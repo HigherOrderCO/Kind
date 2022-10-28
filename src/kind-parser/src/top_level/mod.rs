@@ -65,7 +65,7 @@ impl<'a> Parser<'a> {
         let erased = if hidden { !keep } else { erased };
 
         let res = self.eat_variant(complement.unwrap())?.1;
-        let range = res.mix(start);
+        let range = start.mix(res);
         Ok(Argument {
             hidden,
             erased,
@@ -186,7 +186,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_book(&mut self) -> Module {
+    pub fn parse_module(&mut self) -> Module {
         let mut entries: Vec<TopLevel> = Vec::new();
 
         while !self.get().same_variant(&Token::Eof) {

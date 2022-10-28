@@ -18,5 +18,5 @@ pub fn parse_book(errs: Sender<DiagnosticFrame>, ctx_id: usize, input: &str) -> 
     let mut peekable = input.chars().peekable();
     let lexer = Lexer::new(input, &mut peekable, SyntaxCtxIndex(ctx_id));
     let mut parser = Parser::new(lexer, errs);
-    parser.parse_book()
+    parser.parse_module()
 }

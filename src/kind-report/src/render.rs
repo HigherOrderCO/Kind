@@ -1,5 +1,9 @@
 //! Renders error messages.
 
+// The code is not so good ..
+// pretty printers are always a disaster to write. expect
+// that in the future i can rewrite it in a better way.
+
 use std::collections::HashSet;
 
 use std::fmt::{Display, Write};
@@ -14,7 +18,7 @@ use yansi::Paint;
 
 use crate::{data::*, RenderConfig};
 
-type SortedMarkers = FxHashMap<SyntaxCtxIndex, Vec<Marking>>;
+type SortedMarkers = FxHashMap<SyntaxCtxIndex, Vec<Marker>>;
 
 #[derive(Debug, Clone)]
 struct Point {
@@ -32,7 +36,7 @@ impl Display for Point {
     }
 }
 
-fn group_markers(markers: &[Marking]) -> SortedMarkers {
+fn group_markers(markers: &[Marker]) -> SortedMarkers {
     let mut file_group = SortedMarkers::default();
     for marker in markers {
         let group = file_group
@@ -89,7 +93,7 @@ fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
 // TODO: Remove common indentation.
 // TODO: Prioritize inline marcations.
 fn colorize_code<'a, T: Write + Sized>(
-    markers: &mut [&(Point, Point, &Marking)],
+    markers: &mut [&(Point, Point, &Marker)],
     code_line: &'a str,
     fmt: &mut T,
 ) -> std::fmt::Result {
@@ -129,7 +133,7 @@ fn mark_inlined<T: Write + Sized>(
     prefix: &str,
     code: &str,
     config: &RenderConfig,
-    inline_markers: &mut [&(Point, Point, &Marking)],
+    inline_markers: &mut [&(Point, Point, &Marker)],
     fmt: &mut T,
 ) -> std::fmt::Result {
     inline_markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
@@ -200,7 +204,7 @@ fn mark_inlined<T: Write + Sized>(
 fn write_code_block<'a, T: Write + Sized>(
     file_name: &Path,
     config: &RenderConfig,
-    markers: &[Marking],
+    markers: &[Marker],
     group_code: &'a str,
     fmt: &mut T,
 ) -> std::fmt::Result {
@@ -233,9 +237,9 @@ fn write_code_block<'a, T: Write + Sized>(
 
     let mut lines_set = HashSet::new();
 
-    let mut markers_by_line: FxHashMap<usize, Vec<(Point, Point, &Marking)>> = FxHashMap::default();
+    let mut markers_by_line: FxHashMap<usize, Vec<(Point, Point, &Marker)>> = FxHashMap::default();
 
-    let mut multi_line_markers: Vec<(Point, Point, &Marking)> = Vec::new();
+    let mut multi_line_markers: Vec<(Point, Point, &Marker)> = Vec::new();
 
     for marker in markers {
         let start = find_in_line_guide(marker.position.start, &guide);
@@ -249,6 +253,19 @@ fn write_code_block<'a, T: Write + Sized>(
 
         if end.line != start.line {
             multi_line_markers.push((start.clone(), end.clone(), marker));
+        } else {
+            if marker.main {
+                // Just to make errors a little bit better
+                let start = start.line.saturating_sub(1);
+                let end = if start + 2 >= guide.len() {
+                    guide.len() - 1
+                } else {
+                    start + 2
+                };
+                for i in start..=end {
+                    lines_set.insert(i);
+                }
+            }
         }
 
         if end.line - start.line <= 3 {
@@ -270,7 +287,7 @@ fn write_code_block<'a, T: Write + Sized>(
         let mut prefix = "   ".to_string();
         let mut empty_vec = Vec::new();
         let row = markers_by_line.get_mut(line).unwrap_or(&mut empty_vec);
-        let mut inline_markers: Vec<&(Point, Point, &Marking)> =
+        let mut inline_markers: Vec<&(Point, Point, &Marker)> =
             row.iter().filter(|x| x.0.line == x.1.line).collect();
         let mut current = None;
 

@@ -213,7 +213,7 @@ pub struct Argument {
     pub erased: bool,
     pub name: Ident,
     pub typ: Box<Expr>,
-    pub span: Span,
+    pub span: Range,
 }
 
 /// A rule is a equation that in the left-hand-side
@@ -381,7 +381,7 @@ impl Argument {
             erased: false,
             name: name.clone(),
             typ,
-            span: Span::Locatable(range),
+            span: range,
         }
     }
 }

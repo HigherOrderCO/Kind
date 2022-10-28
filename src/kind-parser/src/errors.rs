@@ -1,7 +1,7 @@
 //! All of the sintatic erros both from the
 //! lexer and the parser.
 
-use kind_report::data::{Color, DiagnosticFrame, Marking, Severity};
+use kind_report::data::{Color, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
 use crate::lexer::tokens::Token;
@@ -48,11 +48,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unfinished String".to_string(),
                 subtitles: vec![],
                 hints: vec!["You need to close the string with another quote, take a look at the beggining".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "The string starts in this position!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::IgnoreRestShouldBeOnTheEnd(range) => DiagnosticFrame {
@@ -61,11 +62,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Invalid position of the '..' operator".to_string(),
                 subtitles: vec![],
                 hints: vec!["Put it on the end of the clause or remove it.".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "It should not be in the middle of this!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::UnusedDocString(range) => DiagnosticFrame {
@@ -74,11 +76,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "This entire documentation comment is in a invalid position".to_string(),
                 subtitles: vec![],
                 hints: vec!["Take a look at the rules for doc comments at https://kind.kindelia.org/hints/documentation-strings".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::For,
                     text: "Remove the entire comment or transform it in a simple comment with '//'".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::UnfinishedChar(range) => DiagnosticFrame {
@@ -87,11 +90,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unfinished Char".to_string(),
                 subtitles: vec![],
                 hints: vec!["You need to close the character with another quote, take a look at the beginning".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "The char starts in this position!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::LowerCasedDefinition(name, range) => DiagnosticFrame {
@@ -104,11 +108,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                     let fst = c.next().unwrap().to_uppercase();
                     format!("Change it to '{}{}'", fst, c.as_str())
                 }],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Wrong case for this name".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::NotAClauseOfDef(fst, snd) => DiagnosticFrame {
@@ -118,17 +123,19 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["If you indend to make another clause, just replace the name in red.".to_string()],
                 positions: vec![
-                    Marking {
+                    Marker {
                         position: snd,
                         color: Color::Fst,
                         text: "This is the unexpected token".to_string(),
                         no_code: false,
+                        main: true,
                     },
-                    Marking {
+                    Marker {
                         position: fst,
                         color: Color::Snd,
                         text: "This is the definition. All clauses should use the same name.".to_string(),
                         no_code: false,
+                        main: false,
                     },
                 ],
             },
@@ -138,11 +145,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unfinished Comment".to_string(),
                 subtitles: vec![],
                 hints: vec!["You need to close the string with '*/', take a look at the beggining".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "The comment starts in this position!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::InvalidEscapeSequence(kind, range) => DiagnosticFrame {
@@ -151,11 +159,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: format!("The {} character sequence is invalid!", encode_name(kind)),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::InvalidNumberRepresentation(repr, range) => DiagnosticFrame {
@@ -164,11 +173,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: format!("The {} number sequence is invalid!", encode_name(repr)),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::UnexpectedChar(chr, range) => DiagnosticFrame {
@@ -177,11 +187,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: format!("The char '{}' is invalid", chr),
                 subtitles: vec![],
                 hints: vec!["Try to remove it!".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::UnexpectedToken(Token::Eof, range, _expect) => DiagnosticFrame {
@@ -190,11 +201,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unexpected end of file.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: true,
+                    main: true,
                 }],
             },
             SyntaxError::UnexpectedToken(Token::Comment(_, _), range, _expect) => DiagnosticFrame {
@@ -203,11 +215,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unexpected documentation comment.".to_string(),
                 subtitles: vec![],
                 hints: vec!["Remove this documentation comment or place it in a correct place.".to_string()],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::UnexpectedToken(_token, range, _expect) => DiagnosticFrame {
@@ -216,11 +229,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unexpected token.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             SyntaxError::Unclosed(range) => DiagnosticFrame {
@@ -229,11 +243,12 @@ impl From<SyntaxError> for DiagnosticFrame {
                 title: "Unclosed parenthesis.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: range,
                     color: Color::Fst,
                     text: "Starts here! try to add another one".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
         }

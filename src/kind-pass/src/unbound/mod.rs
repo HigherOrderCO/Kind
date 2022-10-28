@@ -42,10 +42,10 @@ impl UnboundCollector {
 
 pub fn get_module_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
-    book: &mut Module,
+    module: &mut Module,
 ) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
-    state.visit_module(book);
+    state.visit_module(module);
     state.unbound
 }
 

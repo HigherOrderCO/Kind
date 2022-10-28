@@ -280,7 +280,7 @@ fn codegen_type(args: &[desugared::Argument], typ: &desugared::Expr) -> Box<lang
         mk_quoted_ctr(
             eval_ctr(true, TermTag::All),
             vec![
-                span_to_num(arg.span),
+                span_to_num(Span::Locatable(arg.span)),
                 mk_u60(arg.name.encode()),
                 codegen_expr(true, &arg.typ),
                 lam(&arg.name, codegen_type(&args[1..], typ)),

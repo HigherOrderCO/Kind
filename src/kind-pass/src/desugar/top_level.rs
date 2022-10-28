@@ -41,7 +41,7 @@ impl<'a> DesugarState<'a> {
             erased: argument.erased,
             name: argument.name.clone(),
             typ,
-            span: Span::Locatable(argument.range),
+            span: argument.range,
         }
     }
 
@@ -73,7 +73,7 @@ impl<'a> DesugarState<'a> {
             .to_vec();
 
         for cons in &sum_type.constructors {
-            let cons_ident = cons.name.add_base_ident(&sum_type.name.to_str());
+            let cons_ident = cons.name.add_base_ident(sum_type.name.to_str());
 
             let pre_indices = if cons.typ.is_none() {
                 irelevant_indices.as_slice()
@@ -156,7 +156,7 @@ impl<'a> DesugarState<'a> {
             span: Span::Generated,
         });
 
-        let cons_ident = rec_type.constructor.add_base_ident(&rec_type.name.to_str());
+        let cons_ident = rec_type.constructor.add_base_ident(rec_type.name.to_str());
 
         let data_constructor = desugared::Entry {
             name: cons_ident.clone(),

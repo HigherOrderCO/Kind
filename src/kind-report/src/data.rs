@@ -29,11 +29,12 @@ pub enum Subtitle {
 }
 
 #[derive(Debug, Clone)]
-pub struct Marking {
+pub struct Marker {
     pub position: Range,
     pub color: Color,
     pub text: String,
     pub no_code: bool,
+    pub main: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -43,7 +44,7 @@ pub struct DiagnosticFrame {
     pub title: String,
     pub subtitles: Vec<Subtitle>,
     pub hints: Vec<String>,
-    pub positions: Vec<Marking>,
+    pub positions: Vec<Marker>,
 }
 
 impl<'a> DiagnosticFrame {

@@ -1,4 +1,4 @@
-use kind_report::data::{Color, DiagnosticFrame, Marking, Severity};
+use kind_report::data::{Color, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
 pub enum Sugar {
@@ -25,23 +25,60 @@ pub enum PassError {
     RuleWithIncorrectArity(Range, usize, usize, usize),
     RulesWithInconsistentArity(Vec<(Range, usize)>),
     SugarIsBadlyImplemented(Range, Range, usize),
+    CannotUseIrrelevant(Option<Range>, Range, Range),
 }
 
 // TODO: A way to build an error message with methods
 impl From<PassError> for DiagnosticFrame {
     fn from(err: PassError) -> Self {
         match err {
+            PassError::CannotUseIrrelevant(var_decl, place, declarated_place) => {
+                let mut positions = vec![Marker {
+                    position: place,
+                    color: Color::Fst,
+                    text: "It's in relevant position!".to_string(),
+                    no_code: false,
+                    main: true,
+                },
+                Marker {
+                    position: declarated_place,
+                    color: Color::Snd,
+                    text: "Declarated here as erased (or implicit without '+')".to_string(),
+                    no_code: false,
+                    main: false,
+                }];
+
+                if let Some(range) = var_decl {
+                    positions.push(Marker {
+                        position: range,
+                        color: Color::Thr,
+                        text: "This variable corresponds to the erased type".to_string(),
+                        no_code: false,
+                        main: false,
+                    });
+                }
+
+                DiagnosticFrame {
+                    code: 200,
+                    severity: Severity::Error,
+                    title: "This irrelevant parameter should not be used in a relevant position.".to_string(),
+                    subtitles: vec![],
+                    hints: vec![],
+                    positions,
+                }
+            }
             PassError::LetDestructOnlyForRecord(place) => DiagnosticFrame {
                 code: 200,
                 severity: Severity::Error,
                 title: "Can only destruct record types.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             PassError::RulesWithInconsistentArity(arities) => DiagnosticFrame {
@@ -51,11 +88,12 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: arities.iter().map(|(range, size)| {
-                    Marking {
+                    Marker {
                         position: *range,
                         color: Color::Fst,
                         text: format!("This rule contains {} patterns", size),
                         no_code: false,
+                        main: true,
                     }
                 }).collect(),
             },
@@ -73,11 +111,12 @@ impl From<PassError> for DiagnosticFrame {
                         format!("This rule expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
                     }
                 ],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             PassError::NeedToImplementMethods(expr_place, sugar) => DiagnosticFrame {
@@ -94,11 +133,12 @@ impl From<PassError> for DiagnosticFrame {
                         Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
                     }
                 ],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: expr_place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             PassError::LetDestructOnlyForSum(place) => DiagnosticFrame {
@@ -107,11 +147,12 @@ impl From<PassError> for DiagnosticFrame {
                 title: "Can only use match on sum types.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             PassError::CannotFindField(place, def_name, ty) => DiagnosticFrame {
@@ -120,16 +161,18 @@ impl From<PassError> for DiagnosticFrame {
                 title: format!("Cannot find this field in the definition '{}'.", ty),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
-                },Marking {
+                    main: true,
+                },Marker {
                     position: def_name,
                     color: Color::Snd,
                     text: "This is the definition name".to_string(),
                     no_code: false,
+                    main: false,
                 }],
             },
             PassError::CannotFindConstructor(place, def_name, ty) => DiagnosticFrame {
@@ -138,16 +181,18 @@ impl From<PassError> for DiagnosticFrame {
                 title: format!("Cannot find this constructor in the type definition '{}'.", ty),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
-                },Marking {
+                    main: true,
+                },Marker {
                     position: def_name,
                     color: Color::Snd,
                     text: "This is the definition name".to_string(),
                     no_code: false,
+                    main: false,
                 }],
             },
             PassError::NoCoverage(place, other) => DiagnosticFrame {
@@ -156,11 +201,12 @@ impl From<PassError> for DiagnosticFrame {
                 title: "The match is not covering all of the possibilities!".to_string(),
                 subtitles: vec![],
                 hints: vec![format!("Need a case for {}", other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", "))],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
                     text: "This is the incomplete case".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             PassError::IncorrectArity(head_range, expected, hidden) => DiagnosticFrame {
@@ -177,11 +223,12 @@ impl From<PassError> for DiagnosticFrame {
                         format!("This function expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
                     }
                 ],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: head_range,
                     color: Color::Fst,
                     text: "This function requires a fixed number of arguments".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
@@ -192,7 +239,7 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![format!(
                     "Take a look at how sugar functions should be implemented at https://kind2.kindelia.com/hints/sugars."
                 )],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: head_range,
                     color: Color::Fst,
                     text:
@@ -203,11 +250,13 @@ impl From<PassError> for DiagnosticFrame {
                         }
                     ,
                     no_code: false,
-                },Marking {
+                    main: true,
+                },Marker {
                     position: place_range,
                     color: Color::Snd,
                     text: "This is what triggers the sugar".to_string(),
                     no_code: false,
+                    main: false,
                 }],
             },
             PassError::DuplicatedNamed(first_decl, last_decl) => DiagnosticFrame {
@@ -217,17 +266,19 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![
-                    Marking {
+                    Marker {
                         position: last_decl,
                         color: Color::Fst,
                         text: "Second occurence".to_string(),
                         no_code: false,
+                        main: true,
                     },
-                    Marking {
+                    Marker {
                         position: first_decl,
                         color: Color::Snd,
                         text: "First occurence".to_string(),
                         no_code: false,
+                        main: false,
                     },
                 ],
             },
@@ -239,17 +290,19 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![
-                    Marking {
+                    Marker {
                         position: fun_range,
                         color: Color::Fst,
                         text: "This is the head of the application".to_string(),
                         no_code: false,
+                        main: true,
                     },
-                    Marking {
+                    Marker {
                         position: binding_range,
                         color: Color::Snd,
                         text: "This isn't allowed for this kind of application".to_string(),
                         no_code: false,
+                        main: false,
                     },
                 ],
             },
@@ -260,17 +313,19 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["Rename one of the variables".to_string()],
                 positions: vec![
-                    Marking {
+                    Marker {
                         position: last_decl,
                         color: Color::Fst,
                         text: "Second occurence".to_string(),
                         no_code: false,
+                        main: true,
                     },
-                    Marking {
+                    Marker {
                         position: first_decl,
                         color: Color::Snd,
                         text: "First occurence".to_string(),
                         no_code: false,
+                        main: false,
                     },
                 ],
             },

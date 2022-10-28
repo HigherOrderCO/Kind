@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use kind_report::data::{Color, DiagnosticFrame, Marking, Severity, Subtitle, Word};
+use kind_report::data::{Color, DiagnosticFrame, Marker, Severity, Subtitle, Word};
 use kind_tree::symbol::Ident;
 
 /// Describes all of the possible errors inside each
@@ -31,11 +31,12 @@ impl From<DriverError> for DiagnosticFrame {
                 ],
                 positions:
                     idents.iter().map(|ident| {
-                        Marking {
+                        Marker {
                             position: ident.range,
                             color: Color::Fst,
                             text: "Here!".to_string(),
                             no_code: false,
+                            main: true,
                         }
                     }).collect(),
             },
@@ -48,11 +49,12 @@ impl From<DriverError> for DiagnosticFrame {
                 hints: vec![
                     "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string(),
                 ],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: ident.range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
+                    main: true,
                 }],
             },
             DriverError::DefinedMultipleTimes(fst, snd) => DiagnosticFrame {
@@ -63,16 +65,18 @@ impl From<DriverError> for DiagnosticFrame {
                 hints: vec![
                     "Rename one of the definitions or remove and look at how names work in Kind at https://kind.kindelia.org/hints/names".to_string()
                 ],
-                positions: vec![Marking {
+                positions: vec![Marker {
                     position: fst.range,
                     color: Color::Fst,
                     text: "The first ocorrence".to_string(),
                     no_code: false,
-                },Marking {
+                    main: true,
+                },Marker {
                     position: snd.range,
                     color: Color::Snd,
                     text: "Second occorrence here!".to_string(),
                     no_code: false,
+                    main: false,
                 }],
             },
         }

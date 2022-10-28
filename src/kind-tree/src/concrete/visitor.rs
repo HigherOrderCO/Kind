@@ -107,8 +107,8 @@ pub trait Visitor: Sized {
         walk_rule(self, rule);
     }
 
-    fn visit_module(&mut self, book: &mut Module) {
-        walk_module(self, book);
+    fn visit_module(&mut self, module: &mut Module) {
+        walk_module(self, module);
     }
 
     fn visit_substitution(&mut self, subst: &mut Substitution) {
@@ -316,8 +316,8 @@ pub fn walk_top_level<T: Visitor>(ctx: &mut T, toplevel: &mut TopLevel) {
     }
 }
 
-pub fn walk_module<T: Visitor>(ctx: &mut T, book: &mut Module) {
-    for toplevel in &mut book.entries {
+pub fn walk_module<T: Visitor>(ctx: &mut T, module: &mut Module) {
+    for toplevel in &mut module.entries {
         walk_top_level(ctx, toplevel)
     }
 }
