@@ -16,6 +16,8 @@ pub mod desugared;
 /// instead of a string due to optimizations.
 pub mod symbol;
 
+pub use hvm::language as backend;
+
 /// Enum of binary operators.
 #[derive(Copy, Clone, Debug)]
 pub enum Operator {

@@ -9,3 +9,4 @@ edition = "2021"
 kind-span = {path = "../kind-span"}
 linked-hash-map = "0.5.6"
 fxhash = "0.2.1"
+hvm = "0.1.81"
