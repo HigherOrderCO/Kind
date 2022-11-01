@@ -162,7 +162,7 @@ fn parse_and_store_book_by_path<'a>(session: &mut Session, path: &PathBuf, book:
 
     let mut module = kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
 
-    session.add_path(Rc::new(path.to_path_buf()), Rc::new(input));
+    session.add_path(Rc::new(path.to_path_buf()), input);
 
     let unbound = unbound::get_module_unbound(session.diagnostic_sender.clone(), &mut module);
 
@@ -207,11 +207,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<()> {
 
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book);
 
-    let entry = FxHashSet::from_iter(vec!["Main".to_string()]);
-    let erased_book = kind_pass::erasure::erase_book(&desugared_book, session.diagnostic_sender.clone(), entry);
-
-    println!("{}", erased_book);
-    type_check(&desugared_book);
+    type_check(&desugared_book, session.diagnostic_sender.clone());
 
     Some(())
 }

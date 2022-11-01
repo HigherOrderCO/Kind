@@ -264,7 +264,7 @@ impl Expr {
     pub fn traverse_pi_types(&self) -> String {
         match &self.data {
             ExprKind::All(binder, typ, body) => {
-                if binder.to_string().starts_with('.') {
+                if binder.to_string().starts_with('_') {
                     format!("{} -> {}", typ, body.traverse_pi_types())
                 } else {
                     format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types())

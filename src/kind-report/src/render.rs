@@ -8,9 +8,9 @@ use std::collections::HashSet;
 
 use std::fmt::{Display, Write};
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
+
 use std::str;
-use std::sync::Arc;
+
 
 use fxhash::FxHashMap;
 use kind_span::{Pos, SyntaxCtxIndex};
@@ -254,18 +254,16 @@ fn write_code_block<'a, T: Write + Sized>(
 
         if end.line != start.line {
             multi_line_markers.push((start.clone(), end.clone(), marker));
-        } else {
-            if marker.main {
-                // Just to make errors a little bit better
-                let start = start.line.saturating_sub(1);
-                let end = if start + 2 >= guide.len() {
-                    guide.len() - 1
-                } else {
-                    start + 2
-                };
-                for i in start..=end {
-                    lines_set.insert(i);
-                }
+        } else if marker.main {
+            // Just to make errors a little bit better
+            let start = start.line.saturating_sub(1);
+            let end = if start + 2 >= guide.len() {
+                guide.len() - 1
+            } else {
+                start + 2
+            };
+            for i in start..=end {
+                lines_set.insert(i);
             }
         }
 
@@ -418,6 +416,16 @@ impl<'a> Diagnostic<'a> {
                         "{:>5} {} {}",
                         "",
                         colorizer("•"),
+                        Paint::new(phr)
+                    )?;
+                }
+                Subtitle::Bold(color, phr) => {
+                    let colorizer = get_colorizer(color);
+                    writeln!(
+                        fmt,
+                        "{:>5} {} {}",
+                        "",
+                        colorizer("•"),
                         Paint::new(phr).bold()
                     )?;
                 }
@@ -426,6 +434,8 @@ impl<'a> Diagnostic<'a> {
                     write!(fmt, "{:>5} {} ", "", colorizer("•"))?;
                     for word in words {
                         match word {
+                            Word::Normal(str) => write!(fmt, "{} ", Paint::new(str))?,
+                            Word::Dimmed(str) => write!(fmt, "{} ", Paint::new(str).dimmed())?,
                             Word::White(str) => write!(fmt, "{} ", Paint::new(str).bold())?,
                             Word::Painted(color, str) => {
                                 let colorizer = get_colorizer(color);
@@ -433,6 +443,9 @@ impl<'a> Diagnostic<'a> {
                             }
                         }
                     }
+                    writeln!(fmt)?;
+                }
+                Subtitle::LineBreak => {
                     writeln!(fmt)?;
                 }
             }
@@ -443,7 +456,7 @@ impl<'a> Diagnostic<'a> {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            write_code_block(&file.clone(), config, &group, &code, fmt)?;
+            write_code_block(&file.clone(), config, &group, code, fmt)?;
         }
 
         writeln!(fmt)?;

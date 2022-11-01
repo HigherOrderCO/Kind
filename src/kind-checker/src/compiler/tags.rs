@@ -33,11 +33,11 @@ pub enum TermTag {
 /// to a function that evaluates them so it's the name
 /// of each function.
 pub enum EvalTag {
-    EvalOp,
-    EvalApp,
-    EvalLet,
-    EvalAnn,
-    EvalSub,
+    Op,
+    App,
+    Let,
+    Ann,
+    Sub,
 }
 
 impl fmt::Display for TermTag {
@@ -67,11 +67,11 @@ impl fmt::Display for TermTag {
 impl fmt::Display for EvalTag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            EvalTag::EvalOp => write!(f, "Kind.Term.eval_op"),
-            EvalTag::EvalApp => write!(f, "Kind.Term.eval_app"),
-            EvalTag::EvalLet => write!(f, "Kind.Term.eval_let"),
-            EvalTag::EvalAnn => write!(f, "Kind.Term.eval_ann"),
-            EvalTag::EvalSub => write!(f, "Kind.Term.eval_sub"),
+            EvalTag::Op => write!(f, "Kind.Term.eval_op"),
+            EvalTag::App => write!(f, "Kind.Term.eval_app"),
+            EvalTag::Let => write!(f, "Kind.Term.eval_let"),
+            EvalTag::Ann => write!(f, "Kind.Term.eval_ann"),
+            EvalTag::Sub => write!(f, "Kind.Term.eval_sub"),
         }
     }
 }

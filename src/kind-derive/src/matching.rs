@@ -121,7 +121,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let cons_tipo = mk_app(mk_var(motive_ident.clone()), indices_of_cons);
 
         let cons_type = cons.args.iter().rfold(cons_tipo, |out, arg| {
-            mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or(mk_typ()), out)
+            mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or_else(|| mk_typ()), out)
         });
 
         types.push(Argument {

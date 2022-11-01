@@ -80,7 +80,7 @@ impl<'a> ErasureState<'a> {
         match &pat.data {
             Var(name) => {
                 self.ctx
-                    .insert(name.to_string(), (Some(name.range.clone()), on.0, on.1));
+                    .insert(name.to_string(), (Some(name.range), on.0, on.1));
             }
             Num(_) | Str(_) => (),
             Fun(name, spine) | Ctr(name, spine) => {
@@ -115,9 +115,7 @@ impl<'a> ErasureState<'a> {
 
         match &expr.data {
             Typ | U60 | Num(_) | Str(_) | Err => Box::new(expr.clone()),
-            Hole(_) | Hlp(_) => {
-                todo!()
-            }
+            Hole(_) | Hlp(_) => Box::new(expr.clone()),
             Var(name) => {
                 let relev = self.ctx.get(name.to_str()).unwrap();
                 match (relev.2, on) {
@@ -233,7 +231,7 @@ impl<'a> ErasureState<'a> {
         args.iter()
             .zip(rule.pats.iter())
             .for_each(|((range, erased), expr)| {
-                self.erase_pat((range.clone(), erase_to_relevance(*erased)), expr)
+                self.erase_pat((*range, erase_to_relevance(*erased)), expr)
             });
 
         let body = self.erase_expr(Relevance::Relevant, &rule.body);

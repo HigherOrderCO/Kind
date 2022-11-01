@@ -420,7 +420,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_ask(&mut self) -> Result<Box<Sttm>, SyntaxError> {
         let start = self.range();
-        self.advance(); // 'ask'
+        self.advance();
         let name = self.parse_destruct()?;
         self.eat_variant(Token::Eq)?;
         let expr = self.parse_expr(false)?;

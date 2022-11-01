@@ -3,6 +3,9 @@ pub mod errors;
 pub mod report;
 
 
+use std::sync::mpsc::Sender;
+
+use kind_report::data::DiagnosticFrame;
 use kind_tree::desugared::Book;
 
 
@@ -12,7 +15,7 @@ const CHECKER_HVM: &str = include_str!("checker.hvm");
 
 /// Type checks a dessugared book. It spawns an HVM instance in order
 /// to run a compiled version of the book
-pub fn type_check(book: &Book) {
+pub fn type_check(book: &Book, tx: Sender<DiagnosticFrame>) {
     let base_check_code = compiler::codegen_book(book);
     let mut check_code = CHECKER_HVM.to_string();
     check_code.push_str(&base_check_code.to_string());
@@ -21,11 +24,11 @@ pub fn type_check(book: &Book) {
     let main = runtime.alloc_code("Kind.API.check_all").unwrap();
     runtime.run_io(main);
     runtime.normalize(main);
-    let s = runtime.readback(main);
+    let term = runtime.readback(main);
 
-    let res = parse_report(&s);
+    let errs = parse_report(&term).expect("Internal Error: Cannot parse the report message from the type checker");
 
-    println!("{:?}", res);
-
-    println!("{}", s);
+    for err in errs {
+        tx.send(err.into()).unwrap()
+    }
 }

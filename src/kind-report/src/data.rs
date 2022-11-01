@@ -18,14 +18,18 @@ pub enum Color {
 
 #[derive(Debug, Clone)]
 pub enum Word {
+    Dimmed(String),
     White(String),
+    Normal(String),
     Painted(Color, String),
 }
 
 #[derive(Debug, Clone)]
 pub enum Subtitle {
     Normal(Color, String),
+    Bold(Color, String),
     Phrase(Color, Vec<Word>),
+    LineBreak,
 }
 
 #[derive(Debug, Clone)]

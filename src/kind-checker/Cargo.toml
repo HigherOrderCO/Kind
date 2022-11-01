@@ -11,3 +11,4 @@ kind-span = { path = "../kind-span" }
 kind-report = { path = "../kind-report" }
 hvm = "0.1.81"
 fxhash = "0.2.1"
+im = "15.1.0"

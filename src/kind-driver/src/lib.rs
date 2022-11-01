@@ -2,8 +2,7 @@ use core::fmt;
 use std::{
     io,
     path::PathBuf,
-    rc::Rc,
-    sync::{mpsc::Sender, Mutex, Arc},
+    sync::{mpsc::Sender, Mutex},
     time::Duration,
 };
 
@@ -22,6 +21,7 @@ use notify_debouncer_mini::{
     notify::{RecommendedWatcher, RecursiveMode},
     DebounceEventResult, Debouncer,
 };
+use session::Session;
 
 pub mod errors;
 pub mod resolution;
@@ -32,20 +32,17 @@ extern crate salsa_2022 as salsa;
 /// Helper structure to use stderr as fmt::Write
 struct ToWriteFmt<T>(pub T);
 
-impl<T> fmt::Write for ToWriteFmt<T>
-where
-    T: io::Write,
-{
+impl<T> fmt::Write for ToWriteFmt<T> where T: io::Write {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.0.write_all(s.as_bytes()).map_err(|_| fmt::Error)
     }
 }
 
-pub fn render_error_to_stderr(
+pub fn render_error_to_stderr<T>(
     render_config: &RenderConfig,
-    session: &Database,
+    session: &T,
     err: &DiagnosticFrame,
-) {
+) where T : FileCache {
     Diagnostic::render(
         &Diagnostic { frame: err },
         session,
@@ -60,6 +57,16 @@ impl FileCache for Database {
         let path = self.count.get(&ctx.0)?;
         let code = self.files.get(&*path.clone())?;
         Some((path.clone(), code.1.text(self)))
+    }
+}
+
+impl FileCache for Session {
+    fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(PathBuf, &String)> {
+        let path = self.loaded_paths[ctx.0].as_ref().to_owned();
+        Some((
+            path,
+            &self.loaded_sources[ctx.0]
+        ))
     }
 }
 
@@ -120,9 +127,8 @@ impl Db for Database {
     fn input(&self, cur: Ident, next: Vec<Ident>) -> Option<ProgramSource> {
         let ident = cur.clone();
         let segments = ident.to_str().split('.').collect::<Vec<&str>>();
-        let mut raw_path = PathBuf::from(segments.join("/")).to_path_buf();
+        let mut raw_path = PathBuf::from(segments.join("/"));
         raw_path.set_extension("kind2");
-
 
         let path = match raw_path.canonicalize().ok() {
             Some(res) => Some(res),
@@ -169,18 +175,14 @@ pub struct Diagnostics(DiagnosticFrame);
 #[salsa::tracked]
 pub fn parse_file(db: &dyn crate::Db, file: ProgramSource) -> Module {
     let (rx, tx) = std::sync::mpsc::channel();
-    let mut module = kind_parser::parse_book(rx.clone(), file.ctx(db).0, &file.text(db));
-
-    println!("Parsing it again! {:?}", file.path(db));
+    let mut module = kind_parser::parse_book(rx.clone(), file.ctx(db).0, file.text(db));
 
     let unbound = unbound::get_module_unbound(rx, &mut module);
 
     for (_, idents) in unbound {
-        match db.input(idents[0].clone(), idents) {
-            Some(res) => { parse_file(db, res); },
-            None => ()
+        if let Some(res) = db.input(idents[0].clone(), idents) {
+            parse_file(db, res);
         };
-        
     }
 
     for err in tx.try_iter() {

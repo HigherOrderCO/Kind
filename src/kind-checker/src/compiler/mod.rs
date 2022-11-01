@@ -27,11 +27,11 @@ fn eval_ctr(quote: bool, head: TermTag) -> String {
         head.to_string()
     } else {
         match head {
-            TermTag::Binary => EvalTag::EvalOp.to_string(),
-            TermTag::Let => EvalTag::EvalLet.to_string(),
-            TermTag::Ann => EvalTag::EvalAnn.to_string(),
-            TermTag::Sub => EvalTag::EvalSub.to_string(),
-            TermTag::App => EvalTag::EvalApp.to_string(),
+            TermTag::Binary => EvalTag::Op.to_string(),
+            TermTag::Let => EvalTag::Let.to_string(),
+            TermTag::Ann => EvalTag::Ann.to_string(),
+            TermTag::Sub => EvalTag::Sub.to_string(),
+            TermTag::App => EvalTag::App.to_string(),
             other => other.to_string(),
         }
     }
@@ -257,9 +257,9 @@ fn codegen_all_expr(
             eval_ctr(quote, TermTag::Hole),
             vec![span_to_num(expr.span), mk_u60(*num)],
         ),
-        Hlp(name) => mk_quoted_ctr(
+        Hlp(_) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Hlp),
-            vec![span_to_num(expr.span), mk_u60(name.encode())],
+            vec![span_to_num(expr.span)],
         ),
         Str(input) => codegen_str(input),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),

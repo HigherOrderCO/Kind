@@ -13,7 +13,7 @@ use kind_report::data::DiagnosticFrame;
 #[derive(Debug, Clone)]
 pub struct Session {
     pub loaded_paths: Vec<Rc<PathBuf>>,
-    pub loaded_sources: Vec<Rc<String>>,
+    pub loaded_sources: Vec<String>,
 
     /// It will be useful in the future
     /// to make the public and private decls
@@ -36,7 +36,7 @@ impl Session {
             diagnostic_sender: sender,
         }
     }
-    pub fn add_path(&mut self, path: Rc<PathBuf>, code: Rc<String>) -> usize {
+    pub fn add_path(&mut self, path: Rc<PathBuf>, code: String) -> usize {
         let id = self.book_counter;
         self.book_counter += 1;
         self.loaded_paths.push(path);
