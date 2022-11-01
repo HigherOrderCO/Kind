@@ -8,6 +8,12 @@ pub struct Pos {
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
 pub struct SyntaxCtxIndex(pub usize);
 
+impl SyntaxCtxIndex {
+    pub fn new(size: usize) -> SyntaxCtxIndex {
+        SyntaxCtxIndex(size)
+    }
+}
+
 /// A span in the encoded format that is required by
 /// kind2.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
@@ -15,7 +21,7 @@ pub struct EncodedSpan(pub u64);
 
 /// Describes a position in a source code (syntax context). It's useful
 /// to generate error messages.
-#[derive(Clone, Debug, Copy, Hash)]
+#[derive(Clone, Debug, Copy, Hash, PartialEq, Eq)]
 pub struct Range {
     pub start: Pos,
     pub end: Pos,
@@ -23,7 +29,7 @@ pub struct Range {
 }
 
 /// Range that can be generated.
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, Hash, PartialEq, Eq)]
 pub enum Span {
     Generated,
     Locatable(Range),

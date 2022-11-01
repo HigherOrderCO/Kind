@@ -2,6 +2,13 @@
 //! It's a simpler version of what I want to do in order
 //! to finish a stable version of the compiler.
 
+// FIX: Need to make a "constraint map" in order to check
+// if a irrelevant thing is relevant in relation to the
+// function that we are trying to check the irrelevance.
+
+// Not the best algorithm... it should not be trusted for
+// dead code elimination.
+
 use crate::errors::PassError;
 use std::sync::mpsc::Sender;
 
@@ -17,12 +24,12 @@ pub enum Relevance {
     Irrelevant,
     Relevant,
 }
-
 pub struct ErasureState<'a> {
     errs: Sender<DiagnosticFrame>,
     book: &'a Book,
     ctx: im::HashMap<String, (Option<Range>, Range, Relevance)>,
     is_relevant: FxHashSet<String>,
+    failed: bool
 }
 
 pub fn erase_book(
@@ -35,6 +42,7 @@ pub fn erase_book(
         book,
         ctx: Default::default(),
         is_relevant: entrypoint,
+        failed: false
     };
 
     let mut new_book = Book {
@@ -71,7 +79,8 @@ impl<'a> ErasureState<'a> {
 
         match &pat.data {
             Var(name) => {
-                self.ctx.insert(name.to_string(), (Some(name.range.clone()), on.0, on.1));
+                self.ctx
+                    .insert(name.to_string(), (Some(name.range.clone()), on.0, on.1));
             }
             Num(_) | Str(_) => (),
             Fun(name, spine) | Ctr(name, spine) => {
@@ -114,8 +123,11 @@ impl<'a> ErasureState<'a> {
                 match (relev.2, on) {
                     (Relevance::Irrelevant, Relevance::Relevant) => {
                         self.errs
-                            .send(PassError::CannotUseIrrelevant(relev.0, name.range, relev.1).into())
+                            .send(
+                                PassError::CannotUseIrrelevant(relev.0, name.range, relev.1).into(),
+                            )
                             .unwrap();
+                        self.failed = true;
                         Expr::err(name.range)
                     }
                     _ => Box::new(expr.clone()),
@@ -123,10 +135,10 @@ impl<'a> ErasureState<'a> {
             }
             All(name, typ, body) => {
                 let ctx = self.ctx.clone();
-    
+
                 // Relevant inside the context that is it's being used?
                 self.ctx
-                    .insert(name.to_string(), (None, name.range, Relevance::Relevant));
+                    .insert(name.to_string(), (None, name.range, Relevance::Irrelevant));
 
                 self.erase_expr(Relevance::Irrelevant, typ);
                 self.erase_expr(Relevance::Irrelevant, body);
@@ -137,7 +149,7 @@ impl<'a> ErasureState<'a> {
             Lambda(name, body) => {
                 let ctx = self.ctx.clone();
                 self.ctx
-                    .insert(name.to_string(), (None, name.range, Relevance::Irrelevant));
+                    .insert(name.to_string(), (None, name.range, Relevance::Relevant));
                 let body = self.erase_expr(on, body);
                 self.ctx = ctx;
 
@@ -228,9 +240,16 @@ impl<'a> ErasureState<'a> {
 
         self.ctx = ctx;
 
+        let new_pats = args
+            .iter()
+            .zip(rule.pats.iter())
+            .filter(|((_, erased), _)| !*erased)
+            .map(|res| res.1)
+            .cloned();
+
         Rule {
             name: rule.name.clone(),
-            pats: rule.pats.clone(),
+            pats: new_pats.collect(),
             body,
             span: rule.span,
         }

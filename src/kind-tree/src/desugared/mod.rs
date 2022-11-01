@@ -13,7 +13,7 @@ use crate::{symbol::Ident, Operator};
 /// as ((((a b) c) d) e) that looks like a spine.
 pub type Spine = Vec<Box<Expr>>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
@@ -53,7 +53,7 @@ pub enum ExprKind {
     Err,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Expr {
     pub data: ExprKind,
     pub span: Span,

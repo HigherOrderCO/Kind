@@ -43,7 +43,7 @@ impl From<PassError> for DiagnosticFrame {
                 Marker {
                     position: declarated_place,
                     color: Color::Snd,
-                    text: "Declarated here as erased (or implicit without '+')".to_string(),
+                    text: "Declared here as erased (or implicit without '+')".to_string(),
                     no_code: false,
                     main: false,
                 }];
@@ -52,7 +52,7 @@ impl From<PassError> for DiagnosticFrame {
                     positions.push(Marker {
                         position: range,
                         color: Color::Thr,
-                        text: "This variable corresponds to the erased type".to_string(),
+                        text: "This variable corresponds to the erased argument".to_string(),
                         no_code: false,
                         main: false,
                     });

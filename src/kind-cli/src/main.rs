@@ -1,7 +1,7 @@
 use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{resolution::type_check_book, session::Session};
+use kind_driver::{resolution::type_check_book, session::Session, Database, Db, parse_file, Diagnostics, render_error_to_stderr};
 use kind_report::{data::DiagnosticFrame, RenderConfig};
 
 #[derive(Parser, Debug)]
@@ -76,25 +76,35 @@ fn main() {
 
     let render_config = RenderConfig::unicode(2);
     let (rx, tx) = std::sync::mpsc::channel();
+    let mut db = Database::new(rx);
 
-    match config.command {
-        Command::Check { file } => {
-            let mut session = Session::new(PathBuf::from("."), rx);
-            type_check_book(&mut session, &PathBuf::from(file));
+    let initial = db.input_path(PathBuf::from("./teste.kind2")).unwrap();
 
-            let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+    loop {
+        let res = kind_driver::parse_file(&db, initial);
+        let diagnostics = parse_file::accumulated::<Diagnostics>(&db, initial);
 
-            for err in &errs {
-                kind_driver::render_error_to_stderr(&session, &render_config, err);
-            }
-
-            if !errs.is_empty() {
-                eprintln!();
-                exit(1);
-            } else {
-                exit(0);
+        if diagnostics.is_empty() {
+            println!("Ok!");
+        } else {
+            for diagnostic in diagnostics {
+                render_error_to_stderr(&render_config, &db, &diagnostic)
             }
         }
-        _ => todo!(),
+
+        for event in tx.recv().unwrap().unwrap() {
+            let path = event.path.clone();
+
+            let file = match db.files.get(&path) {
+                Some(file) => file.1,
+                None => continue,
+            };
+            // `path` has changed, so read it and update the contents to match.
+            // This creates a new revision and causes the incremental algorithm
+            // to kick in, just like any other update to a salsa input.
+            let contents = std::fs::read_to_string(path).map_err(|_| format!("Failed to read file {}", event.path.display())).unwrap();
+            file.set_text(&mut db).to(contents);
+            
+        }
     }
 }

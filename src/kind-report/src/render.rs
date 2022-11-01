@@ -10,6 +10,7 @@ use std::fmt::{Display, Write};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::str;
+use std::sync::Arc;
 
 use fxhash::FxHashMap;
 use kind_span::{Pos, SyntaxCtxIndex};
@@ -27,7 +28,7 @@ struct Point {
 }
 
 pub trait FileCache {
-    fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(Rc<PathBuf>, Rc<String>)>;
+    fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(PathBuf, &String)>;
 }
 
 impl Display for Point {

@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use fxhash::FxHashSet;
+use kind_checker::type_check;
 use kind_pass::desugar;
 use kind_pass::expand::expand_book;
 use kind_pass::unbound::{self};
@@ -207,11 +208,10 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<()> {
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book);
 
     let entry = FxHashSet::from_iter(vec!["Main".to_string()]);
-    let erased_book =
-        kind_pass::erasure::erase_book(&desugared_book, session.diagnostic_sender.clone(), entry);
+    let erased_book = kind_pass::erasure::erase_book(&desugared_book, session.diagnostic_sender.clone(), entry);
 
     println!("{}", erased_book);
-    //type_check(&desugared_book);
+    type_check(&desugared_book);
 
     Some(())
 }

@@ -12,7 +12,7 @@ use kind_span::{Range, SyntaxCtxIndex};
 pub struct Symbol(String);
 
 /// Identifier inside a syntax context.
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Ident {
     pub data: Symbol,
     pub range: Range,
@@ -55,6 +55,25 @@ impl Ident {
 
     pub fn to_str(&self) -> &str {
         &self.data.0
+    }
+
+    pub fn decode(num: u64) -> String {
+        let mut num = num;
+        let mut name = String::new();
+        while num > 0 {
+            let chr = (num % 64) as u8;
+            let chr = match chr {
+                0 => '.',
+                1..=10 => (chr - 1 + b'0') as char,
+                11..=36 => (chr - 11 + b'A') as char,
+                37..=62 => (chr - 37 + b'a') as char,
+                63 => '_',
+                64.. => panic!("impossible character value"),
+            };
+            name.push(chr);
+            num /= 64;
+        }
+        name.chars().rev().collect()
     }
 
     pub fn encode(&self) -> u64 {

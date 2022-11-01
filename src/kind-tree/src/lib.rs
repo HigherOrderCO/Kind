@@ -19,7 +19,7 @@ pub mod symbol;
 pub use hvm::language as backend;
 
 /// Enum of binary operators.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Operator {
     Add,
     Sub,

@@ -522,5 +522,10 @@ pub fn codegen_book(book: &Book) -> lang::File {
 
     file.rules.push(functions_entry);
 
+    file.rules.push(lang::Rule {
+        lhs: mk_ctr("HoleInit".to_owned(), vec![]),
+        rhs: mk_u60(book.holes),
+    });
+
     file
 }

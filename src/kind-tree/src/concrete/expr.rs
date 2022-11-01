@@ -12,7 +12,7 @@ pub struct ConsIdent(pub Ident);
 
 /// A binding express the positional or named argument of
 /// a constructor or function.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Binding {
     Positional(Box<Expr>),
     Named(Range, Ident, Box<Expr>),
@@ -23,7 +23,7 @@ pub type Spine = Vec<Binding>;
 
 /// A case binding is a field or a rename of some field
 /// inside a match expression.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum CaseBinding {
     Field(PatIdent),
     Renamed(Ident, PatIdent),
@@ -34,7 +34,7 @@ pub enum CaseBinding {
 /// of the telescope of the constructor and a right-hand side
 /// value. The ignore_rest flag useful to just fill all of the
 /// case bindings that are not used with a default name.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Case {
     pub constructor: Ident,
     pub bindings: Vec<CaseBinding>,
@@ -44,7 +44,7 @@ pub struct Case {
 
 /// A match block that will be desugared
 /// into an eliminator of a datatype.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Match {
     pub typ: Ident,
     pub scrutinizer: Box<Expr>,
@@ -53,7 +53,7 @@ pub struct Match {
 }
 
 /// Substitution
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Substitution {
     pub name: Ident,
     pub redx: usize,
@@ -61,7 +61,7 @@ pub struct Substitution {
     pub expr: Box<Expr>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Literal {
     /// The universe of types (e.g. Type)
     Type,
@@ -80,13 +80,13 @@ pub enum Literal {
 
 /// A destruct of a single constructor. It's a flat destruct
 /// and just translates into a eliminator for records.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Destruct {
     Destruct(Range, Ident, Vec<CaseBinding>, bool),
     Ident(Ident),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum SttmKind {
     Expr(Box<Expr>, Box<Sttm>),
     Ask(Destruct, Box<Expr>, Box<Sttm>),
@@ -99,13 +99,13 @@ pub enum SttmKind {
 /// describes the idea of `sequence` inside a monad
 /// each monadic action contains a `next` element that is
 /// desugared into a 'monadic bind'.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Sttm {
     pub data: SttmKind,
     pub range: Range,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
@@ -145,7 +145,7 @@ pub enum ExprKind {
 }
 
 /// Describes a single expression inside Kind2.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Expr {
     pub data: ExprKind,
     pub range: Range,
