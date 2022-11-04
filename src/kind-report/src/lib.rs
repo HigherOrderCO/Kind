@@ -1,3 +1,5 @@
+use yansi::Paint;
+
 /// Data structures
 pub mod data;
 /// Render
@@ -26,6 +28,17 @@ impl Chars {
             ylline: '├',
         }
     }
+    pub fn ascii() -> &'static Chars {
+        &Chars {
+            vbar: '|',
+            hbar: '-',
+            dbar: ':',
+            trline: '\\',
+            bxline: 'v',
+            brline: '/',
+            ylline: '-',
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -40,5 +53,17 @@ impl<'a> RenderConfig<'a> {
             chars: Chars::unicode(),
             indent,
         }
+    }
+    pub fn ascii(indent: usize) -> RenderConfig<'a> {
+        RenderConfig {
+            chars: Chars::ascii(),
+            indent,
+        }
+    }
+}
+
+pub fn check_if_colors_are_supported(disable: bool) {
+    if cfg!(windows) && !Paint::enable_windows_ascii() || disable {
+        Paint::disable();
     }
 }

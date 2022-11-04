@@ -26,6 +26,14 @@ struct Cli {
     #[arg(short, long)]
     warning: bool,
 
+    /// Disable colors in error messages
+    #[arg(short, long)]
+    no_color: bool,
+
+    /// Only ascii characters in error messages
+    #[arg(short, long)]
+    ascii: bool,
+
     #[command(subcommand)]
     command: Command,
 }
@@ -102,16 +110,23 @@ where
 }
 
 fn main() {
-    let _config = Cli::parse();
+    let config = Cli::parse();
 
-    match _config.command {
+    kind_report::check_if_colors_are_supported(config.no_color);
+
+    let render_config = if config.ascii {
+        RenderConfig::ascii(2)
+    } else {
+        RenderConfig::unicode(2)
+    };
+
+    match config.command {
         Command::Check { file } => {
-            let render_config = RenderConfig::unicode(2);
             let (rx, tx) = std::sync::mpsc::channel();
 
             let mut session = Session::new(PathBuf::from("."), rx);
 
-            println!();
+            eprintln!();
 
             render_to_stderr(
                 &render_config,
@@ -120,7 +135,6 @@ fn main() {
             );
 
             let start = Instant::now();
-
 
             type_check_book(&mut session, &PathBuf::from(file));
 
