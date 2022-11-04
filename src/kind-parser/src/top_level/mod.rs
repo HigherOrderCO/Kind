@@ -62,6 +62,7 @@ impl<'a> Parser<'a> {
         } else {
             None
         };
+
         let erased = if hidden { !keep } else { erased };
 
         let res = self.eat_variant(complement.unwrap())?.1;
@@ -195,6 +196,7 @@ impl<'a> Parser<'a> {
                 Err(err) => {
                     self.advance();
                     self.errs.send(err.into()).unwrap();
+                    self.failed = true;
                     while !self.is_top_level_start() && !self.get().same_variant(&Token::Eof) {
                         self.advance();
                     }
@@ -206,7 +208,10 @@ impl<'a> Parser<'a> {
 
         match res {
             Ok(_) => (),
-            Err(err) => self.errs.send(err.into()).unwrap(),
+            Err(err) => {
+                self.errs.send(err.into()).unwrap();
+                self.failed = true;
+            }
         }
 
         Module { entries }

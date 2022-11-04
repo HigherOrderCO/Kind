@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use kind_span::Range;
 
 #[derive(Debug, Clone)]
@@ -60,4 +62,16 @@ impl<'a> DiagnosticFrame {
 #[derive(Debug, Clone)]
 pub struct Diagnostic<'a> {
     pub frame: &'a DiagnosticFrame,
+}
+
+pub enum Log {
+    Checking(String),
+    Checked(Duration),
+    Failed(Duration),
+}
+
+impl<'a> From<&'a DiagnosticFrame> for Diagnostic<'a> {
+    fn from(frame: &'a DiagnosticFrame) -> Self {
+        Diagnostic { frame }
+    }
 }

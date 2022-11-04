@@ -1,7 +1,7 @@
 /// Data structures
 pub mod data;
 /// Render
-pub mod render;
+pub mod report;
 
 #[derive(Debug)]
 pub struct Chars {

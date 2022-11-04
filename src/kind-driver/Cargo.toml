@@ -16,7 +16,6 @@ kind-target-hvm = { path = "../kind-target-hvm" }
 
 strsim = "0.10.0"
 fxhash = "0.2.1"
-salsa-2022 = { git = "https://github.com/salsa-rs/salsa/", branch = "master" }
 dashmap = "5.4.0"
 eyre = "0.6.8"
 notify-debouncer-mini = "0.2.1"

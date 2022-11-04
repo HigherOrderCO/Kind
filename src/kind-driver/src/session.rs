@@ -14,6 +14,7 @@ use kind_report::data::DiagnosticFrame;
 pub struct Session {
     pub loaded_paths: Vec<Rc<PathBuf>>,
     pub loaded_sources: Vec<String>,
+    pub loaded_paths_map: FxHashMap<PathBuf, usize>,
 
     /// It will be useful in the future
     /// to make the public and private decls
@@ -30,6 +31,7 @@ impl Session {
         Session {
             loaded_paths: Vec::new(),
             loaded_sources: Vec::new(),
+            loaded_paths_map: FxHashMap::default(),
             public_names: FxHashMap::default(),
             root,
             book_counter: 0,
@@ -39,6 +41,8 @@ impl Session {
     pub fn add_path(&mut self, path: Rc<PathBuf>, code: String) -> usize {
         let id = self.book_counter;
         self.book_counter += 1;
+        self.loaded_paths_map
+            .insert((*path).clone(), self.book_counter);
         self.loaded_paths.push(path);
         self.loaded_sources.push(code);
         id

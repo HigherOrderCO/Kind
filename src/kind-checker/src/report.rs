@@ -61,7 +61,10 @@ fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {
     parse_all_expr(Default::default(), term)
 }
 
-fn parse_all_expr(names: im::HashMap<String, String>, term: &Term) -> Result<Box<desugared::Expr>, String> {
+fn parse_all_expr(
+    names: im::HashMap<String, String>,
+    term: &Term,
+) -> Result<Box<desugared::Expr>, String> {
     match term {
         Term::Ctr { name, args } => match name.as_str() {
             "Kind.Quoted.all" => Ok(Expr::all(
@@ -107,12 +110,24 @@ fn parse_all_expr(names: im::HashMap<String, String>, term: &Term) -> Result<Box
             "Kind.Quoted.ctr" => Ok(Expr::ctr(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
-                args[1..].iter().flat_map(|x| parse_all_expr(names.clone(), x)).collect(),
+                {
+                    let mut res = Vec::new();
+                    for arg in &args[1..] {
+                        res.push(parse_all_expr(names.clone(), arg)?);
+                    }
+                    res
+                },
             )),
             "Kind.Quoted.fun" => Ok(Expr::fun(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
-                args[1..].iter().flat_map(|x| parse_all_expr(names.clone(), x)).collect(),
+                {
+                    let mut res = Vec::new();
+                    for arg in &args[1..] {
+                        res.push(parse_all_expr(names.clone(), arg)?);
+                    }
+                    res
+                },
             )),
             "Kind.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
             "Kind.Quoted.u60" => Ok(Expr::u60(parse_orig(&args[0])?)),
@@ -124,7 +139,7 @@ fn parse_all_expr(names: im::HashMap<String, String>, term: &Term) -> Result<Box
                 parse_all_expr(names, &args[3])?,
             )),
             _ => Err("Unexpected tag on transforming quoted term".to_string()),
-        }
+        },
         _ => Err("Unexpected term on transforming quoted term".to_string()),
     }
 }
@@ -161,13 +176,12 @@ pub fn parse_entry(term: &Term) -> Result<Entry, String> {
                     let trd = trd.iter().flat_map(|x| parse_expr(x)).collect();
                     Ok((fst, snd, trd))
                 }
-                _ => Err("Unexpected value on entry second pair".to_string())
+                _ => Err("Unexpected value on entry second pair".to_string()),
             }
-        },
-        _ => Err("Unexpected value on entry first pair".to_string())
+        }
+        _ => Err("Unexpected value on entry first pair".to_string()),
     }
 }
-
 
 fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
     match expr {
@@ -187,8 +201,14 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
                     parse_all_expr(im::HashMap::new(), &args[2])?,
                     parse_all_expr(im::HashMap::new(), &args[3])?,
                 )),
-                "Kind.Error.Quoted.inspection" => Ok(TypeError::Inspection(ctx, orig, parse_all_expr(im::HashMap::new(), &args[2])?)),
-                "Kind.Error.Quoted.too_many_arguments" => Ok(TypeError::TooManyArguments(ctx, orig)),
+                "Kind.Error.Quoted.inspection" => Ok(TypeError::Inspection(
+                    ctx,
+                    orig,
+                    parse_all_expr(im::HashMap::new(), &args[2])?,
+                )),
+                "Kind.Error.Quoted.too_many_arguments" => {
+                    Ok(TypeError::TooManyArguments(ctx, orig))
+                }
                 "Kind.Error.Quoted.type_mismatch" => Ok(TypeError::TypeMismatch(
                     ctx,
                     orig,

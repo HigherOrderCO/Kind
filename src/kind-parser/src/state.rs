@@ -26,6 +26,7 @@ pub struct Parser<'a> {
     /// tokens, we cannot rely on the count provided by the
     /// lexer.
     pub eaten: u32,
+    pub failed: bool,
 }
 
 impl<'a> Parser<'a> {
@@ -42,6 +43,7 @@ impl<'a> Parser<'a> {
             breaks,
             errs: sender,
             eaten: 0,
+            failed: false
         }
     }
 

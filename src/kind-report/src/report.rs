@@ -11,7 +11,6 @@ use std::path::{Path, PathBuf};
 
 use std::str;
 
-
 use fxhash::FxHashMap;
 use kind_span::{Pos, SyntaxCtxIndex};
 use unicode_width::UnicodeWidthStr;
@@ -371,34 +370,33 @@ fn write_code_block<'a, T: Write + Sized>(
 }
 
 fn render_tag<T: Write + Sized>(severity: &Severity, fmt: &mut T) -> std::fmt::Result {
-    match severity {
-        Severity::Error => write!(
-            fmt,
-            " {} ",
-            Paint::new(" ERROR ").bg(yansi::Color::Red).bold()
-        ),
-        Severity::Warning => write!(
-            fmt,
-            " {} ",
-            Paint::new(" WARN ").bg(yansi::Color::Yellow).bold()
-        ),
-        Severity::Info => write!(
-            fmt,
-            " {} ",
-            Paint::new(" INFO ").bg(yansi::Color::Blue).bold()
-        ),
-    }
+    write!(
+        fmt,
+        " {} ",
+        match severity {
+            Severity::Error => Paint::new(" ERROR ").bg(yansi::Color::Red).bold(),
+            Severity::Warning => Paint::new(" WARN ").bg(yansi::Color::Yellow).bold(),
+            Severity::Info => Paint::new(" INFO ").bg(yansi::Color::Blue).bold(),
+        }
+    )
 }
 
-impl<'a> Diagnostic<'a> {
-    pub fn render<T: Write + Sized, C: FileCache>(
+pub trait Report {
+    fn render<T: Write + Sized, C: FileCache>(
+        &self,
+        cache: &C,
+        config: &RenderConfig,
+        fmt: &mut T,
+    ) -> std::fmt::Result;
+}
+
+impl<'a> Report for Diagnostic<'a> {
+    fn render<T: Write + Sized, C: FileCache>(
         &self,
         cache: &C,
         config: &RenderConfig,
         fmt: &mut T,
     ) -> std::fmt::Result {
-        writeln!(fmt)?;
-
         write!(fmt, " ")?;
         render_tag(&self.frame.severity, fmt)?;
         writeln!(fmt, "{}", Paint::new(&self.frame.title).bold())?;
@@ -411,13 +409,7 @@ impl<'a> Diagnostic<'a> {
             match subtitle {
                 Subtitle::Normal(color, phr) => {
                     let colorizer = get_colorizer(color);
-                    writeln!(
-                        fmt,
-                        "{:>5} {} {}",
-                        "",
-                        colorizer("•"),
-                        Paint::new(phr)
-                    )?;
+                    writeln!(fmt, "{:>5} {} {}", "", colorizer("•"), Paint::new(phr))?;
                 }
                 Subtitle::Bold(color, phr) => {
                     let colorizer = get_colorizer(color);
@@ -471,6 +463,46 @@ impl<'a> Diagnostic<'a> {
             )?;
         }
 
+        if !self.frame.hints.is_empty() {
+            writeln!(fmt)?;
+        }
+
         Ok(())
+    }
+}
+
+impl Report for Log {
+    fn render<T: Write + Sized, C: FileCache>(
+        &self,
+        _cache: &C,
+        _config: &RenderConfig,
+        fmt: &mut T,
+    ) -> std::fmt::Result {
+        match self {
+            Log::Checking(file) => {
+                writeln!(
+                    fmt,
+                    "  {} {}",
+                    Paint::new(" CHECKING ").bg(yansi::Color::Green).bold(),
+                    file
+                )
+            }
+            Log::Checked(duration) => {
+                writeln!(
+                    fmt,
+                    "   {} took {}s",
+                    Paint::new(" CHECKED ").bg(yansi::Color::Green).bold(),
+                    duration.as_secs()
+                )
+            }
+            Log::Failed(duration) => {
+                writeln!(
+                    fmt,
+                    "    {} took {}s",
+                    Paint::new(" FAILED ").bg(yansi::Color::Red).bold(),
+                    duration.as_secs()
+                )
+            }
+        }
     }
 }

@@ -19,3 +19,4 @@ kind-report  = { path = "../kind-report" }
 kind-checker = { path = "../kind-checker" }
 
 clap = { version = "4.0.10", features = ["derive"] }
+termcolor = "1.1.3"

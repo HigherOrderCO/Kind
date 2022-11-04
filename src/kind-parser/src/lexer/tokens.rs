@@ -18,7 +18,6 @@ pub enum Token {
     Dollar,     // $
     Comma,      // ,
     RightArrow, // ->
-    ColonColon, // ::
     DotDot,     // ..
     Dot,        // .
     Tilde,      // ~

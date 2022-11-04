@@ -27,7 +27,7 @@ use crate::errors::PassError;
 pub struct UnboundCollector {
     pub errors: Sender<DiagnosticFrame>,
     pub context_vars: Vec<Ident>,
-    pub unbound: FxHashMap<String, Vec<Ident>>,
+    pub unbound: FxHashMap<String, (bool, Vec<Ident>)>,
 }
 
 impl UnboundCollector {
@@ -43,7 +43,7 @@ impl UnboundCollector {
 pub fn get_module_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     module: &mut Module,
-) -> FxHashMap<String, Vec<Ident>> {
+) -> FxHashMap<String, (bool, Vec<Ident>)> {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_module(module);
     state.unbound
@@ -52,7 +52,7 @@ pub fn get_module_unbound(
 pub fn get_book_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     book: &mut Book,
-) -> FxHashMap<String, Vec<Ident>> {
+) -> FxHashMap<String, (bool, Vec<Ident>)> {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_book(book);
     state.unbound
@@ -63,8 +63,11 @@ impl Visitor for UnboundCollector {
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         if self.context_vars.iter().all(|x| x.data != ident.data) && !ident.used_by_sugar {
-            let entry = self.unbound.entry(ident.to_string()).or_default();
-            entry.push(ident.clone());
+            let entry = self
+                .unbound
+                .entry(ident.to_string())
+                .or_insert_with(|| (false, Vec::new()));
+            entry.1.push(ident.clone());
         }
     }
 
@@ -256,11 +259,6 @@ impl Visitor for UnboundCollector {
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
         self.visit_expr(&mut matcher.scrutinizer);
         for case in &mut matcher.cases {
-            // TODO: Better error for not found constructors like this one.
-            // let mut name = case.constructor.clone();
-            // name.data.0 = format!("{}.{}", matcher.typ.data.0.clone(), name.data.0);
-            // self.visit_ident(&mut name);
-
             self.visit_case(case);
         }
         match &mut matcher.motive {
@@ -281,8 +279,11 @@ impl Visitor for UnboundCollector {
             ExprKind::Var(ident) => self.visit_ident(ident),
             ExprKind::Constr(ident) => {
                 if !self.context_vars.iter().any(|x| x.data == ident.data) {
-                    let entry = self.unbound.entry(ident.to_string()).or_default();
-                    entry.push(ident.clone());
+                    let entry = self
+                        .unbound
+                        .entry(ident.to_string())
+                        .or_insert_with(|| (true, Vec::new()));
+                    entry.1.push(ident.clone());
                 }
             }
             ExprKind::All(None, typ, body) => {

@@ -3,21 +3,18 @@
 //! it returns a desugared book of all of the
 //! depedencies.
 
+use kind_pass::erasure::{self};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-
-use fxhash::FxHashSet;
-use kind_checker::type_check;
-use kind_pass::desugar;
-use kind_pass::expand::expand_book;
-use kind_pass::unbound::{self};
-use kind_report::data::DiagnosticFrame;
-use kind_tree::concrete::Book;
-use kind_tree::concrete::TopLevel;
-use kind_tree::{concrete::Module, symbol::Ident};
 use strsim::jaro;
+
+use kind_pass::unbound::{self};
+use kind_pass::{desugar, expand};
+use kind_report::data::DiagnosticFrame;
+use kind_tree::concrete::{Book, Module, TopLevel};
+use kind_tree::symbol::Ident;
 
 use crate::{errors::DriverError, session::Session};
 
@@ -144,39 +141,50 @@ fn parse_and_store_book_by_identifier<'a>(
     session: &mut Session,
     ident: &Ident,
     book: &'a mut Book,
-) {
+) -> bool {
     if book.entries.contains_key(ident.to_str()) {
-        return;
+        return false;
     }
 
     match ident_to_path(&session.root, ident, true) {
-        Ok(None) => (),
+        Ok(None) => false,
         Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
-        Err(err) => session.diagnostic_sender.send(err).unwrap(),
+        Err(err) => {
+            session.diagnostic_sender.send(err).unwrap();
+            true
+        },
     }
 }
 
-fn parse_and_store_book_by_path<'a>(session: &mut Session, path: &PathBuf, book: &'a mut Book) {
+fn parse_and_store_book_by_path<'a>(session: &mut Session, path: &PathBuf, book: &'a mut Book) -> bool {
+    if session.loaded_paths_map.contains_key(path) {
+        return false;
+    }
+
     let input = fs::read_to_string(path).unwrap();
     let ctx_id = session.book_counter;
 
-    let mut module = kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
+    session.add_path(Rc::new(path.to_path_buf()), input.clone());
 
-    session.add_path(Rc::new(path.to_path_buf()), input);
+    let (mut module, mut failed) = kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
 
     let unbound = unbound::get_module_unbound(session.diagnostic_sender.clone(), &mut module);
 
     for idents in unbound.values() {
-        parse_and_store_book_by_identifier(session, &idents[0], book);
+        if idents.0 {
+            failed |= parse_and_store_book_by_identifier(session, &idents.1[0], book);
+        }
     }
 
     module_to_book(session, &module, book);
+
+    failed
 }
 
 pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Book> {
     let mut book = Book::default();
 
-    parse_and_store_book_by_path(session, path, &mut book);
+    let mut failed = parse_and_store_book_by_path(session, path, &mut book);
 
     let unbounds = unbound::get_book_unbound(session.diagnostic_sender.clone(), &mut book);
 
@@ -185,16 +193,17 @@ pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Boo
         let similar_names = book
             .names
             .keys()
-            .filter(|x| jaro(x, idents[0].to_str()).abs() > 0.8)
+            .filter(|x| jaro(x, idents.1[0].to_str()).abs() > 0.8)
             .cloned()
             .collect();
         session
             .diagnostic_sender
-            .send(DriverError::UnboundVariable(idents.clone(), similar_names).into())
+            .send(DriverError::UnboundVariable(idents.1.clone(), similar_names).into())
             .unwrap();
+        failed = true;
     }
 
-    if !unbounds.is_empty() {
+    if !unbounds.is_empty() || failed {
         None
     } else {
         Some(book)
@@ -203,11 +212,22 @@ pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Boo
 
 pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<()> {
     let mut concrete_book = parse_and_store_book(session, path)?;
-    expand_book(&mut concrete_book);
 
-    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book);
+    expand::expand_book(&mut concrete_book);
 
-    type_check(&desugared_book, session.diagnostic_sender.clone());
+    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
+
+    let succeeded = kind_checker::type_check(&desugared_book, session.diagnostic_sender.clone());
+
+    if !succeeded {
+        return None;
+    }
+
+    erasure::erase_book(
+        &desugared_book,
+        session.diagnostic_sender.clone(),
+        HashSet::from_iter(vec!["Main".to_string()]),
+    )?;
 
     Some(())
 }

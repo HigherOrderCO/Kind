@@ -302,8 +302,8 @@ impl<'a> Parser<'a> {
             let range = self.range();
             self.advance(); // '('
             let mut expr = self.parse_expr(true)?;
-            if self.get().same_variant(&Token::ColonColon) {
-                self.advance(); // '::'
+            if self.get().same_variant(&Token::Colon) {
+                self.advance(); // ':'
                 let typ = self.parse_expr(false)?;
                 let range = range.mix(self.range());
 
@@ -407,7 +407,7 @@ impl<'a> Parser<'a> {
                 range,
             });
         }
-        if self.check_and_eat(Token::ColonColon) {
+        if self.check_and_eat(Token::Colon) {
             let expr = self.parse_expr(false)?;
             Ok(Box::new(Expr {
                 range: head.range.mix(expr.range),

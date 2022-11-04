@@ -2,7 +2,7 @@
 
 use kind_report::data::{Color, DiagnosticFrame, Marker, Severity, Subtitle, Word};
 use kind_span::Range;
-use kind_tree::{desugared::Expr};
+use kind_tree::desugared::Expr;
 
 use crate::report::Context;
 

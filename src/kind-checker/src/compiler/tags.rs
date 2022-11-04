@@ -1,3 +1,5 @@
+///! This module describes tags for internal use
+/// during compilation
 use core::fmt;
 
 use kind_tree::Operator;

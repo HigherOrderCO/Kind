@@ -28,18 +28,24 @@ pub struct DesugarState<'a> {
     pub new_book: desugared::Book,
     pub name_count: u64,
     pub holes: u64,
+    pub failed: bool
 }
 
-pub fn desugar_book(errors: Sender<DiagnosticFrame>, book: &concrete::Book) -> desugared::Book {
+pub fn desugar_book(errors: Sender<DiagnosticFrame>, book: &concrete::Book) -> Option<desugared::Book> {
     let mut state = DesugarState {
         errors,
         old_book: book,
         new_book: Default::default(),
         name_count: 0,
         holes: 0,
+        failed: false
     };
     state.desugar_book(book);
-    state.new_book
+    if state.failed {
+        None
+    } else {
+        Some(state.new_book)
+    }
 }
 
 impl<'a> DesugarState<'a> {
@@ -60,8 +66,9 @@ impl<'a> DesugarState<'a> {
         })
     }
 
-    fn send_err(&self, err: PassError) {
-        self.errors.send(err.into()).unwrap()
+    fn send_err(&mut self, err: PassError) {
+        self.errors.send(err.into()).unwrap();
+        self.failed = true;
     }
 
     pub fn desugar_book(&mut self, book: &concrete::Book) {

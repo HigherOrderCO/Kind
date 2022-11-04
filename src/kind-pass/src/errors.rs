@@ -25,7 +25,7 @@ pub enum PassError {
     RuleWithIncorrectArity(Range, usize, usize, usize),
     RulesWithInconsistentArity(Vec<(Range, usize)>),
     SugarIsBadlyImplemented(Range, Range, usize),
-    CannotUseIrrelevant(Option<Range>, Range, Range),
+    CannotUseIrrelevant(Option<Range>, Range, Option<Range>),
 }
 
 // TODO: A way to build an error message with methods
@@ -39,14 +39,17 @@ impl From<PassError> for DiagnosticFrame {
                     text: "It's in relevant position!".to_string(),
                     no_code: false,
                     main: true,
-                },
-                Marker {
-                    position: declarated_place,
-                    color: Color::Snd,
-                    text: "Declared here as erased (or implicit without '+')".to_string(),
-                    no_code: false,
-                    main: false,
                 }];
+
+                if let Some(range) = declarated_place {
+                    positions.push(Marker {
+                        position: range,
+                        color: Color::Snd,
+                        text: "Declared here as erased (or implicit without '+')".to_string(),
+                        no_code: false,
+                        main: false,
+                    })
+                }
 
                 if let Some(range) = var_decl {
                     positions.push(Marker {
@@ -86,7 +89,7 @@ impl From<PassError> for DiagnosticFrame {
                 severity: Severity::Error,
                 title: "All of the rules of a entry should have the same number of patterns.".to_string(),
                 subtitles: vec![],
-                hints: vec![],
+                hints: vec!["Check if you're trying to use a function that manipulats erased variables.".to_string()],
                 positions: arities.iter().map(|(range, size)| {
                     Marker {
                         position: *range,

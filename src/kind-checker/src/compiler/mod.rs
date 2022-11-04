@@ -17,7 +17,7 @@ mod tags;
 
 macro_rules! vec_preppend {
     ($($f:expr),*; $e:expr) => {
-        vec![[$($f),*].as_slice(), &$e.as_slice()].concat()
+        vec![[$($f),*].as_slice(), $e.as_slice()].concat()
     };
 }
 
@@ -257,10 +257,7 @@ fn codegen_all_expr(
             eval_ctr(quote, TermTag::Hole),
             vec![span_to_num(expr.span), mk_u60(*num)],
         ),
-        Hlp(_) => mk_quoted_ctr(
-            eval_ctr(quote, TermTag::Hlp),
-            vec![span_to_num(expr.span)],
-        ),
+        Hlp(_) => mk_quoted_ctr(eval_ctr(quote, TermTag::Hlp), vec![span_to_num(expr.span)]),
         Str(input) => codegen_str(input),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),
     }

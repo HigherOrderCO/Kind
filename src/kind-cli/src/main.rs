@@ -1,8 +1,12 @@
-use std::{path::PathBuf};
+use std::path::PathBuf;
+use std::time::Instant;
+use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{resolution::type_check_book, session::Session, render_error_to_stderr};
-use kind_report::{data::{DiagnosticFrame}, RenderConfig};
+use kind_driver::{resolution::type_check_book, session::Session};
+use kind_report::data::{Diagnostic, DiagnosticFrame, Log};
+use kind_report::report::{FileCache, Report};
+use kind_report::RenderConfig;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -71,23 +75,69 @@ enum Command {
     Repl,
 }
 
+/// Helper structure to use stderr as fmt::Write
+struct ToWriteFmt<T>(pub T);
+
+impl<T> fmt::Write for ToWriteFmt<T>
+where
+    T: io::Write,
+{
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.0.write_all(s.as_bytes()).map_err(|_| fmt::Error)
+    }
+}
+
+pub fn render_to_stderr<T, E>(render_config: &RenderConfig, session: &T, err: &E)
+where
+    T: FileCache,
+    E: Report,
+{
+    Report::render(
+        err,
+        session,
+        render_config,
+        &mut ToWriteFmt(std::io::stderr()),
+    )
+    .unwrap();
+}
+
 fn main() {
     let _config = Cli::parse();
 
-    let render_config = RenderConfig::unicode(2);
-    let (rx, tx) = std::sync::mpsc::channel();
+    match _config.command {
+        Command::Check { file } => {
+            let render_config = RenderConfig::unicode(2);
+            let (rx, tx) = std::sync::mpsc::channel();
 
-    let mut session = Session::new(PathBuf::from("."), rx);
+            let mut session = Session::new(PathBuf::from("."), rx);
 
-    type_check_book(&mut session, &PathBuf::from("./teste.kind2"));
+            println!();
 
-    let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+            render_to_stderr(
+                &render_config,
+                &session,
+                &Log::Checking(format!("the file '{}'", file)),
+            );
 
-    if diagnostics.is_empty() {
-        println!("Ok!");
-    } else {
-        for diagnostic in diagnostics {
-            render_error_to_stderr(&render_config, &session, &diagnostic)
+            let start = Instant::now();
+
+
+            type_check_book(&mut session, &PathBuf::from(file));
+
+            let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+
+            if diagnostics.is_empty() {
+                render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
+            } else {
+                render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
+                eprintln!();
+                for diagnostic in diagnostics {
+                    let diagnostic: Diagnostic = (&diagnostic).into();
+                    render_to_stderr(&render_config, &session, &diagnostic)
+                }
+            }
+            eprintln!();
         }
+        _ => todo!(),
     }
 }

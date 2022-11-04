@@ -14,9 +14,9 @@ use kind_tree::concrete::Module;
 pub use lexer::state::*;
 use state::Parser;
 
-pub fn parse_book(errs: Sender<DiagnosticFrame>, ctx_id: usize, input: &str) -> Module {
+pub fn parse_book(errs: Sender<DiagnosticFrame>, ctx_id: usize, input: &str) -> (Module, bool) {
     let mut peekable = input.chars().peekable();
     let lexer = Lexer::new(input, &mut peekable, SyntaxCtxIndex::new(ctx_id));
     let mut parser = Parser::new(lexer, errs);
-    parser.parse_module()
+    (parser.parse_module(), parser.failed)
 }
