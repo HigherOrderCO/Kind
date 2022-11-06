@@ -12,7 +12,7 @@ use super::DesugarState;
 impl<'a> DesugarState<'a> {
     pub(crate) fn order_case_arguments(
         &mut self,
-        type_info: (&Range, &Ident),
+        type_info: (&Range, String),
         fields: &[(String, bool)],
         cases: &[CaseBinding],
         jump_rest: bool,
@@ -52,7 +52,7 @@ impl<'a> DesugarState<'a> {
             .collect();
 
         if !jump_rest && !names.is_empty() {
-            self.send_err(PassError::NoCoverage(type_info.1.locate(), names))
+            self.send_err(PassError::NoCoverage(type_info.0.clone(), names))
         }
 
         ordered_fields
@@ -77,7 +77,7 @@ impl<'a> DesugarState<'a> {
                 };
 
                 let ordered_fields = self.order_case_arguments(
-                    (&typ.range, typ),
+                    (&typ.range, typ.to_string()),
                     &record
                         .fields
                         .iter()
@@ -173,7 +173,7 @@ impl<'a> DesugarState<'a> {
             } else {
                 let sum_c = &sum.constructors[index];
                 let ordered = self.order_case_arguments(
-                    (&case.constructor.range, &case.constructor),
+                    (&case.constructor.range, case.constructor.to_string()),
                     &sum_c
                         .args
                         .iter()

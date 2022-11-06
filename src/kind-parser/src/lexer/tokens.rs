@@ -24,7 +24,7 @@ pub enum Token {
 
     Help(String),
     LowerId(String),
-    UpperId(String),
+    UpperId(String, Option<String>),
 
     // Keywords
     Do,
@@ -90,7 +90,7 @@ impl Token {
     }
 
     pub fn is_upper_id(&self) -> bool {
-        matches!(self, Token::UpperId(_))
+        matches!(self, Token::UpperId(_, _))
     }
 
     pub fn is_str(&self) -> bool {

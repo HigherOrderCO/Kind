@@ -8,9 +8,9 @@ use crate::state::Parser;
 impl<'a> Parser<'a> {
     pub fn parse_attr_style(&mut self) -> Result<AttributeStyle, SyntaxError> {
         match self.get().clone() {
-            Token::UpperId(_) => {
+            Token::LowerId(_) => {
                 let range = self.range();
-                let ident = self.parse_upper_id()?;
+                let ident = self.parse_id()?;
                 Ok(AttributeStyle::Ident(range, ident))
             }
             Token::Num(num) => {

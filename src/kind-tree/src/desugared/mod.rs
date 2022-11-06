@@ -6,7 +6,10 @@ use std::fmt::{Display, Error, Formatter};
 use kind_span::{Range, Span};
 use linked_hash_map::LinkedHashMap;
 
-use crate::{symbol::Ident, Operator};
+use crate::{
+    symbol::{Ident, QualifiedIdent},
+    Operator,
+};
 
 /// Just a vector of expressions. It is called spine because
 /// it is usually in a form like (a b c d e) that can be interpret
@@ -24,9 +27,9 @@ pub enum ExprKind {
     /// Application of a expression to a spine of expressions
     App(Box<Expr>, Spine),
     /// Application of a function
-    Fun(Ident, Spine),
+    Fun(QualifiedIdent, Spine),
     /// Application of a Construtor
-    Ctr(Ident, Spine),
+    Ctr(QualifiedIdent, Spine),
     /// Declaration of a local variable
     Let(Ident, Box<Expr>, Box<Expr>),
     /// Type ascription (x : y)
@@ -116,14 +119,14 @@ impl Expr {
         })
     }
 
-    pub fn fun(range: Range, head: Ident, spine: Vec<Box<Expr>>) -> Box<Expr> {
+    pub fn fun(range: Range, head: QualifiedIdent, spine: Vec<Box<Expr>>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Fun(head, spine),
         })
     }
 
-    pub fn ctr(range: Range, head: Ident, spine: Vec<Box<Expr>>) -> Box<Expr> {
+    pub fn ctr(range: Range, head: QualifiedIdent, spine: Vec<Box<Expr>>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Ctr(head, spine),
@@ -221,7 +224,7 @@ pub struct Argument {
 /// right hand side a value.
 #[derive(Clone, Debug)]
 pub struct Rule {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub pats: Vec<Box<Expr>>,
     pub body: Box<Expr>,
     pub span: Span,
@@ -238,7 +241,7 @@ pub enum Attribute {}
 /// return type @typ@.
 #[derive(Clone, Debug)]
 pub struct Entry {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub args: Vec<Argument>,
     pub typ: Box<Expr>,
     pub rules: Vec<Rule>,

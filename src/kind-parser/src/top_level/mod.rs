@@ -1,6 +1,7 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
 use kind_tree::concrete::{Argument, Attribute, Entry, Module, Rule, Telescope, TopLevel};
+use kind_tree::symbol::QualifiedIdent;
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -79,14 +80,15 @@ impl<'a> Parser<'a> {
     pub fn parse_rule(&mut self, name: String) -> Result<Box<Rule>, SyntaxError> {
         let start = self.range();
         let ident;
-        if let Token::UpperId(name_id) = self.get() {
-            if *name_id == name {
+        if let Token::UpperId(name_id, ext) = self.get() {
+            let qual = QualifiedIdent::new_static(name_id.clone(), ext.clone(), start);
+            if qual.to_string() == name {
                 ident = self.parse_upper_id()?;
             } else {
-                return self.fail(vec![Token::UpperId(name)]);
+                return self.fail(vec![]);
             }
         } else {
-            return self.fail(vec![Token::UpperId(name)]);
+            return self.fail(vec![]);
         }
         let mut pats = Vec::new();
         while !self.get().same_variant(&Token::Eq) && !self.get().same_variant(&Token::Eof) {

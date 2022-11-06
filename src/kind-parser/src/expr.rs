@@ -1,7 +1,7 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::*;
 use kind_tree::concrete::pat::PatIdent;
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::Operator;
 
 use crate::errors::SyntaxError;
@@ -124,10 +124,11 @@ impl<'a> Parser<'a> {
         Ok(ident)
     }
 
-    pub fn parse_upper_id(&mut self) -> Result<Ident, SyntaxError> {
+    pub fn parse_upper_id(&mut self) -> Result<QualifiedIdent, SyntaxError> {
         let range = self.range();
-        let id = eat_single!(self, Token::UpperId(x) => x.clone())?;
-        let ident = Ident::new_static(&id, range);
+        let (start, end) =
+            eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
+        let ident = QualifiedIdent::new_static(start.clone(), end.clone(), range);
         Ok(ident)
     }
 
@@ -153,6 +154,7 @@ impl<'a> Parser<'a> {
         self.advance(); // ':'
         let typ = self.parse_expr(false)?;
 
+        let par_range = self.range();
         self.eat_closing_keyword(Token::RPar, range)?;
 
         if self.check_and_eat(Token::FatArrow) {
@@ -161,12 +163,22 @@ impl<'a> Parser<'a> {
                 range: range.mix(body.range),
                 data: ExprKind::Lambda(ident, Some(typ), body),
             }))
-        } else {
-            self.check_and_eat(Token::RightArrow);
+        } else if self.check_and_eat(Token::RightArrow) {
             let body = self.parse_expr(false)?;
             Ok(Box::new(Expr {
                 range: range.mix(body.range),
                 data: ExprKind::All(Some(ident), typ, body),
+            }))
+        } else {
+            Ok(Box::new(Expr {
+                range: range.mix(typ.range),
+                data: ExprKind::Ann(
+                    Box::new(Expr {
+                        range: range.mix(par_range),
+                        data: ExprKind::Var(ident),
+                    }),
+                    typ,
+                ),
             }))
         }
     }
@@ -200,7 +212,7 @@ impl<'a> Parser<'a> {
 
     fn parse_data(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let id = self.parse_upper_id()?;
-        let data = match id.to_str() {
+        let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit(Literal::Type),
             "U60" => ExprKind::Lit(Literal::U60),
             _ => ExprKind::Constr(id.clone()),
@@ -344,7 +356,7 @@ impl<'a> Parser<'a> {
         self.ignore_docs();
         match self.get().clone() {
             Token::LowerId(_) => self.parse_var(),
-            Token::UpperId(_) => self.parse_data(),
+            Token::UpperId(_, _) => self.parse_data(),
             Token::Num(num) => self.parse_num(num),
             Token::Char(chr) => self.parse_char(chr),
             Token::Str(str) => self.parse_str(str),

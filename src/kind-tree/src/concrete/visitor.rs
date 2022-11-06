@@ -63,6 +63,10 @@ pub trait Visitor: Sized {
         walk_pat_ident(self, ident);
     }
 
+    fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
+        walk_qualified_ident(self, ident);
+    }
+
     fn visit_ident(&mut self, ident: &mut Ident) {
         walk_ident(self, ident);
     }
@@ -156,10 +160,14 @@ pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
     ctx.visit_range(&mut ident.range);
 }
 
+pub fn walk_qualified_ident<T: Visitor>(ctx: &mut T, ident: &mut QualifiedIdent) {
+    ctx.visit_range(&mut ident.range);
+}
+
 pub fn walk_destruct<T: Visitor>(ctx: &mut T, destruct: &mut Destruct) {
     match destruct {
         Destruct::Destruct(range, i, e, _) => {
-            ctx.visit_ident(i);
+            ctx.visit_qualified_ident(i);
             ctx.visit_range(range);
             visit_vec!(e, e => ctx.visit_case_binding(e))
         }
@@ -197,7 +205,7 @@ pub fn walk_case<T: Visitor>(ctx: &mut T, case: &mut Case) {
 }
 
 pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
-    ctx.visit_ident(&mut matcher.typ);
+    ctx.visit_qualified_ident(&mut matcher.typ);
     ctx.visit_expr(&mut matcher.scrutinizer);
 
     match &mut matcher.motive {
@@ -220,7 +228,7 @@ pub fn walk_argument<T: Visitor>(ctx: &mut T, argument: &mut Argument) {
 }
 
 pub fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
-    ctx.visit_ident(&mut entry.name);
+    ctx.visit_qualified_ident(&mut entry.name);
     for arg in &mut entry.args.0 {
         ctx.visit_argument(arg)
     }
@@ -275,7 +283,7 @@ pub fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
             ctx.visit_pat(snd);
         }
         PatKind::App(t, ls) => {
-            ctx.visit_ident(t);
+            ctx.visit_qualified_ident(t);
             for pat in ls {
                 ctx.visit_pat(pat)
             }
@@ -284,7 +292,7 @@ pub fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
 }
 
 pub fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
-    ctx.visit_ident(&mut rule.name);
+    ctx.visit_qualified_ident(&mut rule.name);
     for pat in &mut rule.pats {
         ctx.visit_pat(pat);
     }
@@ -295,14 +303,14 @@ pub fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
 pub fn walk_top_level<T: Visitor>(ctx: &mut T, toplevel: &mut TopLevel) {
     match toplevel {
         super::TopLevel::SumType(sum) => {
-            ctx.visit_ident(&mut sum.name);
+            ctx.visit_qualified_ident(&mut sum.name);
             visit_vec!(&mut sum.attrs, arg => ctx.visit_attr(arg));
             visit_vec!(&mut sum.parameters.0, arg => ctx.visit_argument(arg));
             visit_vec!(&mut sum.indices.0, arg => ctx.visit_argument(arg));
             visit_vec!(&mut sum.constructors, arg => ctx.visit_constructor(arg));
         }
         super::TopLevel::RecordType(rec) => {
-            ctx.visit_ident(&mut rec.name);
+            ctx.visit_qualified_ident(&mut rec.name);
             visit_vec!(&mut rec.attrs, arg => ctx.visit_attr(arg));
             visit_vec!(&mut rec.parameters.0, arg => ctx.visit_argument(arg));
             visit_vec!(&mut rec.fields, (name, _docs, typ) => {
@@ -357,7 +365,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
     ctx.visit_range(&mut expr.range);
     match &mut expr.data {
         ExprKind::Var(ident) => ctx.visit_ident(ident),
-        ExprKind::Constr(ident) => ctx.visit_ident(ident),
+        ExprKind::Constr(ident) => ctx.visit_qualified_ident(ident),
         ExprKind::All(None, typ, body) => {
             ctx.visit_expr(typ);
             ctx.visit_expr(body);
@@ -386,7 +394,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             ctx.visit_expr(body);
         }
         ExprKind::Do(ident, sttm) => {
-            ctx.visit_ident(ident);
+            ctx.visit_qualified_ident(ident);
             ctx.visit_sttm(sttm)
         }
         ExprKind::Lambda(ident, binder, body) => {

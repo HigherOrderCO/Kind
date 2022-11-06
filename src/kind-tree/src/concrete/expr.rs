@@ -4,7 +4,10 @@
 //! error messages.
 
 use super::pat::PatIdent;
-use crate::{symbol::Ident, Operator};
+use crate::{
+    symbol::{Ident, QualifiedIdent},
+    Operator,
+};
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
 
@@ -46,7 +49,7 @@ pub struct Case {
 /// into an eliminator of a datatype.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Match {
-    pub typ: Ident,
+    pub typ: QualifiedIdent,
     pub scrutinizer: Box<Expr>,
     pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
@@ -82,7 +85,7 @@ pub enum Literal {
 /// and just translates into a eliminator for records.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Destruct {
-    Destruct(Range, Ident, Vec<CaseBinding>, bool),
+    Destruct(Range, QualifiedIdent, Vec<CaseBinding>, bool),
     Ident(Ident),
 }
 
@@ -110,7 +113,7 @@ pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
     /// Name of a function/constructor
-    Constr(Ident),
+    Constr(QualifiedIdent),
     /// The dependent function space (e.g. (x : Int) -> y)
     All(Option<Ident>, Box<Expr>, Box<Expr>),
     /// The dependent product space (e.g. [x : Int] -> y)
@@ -135,7 +138,7 @@ pub enum ExprKind {
     /// into an eliminator of a datatype.
     Match(Box<Match>),
     /// Do notation
-    Do(Ident, Box<Sttm>),
+    Do(QualifiedIdent, Box<Sttm>),
     /// If else statement
     If(Box<Expr>, Box<Expr>, Box<Expr>),
     /// If else statement

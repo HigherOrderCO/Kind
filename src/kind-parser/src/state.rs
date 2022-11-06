@@ -43,7 +43,7 @@ impl<'a> Parser<'a> {
             breaks,
             errs: sender,
             eaten: 0,
-            failed: false
+            failed: false,
         }
     }
 

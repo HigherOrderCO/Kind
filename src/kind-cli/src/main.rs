@@ -3,7 +3,8 @@ use std::time::Instant;
 use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{resolution::type_check_book, session::Session};
+use kind_driver::resolution::{compile_book, type_check_book};
+use kind_driver::{session::Session};
 use kind_report::data::{Diagnostic, DiagnosticFrame, Log};
 use kind_report::report::{FileCache, Report};
 use kind_report::RenderConfig;

@@ -7,7 +7,7 @@ use std::fmt::{Display, Error, Formatter};
 
 use kind_span::Range;
 
-use crate::symbol::Ident;
+use crate::symbol::{Ident, QualifiedIdent};
 
 // Really useful thin layer on ident.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -18,7 +18,7 @@ pub enum PatKind {
     /// Name of a variable
     Var(PatIdent),
     /// Application of a constructor
-    App(Ident, Vec<Box<Pat>>),
+    App(QualifiedIdent, Vec<Box<Pat>>),
     /// Hole
     Num(u64),
     /// Pair

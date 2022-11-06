@@ -4,7 +4,7 @@ use kind_tree::concrete::expr::Expr;
 
 use kind_tree::concrete::{Binding, ExprKind};
 use kind_tree::desugared;
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{QualifiedIdent};
 
 use crate::errors::PassError;
 
@@ -14,10 +14,10 @@ impl<'a> DesugarState<'a> {
     pub(crate) fn make_desugared_spine(
         &mut self,
         range: Range,
-        head: Ident,
+        head: QualifiedIdent,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Option<Vec<Box<desugared::Expr>>> {
-        let entry = self.old_book.get_count_garanteed(head.to_str());
+        let entry = self.old_book.get_count_garanteed(head.to_string().as_str());
 
         let mut arguments = Vec::new();
 
@@ -47,7 +47,7 @@ impl<'a> DesugarState<'a> {
     pub(crate) fn mk_desugared_ctr(
         &mut self,
         range: Range,
-        head: Ident,
+        head: QualifiedIdent,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Box<desugared::Expr> {
         match self.make_desugared_spine(range, head.clone(), spine) {
@@ -59,7 +59,7 @@ impl<'a> DesugarState<'a> {
     pub(crate) fn mk_desugared_fun(
         &mut self,
         range: Range,
-        head: Ident,
+        head: QualifiedIdent,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Box<desugared::Expr> {
         match self.make_desugared_spine(range, head.clone(), spine) {
@@ -76,7 +76,9 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         match &head.data {
             ExprKind::Constr(entry_name) => {
-                let entry = self.old_book.get_count_garanteed(entry_name.to_str());
+                let entry = self
+                    .old_book
+                    .get_count_garanteed(entry_name.to_string().as_str());
 
                 let mut positions = FxHashMap::default();
                 let mut arguments = vec![None; entry.arguments.len()];

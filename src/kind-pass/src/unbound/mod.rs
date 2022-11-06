@@ -9,10 +9,11 @@ use std::sync::mpsc::Sender;
 
 use fxhash::FxHashMap;
 use kind_report::data::DiagnosticFrame;
+use kind_span::Range;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::{Book, Module, TopLevel};
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, QualifiedIdent};
 
 use kind_tree::concrete::{
     expr::{Expr, ExprKind, SttmKind},
@@ -26,8 +27,9 @@ use crate::errors::PassError;
 
 pub struct UnboundCollector {
     pub errors: Sender<DiagnosticFrame>,
-    pub context_vars: Vec<Ident>,
-    pub unbound: FxHashMap<String, (bool, Vec<Ident>)>,
+    pub context_vars: Vec<(Range, String)>,
+    pub unbound_top_level: FxHashMap<String, Vec<QualifiedIdent>>,
+    pub unbound: FxHashMap<String, Vec<Ident>>,
 }
 
 impl UnboundCollector {
@@ -35,6 +37,7 @@ impl UnboundCollector {
         Self {
             errors: diagnostic_sender,
             context_vars: Default::default(),
+            unbound_top_level: Default::default(),
             unbound: Default::default(),
         }
     }
@@ -43,41 +46,55 @@ impl UnboundCollector {
 pub fn get_module_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     module: &mut Module,
-) -> FxHashMap<String, (bool, Vec<Ident>)> {
+) -> (
+    FxHashMap<String, Vec<Ident>>,
+    FxHashMap<String, Vec<QualifiedIdent>>,
+) {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_module(module);
-    state.unbound
+    (state.unbound, state.unbound_top_level)
 }
 
 pub fn get_book_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     book: &mut Book,
-) -> FxHashMap<String, (bool, Vec<Ident>)> {
+) -> (
+    FxHashMap<String, Vec<Ident>>,
+    FxHashMap<String, Vec<QualifiedIdent>>,
+) {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_book(book);
-    state.unbound
+    (state.unbound, state.unbound_top_level)
 }
 
 impl Visitor for UnboundCollector {
     fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
 
     fn visit_ident(&mut self, ident: &mut Ident) {
-        if self.context_vars.iter().all(|x| x.data != ident.data) && !ident.used_by_sugar {
+        if self
+            .context_vars
+            .iter()
+            .all(|x| x.1 != ident.data.to_string())
+        {
             let entry = self
                 .unbound
                 .entry(ident.to_string())
-                .or_insert_with(|| (false, Vec::new()));
-            entry.1.push(ident.clone());
+                .or_insert_with(|| Vec::new());
+            entry.push(ident.clone());
         }
     }
 
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
-        if let Some(fst) = self.context_vars.iter().find(|x| x.data == ident.0.data) {
+        if let Some(fst) = self
+            .context_vars
+            .iter()
+            .find(|x| x.1 == ident.0.data.to_string())
+        {
             self.errors
-                .send(PassError::RepeatedVariable(fst.range, ident.0.range).into())
+                .send(PassError::RepeatedVariable(fst.0, ident.0.range).into())
                 .unwrap()
         } else {
-            self.context_vars.push(ident.0.clone())
+            self.context_vars.push((ident.0.range, ident.0.to_string()))
         }
     }
 
@@ -86,7 +103,8 @@ impl Visitor for UnboundCollector {
             Some(res) => self.visit_expr(res),
             None => (),
         }
-        self.context_vars.push(argument.name.clone());
+        self.context_vars
+            .push((argument.name.range, argument.name.to_string()));
     }
 
     fn visit_rule(&mut self, rule: &mut Rule) {
@@ -116,10 +134,12 @@ impl Visitor for UnboundCollector {
     fn visit_top_level(&mut self, toplevel: &mut TopLevel) {
         match toplevel {
             TopLevel::SumType(entr) => {
-                self.context_vars.push(entr.name.clone());
+                self.context_vars
+                    .push((entr.name.range, entr.name.to_string()));
                 for cons in &entr.constructors {
-                    let name_cons = cons.name.add_base_ident(cons.name.to_str());
-                    self.context_vars.push(name_cons);
+                    let name_cons = entr.name.add_segment(cons.name.to_str());
+                    self.context_vars
+                        .push((name_cons.range, name_cons.to_string()));
                 }
 
                 let vars = self.context_vars.clone();
@@ -139,10 +159,13 @@ impl Visitor for UnboundCollector {
                 self.context_vars = vars;
             }
             TopLevel::RecordType(entr) => {
-                self.context_vars.push(entr.name.clone());
+                self.context_vars
+                    .push((entr.name.range, entr.name.to_string()));
 
-                let name_cons = entr.constructor.add_base_ident(entr.name.to_str());
-                self.context_vars.push(name_cons);
+                let name_cons = entr.name.add_segment(entr.constructor.to_str());
+
+                self.context_vars
+                    .push((name_cons.range, name_cons.to_string()));
 
                 let inside_vars = self.context_vars.clone();
 
@@ -154,7 +177,7 @@ impl Visitor for UnboundCollector {
                 self.context_vars = inside_vars;
             }
             TopLevel::Entry(entr) => {
-                self.context_vars.push(entr.name.clone());
+                self.context_vars.push((entr.range, entr.to_string()));
                 self.visit_entry(entr)
             }
         }
@@ -167,7 +190,11 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_book(&mut self, book: &mut Book) {
-        self.context_vars = book.names.values().cloned().collect();
+        self.context_vars = book
+            .names
+            .values()
+            .map(|name| (name.range, name.to_string()))
+            .collect();
         for entr in book.entries.values_mut() {
             self.visit_top_level(entr)
         }
@@ -178,12 +205,12 @@ impl Visitor for UnboundCollector {
             Destruct::Destruct(range, ty, bindings, _) => {
                 self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.open", ty), *range));
                 self.visit_range(range);
-                self.visit_ident(ty);
+                self.visit_qualified_ident(ty);
                 for bind in bindings {
                     self.visit_case_binding(bind)
                 }
             }
-            Destruct::Ident(ident) => self.context_vars.push(ident.clone()),
+            Destruct::Ident(ident) => self.context_vars.push((ident.range, ident.to_string())),
         }
     }
 
@@ -232,7 +259,7 @@ impl Visitor for UnboundCollector {
                 self.visit_pat(snd);
             }
             PatKind::App(t, ls) => {
-                self.visit_ident(t);
+                self.visit_qualified_ident(t);
                 for pat in ls {
                     self.visit_pat(pat)
                 }
@@ -278,12 +305,12 @@ impl Visitor for UnboundCollector {
         match &mut expr.data {
             ExprKind::Var(ident) => self.visit_ident(ident),
             ExprKind::Constr(ident) => {
-                if !self.context_vars.iter().any(|x| x.data == ident.data) {
+                if !self.context_vars.iter().any(|x| x.1 == ident.to_string()) {
                     let entry = self
-                        .unbound
+                        .unbound_top_level
                         .entry(ident.to_string())
-                        .or_insert_with(|| (true, Vec::new()));
-                    entry.1.push(ident.clone());
+                        .or_insert_with(|| Vec::new());
+                    entry.push(ident.clone());
                 }
             }
             ExprKind::All(None, typ, body) => {
@@ -292,7 +319,7 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::All(Some(ident), typ, body) => {
                 self.visit_expr(typ);
-                self.context_vars.push(ident.clone());
+                self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
@@ -301,7 +328,7 @@ impl Visitor for UnboundCollector {
                     Some(x) => self.visit_expr(x),
                     None => (),
                 }
-                self.context_vars.push(ident.clone());
+                self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
@@ -333,13 +360,13 @@ impl Visitor for UnboundCollector {
             ExprKind::Sigma(Some(ident), typ, body) => {
                 self.visit_ident(&mut Ident::new_by_sugar("Sigma", expr.range));
                 self.visit_expr(typ);
-                self.context_vars.push(ident.clone());
+                self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
             ExprKind::Match(matcher) => {
                 self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.match", matcher.typ.to_str()),
+                    &format!("{}.match", matcher.typ.to_string().as_str()),
                     expr.range,
                 ));
                 self.visit_match(matcher)
@@ -350,7 +377,7 @@ impl Visitor for UnboundCollector {
                 if let Some(pos) = self
                     .context_vars
                     .iter()
-                    .position(|x| x.to_str() == subst.name.to_str())
+                    .position(|x| x.1 == subst.name.to_string())
                 {
                     subst.indx = pos;
                 }

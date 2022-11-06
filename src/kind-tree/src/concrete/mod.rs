@@ -4,7 +4,7 @@
 
 use std::fmt::{Display, Error, Formatter};
 
-use crate::symbol::Ident;
+use crate::symbol::{Ident, QualifiedIdent};
 use expr::Expr;
 use fxhash::FxHashMap;
 use kind_span::{Locatable, Range};
@@ -91,7 +91,7 @@ pub struct Argument {
 /// right hand side a value.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Rule {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub pats: Vec<Box<Pat>>,
     pub body: Box<Expr>,
     pub range: Range,
@@ -103,7 +103,7 @@ pub struct Rule {
 /// return type @typ@.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Entry {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub docs: Vec<String>,
     pub args: Telescope<Argument>,
     pub typ: Box<Expr>,
@@ -126,7 +126,7 @@ pub struct Constructor {
 /// parametric and indexed data type definitions.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct SumTypeDecl {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub docs: Vec<String>,
     pub parameters: Telescope<Argument>,
     pub indices: Telescope<Argument>,
@@ -137,7 +137,7 @@ pub struct SumTypeDecl {
 /// A single constructor data type.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct RecordDecl {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub docs: Vec<String>,
     pub constructor: Ident,
     pub parameters: Telescope<Argument>,
@@ -192,8 +192,8 @@ pub struct EntryMeta {
 /// by joining a bunch of books that are already resolved.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
-    pub names: LinkedHashMap<String, Ident>,  // Ordered hashset
-    pub entries: FxHashMap<String, TopLevel>, // Probably deterministic order everytime
+    pub names: LinkedHashMap<String, QualifiedIdent>, // Ordered hashset
+    pub entries: FxHashMap<String, TopLevel>,         // Probably deterministic order everytime
     pub count: FxHashMap<String, EntryMeta>, // Stores some important information in order to desugarize
 }
 

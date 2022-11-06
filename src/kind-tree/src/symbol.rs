@@ -16,10 +16,61 @@ pub struct Symbol(String);
 pub struct Ident {
     pub data: Symbol,
     pub range: Range,
+}
+
+/// Qualified Identifiers always refer to top level
+/// constructions.
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct QualifiedIdent {
+    pub root: Symbol,
+    pub aux: Option<Symbol>,
+    pub range: Range,
+
     /// Flag that is useful to avoid unbound errors while
     /// trying to collect names created by each of the sintatic
     /// sugars.
     pub used_by_sugar: bool,
+}
+
+impl QualifiedIdent {
+    pub fn new(root: Symbol, aux: Option<Symbol>, range: Range) -> QualifiedIdent {
+        QualifiedIdent {
+            root,
+            aux,
+            range,
+            used_by_sugar: false,
+        }
+    }
+
+    /// Avoid this function. It transforms a QualifiedIdent into a Ident
+    pub fn to_ident(&self) -> Ident {
+        Ident {
+            data: Symbol(self.to_string()),
+            range: self.range,
+        }
+    }
+
+    pub fn new_static(root: String, aux: Option<String>, range: Range) -> QualifiedIdent {
+        QualifiedIdent {
+            root: Symbol(root),
+            aux: aux.map(Symbol),
+            range,
+            used_by_sugar: false,
+        }
+    }
+
+    pub fn add_segment(&self, extension: &str) -> QualifiedIdent {
+        let aux = match self.aux.clone() {
+            Some(res) => Symbol(format!("{}.{}", res.0, extension)),
+            None => Symbol(extension.to_string()),
+        };
+        QualifiedIdent {
+            root: self.root.clone(),
+            aux: Some(aux),
+            range: self.range.clone(),
+            used_by_sugar: self.used_by_sugar,
+        }
+    }
 }
 
 impl Ident {
@@ -27,7 +78,6 @@ impl Ident {
         Ident {
             data: Symbol(data),
             range,
-            used_by_sugar: false,
         }
     }
 
@@ -35,7 +85,6 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
-            used_by_sugar: false,
         }
     }
 
@@ -43,7 +92,6 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
-            used_by_sugar: true,
         }
     }
 
@@ -106,7 +154,6 @@ impl Ident {
         Ident {
             data: self.data.clone(),
             range,
-            used_by_sugar: self.used_by_sugar,
         }
     }
 
@@ -114,7 +161,6 @@ impl Ident {
         Ident {
             data: Symbol(format!("{}.{}", self.data.0, name)),
             range: self.range,
-            used_by_sugar: self.used_by_sugar,
         }
     }
 
@@ -122,24 +168,28 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range: Range::ghost_range(),
-            used_by_sugar: false,
         }
     }
+}
 
-    // TODO: Not sure if error messages will be that good with
-    // sintetized idents like that. I think I should make another ident type for
-    // not completed constructors.
-    pub fn add_base_ident(&self, base: &str) -> Ident {
-        Ident {
-            data: Symbol(format!("{}.{}", base, self.data.0)),
-            range: self.range,
-            used_by_sugar: self.used_by_sugar,
-        }
+impl Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
 impl Display for Ident {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.data.0)
+        write!(f, "{}", self.data)
+    }
+}
+
+impl Display for QualifiedIdent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(aux) = &self.aux {
+            write!(f, "{}/{}", self.root, aux)
+        } else {
+            write!(f, "{}", self.root)
+        }
     }
 }

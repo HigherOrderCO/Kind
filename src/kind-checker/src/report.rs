@@ -1,6 +1,6 @@
 use kind_span::{EncodedSpan, Range};
 use kind_tree::backend::Term;
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::{desugared, Operator};
 
 use crate::errors::TypeError;
@@ -57,6 +57,10 @@ fn parse_name(term: &Term) -> Result<String, String> {
     match_opt!(*term, Term::Num { numb } => Ident::decode(numb))
 }
 
+fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
+    todo!()
+}
+
 fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {
     parse_all_expr(Default::default(), term)
 }
@@ -109,7 +113,7 @@ fn parse_all_expr(
             )),
             "Kind.Quoted.ctr" => Ok(Expr::ctr(
                 parse_orig(&args[0])?,
-                Ident::generate(&parse_name(&args[1])?),
+                parse_qualified(&args[1])?,
                 {
                     let mut res = Vec::new();
                     for arg in &args[1..] {
@@ -120,7 +124,7 @@ fn parse_all_expr(
             )),
             "Kind.Quoted.fun" => Ok(Expr::fun(
                 parse_orig(&args[0])?,
-                Ident::generate(&parse_name(&args[1])?),
+                parse_qualified(&args[1])?,
                 {
                     let mut res = Vec::new();
                     for arg in &args[1..] {

@@ -6,7 +6,7 @@ use kind_tree::concrete::expr::Expr;
 use kind_tree::concrete::pat::{Pat, PatIdent};
 use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, QualifiedIdent};
 
 /// Derives an eliminator from a sum type declaration.
 pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
@@ -17,7 +17,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         })
     };
 
-    let mk_cons = |name: Ident| -> Box<Expr> {
+    let mk_cons = |name: QualifiedIdent| -> Box<Expr> {
         Box::new(Expr {
             data: ExprKind::Constr(name),
             range,

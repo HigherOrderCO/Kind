@@ -4,14 +4,14 @@
 use std::path::PathBuf;
 
 use kind_report::data::{Color, DiagnosticFrame, Marker, Severity, Subtitle, Word};
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, QualifiedIdent};
 
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
 pub(crate) enum DriverError {
     UnboundVariable(Vec<Ident>, Vec<String>),
-    MultiplePaths(Ident, Vec<PathBuf>),
-    DefinedMultipleTimes(Ident, Ident),
+    MultiplePaths(QualifiedIdent, Vec<PathBuf>),
+    DefinedMultipleTimes(QualifiedIdent, QualifiedIdent),
 }
 
 impl From<DriverError> for DiagnosticFrame {

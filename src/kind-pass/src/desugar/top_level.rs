@@ -1,7 +1,7 @@
 use kind_span::{Range, Span};
 use kind_tree::concrete::{self, Telescope};
 use kind_tree::desugared;
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{QualifiedIdent};
 
 use crate::errors::{PassError, Sugar};
 
@@ -13,14 +13,14 @@ use super::DesugarState;
 /// NOTE: Does not work with Pi types.
 pub fn is_data_constructor_of(expr: concrete::expr::Expr, type_name: &str) -> bool {
     match expr.data {
-        concrete::ExprKind::Var(name) => name.to_str() == type_name,
+        concrete::ExprKind::Var(name) => name.to_string().as_str() == type_name,
         concrete::ExprKind::App(head, _) => {
             if let concrete::expr::Expr {
                 data: concrete::ExprKind::Var(name),
                 ..
             } = *head
             {
-                name.to_str() == type_name
+                name.to_string().as_str() == type_name
             } else {
                 false
             }
@@ -73,7 +73,7 @@ impl<'a> DesugarState<'a> {
             .to_vec();
 
         for cons in &sum_type.constructors {
-            let cons_ident = cons.name.add_base_ident(sum_type.name.to_str());
+            let cons_ident = sum_type.name.add_segment(cons.name.to_str());
 
             let pre_indices = if cons.typ.is_none() {
                 irelevant_indices.as_slice()
@@ -146,17 +146,11 @@ impl<'a> DesugarState<'a> {
             .collect::<Vec<Box<desugared::Expr>>>();
 
         let typ = Box::new(desugared::Expr {
-            data: desugared::ExprKind::App(
-                Box::new(desugared::Expr {
-                    data: desugared::ExprKind::Var(rec_type.name.clone()),
-                    span: Span::Generated,
-                }),
-                args,
-            ),
+            data: desugared::ExprKind::Ctr(rec_type.name.clone(), args),
             span: Span::Generated,
         });
 
-        let cons_ident = rec_type.constructor.add_base_ident(rec_type.name.to_str());
+        let cons_ident = rec_type.name.add_segment(rec_type.constructor.to_str());
 
         let data_constructor = desugared::Entry {
             name: cons_ident.clone(),
@@ -193,9 +187,10 @@ impl<'a> DesugarState<'a> {
         fst: &concrete::pat::Pat,
         snd: &concrete::pat::Pat,
     ) -> Box<desugared::Expr> {
-        let sigma_new = Ident::new_static("Sigma.new", range);
+        let sigma_new =
+            QualifiedIdent::new_static("Sigma".to_string(), Some("new".to_string()), range);
 
-        let entry = self.old_book.entries.get(sigma_new.to_str());
+        let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
             return desugared::Expr::err(range);
@@ -211,13 +206,13 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[concrete::pat::Pat],
     ) -> Box<desugared::Expr> {
-        let cons_ident = Ident::new_static("List.cons", range);
-        let nil_ident = Ident::new_static("List.nil", range);
-        let list_ident = Ident::new_static("List", range);
+        let list_ident = QualifiedIdent::new_static("List".to_string(), None, range);
+        let cons_ident = list_ident.add_segment("cons");
+        let nil_ident = list_ident.add_segment("nil");
 
-        let list = self.old_book.entries.get(list_ident.to_str());
-        let nil = self.old_book.entries.get(cons_ident.to_str());
-        let cons = self.old_book.entries.get(nil_ident.to_str());
+        let list = self.old_book.entries.get(list_ident.to_string().as_str());
+        let nil = self.old_book.entries.get(cons_ident.to_string().as_str());
+        let cons = self.old_book.entries.get(nil_ident.to_string().as_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
@@ -239,7 +234,7 @@ impl<'a> DesugarState<'a> {
                 let entry = self
                     .old_book
                     .count
-                    .get(head.to_str())
+                    .get(head.to_string().as_str())
                     .expect("Cannot find definition");
 
                 if !entry.is_ctr {

@@ -9,7 +9,7 @@ use self::tags::{operator_to_constructor, TermTag};
 use hvm::Term;
 use kind_span::Span;
 use kind_tree::desugared::{self, Book, Expr};
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, QualifiedIdent};
 
 use hvm::language as lang;
 
@@ -78,9 +78,9 @@ fn mk_single_ctr(head: String) -> Box<Term> {
     })
 }
 
-fn mk_ctr_name(ident: &Ident) -> Box<Term> {
+fn mk_ctr_name(ident: &QualifiedIdent) -> Box<Term> {
     // Adds an empty segment (so it just appends a dot in the end)
-    mk_single_ctr(ident.add_segment("").to_string())
+    mk_single_ctr(format!("{}.", ident.to_string()))
 }
 
 fn span_to_num(span: Span) -> Box<Term> {
@@ -361,7 +361,7 @@ fn codegen_rule(file: &mut lang::File, rule: &desugared::Rule) {
         rhs: codegen_expr(true, &rule.body),
     });
 
-    if rule.name.to_str() == "HVM.log" {
+    if rule.name.to_string().as_str() == "HVM.log" {
         file.rules.push(lang::Rule {
             lhs: mk_ctr(
                 TermTag::HoasF(rule.name.to_string()).to_string(),
@@ -431,12 +431,12 @@ fn codegen_entry_rules(
 fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
     file.rules.push(lang::Rule {
         lhs: mk_ctr("NameOf".to_owned(), vec![mk_ctr_name(&entry.name)]),
-        rhs: codegen_str(entry.name.to_str()),
+        rhs: codegen_str(entry.name.to_string().as_str()),
     });
 
     file.rules.push(lang::Rule {
         lhs: mk_ctr("HashOf".to_owned(), vec![mk_ctr_name(&entry.name)]),
-        rhs: mk_u60(fxhash::hash64(entry.name.to_str())),
+        rhs: mk_u60(fxhash::hash64(entry.name.to_string().as_str())),
     });
 
     file.rules.push(lang::Rule {
