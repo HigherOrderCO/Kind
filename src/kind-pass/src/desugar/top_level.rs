@@ -274,7 +274,8 @@ impl<'a> DesugarState<'a> {
                 desugared::Expr::ctr(pat.range, head.clone(), new_spine)
             }
             concrete::pat::PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
-            concrete::pat::PatKind::Num(n) => desugared::Expr::num(pat.range, *n),
+            // TODO: Add u120 pattern literals
+            concrete::pat::PatKind::Num(n) => desugared::Expr::num60(pat.range, *n),
             concrete::pat::PatKind::Hole => desugared::Expr::hole(pat.range, self.gen_hole()),
             concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
             concrete::pat::PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),

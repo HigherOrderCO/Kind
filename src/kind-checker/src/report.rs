@@ -135,7 +135,7 @@ fn parse_all_expr(
             )),
             "Kind.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
             "Kind.Quoted.u60" => Ok(Expr::u60(parse_orig(&args[0])?)),
-            "Kind.Quoted.num" => Ok(Expr::num(parse_orig(&args[0])?, parse_num(&args[1])?)),
+            "Kind.Quoted.num" => Ok(Expr::num60(parse_orig(&args[0])?, parse_num(&args[1])?)),   // TODO: do something about u120?
             "Kind.Quoted.op2" => Ok(Expr::binary(
                 parse_orig(&args[0])?,
                 parse_op(&args[1])?,

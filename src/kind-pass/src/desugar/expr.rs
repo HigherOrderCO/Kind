@@ -17,7 +17,8 @@ impl<'a> DesugarState<'a> {
             Literal::Type => desugared::Expr::typ(range),
             Literal::Help(name) => desugared::Expr::hlp(range, name.clone()),
             Literal::U60 => desugared::Expr::u60(range),
-            Literal::Number(num) => desugared::Expr::num(range, *num),
+            // TODO: Add u120 literals
+            Literal::Number(num) => desugared::Expr::num60(range, *num),
             Literal::String(string) => desugared::Expr::str(range, string.to_owned()),
             Literal::Char(_) => todo!(),
         }

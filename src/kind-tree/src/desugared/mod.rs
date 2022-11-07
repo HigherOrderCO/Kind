@@ -38,10 +38,14 @@ pub enum ExprKind {
     Sub(Ident, usize, usize, Box<Expr>),
     /// Type Literal
     Typ,
-    ///  U60 Type
+    /// U60 Type
     U60,
-    /// Number literal
-    Num(u64),
+    /// U120 Type
+    U120,
+    /// 60 bit number literal
+    Num60(u64),
+    /// 120 bit number literal
+    Num120(u128),
     /// Very special constructor :)
     Str(String),
     /// Binary operation (e.g. 2 + 3)
@@ -161,10 +165,17 @@ impl Expr {
         })
     }
 
-    pub fn num(range: Range, num: u64) -> Box<Expr> {
+    pub fn num60(range: Range, num: u64) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::Num(num),
+            data: ExprKind::Num60(num),
+        })
+    }
+
+    pub fn num120(range: Range, num: u128) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Num120(num),
         })
     }
 
@@ -284,8 +295,10 @@ impl Display for Expr {
         match &self.data {
             Typ => write!(f, "Type"),
             U60 => write!(f, "U60"),
+            U120 => write!(f, "U120"),
             Str(n) => write!(f, "\"{}\"", n),
-            Num(n) => write!(f, "{}", n),
+            Num60(n) => write!(f, "{}", n),
+            Num120(n) => write!(f, "{}", n),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body) => write!(f, "({} => {})", binder, body),
