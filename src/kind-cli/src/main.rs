@@ -3,11 +3,13 @@ use std::time::Instant;
 use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
-use kind_driver::resolution::{type_check_book};
-use kind_driver::{session::Session};
+use driver::resolution;
+use kind_driver::session::Session;
 use kind_report::data::{Diagnostic, DiagnosticFrame, Log};
 use kind_report::report::{FileCache, Report};
 use kind_report::RenderConfig;
+
+use kind_driver as driver;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -110,52 +112,102 @@ where
     .unwrap();
 }
 
+pub fn compile_in_session<T>(
+    render_config: RenderConfig,
+    root: PathBuf,
+    file: String,
+    fun: &mut dyn FnMut(&mut Session) -> Option<T>,
+) -> Option<T> {
+    let (rx, tx) = std::sync::mpsc::channel();
+
+    let mut session = Session::new(root, rx);
+
+    eprintln!();
+
+    render_to_stderr(
+        &render_config,
+        &session,
+        &Log::Checking(format!("the file '{}'", file)),
+    );
+
+    let start = Instant::now();
+
+    let res = fun(&mut session);
+
+    let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+
+    if diagnostics.is_empty() {
+        render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
+    } else {
+        render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
+        eprintln!();
+        for diagnostic in diagnostics {
+            let diagnostic: Diagnostic = (&diagnostic).into();
+            render_to_stderr(&render_config, &session, &diagnostic)
+        }
+    }
+
+    eprintln!();
+
+    res
+}
+
 fn main() {
     let config = Cli::parse();
 
     kind_report::check_if_colors_are_supported(config.no_color);
 
-    let render_config = kind_report::check_if_utf8_is_supported(config.no_color, 2);
+    let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2);
+    let root = PathBuf::from(".");
 
     match config.command {
         Command::Check { file } => {
-            let (rx, tx) = std::sync::mpsc::channel();
-
-            let mut session = Session::new(PathBuf::from("."), rx);
-
-            eprintln!();
-
-            render_to_stderr(
-                &render_config,
-                &session,
-                &Log::Checking(format!("the file '{}'", file)),
-            );
-
-            let start = Instant::now();
-
-            type_check_book(&mut session, &PathBuf::from(file));
-
-            let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
-
-            if diagnostics.is_empty() {
-                render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
-            } else {
-                render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
-                eprintln!();
-                for diagnostic in diagnostics {
-                    let diagnostic: Diagnostic = (&diagnostic).into();
-                    render_to_stderr(&render_config, &session, &diagnostic)
-                }
-            }
-            eprintln!();
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::type_check_book(session, &PathBuf::from(file.clone()))
+            });
         }
-        Command::Eval { file } => todo!(),
-        Command::Run { file } => todo!(),
-        Command::GenChecker { file } => todo!(),
-        Command::Show { file } => todo!(),
-        Command::ToKDL { file, namespace } => todo!(),
-        Command::ToHVM { file } => todo!(),
-        Command::Watch { file } => todo!(),
+        Command::ToHVM { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::compile_book_to_hvm(session, &PathBuf::from(file.clone()))
+            }).and_then(|res| {
+                println!("{}", res);
+                Some(res)
+            });
+        }
+        Command::Run { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::compile_book_to_hvm(session, &PathBuf::from(file.clone()))
+            }).and_then(|res| {
+                println!("{}", driver::execute_file(&res));
+                Some(res)
+            });
+        }
+        Command::Eval { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::erase_book(session, &PathBuf::from(file.clone()))
+            }).and_then(|res| {
+                println!("{}", driver::eval_in_checker(&res));
+                Some(res)
+            });
+        }
+        Command::Show { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::to_book(session, &PathBuf::from(file.clone()))
+            }).and_then(|res| {
+                print!("{}", res);
+                Some(res)
+            });
+        }
+        Command::GenChecker { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::erase_book(session, &PathBuf::from(file.clone()))
+            }).and_then(|res| {
+                print!("{}", driver::generate_checker(&res));
+                Some(res)
+            });
+        }
+        Command::ToKDL { file: _, namespace: _ } => todo!(),
+        Command::Watch { file: _ } => todo!(),
         Command::Repl => todo!(),
     }
 }

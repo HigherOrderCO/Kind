@@ -3,8 +3,6 @@
 //! it returns a desugared book of all of the
 //! depedencies.
 
-use kind_pass::erasure::{self};
-use kind_tree::desugared;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -12,7 +10,6 @@ use std::rc::Rc;
 use strsim::jaro;
 
 use kind_pass::unbound::{self};
-use kind_pass::{desugar, expand};
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
@@ -233,38 +230,5 @@ pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Boo
         None
     } else {
         Some(book)
-    }
-}
-
-pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
-    let mut concrete_book = parse_and_store_book(session, path)?;
-
-    expand::expand_book(&mut concrete_book);
-
-    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-
-    let succeeded = kind_checker::type_check(&desugared_book, session.diagnostic_sender.clone());
-
-    if !succeeded {
-        return None;
-    }
-
-    let erased = erasure::erase_book(
-        &desugared_book,
-        session.diagnostic_sender.clone(),
-        HashSet::from_iter(vec!["Main".to_string()]),
-    )?;
-
-    Some(erased)
-}
-
-pub fn compile_book(session: &mut Session, path: &PathBuf) -> Option<()> {
-    let book = type_check_book(session, path);
-    match book {
-        None => None,
-        Some(book) => {
-            println!("{}", kind_target_hvm::compile_book(book));
-            Some(())
-        }
     }
 }

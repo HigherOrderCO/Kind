@@ -275,7 +275,7 @@ impl Display for TopLevel {
                 }
                 writeln!(f, "}}\n")
             }
-            TopLevel::Entry(entr) => writeln!(f, "{}\n", entr),
+            TopLevel::Entry(entr) => writeln!(f, "{}", entr),
         }
     }
 }
@@ -283,7 +283,16 @@ impl Display for TopLevel {
 impl Display for Module {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in &self.entries {
-            writeln!(f, "{}", entr)?;
+            write!(f, "{}", entr)?;
+        }
+        Ok(())
+    }
+}
+
+impl Display for Book {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        for (_, entr) in &self.entries {
+            write!(f, "{}", entr)?;
         }
         Ok(())
     }
@@ -320,10 +329,10 @@ impl Display for Entry {
             write!(f, " {}", arg)?;
         }
 
-        write!(f, " : {}", &self.typ)?;
+        write!(f, " : {}\n", &self.typ)?;
 
         for rule in &self.rules {
-            write!(f, "\n{}", rule)?
+            write!(f, "{}\n", rule)?
         }
 
         Ok(())
