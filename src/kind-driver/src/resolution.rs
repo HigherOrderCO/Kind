@@ -167,7 +167,16 @@ fn parse_and_store_book_by_path<'a>(
         return false;
     }
 
-    let input = fs::read_to_string(path).unwrap();
+    let input = match fs::read_to_string(path) {
+        Ok(res) => res,
+        Err(_) => {
+            session
+                .diagnostic_sender
+                .send(DriverError::CannotFindFile(path.to_str().unwrap().to_string()).into())
+                .unwrap();
+            return true;
+        }
+    };
     let ctx_id = session.book_counter;
 
     session.add_path(Rc::new(path.to_path_buf()), input.clone());

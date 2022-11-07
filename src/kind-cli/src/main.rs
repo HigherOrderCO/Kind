@@ -153,6 +153,13 @@ fn main() {
             }
             eprintln!();
         }
-        _ => todo!(),
+        Command::Eval { file } => todo!(),
+        Command::Run { file } => todo!(),
+        Command::GenChecker { file } => todo!(),
+        Command::Show { file } => todo!(),
+        Command::ToKDL { file, namespace } => todo!(),
+        Command::ToHVM { file } => todo!(),
+        Command::Watch { file } => todo!(),
+        Command::Repl => todo!(),
     }
 }

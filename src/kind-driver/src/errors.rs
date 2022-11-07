@@ -9,6 +9,7 @@ use kind_tree::symbol::{Ident, QualifiedIdent};
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
 pub(crate) enum DriverError {
+    CannotFindFile(String),
     UnboundVariable(Vec<Ident>, Vec<String>),
     MultiplePaths(QualifiedIdent, Vec<PathBuf>),
     DefinedMultipleTimes(QualifiedIdent, QualifiedIdent),
@@ -79,6 +80,14 @@ impl From<DriverError> for DiagnosticFrame {
                     main: false,
                 }],
             },
+            DriverError::CannotFindFile(file) => DiagnosticFrame {
+                code: 103,
+                severity: Severity::Error,
+                title: format!("Cannot find file '{}'", file),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![]
+            }
         }
     }
 }

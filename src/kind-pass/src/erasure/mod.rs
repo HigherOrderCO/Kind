@@ -75,9 +75,9 @@ pub fn erase_book(
 
     for (name, (_, relev)) in &state.names {
         if let Some(Relevance::Relevant) = state.normalize(*relev) {
-            new_book
-                .entrs
-                .insert(name.clone(), entries.get(name).unwrap().clone());
+            if let Some(res) = entries.get(name) {
+                new_book.entrs.insert(name.to_string(), res.clone());
+            }
         }
     }
 

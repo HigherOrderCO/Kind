@@ -444,6 +444,7 @@ impl<'a> Report for Diagnostic<'a> {
         }
 
         let groups = group_markers(&self.frame.positions);
+        let is_empty = groups.len() == 0;
 
         for (ctx, group) in groups {
             writeln!(fmt)?;
@@ -451,7 +452,9 @@ impl<'a> Report for Diagnostic<'a> {
             write_code_block(&file.clone(), config, &group, code, fmt)?;
         }
 
-        writeln!(fmt)?;
+        if !is_empty {
+            writeln!(fmt)?;
+        }
 
         for hint in &self.frame.hints {
             writeln!(
