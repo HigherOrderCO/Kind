@@ -3,7 +3,7 @@ use std::time::Instant;
 use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
-use kind_driver::resolution::{compile_book, type_check_book};
+use kind_driver::resolution::{type_check_book};
 use kind_driver::{session::Session};
 use kind_report::data::{Diagnostic, DiagnosticFrame, Log};
 use kind_report::report::{FileCache, Report};
@@ -115,11 +115,7 @@ fn main() {
 
     kind_report::check_if_colors_are_supported(config.no_color);
 
-    let render_config = if config.ascii {
-        RenderConfig::ascii(2)
-    } else {
-        RenderConfig::unicode(2)
-    };
+    let render_config = kind_report::check_if_utf8_is_supported(config.no_color, 2);
 
     match config.command {
         Command::Check { file } => {

@@ -409,7 +409,7 @@ impl<'a> Report for Diagnostic<'a> {
             match subtitle {
                 Subtitle::Normal(color, phr) => {
                     let colorizer = get_colorizer(color);
-                    writeln!(fmt, "{:>5} {} {}", "", colorizer("•"), Paint::new(phr))?;
+                    writeln!(fmt, "{:>5} {} {}", "", colorizer(config.chars.bullet), Paint::new(phr))?;
                 }
                 Subtitle::Bold(color, phr) => {
                     let colorizer = get_colorizer(color);
@@ -417,13 +417,13 @@ impl<'a> Report for Diagnostic<'a> {
                         fmt,
                         "{:>5} {} {}",
                         "",
-                        colorizer("•"),
+                        colorizer(config.chars.bullet),
                         Paint::new(phr).bold()
                     )?;
                 }
                 Subtitle::Phrase(color, words) => {
                     let colorizer = get_colorizer(color);
-                    write!(fmt, "{:>5} {} ", "", colorizer("•"))?;
+                    write!(fmt, "{:>5} {} ", "", colorizer(config.chars.bullet))?;
                     for word in words {
                         match word {
                             Word::Normal(str) => write!(fmt, "{} ", Paint::new(str))?,
