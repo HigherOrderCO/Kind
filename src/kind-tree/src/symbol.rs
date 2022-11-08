@@ -50,26 +50,36 @@ impl QualifiedIdent {
         }
     }
 
-    pub fn new_static(root: String, aux: Option<String>, range: Range) -> QualifiedIdent {
+    pub fn new_static(root: &str, aux: Option<String>, range: Range) -> QualifiedIdent {
         QualifiedIdent {
-            root: Symbol(root),
+            root: Symbol(root.to_string()),
             aux: aux.map(Symbol),
             range,
             used_by_sugar: false,
         }
     }
 
-    pub fn add_segment(&self, extension: &str) -> QualifiedIdent {
-        let aux = match self.aux.clone() {
-            Some(res) => Symbol(format!("{}.{}", res.0, extension)),
-            None => Symbol(extension.to_string()),
-        };
+    pub fn new_sugared(root: &str, aux: &str, range: Range) -> QualifiedIdent {
         QualifiedIdent {
-            root: self.root.clone(),
-            aux: Some(aux),
+            root: Symbol(root.to_string()),
+            aux: Some(Symbol(aux.to_string())),
+            range,
+            used_by_sugar: true,
+        }
+    }
+
+    pub fn add_segment(&self, extension: &str) -> QualifiedIdent {
+        QualifiedIdent {
+            root: Symbol(format!("{}.{}", self.root.0, extension)),
+            aux: self.aux.clone(),
             range: self.range.clone(),
             used_by_sugar: self.used_by_sugar,
         }
+    }
+
+    pub fn to_sugar(&mut self) -> &mut QualifiedIdent {
+        self.used_by_sugar = true;
+        self
     }
 }
 

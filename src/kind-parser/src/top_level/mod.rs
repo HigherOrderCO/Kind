@@ -81,7 +81,7 @@ impl<'a> Parser<'a> {
         let start = self.range();
         let ident;
         if let Token::UpperId(name_id, ext) = self.get() {
-            let qual = QualifiedIdent::new_static(name_id.clone(), ext.clone(), start);
+            let qual = QualifiedIdent::new_static(name_id.as_str(), ext.clone(), start);
             if qual.to_string() == name {
                 ident = self.parse_upper_id()?;
             } else {

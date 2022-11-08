@@ -6,6 +6,11 @@ use kind_tree::{desugared, Operator};
 use crate::errors::TypeError;
 use desugared::Expr;
 
+type Entry = (String, Box<Expr>, Vec<Box<Expr>>);
+
+#[derive(Debug)]
+pub struct Context(pub Vec<Entry>);
+
 macro_rules! match_opt {
     ($expr:expr, $pat:pat => $end:expr) => {
         match $expr {
@@ -14,11 +19,6 @@ macro_rules! match_opt {
         }
     };
 }
-
-type Entry = (String, Box<Expr>, Vec<Box<Expr>>);
-
-#[derive(Debug)]
-pub struct Context(pub Vec<Entry>);
 
 fn parse_orig(term: &Term) -> Result<Range, String> {
     match_opt!(term, Term::Num { numb } => EncodedSpan(*numb).to_range())
@@ -58,7 +58,8 @@ fn parse_name(term: &Term) -> Result<String, String> {
 }
 
 fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
-    todo!()
+    let name = match_opt!(*term, Term::Num { numb } => Ident::decode(numb))?;
+    Ok(QualifiedIdent::new_static(&name, None, Range::ghost_range()))
 }
 
 fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {

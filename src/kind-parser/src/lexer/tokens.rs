@@ -34,10 +34,11 @@ pub enum Token {
     Ask,
     Return,
     Let,
-    Open,
     Type,
     Record,
     Constructor,
+    Use,
+    As,
 
     // Literals
     Char(char),

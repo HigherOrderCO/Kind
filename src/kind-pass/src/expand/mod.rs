@@ -1,7 +1,15 @@
+/// Expands identifiers sum type and record definitions
+
 use std::collections::HashMap;
 
 use kind_derive::matching::derive_match;
-use kind_tree::concrete::{Book, TopLevel};
+use kind_tree::concrete::{Book, TopLevel, visitor::Visitor};
+
+pub struct Expand;
+
+impl Visitor for Expand {
+    
+}
 
 pub fn expand_book(book: &mut Book) {
     let mut entries = HashMap::new();

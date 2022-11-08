@@ -126,9 +126,8 @@ impl<'a> Parser<'a> {
 
     pub fn parse_upper_id(&mut self) -> Result<QualifiedIdent, SyntaxError> {
         let range = self.range();
-        let (start, end) =
-            eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
-        let ident = QualifiedIdent::new_static(start.clone(), end.clone(), range);
+        let (start, end) = eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
+        let ident = QualifiedIdent::new_static(start.as_str(), end.clone(), range);
         Ok(ident)
     }
 

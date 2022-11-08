@@ -3,6 +3,7 @@
 
 use std::fmt::{Display, Error, Formatter};
 
+use fxhash::FxHashMap;
 use kind_span::{Range, Span};
 use linked_hash_map::LinkedHashMap;
 
@@ -253,6 +254,7 @@ pub struct Entry {
 #[derive(Clone, Debug, Default)]
 pub struct Book {
     pub entrs: LinkedHashMap<String, Box<Entry>>,
+    pub names: FxHashMap<String, usize>,
     pub holes: u64,
 }
 

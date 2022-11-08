@@ -3,7 +3,6 @@ use std::time::Instant;
 use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
-use driver::resolution;
 use kind_driver::session::Session;
 use kind_report::data::{Diagnostic, DiagnosticFrame, Log};
 use kind_report::report::{FileCache, Report};
