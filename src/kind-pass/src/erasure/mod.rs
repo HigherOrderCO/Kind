@@ -202,7 +202,7 @@ impl<'a> ErasureState<'a> {
         use kind_tree::desugared::ExprKind::*;
 
         match &pat.data {
-            Num60(_) | Num120(_) | Str(_) => (),
+            Num(_) | Str(_) => (),
             Var(name) => {
                 self.ctx.insert(name.to_string(), (name.range, on));
             }
@@ -242,7 +242,7 @@ impl<'a> ErasureState<'a> {
         use kind_tree::desugared::ExprKind::*;
 
         match &expr.data {
-            Typ | U60 | U120 | Num60(_) | Num120(_) | Str(_) | Err => Box::new(expr.clone()),
+            Typ | NumType(_) | Num(_) | Str(_) | Err => Box::new(expr.clone()),
             Hole(_) | Hlp(_) => Box::new(expr.clone()),
             Var(name) => {
                 let relev = self.ctx.get(&name.to_string()).unwrap();
