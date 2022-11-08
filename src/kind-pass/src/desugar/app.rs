@@ -72,10 +72,9 @@ impl<'a> DesugarState<'a> {
         &mut self,
         range: Range,
         head: &Expr,
-        spine: &[Binding],
     ) -> Box<desugared::Expr> {
         match &head.data {
-            ExprKind::Constr(entry_name) => {
+            ExprKind::Constr(entry_name, spine) => {
                 let entry = self
                     .old_book
                     .get_count_garanteed(entry_name.to_string().as_str());
@@ -98,7 +97,8 @@ impl<'a> DesugarState<'a> {
                     }
                 } else if entry.arguments.len() != spine.len() {
                     self.send_err(PassError::IncorrectArity(
-                        head.locate(),
+                        entry_name.range,
+                        spine.iter().map(|x| x.locate()).collect(),
                         entry.arguments.len(),
                         hidden,
                     ));
@@ -168,7 +168,7 @@ impl<'a> DesugarState<'a> {
                     span: Span::Locatable(range),
                 })
             }
-            _ => {
+            ExprKind::App(head, spine) => {
                 let mut new_spine = Vec::new();
                 let new_head = self.desugar_expr(head);
                 for arg in spine {
@@ -182,6 +182,7 @@ impl<'a> DesugarState<'a> {
                 }
                 desugared::Expr::app(range, new_head, new_spine)
             }
+            _ => panic!("Internal Error: This function should be used with app and constr")
         }
     }
 }

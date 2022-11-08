@@ -28,6 +28,8 @@ pub enum SyntaxError {
     Unclosed(Range),
     IgnoreRestShouldBeOnTheEnd(Range),
     UnusedDocString(Range),
+    CannotUseUse(Range),
+    ImportsCannotHaveAlias(Range)
 }
 
 fn encode_name(encode: EncodeSequence) -> &'static str {
@@ -247,6 +249,34 @@ impl From<SyntaxError> for DiagnosticFrame {
                     position: range,
                     color: Color::Fst,
                     text: "Starts here! try to add another one".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            SyntaxError::CannotUseUse(range) => DiagnosticFrame {
+                code: 14,
+                severity: Severity::Error,
+                title: "Can only use the 'use' statement in the beggining of the file".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: range,
+                    color: Color::Fst,
+                    text: "Move it to the beggining".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            SyntaxError::ImportsCannotHaveAlias(range) => DiagnosticFrame {
+                code: 14,
+                severity: Severity::Error,
+                title: "The upper cased name cannot have an alias".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: range,
+                    color: Color::Fst,
+                    text: "Use the entire name here!".to_string(),
                     no_code: false,
                     main: true,
                 }],

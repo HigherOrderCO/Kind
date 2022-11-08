@@ -1,15 +1,12 @@
-/// Expands identifiers sum type and record definitions
+/// Expands sum type and record definitions to a lot of
+/// helper definitions like eliminators and replace qualified identifiers
+/// by their module names.
 
-use std::collections::HashMap;
-
+use std::{collections::HashMap};
 use kind_derive::matching::derive_match;
-use kind_tree::concrete::{Book, TopLevel, visitor::Visitor};
+use kind_tree::{concrete::{Book, TopLevel}};
 
-pub struct Expand;
-
-impl Visitor for Expand {
-    
-}
+pub mod uses;
 
 pub fn expand_book(book: &mut Book) {
     let mut entries = HashMap::new();

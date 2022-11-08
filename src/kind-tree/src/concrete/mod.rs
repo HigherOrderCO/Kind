@@ -170,9 +170,10 @@ impl TopLevel {
 /// A module is a collection of top level entries
 /// that contains syntatic sugars. In the future
 /// it will contain a HashMap to local renames.
-#[derive(Clone, Debug, Default, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Module {
     pub entries: Vec<TopLevel>,
+    pub uses: FxHashMap<String, String>
 }
 
 /// Metadata about entries, it's really useful when we

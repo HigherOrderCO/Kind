@@ -56,9 +56,9 @@ impl<'a> Lexer<'a> {
 
     /// Lex a base-10 digit.
     fn lex_digit(&mut self, start: usize) -> (Token, Range) {
-        let num = self.accumulate_while(&|x| x.is_ascii_digit());
+        let num = self.accumulate_while(&|x| x.is_ascii_digit() || x == '_');
         (
-            Token::Num(num.parse::<u64>().unwrap()),
+            Token::Num(num.replace("_", "").parse::<u64>().unwrap()),
             self.mk_range(start),
         )
     }
@@ -67,8 +67,8 @@ impl<'a> Lexer<'a> {
     /// character that indicates the encoding
     fn lex_base(&mut self, start: usize, base: u32, err: EncodeSequence) -> (Token, Range) {
         self.next_char();
-        let num = self.accumulate_while(&|x| x.is_digit(base));
-        if let Ok(res) = u64::from_str_radix(num, base) {
+        let num = self.accumulate_while(&|x| x.is_digit(base) || x == '_');
+        if let Ok(res) = u64::from_str_radix(&num.replace("_", ""), base) {
             (Token::Num(res), self.mk_range(start))
         } else {
             (

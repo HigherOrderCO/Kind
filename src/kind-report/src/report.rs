@@ -277,7 +277,7 @@ fn write_code_block<'a, T: Write + Sized>(
     }
 
     let code_lines: Vec<&'a str> = group_code.lines().collect();
-    let mut lines = lines_set.iter().collect::<Vec<&usize>>();
+    let mut lines = lines_set.iter().filter(|x| **x < code_lines.len()).collect::<Vec<&usize>>();
     lines.sort();
 
     for i in 0..lines.len() {

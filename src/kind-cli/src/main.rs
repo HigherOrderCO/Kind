@@ -137,6 +137,7 @@ pub fn compile_in_session<T>(
 
     if diagnostics.is_empty() {
         render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
+        eprintln!();
     } else {
         render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
         eprintln!();
@@ -145,9 +146,6 @@ pub fn compile_in_session<T>(
             render_to_stderr(&render_config, &session, &diagnostic)
         }
     }
-
-    eprintln!();
-
     res
 }
 

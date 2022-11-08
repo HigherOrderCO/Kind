@@ -262,6 +262,7 @@ impl<'a> DesugarState<'a> {
                 } else if entry.arguments.len() != spine.len() {
                     self.send_err(PassError::IncorrectArity(
                         head.range,
+                        spine.iter().map(|x| x.range).collect(),
                         entry.arguments.len(),
                         hidden,
                     ));

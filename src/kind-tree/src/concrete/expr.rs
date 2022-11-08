@@ -113,7 +113,7 @@ pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
     /// Name of a function/constructor
-    Constr(QualifiedIdent),
+    Constr(QualifiedIdent, Spine),
     /// The dependent function space (e.g. (x : Int) -> y)
     All(Option<Ident>, Box<Expr>, Box<Expr>),
     /// The dependent product space (e.g. [x : Int] -> y)
@@ -371,7 +371,12 @@ impl Display for Expr {
             Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Lit(lit) => write!(f, "{}", lit),
             Var(name) => write!(f, "{}", name),
-            Constr(name) => write!(f, "{}", name),
+            Constr(head, spine) => write!(
+                f,
+                "({}{})",
+                head,
+                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+            ),
             Lambda(binder, None, body) => write!(f, "({} => {})", binder, body),
             Lambda(binder, Some(typ), body) => write!(f, "(({} : {}) => {})", binder, typ, body),
             Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),

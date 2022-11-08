@@ -78,7 +78,7 @@ impl<'a> Parser<'a> {
             && self.peek(2).same_variant(&Token::Colon)
     }
 
-    pub fn is_named(&self) -> bool {
+    pub fn is_named_parameter(&self) -> bool {
         self.get().same_variant(&Token::LPar)
             && self.peek(1).is_lower_id()
             && self.peek(2).same_variant(&Token::Eq)
@@ -126,7 +126,8 @@ impl<'a> Parser<'a> {
 
     pub fn parse_upper_id(&mut self) -> Result<QualifiedIdent, SyntaxError> {
         let range = self.range();
-        let (start, end) = eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
+        let (start, end) =
+            eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
         let ident = QualifiedIdent::new_static(start.as_str(), end.clone(), range);
         Ok(ident)
     }
@@ -209,17 +210,29 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    fn parse_data(&mut self) -> Result<Box<Expr>, SyntaxError> {
+    fn parse_single_upper(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let id = self.parse_upper_id()?;
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit(Literal::Type),
             "U60" => ExprKind::Lit(Literal::U60),
-            _ => ExprKind::Constr(id.clone()),
+            _ => ExprKind::Constr(id.clone(), vec![]),
         };
-        Ok(Box::new(Expr {
-            range: id.range,
-            data,
-        }))
+        Ok(Box::new(Expr { range: id.range, data }))
+    }
+
+    fn parse_data(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
+        let id = self.parse_upper_id()?;
+        let mut range = id.range;
+        let data = match id.to_string().as_str() {
+            "Type" => ExprKind::Lit(Literal::Type),
+            "U60" => ExprKind::Lit(Literal::U60),
+            _ => {
+                let (range_end, spine) = self.parse_call_tail(id.range, multiline)?;
+                range = range_end;
+                ExprKind::Constr(id.clone(), spine)
+            }
+        };
+        Ok(Box::new(Expr { range, data }))
     }
 
     fn parse_num(&mut self, num: u64) -> Result<Box<Expr>, SyntaxError> {
@@ -354,8 +367,8 @@ impl<'a> Parser<'a> {
     pub fn parse_atom(&mut self) -> Result<Box<Expr>, SyntaxError> {
         self.ignore_docs();
         match self.get().clone() {
+            Token::UpperId(_, _) => self.parse_single_upper(),
             Token::LowerId(_) => self.parse_var(),
-            Token::UpperId(_, _) => self.parse_data(),
             Token::Num(num) => self.parse_num(num),
             Token::Char(chr) => self.parse_char(chr),
             Token::Str(str) => self.parse_str(str),
@@ -369,7 +382,7 @@ impl<'a> Parser<'a> {
 
     fn parse_binding(&mut self) -> Result<Binding, SyntaxError> {
         self.ignore_docs();
-        if self.is_named() {
+        if self.is_named_parameter() {
             let start = self.range();
             self.advance(); // '('
             let name = self.parse_id()?;
@@ -384,10 +397,30 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_call(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
-        let head = self.parse_atom()?;
-        let start = head.range;
+        if self.get().is_upper_id() {
+            self.parse_data(multiline)
+        } else {
+            let head = self.parse_atom()?;
+            let start = head.range;
+            let (end, spine) = self.parse_call_tail(start, multiline)?;
+            if spine.is_empty() {
+                Ok(head)
+            } else {
+                Ok(Box::new(Expr {
+                    data: ExprKind::App(head, spine),
+                    range: start.mix(end),
+                }))
+            }
+        }
+    }
+
+    fn parse_call_tail(
+        &mut self,
+        start: Range,
+        multiline: bool,
+    ) -> Result<(Range, Vec<Binding>), SyntaxError> {
         let mut spine = Vec::new();
-        let mut end = head.range;
+        let mut end = start;
         while (!self.is_linebreak() || multiline) && !self.get().same_variant(&Token::Eof) {
             let res = self.try_single(&|parser| parser.parse_binding())?;
             match res {
@@ -398,14 +431,7 @@ impl<'a> Parser<'a> {
                 None => break,
             }
         }
-        if spine.is_empty() {
-            Ok(head)
-        } else {
-            Ok(Box::new(Expr {
-                data: ExprKind::App(head, spine),
-                range: start.mix(end),
-            }))
-        }
+        Ok((end, spine))
     }
 
     fn parse_arrow(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {

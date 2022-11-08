@@ -42,6 +42,10 @@ impl QualifiedIdent {
         }
     }
 
+    pub fn change_root(&mut self, str: String) {
+        self.root = Symbol(str);
+    }
+
     /// Avoid this function. It transforms a QualifiedIdent into a Ident
     pub fn to_ident(&self) -> Ident {
         Ident {

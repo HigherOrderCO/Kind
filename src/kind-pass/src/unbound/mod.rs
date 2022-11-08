@@ -314,7 +314,10 @@ impl Visitor for UnboundCollector {
     fn visit_expr(&mut self, expr: &mut Expr) {
         match &mut expr.data {
             ExprKind::Var(ident) => self.visit_ident(ident),
-            ExprKind::Constr(ident) => self.visit_qualified_ident(ident),
+            ExprKind::Constr(ident, spine) => {
+                self.visit_qualified_ident(ident);
+                visit_vec!(spine.iter_mut(), arg => self.visit_binding(arg));
+            },
             ExprKind::All(None, typ, body) => {
                 self.visit_expr(typ);
                 self.visit_expr(body);

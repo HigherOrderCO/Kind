@@ -14,7 +14,7 @@ pub enum Sugar {
 pub enum PassError {
     RepeatedVariable(Range, Range),
     CannotUseNamed(Range, Range),
-    IncorrectArity(Range, usize, usize),
+    IncorrectArity(Range, Vec<Range>, usize, usize),
     DuplicatedNamed(Range, Range),
     LetDestructOnlyForRecord(Range),
     LetDestructOnlyForSum(Range),
@@ -26,6 +26,7 @@ pub enum PassError {
     RulesWithInconsistentArity(Vec<(Range, usize)>),
     SugarIsBadlyImplemented(Range, Range, usize),
     CannotUseIrrelevant(Option<Range>, Range, Option<Range>),
+    CannotFindAlias(String, Range)
 }
 
 // TODO: A way to build an error message with methods
@@ -212,28 +213,42 @@ impl From<PassError> for DiagnosticFrame {
                     main: true,
                 }],
             },
-            PassError::IncorrectArity(head_range, expected, hidden) => DiagnosticFrame {
-                code: 210,
-                severity: Severity::Error,
-                title: "Incorrect arity".to_string(),
-                subtitles: vec![],
-                hints: vec![
-                    if expected == 0 {
-                        "This function expects no arguments".to_string()
-                    } else if hidden == 0 {
-                        format!("This function expects {} arguments", expected)
-                    } else {
-                        format!("This function expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
-                    }
-                ],
-                positions: vec![Marker {
+            PassError::IncorrectArity(head_range, got, expected, hidden) => {
+                let mut positions = vec![Marker {
                     position: head_range,
                     color: Color::Fst,
                     text: "This function requires a fixed number of arguments".to_string(),
                     no_code: false,
                     main: true,
-                }],
-            },
+                }];
+
+                for range in &got {
+                    positions.push(Marker {
+                        position: range.clone(),
+                        color: Color::Snd,
+                        text: "Remove this argument".to_string(),
+                        no_code: false,
+                        main: true,
+                    })
+                }
+
+                DiagnosticFrame {
+                    code: 210,
+                    severity: Severity::Error,
+                    title: "Incorrect arity, ".to_string(),
+                    subtitles: vec![],
+                    hints: vec![
+                        if expected == 0 {
+                            format!("This function expects no arguments but got {}", got.len())
+                        } else if hidden == 0 {
+                            format!("This function expects {} arguments but got {}", expected, got.len())
+                        } else {
+                            format!("This function expects {} arguments or {} (without hidden ones) but got {}.", expected, expected - hidden, got.len())
+                        }
+                    ],
+                    positions
+                }
+            }
             PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
                 code: 211,
                 severity: Severity::Error,
@@ -330,6 +345,22 @@ impl From<PassError> for DiagnosticFrame {
                         no_code: false,
                         main: false,
                     },
+                ],
+            },
+            PassError::CannotFindAlias(name, range) => DiagnosticFrame {
+                code: 214,
+                severity: Severity::Error,
+                title: "Cannot find alias".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![
+                    Marker {
+                        position: range,
+                        color: Color::Fst,
+                        text: format!("Cannot find alias for '{}'", name),
+                        no_code: false,
+                        main: true,
+                    }
                 ],
             },
         }

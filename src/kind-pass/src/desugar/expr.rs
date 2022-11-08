@@ -227,7 +227,7 @@ impl<'a> DesugarState<'a> {
     pub(crate) fn desugar_expr(&mut self, expr: &expr::Expr) -> Box<desugared::Expr> {
         use expr::ExprKind::*;
         match &expr.data {
-            Constr(_) => self.desugar_app(expr.range, expr, &[]),
+            Constr(_, _) | App(_, _) => self.desugar_app(expr.range, expr),
             All(ident, typ, body) => desugared::Expr::all(
                 expr.range,
                 ident.clone().unwrap_or_else(|| self.gen_name(expr.range)),
@@ -248,7 +248,6 @@ impl<'a> DesugarState<'a> {
             }
             Var(ident) => desugared::Expr::var(ident.clone()),
             Hole => desugared::Expr::hole(expr.range, self.gen_hole()),
-            App(head, spine) => self.desugar_app(expr.range, head, spine),
             Lit(literal) => self.desugar_literal(expr.range, literal),
             Match(matcher) => self.desugar_match(expr.range, matcher),
             Let(destruct, val, next) => self.desugar_let(expr.range, destruct, val, next),

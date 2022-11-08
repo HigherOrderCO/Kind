@@ -17,9 +17,9 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         })
     };
 
-    let mk_cons = |name: QualifiedIdent| -> Box<Expr> {
+    let mk_cons = |name: QualifiedIdent, spine: Vec<Binding>| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Constr(name),
+            data: ExprKind::Constr(name, spine),
             range,
         })
     };
@@ -60,8 +60,8 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     // The type
 
     let all_args = sum.parameters.extend(&sum.indices);
-    let res_motive_ty = mk_app(
-        mk_cons(sum.name.clone()),
+    let res_motive_ty = mk_cons(
+        sum.name.clone(),
         all_args
             .iter()
             .cloned()
@@ -110,7 +110,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             .map(|x| Binding::Positional(mk_var(x.name.clone())))
             .collect();
 
-        let cons_inst = mk_app(mk_cons(sum.name.add_segment(cons.name.to_str())), vars);
+        let cons_inst = mk_cons(sum.name.add_segment(cons.name.to_str()), vars);
 
         let mut indices_of_cons = match cons.typ.clone().map(|x| x.data) {
             Some(ExprKind::App(_, spine)) => spine[sum.parameters.len()..].to_vec(),
