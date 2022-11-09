@@ -1,6 +1,6 @@
 use kind_span::{Range, Span};
 use kind_tree::concrete::{self, Telescope};
-use kind_tree::desugared;
+use kind_tree::desugared::{self, ExprKind};
 use kind_tree::symbol::{QualifiedIdent};
 
 use crate::errors::{PassError, Sugar};
@@ -82,7 +82,23 @@ impl<'a> DesugarState<'a> {
             };
 
             let typ = match cons.typ.clone() {
-                Some(expr) => self.desugar_expr(&expr),
+                Some(expr) => {
+                    let res = self.desugar_expr(&expr);
+                    match &res.data {
+                        ExprKind::Ctr(name, spine) if name.to_string() == sum_type.name.to_string() => {
+                            for i in 0..sum_type.parameters.len() {
+                                match &spine[i].data {
+                                    ExprKind::Var(name) if name.to_string() == sum_type.parameters[i].name.to_string() => (),
+                                    _ => {
+                                        self.send_err(PassError::ShouldBeAParameter(spine[i].span, sum_type.parameters[i].range));
+                                    }
+                                }
+                            }
+                        }
+                        _ => self.send_err(PassError::NotATypeConstructor(expr.range, sum_type.name.range))
+                    }
+                    res
+                },
                 None => {
                     let args = [irrelevant_params.as_slice(), pre_indices]
                         .concat()

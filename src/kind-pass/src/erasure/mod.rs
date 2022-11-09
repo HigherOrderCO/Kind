@@ -255,15 +255,18 @@ impl<'a> ErasureState<'a> {
 
         match &expr.data {
             Typ | U60 | Num(_) | Str(_) | Err => Box::new(expr.clone()),
-            Hole(_) | Hlp(_) => {
-                match &expr.span {
-                    kind_span::Span::Generated => Box::new(expr.clone()),
-                    kind_span::Span::Locatable(span) => {
-                        if !self.unify(span.clone(), on.clone(), (None, Relevance::Irrelevant), false) {
-                            self.err_irrelevant(None, span.clone(), None)
-                        }
-                        Box::new(expr.clone())
-                    },
+            Hole(_) | Hlp(_) => match &expr.span {
+                kind_span::Span::Generated => Box::new(expr.clone()),
+                kind_span::Span::Locatable(span) => {
+                    if !self.unify(
+                        span.clone(),
+                        on.clone(),
+                        (None, Relevance::Irrelevant),
+                        false,
+                    ) {
+                        self.err_irrelevant(None, span.clone(), None)
+                    }
+                    Box::new(expr.clone())
                 }
             },
             Var(name) => {
@@ -375,13 +378,17 @@ impl<'a> ErasureState<'a> {
                     self.err_irrelevant(None, head.range, None)
                 }
 
-                let spine = spine.iter().zip(args).map(|(expr, arg)| {
-                    self.erase_expr(&(Some(arg.span), erasure_to_relevance(arg.erased)), expr)
-                });
+                let spine = spine
+                    .iter()
+                    .zip(args)
+                    .map(|(expr, arg)| {
+                        (self.erase_expr(&(Some(arg.span), erasure_to_relevance(arg.erased)), expr), arg)
+                    })
+                    .filter(|(_, arg)| !arg.erased);
 
                 Box::new(Expr {
                     span: expr.span,
-                    data: ExprKind::Ctr(head.clone(), spine.collect()),
+                    data: ExprKind::Ctr(head.clone(), spine.map(|(expr, _)| expr).collect()),
                 })
             }
             Ann(relev, irrel) => {

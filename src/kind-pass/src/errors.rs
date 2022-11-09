@@ -1,5 +1,5 @@
 use kind_report::data::{Color, DiagnosticFrame, Marker, Severity};
-use kind_span::Range;
+use kind_span::{Range, Span};
 
 pub enum Sugar {
     DoNotation,
@@ -26,7 +26,9 @@ pub enum PassError {
     RulesWithInconsistentArity(Vec<(Range, usize)>),
     SugarIsBadlyImplemented(Range, Range, usize),
     CannotUseIrrelevant(Option<Range>, Range, Option<Range>),
-    CannotFindAlias(String, Range)
+    CannotFindAlias(String, Range),
+    NotATypeConstructor(Range, Range),
+    ShouldBeAParameter(Span, Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -350,6 +352,64 @@ impl From<PassError> for DiagnosticFrame {
                         text: format!("Cannot find alias for '{}'", name),
                         no_code: false,
                         main: true,
+                    }
+                ],
+            },
+            PassError::ShouldBeAParameter(error_range, declaration_range) => {
+                let mut positions = vec![];
+
+                match error_range {
+                    Span::Generated => (),
+                    Span::Locatable(error_range) => {
+                        positions.push(Marker {
+                            position: error_range,
+                            color: Color::Fst,
+                            text: format!("This expression is not the parameter"),
+                            no_code: false,
+                            main: true,
+                        })
+                    },
+                }
+
+                positions.push(
+                    Marker {
+                        position: declaration_range,
+                        color: Color::Snd,
+                        text: format!("This is the parameter that should be used"),
+                        no_code: false,
+                        main: false,
+                    }
+                );
+
+                DiagnosticFrame {
+                    code: 214,
+                    severity: Severity::Error,
+                    title: "The expression is not the parameter declared in the type constructor".to_string(),
+                    subtitles: vec![],
+                    hints: vec![],
+                    positions
+                }
+            }
+            PassError::NotATypeConstructor(error_range, declaration_range) => DiagnosticFrame {
+                code: 214,
+                severity: Severity::Error,
+                title: "This is not the type that is being declared.".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![
+                    Marker {
+                        position: error_range,
+                        color: Color::Fst,
+                        text: format!("This is not the type that is being declared"),
+                        no_code: false,
+                        main: true,
+                    },
+                    Marker {
+                        position: declaration_range,
+                        color: Color::Snd,
+                        text: format!("This is the type that should be used instead"),
+                        no_code: false,
+                        main: false,
                     }
                 ],
             },

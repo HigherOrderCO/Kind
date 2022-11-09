@@ -150,13 +150,11 @@ impl<'a> Parser<'a> {
 
         let args = self.parse_arguments()?;
 
+        self.eat_variant(Token::Colon)?;
+        let typ = self.parse_expr(false)?;
+
         if self.check_actual(Token::LBrace) {
             let start = self.range();
-
-            let typ = Box::new(Expr {
-                data: ExprKind::Hole,
-                range: ident.range,
-            });
 
             self.eat_variant(Token::LBrace)?;
 
@@ -200,8 +198,6 @@ impl<'a> Parser<'a> {
                 range: start.mix(end),
             })
         } else {
-            self.eat_variant(Token::Colon)?;
-            let typ = self.parse_expr(false)?;
             let mut rules = Vec::new();
             loop {
                 let res = self.try_single(&|parser| parser.parse_rule(ident.to_string()))?;
