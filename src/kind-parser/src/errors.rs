@@ -225,10 +225,10 @@ impl From<SyntaxError> for DiagnosticFrame {
                     main: true,
                 }],
             },
-            SyntaxError::UnexpectedToken(_token, range, _expect) => DiagnosticFrame {
+            SyntaxError::UnexpectedToken(token, range, _expect) => DiagnosticFrame {
                 code: 13,
                 severity: Severity::Error,
-                title: "Unexpected token.".to_string(),
+                title: format!("Unexpected token {:?}.", token),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {

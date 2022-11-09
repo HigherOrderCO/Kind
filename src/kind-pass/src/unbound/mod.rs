@@ -113,6 +113,20 @@ impl Visitor for UnboundCollector {
             Some(res) => self.visit_expr(res),
             None => (),
         }
+
+        if let Some(fst) = self
+            .context_vars
+            .iter()
+            .find(|x| x.1 == argument.name.to_string())
+        {
+            self.errors
+                .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
+                .unwrap()
+        } else {
+            self.context_vars
+                .push((argument.name.range, argument.name.to_string()))
+        }
+
         self.context_vars
             .push((argument.name.range, argument.name.to_string()));
     }
@@ -137,6 +151,7 @@ impl Visitor for UnboundCollector {
         }
 
         self.visit_expr(&mut entry.typ);
+
         self.context_vars = vars;
 
         for rule in &mut entry.rules {
@@ -317,7 +332,7 @@ impl Visitor for UnboundCollector {
             ExprKind::Constr(ident, spine) => {
                 self.visit_qualified_ident(ident);
                 visit_vec!(spine.iter_mut(), arg => self.visit_binding(arg));
-            },
+            }
             ExprKind::All(None, typ, body) => {
                 self.visit_expr(typ);
                 self.visit_expr(body);

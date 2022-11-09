@@ -101,4 +101,8 @@ impl Token {
     pub fn is_num(&self) -> bool {
         matches!(self, Token::Num(_))
     }
+
+    pub fn is_eof(&self) -> bool {
+        matches!(self, Token::Eof)
+    }
 }

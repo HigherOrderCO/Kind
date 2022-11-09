@@ -68,6 +68,15 @@ impl<'a> Parser<'a> {
         }))
     }
 
+    pub fn parse_pat_hole(&mut self) -> Result<Box<Pat>, SyntaxError> {
+        let range = self.range();
+        self.eat_variant(Token::Hole)?;
+        Ok(Box::new(Pat {
+            range,
+            data: PatKind::Hole,
+        }))
+    }
+
     fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let range = self.range();
         self.advance(); // '['
@@ -123,6 +132,8 @@ impl<'a> Parser<'a> {
             self.parse_pat_single_cons()
         } else if self.check_actual(Token::LBrace) {
             self.parse_pat_list()
+        } else if self.check_actual(Token::Hole) {
+            self.parse_pat_hole()
         } else {
             self.fail(vec![])
         }

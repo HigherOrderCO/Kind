@@ -252,7 +252,7 @@ impl Display for TopLevel {
                 }
                 writeln!(f, " {{")?;
                 for cons in &sum.constructors {
-                    writeln!(f, "  {},", cons)?;
+                    writeln!(f, "  {}", cons)?;
                 }
                 writeln!(f, "}}\n")
             }
@@ -592,7 +592,7 @@ impl Entry {
             hiddens,
             erased,
             arguments,
-            is_ctr: false,
+            is_ctr: self.rules.len() == 0,
             range: self.name.range,
         }
     }

@@ -29,7 +29,7 @@ fn is_valid_id(chr: char) -> bool {
 }
 
 fn is_valid_upper_start(chr: char) -> bool {
-    matches!(chr, 'A'..='Z' | '_')
+    matches!(chr, 'A'..='Z')
 }
 
 fn is_valid_id_start(chr: char) -> bool {
@@ -51,6 +51,7 @@ impl<'a> Lexer<'a> {
 
     pub fn to_keyword(data: &str) -> Token {
         match data {
+            "_" => Token::Hole,
             "ask" => Token::Ask,
             "do" => Token::Do,
             "if" => Token::If,

@@ -375,6 +375,7 @@ impl<'a> Parser<'a> {
             Token::Help(str) => self.parse_help(str),
             Token::LBracket => self.parse_list(),
             Token::LPar => self.parse_paren(),
+            Token::Hole => self.parse_hole(),
             Token::Float(_, _) => todo!(),
             _ => self.fail(vec![Token::LowerId("".to_string())]),
         }
@@ -662,6 +663,15 @@ impl<'a> Parser<'a> {
         Ok(Box::new(Expr {
             data: ExprKind::Pair(fst, snd),
             range: start.mix(end),
+        }))
+    }
+
+    fn parse_hole(&mut self) -> Result<Box<Expr>, SyntaxError> {
+        let start = self.range();
+        self.advance(); // '_'
+        Ok(Box::new(Expr {
+            data: ExprKind::Hole,
+            range: start,
         }))
     }
 

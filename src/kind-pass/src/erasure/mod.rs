@@ -146,7 +146,14 @@ impl<'a> ErasureState<'a> {
                     self.holes[hole.1] = Some(t);
                     true
                 } else {
-                    self.unify_hole(range, (hole.0, n), right, visited, inverted, relevance_unify)
+                    self.unify_hole(
+                        range,
+                        (hole.0, n),
+                        right,
+                        visited,
+                        inverted,
+                        relevance_unify,
+                    )
                 }
             }
             (_, Relevance::Relevant) => true,
@@ -176,9 +183,14 @@ impl<'a> ErasureState<'a> {
             (_, Relevance::Hole(hole)) => {
                 self.unify_hole(range, (right.0, hole), left, visited, true, relevance_unify)
             }
-            (Relevance::Hole(hole), _) => {
-                self.unify_hole(range, (left.0, hole), right, visited, false, relevance_unify)
-            }
+            (Relevance::Hole(hole), _) => self.unify_hole(
+                range,
+                (left.0, hole),
+                right,
+                visited,
+                false,
+                relevance_unify,
+            ),
 
             (Relevance::Irrelevant, Relevance::Irrelevant)
             | (Relevance::Irrelevant, Relevance::Relevant)
@@ -234,7 +246,7 @@ impl<'a> ErasureState<'a> {
                     .zip(irrelevances)
                     .for_each(|(arg, relev)| self.erase_pat(relev, arg));
             }
-            _ => panic!("Internal Error: Not a pattern"),
+            res => panic!("Internal Error: Not a pattern {:?}", res),
         }
     }
 
@@ -243,7 +255,17 @@ impl<'a> ErasureState<'a> {
 
         match &expr.data {
             Typ | U60 | Num(_) | Str(_) | Err => Box::new(expr.clone()),
-            Hole(_) | Hlp(_) => Box::new(expr.clone()),
+            Hole(_) | Hlp(_) => {
+                match &expr.span {
+                    kind_span::Span::Generated => Box::new(expr.clone()),
+                    kind_span::Span::Locatable(span) => {
+                        if !self.unify(span.clone(), on.clone(), (None, Relevance::Irrelevant), false) {
+                            self.err_irrelevant(None, span.clone(), None)
+                        }
+                        Box::new(expr.clone())
+                    },
+                }
+            },
             Var(name) => {
                 let relev = self.ctx.get(&name.to_string()).unwrap();
                 let declared_ty = (relev.1).0;
@@ -316,13 +338,23 @@ impl<'a> ErasureState<'a> {
                     self.err_irrelevant(None, head.range, None)
                 }
 
-                let spine = spine.iter().zip(args).map(|(expr, arg)| {
-                    self.erase_expr(&(Some(arg.span), erasure_to_relevance(arg.erased)), expr)
-                });
+                let spine = spine
+                    .iter()
+                    .zip(args)
+                    .map(|(expr, arg)| {
+                        (
+                            self.erase_expr(
+                                &(Some(arg.span), erasure_to_relevance(arg.erased)),
+                                expr,
+                            ),
+                            arg,
+                        )
+                    })
+                    .filter(|(_, arg)| !arg.erased);
 
                 Box::new(Expr {
                     span: expr.span,
-                    data: ExprKind::Fun(head.clone(), spine.collect()),
+                    data: ExprKind::Fun(head.clone(), spine.map(|(expr, _)| expr).collect()),
                 })
             }
             Ctr(head, spine) => {

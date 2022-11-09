@@ -60,16 +60,17 @@ impl<'a> DesugarState<'a> {
 
     pub(crate) fn desugar_destruct(
         &mut self,
+        range: Range,
         binding: &expr::Destruct,
         val: Box<desugared::Expr>,
         next: &dyn Fn(&mut Self) -> Box<desugared::Expr>,
         on_ident: &dyn Fn(&mut Self, &Ident) -> Box<desugared::Expr>,
     ) -> Box<desugared::Expr> {
         match binding {
-            Destruct::Destruct(destruct_range, typ, case, jump_rest) => {
-                let entry = self.old_book.get_entry_garanteed(&typ.to_string());
+            Destruct::Destruct(_, typ, case, jump_rest) => {
+                let entry = self.old_book.entries.get(&typ.to_string());
 
-                let record = if let TopLevel::RecordType(record) = entry {
+                let record = if let Some(TopLevel::RecordType(record)) = entry {
                     record
                 } else {
                     self.send_err(PassError::LetDestructOnlyForRecord(typ.range));
@@ -101,10 +102,10 @@ impl<'a> DesugarState<'a> {
 
                 let spine = vec![
                     val,
-                    desugared::Expr::unfold_lambda(*destruct_range, &arguments, next(self)),
+                    desugared::Expr::unfold_lambda(range, &arguments, next(self)),
                 ];
 
-                self.mk_desugared_fun(*destruct_range, open_id, spine)
+                self.mk_desugared_fun(range, open_id, spine, false)
             }
             Destruct::Ident(name) => on_ident(self, name),
         }
@@ -119,6 +120,7 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         let res_val = self.desugar_expr(val);
         self.desugar_destruct(
+            next.range,
             binding,
             res_val,
             &|this| this.desugar_expr(next),
@@ -138,7 +140,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         match_: &expr::Match,
     ) -> Box<desugared::Expr> {
-        let entry = self.old_book.get_entry_garanteed(&match_.typ.to_string());
+        let entry = self.old_book.entries.get(&match_.typ.to_string()).unwrap();
 
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
@@ -234,6 +236,7 @@ impl<'a> DesugarState<'a> {
             match_.typ.range,
             match_id,
             [prefix.as_slice(), lambdas.as_slice()].concat(),
+            false,
         )
     }
 }

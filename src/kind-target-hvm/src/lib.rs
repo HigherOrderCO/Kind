@@ -35,13 +35,13 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
             name: op.to_string(),
             args: vec![compile_term(l), compile_term(r)],
         }),
-        Typ => unreachable!("Internal Error: 'Typ' cannot be a relevant term"),
-        U60 => unreachable!("Internal Error: 'U60' cannot be a relevant term"),
-        Str(_) => unreachable!("Internal Error: 'Str' cannot be a relevant term"),
         Hole(_) => unreachable!("Internal Error: 'Hole' cannot be a relevant term"),
+        | Typ => unreachable!("Internal Error: 'Typ' cannot be a relevant term"),
+        | U60 => unreachable!("Internal Error: 'U60' cannot be a relevant term"),
+        | All(_, _, _) => unreachable!("Internal Error: 'All' cannot be a relevant term"),
+        Str(_) => unreachable!("Internal Error: 'Str' cannot be a relevant term"),
         Hlp(_) => unreachable!("Internal Error: 'Hlp' cannot be a relevant term"),
         Err => unreachable!("Internal Error: 'Err' cannot be a relevant term"),
-        All(_, _, _) => unreachable!("Internal Error: 'All' cannot be a relevant term"),
     }
 }
 

@@ -51,6 +51,7 @@ impl<'a> DesugarState<'a> {
                 range,
                 bind_ident.clone(),
                 vec![expr, desugared::Expr::lambda(range, name, next)],
+                false
             )
         };
 
@@ -67,6 +68,7 @@ impl<'a> DesugarState<'a> {
                 let name = self.gen_name(sttm.range);
 
                 let res_destruct = self.desugar_destruct(
+                    next.range,
                     &concrete::Destruct::Destruct(*a, b.to_owned(), c.to_owned(), *d),
                     desugared::Expr::var(name.clone()),
                     &|this| this.desugar_sttm(bind_ident, pure_ident, next),
@@ -83,6 +85,7 @@ impl<'a> DesugarState<'a> {
             concrete::SttmKind::Let(destruct, val, next) => {
                 let res_val = self.desugar_expr(&val.clone());
                 self.desugar_destruct(
+                    next.range,
                     destruct,
                     res_val,
                     &|this| this.desugar_sttm(bind_ident, pure_ident, next),
@@ -98,7 +101,7 @@ impl<'a> DesugarState<'a> {
             }
             concrete::SttmKind::Return(expr) => {
                 let res_expr = self.desugar_expr(expr);
-                self.mk_desugared_fun(expr.locate(), pure_ident.clone(), vec![res_expr])
+                self.mk_desugared_fun(expr.locate(), pure_ident.clone(), vec![res_expr], false)
             }
             concrete::SttmKind::RetExpr(expr) => self.desugar_expr(expr),
         }
@@ -149,7 +152,7 @@ impl<'a> DesugarState<'a> {
             desugared::Expr::lambda(range, name, self.desugar_expr(body)),
         ];
 
-        self.mk_desugared_ctr(range, sigma, spine)
+        self.mk_desugared_ctr(range, sigma, spine, false)
     }
 
     pub(crate) fn desugar_list(
@@ -171,10 +174,10 @@ impl<'a> DesugarState<'a> {
         }
 
         expr.iter().rfold(
-            self.mk_desugared_ctr(range, nil_ident, Vec::new()),
+            self.mk_desugared_ctr(range, nil_ident, Vec::new(), false),
             |res, elem| {
                 let spine = vec![self.desugar_expr(elem), res];
-                self.mk_desugared_ctr(range, cons_ident.clone(), spine)
+                self.mk_desugared_ctr(range, cons_ident.clone(), spine, false)
             },
         )
     }
@@ -201,7 +204,7 @@ impl<'a> DesugarState<'a> {
             self.desugar_expr(else_),
         ];
 
-        self.mk_desugared_fun(range, bool_ident, spine)
+        self.mk_desugared_fun(range, bool_ident, spine, false)
     }
 
     pub(crate) fn desugar_pair(
@@ -221,7 +224,7 @@ impl<'a> DesugarState<'a> {
 
         let spine = vec![self.desugar_expr(fst), self.desugar_expr(snd)];
 
-        self.mk_desugared_ctr(range, sigma_new, spine)
+        self.mk_desugared_ctr(range, sigma_new, spine, false)
     }
 
     pub(crate) fn desugar_expr(&mut self, expr: &expr::Expr) -> Box<desugared::Expr> {

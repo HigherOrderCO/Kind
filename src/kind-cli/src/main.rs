@@ -197,7 +197,7 @@ fn main() {
         }
         Command::GenChecker { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                driver::erase_book(session, &PathBuf::from(file.clone()))
+                driver::check_erasure_book(session, &PathBuf::from(file.clone()))
             }).and_then(|res| {
                 print!("{}", driver::generate_checker(&res));
                 Some(res)

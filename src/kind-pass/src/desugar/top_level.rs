@@ -90,7 +90,7 @@ impl<'a> DesugarState<'a> {
                         .map(|x| desugared::Expr::var(x.name.clone()))
                         .collect::<Vec<Box<desugared::Expr>>>();
 
-                    desugared::Expr::ctr(sum_type.name.range, sum_type.name.clone(), args)
+                    desugared::Expr::ctr(cons.name.range, sum_type.name.clone(), args)
                 }
             };
 
@@ -105,9 +105,10 @@ impl<'a> DesugarState<'a> {
                 typ,
                 rules: Vec::new(),
                 attrs: Vec::new(),
-                span: Span::Locatable(sum_type.name.range),
+                span: Span::Locatable(cons.name.range),
             };
 
+            
             self.new_book
                 .entrs
                 .insert(cons_ident.to_string(), Box::new(data_constructor));
@@ -198,7 +199,7 @@ impl<'a> DesugarState<'a> {
 
         let spine = vec![self.desugar_pat(fst), self.desugar_pat(snd)];
 
-        self.mk_desugared_ctr(range, sigma_new, spine)
+        self.mk_desugared_ctr(range, sigma_new, spine, true)
     }
 
     pub fn desugar_list_pat(
@@ -220,10 +221,10 @@ impl<'a> DesugarState<'a> {
         }
 
         expr.iter().rfold(
-            self.mk_desugared_ctr(range, nil_ident, Vec::new()),
+            self.mk_desugared_ctr(range, nil_ident, Vec::new(), true),
             |res, elem| {
                 let spine = vec![self.desugar_pat(elem), res];
-                self.mk_desugared_ctr(range, cons_ident.clone(), spine)
+                self.mk_desugared_ctr(range, cons_ident.clone(), spine, true)
             },
         )
     }
@@ -240,7 +241,7 @@ impl<'a> DesugarState<'a> {
                 if !entry.is_ctr {
                     // TODO: Not sure if i should just throw an error?
                     // We are not requiring that the thing is specifically a constructor
-                    panic!("Incomplete Design: Oh no!")
+                    //panic!("Incomplete Design: Oh no! {}", head)
                 }
 
                 let (hidden, _erased) = entry.arguments.count_implicits();
@@ -253,13 +254,15 @@ impl<'a> DesugarState<'a> {
                     let mut count = 0;
                     for i in 0..entry.arguments.len() {
                         if entry.arguments[i].hidden {
-                            new_spine.push(self.gen_hole_expr())
+                            let name = self.gen_name(entry.arguments[i].range);
+                            new_spine.push(desugared::Expr::var(name))
                         } else {
                             new_spine.push(self.desugar_pat(&spine[count]));
                             count += 1;
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
+                    println!("{}", pat);
                     self.send_err(PassError::IncorrectArity(
                         head.range,
                         spine.iter().map(|x| x.range).collect(),
@@ -274,9 +277,12 @@ impl<'a> DesugarState<'a> {
                 }
                 desugared::Expr::ctr(pat.range, head.clone(), new_spine)
             }
+            concrete::pat::PatKind::Hole => {
+                let name = self.gen_name(pat.range);
+                desugared::Expr::var(name)
+            },
             concrete::pat::PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
             concrete::pat::PatKind::Num(n) => desugared::Expr::num(pat.range, *n),
-            concrete::pat::PatKind::Hole => desugared::Expr::hole(pat.range, self.gen_hole()),
             concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
             concrete::pat::PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
             concrete::pat::PatKind::Str(string) => {
@@ -339,6 +345,9 @@ impl<'a> DesugarState<'a> {
     }
 
     pub fn desugar_entry(&mut self, entry: &concrete::Entry) {
+
+        self.name_count = 0;
+
         let rules = entry
             .rules
             .iter()

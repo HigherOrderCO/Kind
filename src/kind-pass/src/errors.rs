@@ -214,7 +214,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::IncorrectArity(head_range, got, expected, hidden) => {
-                let mut positions = vec![Marker {
+                let positions = vec![Marker {
                     position: head_range,
                     color: Color::Fst,
                     text: "This function requires a fixed number of arguments".to_string(),
@@ -222,20 +222,10 @@ impl From<PassError> for DiagnosticFrame {
                     main: true,
                 }];
 
-                for range in &got {
-                    positions.push(Marker {
-                        position: range.clone(),
-                        color: Color::Snd,
-                        text: "Remove this argument".to_string(),
-                        no_code: false,
-                        main: true,
-                    })
-                }
-
                 DiagnosticFrame {
                     code: 210,
                     severity: Severity::Error,
-                    title: "Incorrect arity, ".to_string(),
+                    title: "Incorrect arity.".to_string(),
                     subtitles: vec![],
                     hints: vec![
                         if expected == 0 {
@@ -327,9 +317,9 @@ impl From<PassError> for DiagnosticFrame {
             PassError::RepeatedVariable(first_decl, last_decl) => DiagnosticFrame {
                 code: 214,
                 severity: Severity::Error,
-                title: "Repeated variable".to_string(),
+                title: "Repeated name".to_string(),
                 subtitles: vec![],
-                hints: vec!["Rename one of the variables".to_string()],
+                hints: vec!["Rename one of the occurences".to_string()],
                 positions: vec![
                     Marker {
                         position: last_decl,
