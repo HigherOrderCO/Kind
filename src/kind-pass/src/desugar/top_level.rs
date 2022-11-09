@@ -1,7 +1,7 @@
 use kind_span::{Range, Span};
 use kind_tree::concrete::{self, Telescope};
 use kind_tree::desugared::{self, ExprKind};
-use kind_tree::symbol::{QualifiedIdent};
+use kind_tree::symbol::QualifiedIdent;
 
 use crate::errors::{PassError, Sugar};
 
@@ -85,20 +85,29 @@ impl<'a> DesugarState<'a> {
                 Some(expr) => {
                     let res = self.desugar_expr(&expr);
                     match &res.data {
-                        ExprKind::Ctr(name, spine) if name.to_string() == sum_type.name.to_string() => {
-                            for i in 0..sum_type.parameters.len() {
+                        ExprKind::Ctr(name, spine)
+                            if name.to_string() == sum_type.name.to_string() =>
+                        {
+                            for (i, parameter) in sum_type.parameters.iter().enumerate() {
                                 match &spine[i].data {
-                                    ExprKind::Var(name) if name.to_string() == sum_type.parameters[i].name.to_string() => (),
+                                    ExprKind::Var(name)
+                                        if name.to_string() == parameter.name.to_string() => {}
                                     _ => {
-                                        self.send_err(PassError::ShouldBeAParameter(spine[i].span, sum_type.parameters[i].range));
+                                        self.send_err(PassError::ShouldBeAParameter(
+                                            spine[i].span,
+                                            parameter.range,
+                                        ));
                                     }
                                 }
                             }
                         }
-                        _ => self.send_err(PassError::NotATypeConstructor(expr.range, sum_type.name.range))
+                        _ => self.send_err(PassError::NotATypeConstructor(
+                            expr.range,
+                            sum_type.name.range,
+                        )),
                     }
                     res
-                },
+                }
                 None => {
                     let args = [irrelevant_params.as_slice(), pre_indices]
                         .concat()
@@ -124,7 +133,6 @@ impl<'a> DesugarState<'a> {
                 span: Span::Locatable(cons.name.range),
             };
 
-            
             self.new_book
                 .entrs
                 .insert(cons_ident.to_string(), Box::new(data_constructor));
@@ -204,8 +212,7 @@ impl<'a> DesugarState<'a> {
         fst: &concrete::pat::Pat,
         snd: &concrete::pat::Pat,
     ) -> Box<desugared::Expr> {
-        let sigma_new =
-            QualifiedIdent::new_static("Sigma", Some("new".to_string()), range);
+        let sigma_new = QualifiedIdent::new_static("Sigma", Some("new".to_string()), range);
 
         let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
         if entry.is_none() {
@@ -296,7 +303,7 @@ impl<'a> DesugarState<'a> {
             concrete::pat::PatKind::Hole => {
                 let name = self.gen_name(pat.range);
                 desugared::Expr::var(name)
-            },
+            }
             concrete::pat::PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
             concrete::pat::PatKind::Num(n) => desugared::Expr::num(pat.range, *n),
             concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
@@ -361,7 +368,6 @@ impl<'a> DesugarState<'a> {
     }
 
     pub fn desugar_entry(&mut self, entry: &concrete::Entry) {
-
         self.name_count = 0;
 
         let rules = entry

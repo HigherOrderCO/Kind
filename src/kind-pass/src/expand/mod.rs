@@ -2,8 +2,8 @@ use fxhash::FxHashMap;
 use kind_derive::matching::derive_match;
 use kind_derive::open::derive_open;
 use kind_tree::concrete::{
-    self, expr::Expr, Argument, Binding, Book, Entry, ExprKind, Literal, RecordDecl, SumTypeDecl,
-    Telescope, TopLevel, EntryMeta,
+    self, expr::Expr, Argument, Binding, Book, Entry, EntryMeta, ExprKind, Literal, RecordDecl,
+    SumTypeDecl, Telescope, TopLevel,
 };
 /// Expands sum type and record definitions to a lot of
 /// helper definitions like eliminators and replace qualified identifiers
@@ -24,7 +24,10 @@ pub fn expand_record_type(book: &mut FxHashMap<String, (Entry, EntryMeta)>, rec_
         attrs: rec_type.attrs.clone(),
     };
 
-    book.insert(rec_type.name.to_string(), (type_constructor, rec_type.extract_book_info()));
+    book.insert(
+        rec_type.name.to_string(),
+        (type_constructor, rec_type.extract_book_info()),
+    );
 
     let irrelevant_params = rec_type.parameters.map(|x| x.to_implicit());
 
@@ -63,7 +66,13 @@ pub fn expand_record_type(book: &mut FxHashMap<String, (Entry, EntryMeta)>, rec_
         docs: vec![],
     };
 
-    book.insert(cons_ident.to_string(), (data_constructor, rec_type.extract_book_info_of_constructor()));
+    book.insert(
+        cons_ident.to_string(),
+        (
+            data_constructor,
+            rec_type.extract_book_info_of_constructor(),
+        ),
+    );
 }
 
 pub fn expand_sum_type(book: &mut FxHashMap<String, (Entry, EntryMeta)>, sum_type: &SumTypeDecl) {
@@ -122,7 +131,7 @@ pub fn expand_sum_type(book: &mut FxHashMap<String, (Entry, EntryMeta)>, sum_typ
             range: cons_ident.range,
         };
 
-        let book_info = cons.extract_book_info(&sum_type);
+        let book_info = cons.extract_book_info(sum_type);
         book.insert(cons_ident.to_string(), (data_constructor, book_info));
     }
 }

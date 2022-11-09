@@ -53,7 +53,5 @@ pub fn eval_api(book: &Book) -> Box<Term> {
     let main = runtime.alloc_code("Kind.API.eval_main").unwrap();
     runtime.run_io(main);
     runtime.normalize(main);
-    let term = runtime.readback(main);
-
-    term
+    runtime.readback(main)
 }

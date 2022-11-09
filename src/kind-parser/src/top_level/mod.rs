@@ -1,9 +1,8 @@
 use fxhash::FxHashMap;
-use kind_tree::concrete::expr::Expr;
-use kind_tree::concrete::pat::{PatIdent, Pat, PatKind};
+use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use kind_tree::concrete::{Argument, Attribute, Entry, Module, Rule, Telescope, TopLevel, ExprKind};
+use kind_tree::concrete::{Argument, Attribute, Entry, Module, Rule, Telescope, TopLevel};
 use kind_tree::symbol::QualifiedIdent;
 
 use crate::errors::SyntaxError;
@@ -163,17 +162,20 @@ impl<'a> Parser<'a> {
             let end = self.range();
             self.eat_closing_keyword(Token::RBrace, start)?;
 
-            let mut rules = vec![
-                Box::new(Rule {
-                    name: ident.clone(),
-                    pats: args.iter().map(|x| Box::new(Pat {
-                        range: x.range,
-                        data: PatKind::Var(PatIdent(x.name.clone())),
-                    })).collect(),
-                    body,
-                    range: end,
-                })
-            ];
+            let mut rules = vec![Box::new(Rule {
+                name: ident.clone(),
+                pats: args
+                    .iter()
+                    .map(|x| {
+                        Box::new(Pat {
+                            range: x.range,
+                            data: PatKind::Var(PatIdent(x.name.clone())),
+                        })
+                    })
+                    .collect(),
+                body,
+                range: end,
+            })];
             loop {
                 let res = self.try_single(&|parser| parser.parse_rule(ident.to_string()))?;
                 match res {
@@ -185,7 +187,7 @@ impl<'a> Parser<'a> {
 
             // Better error message when you have change the name of the function
             if self.get().is_upper_id() && !self.is_top_level_entry_continuation() {
-                return Err(SyntaxError::NotAClauseOfDef(ident.range.clone(), self.range()));
+                return Err(SyntaxError::NotAClauseOfDef(ident.range, self.range()));
             }
 
             Ok(Entry {

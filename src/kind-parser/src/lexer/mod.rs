@@ -104,7 +104,7 @@ impl<'a> Lexer<'a> {
                     }
                 }
                 c if c.is_ascii_digit() => self.lex_number(),
-                c if is_valid_upper_start(*c).clone() => {
+                c if is_valid_upper_start(*c) => {
                     let first_part = self.accumulate_while(&is_valid_id).to_string();
                     let peek = self.peekable.peek().cloned();
                     let auxiliar_part = match peek {
@@ -116,7 +116,7 @@ impl<'a> Lexer<'a> {
                         _ => None,
                     };
                     (
-                        Token::UpperId(first_part.to_string(), auxiliar_part),
+                        Token::UpperId(first_part, auxiliar_part),
                         self.mk_range(start),
                     )
                 }

@@ -1,10 +1,10 @@
-use kind_pass::{expand, desugar, erasure};
+use kind_pass::{desugar, erasure, expand};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
-use kind_tree::{desugared, backend, concrete};
+use kind_tree::{backend, concrete, desugared};
 use session::Session;
-use std::{path::PathBuf, collections::HashSet};
+use std::{collections::HashSet, path::PathBuf};
 
 use kind_checker as checker;
 
@@ -38,7 +38,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugare
     Some(erased)
 }
 
-pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> { 
+pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> {
     let mut concrete_book = resolution::parse_and_store_book(session, path)?;
 
     expand::expand_book(&mut concrete_book);
@@ -77,8 +77,7 @@ pub fn execute_file(file: &backend::File) -> Box<backend::Term> {
     let main = runtime.alloc_code("Main").unwrap();
     runtime.run_io(main);
     runtime.normalize(main);
-    let term = runtime.readback(main);
-    term
+    runtime.readback(main)
 }
 
 pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {

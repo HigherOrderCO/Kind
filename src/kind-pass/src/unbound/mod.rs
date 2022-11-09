@@ -79,7 +79,7 @@ impl Visitor for UnboundCollector {
             let entry = self
                 .unbound
                 .entry(ident.to_string())
-                .or_insert_with(|| Vec::new());
+                .or_insert_with(Vec::new);
             entry.push(ident.clone());
         }
     }
@@ -89,7 +89,7 @@ impl Visitor for UnboundCollector {
             let entry = self
                 .unbound_top_level
                 .entry(ident.to_string())
-                .or_insert_with(|| Vec::new());
+                .or_insert_with(Vec::new);
             entry.push(ident.clone());
         }
     }
@@ -374,14 +374,14 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Sigma(None, typ, body) => {
                 self.visit_qualified_ident(
-                    &mut QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
+                    QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
                 );
                 self.visit_expr(typ);
                 self.visit_expr(body);
             }
             ExprKind::Sigma(Some(ident), typ, body) => {
                 self.visit_qualified_ident(
-                    &mut QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
+                    QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
                 );
                 self.visit_expr(typ);
                 self.context_vars.push((ident.range, ident.to_string()));
@@ -389,7 +389,7 @@ impl Visitor for UnboundCollector {
                 self.context_vars.pop();
             }
             ExprKind::Match(matcher) => {
-                self.visit_qualified_ident(&mut matcher.typ.add_segment("match").to_sugar());
+                self.visit_qualified_ident(matcher.typ.add_segment("match").to_sugar());
                 self.visit_ident(&mut Ident::new_by_sugar(
                     &format!("{}.match", matcher.typ.to_string().as_str()),
                     expr.range,
@@ -411,8 +411,8 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Hole => {}
             ExprKind::Do(typ, sttm) => {
-                self.visit_qualified_ident(&mut typ.add_segment("pure").to_sugar());
-                self.visit_qualified_ident(&mut typ.add_segment("bind").to_sugar());
+                self.visit_qualified_ident(typ.add_segment("pure").to_sugar());
+                self.visit_qualified_ident(typ.add_segment("bind").to_sugar());
                 self.visit_sttm(sttm)
             }
             ExprKind::If(cond, if_, else_) => {

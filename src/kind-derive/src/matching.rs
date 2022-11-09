@@ -56,7 +56,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     for arg in sum.indices.iter() {
         types.push(arg.to_implicit())
     }
-    
+
     // The type
 
     let all_args = sum.parameters.extend(&sum.indices);
@@ -74,7 +74,6 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         .iter()
         .map(|x| Binding::Positional(mk_var(x.name.clone())))
         .collect();
-
 
     let indice_names: Vec<Binding> = sum
         .indices
@@ -98,7 +97,13 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
     let motive_type = sum.parameters.extend(&sum.indices).iter().rfold(
         mk_pi(Ident::new_static("_val", range), res_motive_ty, mk_typ()),
-        |out, arg| mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or(mk_typ()), out),
+        |out, arg| {
+            mk_pi(
+                arg.name.clone(),
+                arg.typ.clone().unwrap_or_else(mk_typ),
+                out,
+            )
+        },
     );
 
     types.push(Argument {
@@ -109,7 +114,9 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         range,
     });
 
-    let params = sum.parameters.map(|x| Binding::Positional(mk_var(x.name.clone())));
+    let params = sum
+        .parameters
+        .map(|x| Binding::Positional(mk_var(x.name.clone())));
 
     // Constructors type
     for cons in &sum.constructors {
@@ -119,7 +126,10 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             .map(|x| Binding::Positional(mk_var(x.name.clone())))
             .collect();
 
-        let cons_inst = mk_cons(sum.name.add_segment(cons.name.to_str()), [params.as_slice(), vars.as_slice()].concat());
+        let cons_inst = mk_cons(
+            sum.name.add_segment(cons.name.to_str()),
+            [params.as_slice(), vars.as_slice()].concat(),
+        );
 
         let mut indices_of_cons = match cons.typ.clone().map(|x| x.data) {
             Some(ExprKind::Constr(_, spine)) => spine.to_vec(),
@@ -133,7 +143,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let cons_type = cons.args.iter().rfold(cons_tipo, |out, arg| {
             mk_pi(
                 arg.name.clone(),
-                arg.typ.clone().unwrap_or_else(|| mk_typ()),
+                arg.typ.clone().unwrap_or_else(mk_typ),
                 out,
             )
         });
@@ -157,12 +167,14 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let cons_ident = sum.name.add_segment(cons.name.to_str());
         let mut pats: Vec<Box<Pat>> = Vec::new();
 
-        let spine_params: Vec<Ident> = sum.parameters.extend(&cons.args)
+        let spine_params: Vec<Ident> = sum
+            .parameters
+            .extend(&cons.args)
             .map(|x| x.name.with_name(|f| format!("{}_", f)))
             .to_vec();
 
-
-        let spine: Vec<Ident> = cons.args
+        let spine: Vec<Ident> = cons
+            .args
             .map(|x| x.name.with_name(|f| format!("{}_", f)))
             .to_vec();
 
@@ -201,7 +213,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                 .iter()
                 .map(|arg| Binding::Positional(mk_var(arg.clone())))
                 .collect(),
-            cons.name.range
+            cons.name.range,
         );
 
         rules.push(Box::new(Rule {
@@ -213,7 +225,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     }
     // Rules
 
-    let entry = Entry {
+    Entry {
         name,
         docs: Vec::new(),
         args: types,
@@ -221,7 +233,5 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         rules,
         range,
         attrs: Vec::new(),
-    };
-
-    entry
+    }
 }

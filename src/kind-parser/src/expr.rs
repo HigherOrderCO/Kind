@@ -128,7 +128,7 @@ impl<'a> Parser<'a> {
         let range = self.range();
         let (start, end) =
             eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
-        let ident = QualifiedIdent::new_static(start.as_str(), end.clone(), range);
+        let ident = QualifiedIdent::new_static(start.as_str(), end, range);
         Ok(ident)
     }
 
@@ -217,7 +217,10 @@ impl<'a> Parser<'a> {
             "U60" => ExprKind::Lit(Literal::U60),
             _ => ExprKind::Constr(id.clone(), vec![]),
         };
-        Ok(Box::new(Expr { range: id.range, data }))
+        Ok(Box::new(Expr {
+            range: id.range,
+            data,
+        }))
     }
 
     fn parse_data(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
@@ -229,7 +232,7 @@ impl<'a> Parser<'a> {
             _ => {
                 let (range_end, spine) = self.parse_call_tail(id.range, multiline)?;
                 range = range_end;
-                ExprKind::Constr(id.clone(), spine)
+                ExprKind::Constr(id, spine)
             }
         };
         Ok(Box::new(Expr { range, data }))

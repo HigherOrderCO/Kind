@@ -80,7 +80,7 @@ fn mk_single_ctr(head: String) -> Box<Term> {
 
 fn mk_ctr_name(ident: &QualifiedIdent) -> Box<Term> {
     // Adds an empty segment (so it just appends a dot in the end)
-    mk_single_ctr(format!("{}.", ident.to_string()))
+    mk_single_ctr(format!("{}.", ident))
 }
 
 fn span_to_num(span: Span) -> Box<Term> {

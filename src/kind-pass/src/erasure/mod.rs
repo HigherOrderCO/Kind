@@ -60,8 +60,9 @@ pub fn erase_book(
 
     for name in entrypoint {
         let count = state.holes.len();
-        let ty = (None, Relevance::Hole(count));
-        state.names.insert(name.to_string(), ty.clone());
+        state
+            .names
+            .insert(name.to_string(), (None, Relevance::Hole(count)));
         state.holes.push(Some(Relevance::Relevant));
     }
 
@@ -95,10 +96,10 @@ pub fn erasure_to_relevance(erased: bool) -> Relevance {
 impl<'a> ErasureState<'a> {
     pub fn new_hole(&mut self, range: Range, name: String) -> (Option<Range>, Relevance) {
         let count = self.holes.len();
-        let ty = (Some(range), Relevance::Hole(count));
-        self.names.insert(name.to_string(), ty.clone());
+        let local_relevance = (Some(range), Relevance::Hole(count));
+        self.names.insert(name, local_relevance);
         self.holes.push(None);
-        ty
+        local_relevance
     }
 
     pub fn err_irrelevant(
@@ -220,7 +221,7 @@ impl<'a> ErasureState<'a> {
             }
             Fun(name, spine) | Ctr(name, spine) => {
                 let fun = match self.names.get(&name.to_string()) {
-                    Some(res) => res.clone(),
+                    Some(res) => *res,
                     None => self.new_hole(name.range, name.to_string()),
                 };
 
@@ -258,13 +259,8 @@ impl<'a> ErasureState<'a> {
             Hole(_) | Hlp(_) => match &expr.span {
                 kind_span::Span::Generated => Box::new(expr.clone()),
                 kind_span::Span::Locatable(span) => {
-                    if !self.unify(
-                        span.clone(),
-                        on.clone(),
-                        (None, Relevance::Irrelevant),
-                        false,
-                    ) {
-                        self.err_irrelevant(None, span.clone(), None)
+                    if !self.unify(*span, *on, (None, Relevance::Irrelevant), false) {
+                        self.err_irrelevant(None, *span, None)
                     }
                     Box::new(expr.clone())
                 }
@@ -273,7 +269,7 @@ impl<'a> ErasureState<'a> {
                 let relev = self.ctx.get(&name.to_string()).unwrap();
                 let declared_ty = (relev.1).0;
                 let declared_val = relev.0;
-                if !self.unify(name.range, on.clone(), relev.1, false) {
+                if !self.unify(name.range, *on, relev.1, false) {
                     self.err_irrelevant(Some(declared_val), name.range, declared_ty)
                 }
                 Box::new(expr.clone())
@@ -282,7 +278,7 @@ impl<'a> ErasureState<'a> {
                 let ctx = self.ctx.clone();
 
                 // Relevant inside the context that is it's being used?
-                self.ctx.insert(name.to_string(), (name.range, on.clone()));
+                self.ctx.insert(name.to_string(), (name.range, *on));
 
                 self.erase_expr(&(on.0, Relevance::Irrelevant), typ);
                 self.erase_expr(&(on.0, Relevance::Irrelevant), body);
@@ -292,7 +288,7 @@ impl<'a> ErasureState<'a> {
             }
             Lambda(name, body) => {
                 let ctx = self.ctx.clone();
-                self.ctx.insert(name.to_string(), (name.range, on.clone()));
+                self.ctx.insert(name.to_string(), (name.range, *on));
                 let body = self.erase_expr(on, body);
                 self.ctx = ctx;
 
@@ -303,7 +299,7 @@ impl<'a> ErasureState<'a> {
             }
             Let(name, val, body) => {
                 let ctx = self.ctx.clone();
-                self.ctx.insert(name.to_string(), (name.range, on.clone()));
+                self.ctx.insert(name.to_string(), (name.range, *on));
 
                 let val = self.erase_expr(on, val);
                 let body = self.erase_expr(on, body);
@@ -333,11 +329,11 @@ impl<'a> ErasureState<'a> {
                     .iter();
 
                 let fun = match self.names.get(&head.to_string()) {
-                    Some(res) => res.clone(),
+                    Some(res) => *res,
                     None => self.new_hole(head.range, head.to_string()),
                 };
 
-                if !self.unify(head.range, on.clone(), fun, true) {
+                if !self.unify(head.range, *on, fun, true) {
                     self.err_irrelevant(None, head.range, None)
                 }
 
@@ -370,11 +366,11 @@ impl<'a> ErasureState<'a> {
                     .iter();
 
                 let fun = match self.names.get(&head.to_string()) {
-                    Some(res) => res.clone(),
+                    Some(res) => *res,
                     None => self.new_hole(head.range, head.to_string()),
                 };
 
-                if !self.unify(head.range, on.clone(), fun, true) {
+                if !self.unify(head.range, *on, fun, true) {
                     self.err_irrelevant(None, head.range, None)
                 }
 
@@ -382,7 +378,13 @@ impl<'a> ErasureState<'a> {
                     .iter()
                     .zip(args)
                     .map(|(expr, arg)| {
-                        (self.erase_expr(&(Some(arg.span), erasure_to_relevance(arg.erased)), expr), arg)
+                        (
+                            self.erase_expr(
+                                &(Some(arg.span), erasure_to_relevance(arg.erased)),
+                                expr,
+                            ),
+                            arg,
+                        )
                     })
                     .filter(|(_, arg)| !arg.erased);
 
@@ -439,7 +441,7 @@ impl<'a> ErasureState<'a> {
 
     pub fn erase_entry(&mut self, entry: &Entry) -> Box<Entry> {
         let place = if let Some(res) = self.names.get(&entry.name.to_string()) {
-            res.clone()
+            *res
         } else {
             self.new_hole(entry.name.range, entry.name.to_string())
         };

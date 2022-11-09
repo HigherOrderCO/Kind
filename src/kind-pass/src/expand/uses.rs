@@ -1,18 +1,17 @@
-/// Expands sum type and record definitions to a lot of
-/// helper definitions like eliminators and replace qualified identifiers
-/// by their module names.
-
-use std::sync::mpsc::Sender;
 use fxhash::FxHashMap;
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::{visitor::Visitor, Module};
+/// Expands sum type and record definitions to a lot of
+/// helper definitions like eliminators and replace qualified identifiers
+/// by their module names.
+use std::sync::mpsc::Sender;
 
 use crate::errors::PassError;
 
 pub struct Expand {
     pub names: FxHashMap<String, String>,
     pub errors: Sender<DiagnosticFrame>,
-    pub failed: bool
+    pub failed: bool,
 }
 
 impl Visitor for Expand {
@@ -23,7 +22,9 @@ impl Visitor for Expand {
         let alias = match self.names.get(&ident.root.to_string()) {
             Some(path) => path,
             None => {
-                self.errors.send(PassError::CannotFindAlias(ident.root.to_string(), ident.range).into()).unwrap();
+                self.errors
+                    .send(PassError::CannotFindAlias(ident.root.to_string(), ident.range).into())
+                    .unwrap();
                 self.failed = true;
                 return;
             }
@@ -42,7 +43,7 @@ pub fn expand_uses(module: &mut Module, errors: Sender<DiagnosticFrame>) -> bool
     let mut session = Expand {
         names: module.uses.clone(),
         errors,
-        failed: false
+        failed: false,
     };
     for entry in module.entries.iter_mut() {
         session.visit_top_level(entry)

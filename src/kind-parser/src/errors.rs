@@ -29,7 +29,7 @@ pub enum SyntaxError {
     IgnoreRestShouldBeOnTheEnd(Range),
     UnusedDocString(Range),
     CannotUseUse(Range),
-    ImportsCannotHaveAlias(Range)
+    ImportsCannotHaveAlias(Range),
 }
 
 fn encode_name(encode: EncodeSequence) -> &'static str {

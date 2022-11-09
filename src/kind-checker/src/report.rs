@@ -55,25 +55,23 @@ fn parse_op(term: &Term) -> Result<Operator, String> {
 
 fn parse_name(term: &Term) -> Result<String, String> {
     match term {
-        Term::Num { numb } => {
-            Ok(Ident::decode(*numb))
-        }
-        Term::Ctr { name, args: _ } => {
-            Ok(name.to_string())
-        }
-        _ => Err("Error while matching opt".to_string())
+        Term::Num { numb } => Ok(Ident::decode(*numb)),
+        Term::Ctr { name, args: _ } => Ok(name.to_string()),
+        _ => Err("Error while matching opt".to_string()),
     }
 }
 
 fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
     match term {
-        Term::Num { numb } => {
-            Ok(QualifiedIdent::new_static(&Ident::decode(*numb), None, Range::ghost_range()))
-        }
+        Term::Num { numb } => Ok(QualifiedIdent::new_static(
+            &Ident::decode(*numb),
+            None,
+            Range::ghost_range(),
+        )),
         Term::Ctr { name, args: _ } => {
-            Ok(QualifiedIdent::new_static(&name, None, Range::ghost_range()))
+            Ok(QualifiedIdent::new_static(name, None, Range::ghost_range()))
         }
-        _ => Err("Error while matching opt".to_string())
+        _ => Err("Error while matching opt".to_string()),
     }
 }
 
@@ -158,7 +156,10 @@ fn parse_all_expr(
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
             )),
-            tag => Err(format!("Unexpected tag on transforming quoted term {:?}", tag)),
+            tag => Err(format!(
+                "Unexpected tag on transforming quoted term {:?}",
+                tag
+            )),
         },
         _ => Err("Unexpected term on transforming quoted term".to_string()),
     }

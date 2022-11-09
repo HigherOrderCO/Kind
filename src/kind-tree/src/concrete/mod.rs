@@ -173,7 +173,7 @@ impl TopLevel {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Module {
     pub entries: Vec<TopLevel>,
-    pub uses: FxHashMap<String, String>
+    pub uses: FxHashMap<String, String>,
 }
 
 /// Metadata about entries, it's really useful when we
@@ -292,7 +292,7 @@ impl Display for Module {
 
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        for (_, entr) in &self.entries {
+        for entr in self.entries.values() {
             write!(f, "{}", entr)?;
         }
         Ok(())
@@ -330,10 +330,10 @@ impl Display for Entry {
             write!(f, " {}", arg)?;
         }
 
-        write!(f, " : {}\n", &self.typ)?;
+        writeln!(f, " : {}", &self.typ)?;
 
         for rule in &self.rules {
-            write!(f, "{}\n", rule)?
+            writeln!(f, "{}", rule)?
         }
 
         Ok(())
@@ -592,7 +592,7 @@ impl Entry {
             hiddens,
             erased,
             arguments,
-            is_ctr: self.rules.len() == 0,
+            is_ctr: self.rules.is_empty(),
             range: self.name.range,
         }
     }

@@ -51,7 +51,7 @@ impl<'a> DesugarState<'a> {
                 range,
                 bind_ident.clone(),
                 vec![expr, desugared::Expr::lambda(range, name, next)],
-                false
+                false,
             )
         };
 

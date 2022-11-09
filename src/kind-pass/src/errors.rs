@@ -364,7 +364,7 @@ impl From<PassError> for DiagnosticFrame {
                         positions.push(Marker {
                             position: error_range,
                             color: Color::Fst,
-                            text: format!("This expression is not the parameter"),
+                            text: "This expression is not the parameter".to_string(),
                             no_code: false,
                             main: true,
                         })
@@ -375,7 +375,7 @@ impl From<PassError> for DiagnosticFrame {
                     Marker {
                         position: declaration_range,
                         color: Color::Snd,
-                        text: format!("This is the parameter that should be used"),
+                        text: "This is the parameter that should be used".to_string(),
                         no_code: false,
                         main: false,
                     }
@@ -400,14 +400,14 @@ impl From<PassError> for DiagnosticFrame {
                     Marker {
                         position: error_range,
                         color: Color::Fst,
-                        text: format!("This is not the type that is being declared"),
+                        text: "This is not the type that is being declared".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
                         position: declaration_range,
                         color: Color::Snd,
-                        text: format!("This is the type that should be used instead"),
+                        text: "This is the type that should be used instead".to_string(),
                         no_code: false,
                         main: false,
                     }

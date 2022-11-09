@@ -166,44 +166,52 @@ fn main() {
         Command::ToHVM { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::compile_book_to_hvm(session, &PathBuf::from(file.clone()))
-            }).and_then(|res| {
+            })
+            .map(|res| {
                 println!("{}", res);
-                Some(res)
+                res
             });
         }
         Command::Run { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::compile_book_to_hvm(session, &PathBuf::from(file.clone()))
-            }).and_then(|res| {
+            })
+            .map(|res| {
                 println!("{}", driver::execute_file(&res));
-                Some(res)
+                res
             });
         }
         Command::Eval { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::erase_book(session, &PathBuf::from(file.clone()))
-            }).and_then(|res| {
+            })
+            .map(|res| {
                 println!("{}", driver::eval_in_checker(&res));
-                Some(res)
+                res
             });
         }
         Command::Show { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::to_book(session, &PathBuf::from(file.clone()))
-            }).and_then(|res| {
+            })
+            .map(|res| {
                 print!("{}", res);
-                Some(res)
+                res
             });
         }
         Command::GenChecker { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::check_erasure_book(session, &PathBuf::from(file.clone()))
-            }).and_then(|res| {
+            })
+            .map(|res| {
                 print!("{}", driver::generate_checker(&res));
-                Some(res)
+                res
             });
         }
-        Command::ToKDL { file: _, namespace: _ } => todo!(),
+        Command::ToKDL {
+            file: _,
+            namespace: _,
+        } => todo!(),
         Command::Watch { file: _ } => todo!(),
         Command::Repl => todo!(),
     }

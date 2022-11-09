@@ -76,7 +76,7 @@ impl QualifiedIdent {
         QualifiedIdent {
             root: Symbol(format!("{}.{}", self.root.0, extension)),
             aux: self.aux.clone(),
-            range: self.range.clone(),
+            range: self.range,
             used_by_sugar: self.used_by_sugar,
         }
     }

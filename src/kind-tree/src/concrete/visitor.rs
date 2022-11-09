@@ -370,7 +370,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             for arg in spine {
                 ctx.visit_binding(arg);
             }
-        },
+        }
         ExprKind::All(None, typ, body) => {
             ctx.visit_expr(typ);
             ctx.visit_expr(body);

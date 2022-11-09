@@ -67,11 +67,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
     let cons_tipo = mk_var(Ident::generate("_res"));
 
     let cons_type = sum.fields.iter().rfold(cons_tipo, |out, (name, _, typ)| {
-        mk_pi(
-            name.clone(),
-            typ.clone(),
-            out,
-        )
+        mk_pi(name.clone(), typ.clone(), out)
     });
 
     // Sccrutinzies
@@ -80,7 +76,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
         hidden: false,
         erased: false,
         name: Ident::generate("scrutinizer"),
-        typ: Some(res_motive_ty.clone()),
+        typ: Some(res_motive_ty),
         range,
     });
 
@@ -106,7 +102,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
 
     pats.push(Box::new(Pat {
         data: concrete::pat::PatKind::App(
-            sum.name.add_segment(sum.constructor.to_str()).clone(),
+            sum.name.add_segment(sum.constructor.to_str()),
             spine
                 .iter()
                 .cloned()
@@ -134,9 +130,12 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
             .collect(),
     );
 
-    let rules = vec![
-        Box::new(Rule { name: name.clone(), pats, body, range })
-    ];
+    let rules = vec![Box::new(Rule {
+        name: name.clone(),
+        pats,
+        body,
+        range,
+    })];
 
     Entry {
         name,

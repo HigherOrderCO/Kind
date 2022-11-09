@@ -3,12 +3,12 @@
 //! it returns a desugared book of all of the
 //! depedencies.
 
+use fxhash::FxHashMap;
+use kind_pass::expand::uses::expand_uses;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use fxhash::FxHashMap;
-use kind_pass::expand::uses::expand_uses;
 use strsim::jaro;
 
 use kind_pass::unbound::{self};
@@ -142,7 +142,7 @@ fn parse_and_store_book_by_identifier<'a>(
     session: &mut Session,
     ident: &QualifiedIdent,
     book: &'a mut Book,
-    unbound: &mut FxHashMap<String, Vec<QualifiedIdent>>
+    unbound: &mut FxHashMap<String, Vec<QualifiedIdent>>,
 ) -> bool {
     if book.entries.contains_key(ident.to_string().as_str()) {
         return false;
@@ -162,7 +162,7 @@ fn parse_and_store_book_by_path<'a>(
     session: &mut Session,
     path: &PathBuf,
     book: &'a mut Book,
-    unbound: &mut FxHashMap<String, Vec<QualifiedIdent>>
+    unbound: &mut FxHashMap<String, Vec<QualifiedIdent>>,
 ) -> bool {
     if session.loaded_paths_map.contains_key(path) {
         return false;
@@ -189,7 +189,7 @@ fn parse_and_store_book_by_path<'a>(
         unbound::get_module_unbound(session.diagnostic_sender.clone(), &mut module);
 
     for idents in unbound_vars.values() {
-        unbound_variable(session, &book, idents);
+        unbound_variable(session, book, idents);
         failed = true;
     }
 
@@ -235,7 +235,14 @@ pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Boo
     let failed = parse_and_store_book_by_path(session, path, &mut book, &mut unbound);
 
     for (_, res) in unbound {
-        unbound_variable(session, &book, res.iter().map(|x| x.to_ident()).collect::<Vec<Ident>>().as_slice())
+        unbound_variable(
+            session,
+            &book,
+            res.iter()
+                .map(|x| x.to_ident())
+                .collect::<Vec<Ident>>()
+                .as_slice(),
+        )
     }
 
     if failed {
