@@ -12,6 +12,44 @@ type TermPrefix = Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>;
 
 type TermComplete = Box<dyn Fn(&str) -> Box<Term>>;
 
+pub fn parse_num(state: State) -> Answer<Option<Box<Term>>> {
+    parser::guard(
+        Box::new(|state| {
+            let (state, head) = parser::get_char(state)?;
+            Ok((state, head.is_ascii_digit()))
+        }),
+        Box::new(|state| {
+            let (state, init) = get_init_index(state)?;
+            let (state, name) = parse_path_str(state)?;
+            let (state, last) = get_last_index(state)?;
+            let orig = Span::new_off(init, last);
+
+            let parts = name.split("u120").collect::<Vec<_>>();
+            if parts.len() == 2 && parts[1] == "" {
+                if let Ok(num120) = parts[0].parse::<u128>() {
+                    let term = Box::new(Term::Ctr {
+                        orig,
+                        name: Ident::new_path("U120", "new"),
+                        args: vec![
+                            Box::new(Term::Num { orig, numb: (num120 >> 60) as u64 }),
+                            Box::new(Term::Num { orig, numb: (num120 & 0xFFFFFFFFFFFFFFF) as u64 })],
+                    });
+                    Ok((state, term))
+                } else {
+                    parser::expected("U120 number", name.len(), state)
+                }
+            } else {
+                if let Ok(numb) = name.parse::<u64>() {
+                    Ok((state, Box::new(Term::Num { orig, numb })))
+                } else {
+                    parser::expected("U60 number", name.len(), state)
+                }    
+            }
+        }),
+        state,
+    )
+}
+
 pub fn parse_var(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| Ok((state, true))),
@@ -20,11 +58,7 @@ pub fn parse_var(state: State) -> Answer<Option<Box<Term>>> {
             let (state, name) = parse_path_str(state)?;
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            if let Ok(numb) = name.parse::<u64>() {
-                Ok((state, Box::new(Term::Num { orig, numb })))
-            } else {
-                Ok((state, Box::new(Term::Var { orig, name: Ident(name) })))
-            }
+            Ok((state, Box::new(Term::Var { orig, name: Ident(name) })))
         }),
         state,
     )
@@ -186,6 +220,7 @@ pub fn parse_term_prefix(state: State) -> Answer<Box<Term>> {
             Box::new(parse_do),   // `do `
             Box::new(parse_hlp),  // `?`
             Box::new(parse_hol),  // `_`
+            Box::new(parse_num),  // `01234` or `01234u120`
             Box::new(parse_var),  // x
             Box::new(|state| Ok((state, None))),
         ],
