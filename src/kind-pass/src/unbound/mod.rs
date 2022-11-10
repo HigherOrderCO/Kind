@@ -79,7 +79,17 @@ impl Visitor for UnboundCollector {
             let entry = self
                 .unbound
                 .entry(ident.to_string())
-                .or_insert_with(|| Vec::new());
+                .or_insert_with(Vec::new);
+            entry.push(ident.clone());
+        }
+    }
+
+    fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
+        if !self.context_vars.iter().any(|x| x.1 == ident.to_string()) {
+            let entry = self
+                .unbound_top_level
+                .entry(ident.to_string())
+                .or_insert_with(Vec::new);
             entry.push(ident.clone());
         }
     }
@@ -103,6 +113,21 @@ impl Visitor for UnboundCollector {
             Some(res) => self.visit_expr(res),
             None => (),
         }
+
+        let res = self
+            .context_vars
+            .iter()
+            .find(|x| x.1 == argument.name.to_string());
+
+        if let Some(fst) = res {
+            self.errors
+                .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
+                .unwrap()
+        } else {
+            self.context_vars
+                .push((argument.name.range, argument.name.to_string()))
+        }
+
         self.context_vars
             .push((argument.name.range, argument.name.to_string()));
     }
@@ -117,6 +142,9 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_entry(&mut self, entry: &mut Entry) {
+        self.context_vars
+            .push((entry.name.range, entry.name.to_string()));
+
         let vars = self.context_vars.clone();
 
         for arg in entry.args.iter_mut() {
@@ -124,6 +152,7 @@ impl Visitor for UnboundCollector {
         }
 
         self.visit_expr(&mut entry.typ);
+
         self.context_vars = vars;
 
         for rule in &mut entry.rules {
@@ -136,10 +165,27 @@ impl Visitor for UnboundCollector {
             TopLevel::SumType(entr) => {
                 self.context_vars
                     .push((entr.name.range, entr.name.to_string()));
+
+                let mut repeated_names = FxHashMap::<String, Range>::default();
+                let mut failed = false;
+
                 for cons in &entr.constructors {
+
+                    match repeated_names.get(&cons.name.to_string()) {
+                        Some(_) => {
+                            failed = true;
+                        },
+                        None => {
+                            repeated_names.insert(cons.name.to_string(), cons.name.range);
+                        },
+                    }
+
                     let name_cons = entr.name.add_segment(cons.name.to_str());
-                    self.context_vars
-                        .push((name_cons.range, name_cons.to_string()));
+                    self.context_vars.push((name_cons.range, name_cons.to_string()));
+                }
+
+                if failed {
+                    return;
                 }
 
                 let vars = self.context_vars.clone();
@@ -176,10 +222,7 @@ impl Visitor for UnboundCollector {
 
                 self.context_vars = inside_vars;
             }
-            TopLevel::Entry(entr) => {
-                self.context_vars.push((entr.range, entr.to_string()));
-                self.visit_entry(entr)
-            }
+            TopLevel::Entry(entr) => self.visit_entry(entr),
         }
     }
 
@@ -203,7 +246,7 @@ impl Visitor for UnboundCollector {
     fn visit_destruct(&mut self, destruct: &mut Destruct) {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
-                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.open", ty), *range));
+                self.visit_qualified_ident(QualifiedIdent::add_segment(ty, "open").to_sugar());
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);
                 for bind in bindings {
@@ -304,14 +347,9 @@ impl Visitor for UnboundCollector {
     fn visit_expr(&mut self, expr: &mut Expr) {
         match &mut expr.data {
             ExprKind::Var(ident) => self.visit_ident(ident),
-            ExprKind::Constr(ident) => {
-                if !self.context_vars.iter().any(|x| x.1 == ident.to_string()) {
-                    let entry = self
-                        .unbound_top_level
-                        .entry(ident.to_string())
-                        .or_insert_with(|| Vec::new());
-                    entry.push(ident.clone());
-                }
+            ExprKind::Constr(ident, spine) => {
+                self.visit_qualified_ident(ident);
+                visit_vec!(spine.iter_mut(), arg => self.visit_binding(arg));
             }
             ExprKind::All(None, typ, body) => {
                 self.visit_expr(typ);
@@ -353,22 +391,23 @@ impl Visitor for UnboundCollector {
                 self.context_vars = vars;
             }
             ExprKind::Sigma(None, typ, body) => {
-                self.visit_ident(&mut Ident::new_by_sugar("Sigma", expr.range));
+                self.visit_qualified_ident(
+                    QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
+                );
                 self.visit_expr(typ);
                 self.visit_expr(body);
             }
             ExprKind::Sigma(Some(ident), typ, body) => {
-                self.visit_ident(&mut Ident::new_by_sugar("Sigma", expr.range));
+                self.visit_qualified_ident(
+                    QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
+                );
                 self.visit_expr(typ);
                 self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
             ExprKind::Match(matcher) => {
-                self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.match", matcher.typ.to_string().as_str()),
-                    expr.range,
-                ));
+                self.visit_qualified_ident(matcher.typ.add_segment("match").to_sugar());
                 self.visit_match(matcher)
             }
             ExprKind::Subst(subst) => {
@@ -386,30 +425,32 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Hole => {}
             ExprKind::Do(typ, sttm) => {
-                self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.pure", typ),
-                    expr.range,
-                ));
-                self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.bind", typ),
-                    expr.range,
-                ));
+                self.visit_qualified_ident(typ.add_segment("pure").to_sugar());
+                self.visit_qualified_ident(typ.add_segment("bind").to_sugar());
                 self.visit_sttm(sttm)
             }
             ExprKind::If(cond, if_, else_) => {
-                self.visit_ident(&mut Ident::new_by_sugar("Bool.if", expr.range));
+                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
+                    "Bool", "if", expr.range,
+                ));
                 self.visit_expr(cond);
                 self.visit_expr(if_);
                 self.visit_expr(else_);
             }
             ExprKind::Pair(l, r) => {
-                self.visit_ident(&mut Ident::new_by_sugar("Pair.new", expr.range));
+                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
+                    "Pair", "new", expr.range,
+                ));
                 self.visit_expr(l);
                 self.visit_expr(r);
             }
             ExprKind::List(spine) => {
-                self.visit_ident(&mut Ident::new_by_sugar("List.nil", expr.range));
-                self.visit_ident(&mut Ident::new_by_sugar("List.cons", expr.range));
+                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
+                    "List", "nil", expr.range,
+                ));
+                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
+                    "List", "cons", expr.range,
+                ));
                 visit_vec!(spine.iter_mut(), arg => self.visit_expr(arg));
             }
         }

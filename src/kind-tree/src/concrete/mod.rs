@@ -170,9 +170,10 @@ impl TopLevel {
 /// A module is a collection of top level entries
 /// that contains syntatic sugars. In the future
 /// it will contain a HashMap to local renames.
-#[derive(Clone, Debug, Default, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Module {
     pub entries: Vec<TopLevel>,
+    pub uses: FxHashMap<String, String>,
 }
 
 /// Metadata about entries, it's really useful when we
@@ -251,7 +252,7 @@ impl Display for TopLevel {
                 }
                 writeln!(f, " {{")?;
                 for cons in &sum.constructors {
-                    writeln!(f, "  {},", cons)?;
+                    writeln!(f, "  {}", cons)?;
                 }
                 writeln!(f, "}}\n")
             }
@@ -275,7 +276,7 @@ impl Display for TopLevel {
                 }
                 writeln!(f, "}}\n")
             }
-            TopLevel::Entry(entr) => writeln!(f, "{}\n", entr),
+            TopLevel::Entry(entr) => writeln!(f, "{}", entr),
         }
     }
 }
@@ -283,7 +284,16 @@ impl Display for TopLevel {
 impl Display for Module {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in &self.entries {
-            writeln!(f, "{}", entr)?;
+            write!(f, "{}", entr)?;
+        }
+        Ok(())
+    }
+}
+
+impl Display for Book {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        for entr in self.entries.values() {
+            write!(f, "{}", entr)?;
         }
         Ok(())
     }
@@ -320,10 +330,10 @@ impl Display for Entry {
             write!(f, " {}", arg)?;
         }
 
-        write!(f, " : {}", &self.typ)?;
+        writeln!(f, " : {}", &self.typ)?;
 
         for rule in &self.rules {
-            write!(f, "\n{}", rule)?
+            writeln!(f, "{}", rule)?
         }
 
         Ok(())
@@ -582,7 +592,7 @@ impl Entry {
             hiddens,
             erased,
             arguments,
-            is_ctr: false,
+            is_ctr: self.rules.is_empty(),
             range: self.name.range,
         }
     }

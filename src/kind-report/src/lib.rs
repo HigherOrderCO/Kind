@@ -14,6 +14,7 @@ pub struct Chars {
     pub bxline: char,
     pub brline: char,
     pub ylline: char,
+    pub bullet: char,
 }
 
 impl Chars {
@@ -26,6 +27,7 @@ impl Chars {
             bxline: '┬',
             brline: '┌',
             ylline: '├',
+            bullet: '•',
         }
     }
     pub fn ascii() -> &'static Chars {
@@ -37,6 +39,7 @@ impl Chars {
             bxline: 'v',
             brline: '/',
             ylline: '-',
+            bullet: '*',
         }
     }
 }
@@ -63,7 +66,15 @@ impl<'a> RenderConfig<'a> {
 }
 
 pub fn check_if_colors_are_supported(disable: bool) {
-    if cfg!(windows) && !Paint::enable_windows_ascii() || disable {
+    if disable || (cfg!(windows) && !Paint::enable_windows_ascii()) {
         Paint::disable();
+    }
+}
+
+pub fn check_if_utf8_is_supported<'a>(disable: bool, indent: usize) -> RenderConfig<'a> {
+    if disable || (cfg!(windows) && !Paint::enable_windows_ascii()) {
+        RenderConfig::ascii(indent)
+    } else {
+        RenderConfig::unicode(indent)
     }
 }

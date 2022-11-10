@@ -86,8 +86,12 @@ impl<'a> Parser<'a> {
     }
 
     pub fn eat_closing_keyword(&mut self, expect: Token, range: Range) -> Result<(), SyntaxError> {
-        if !self.check_and_eat(expect) {
-            Err(SyntaxError::Unclosed(range))
+        if !self.check_and_eat(expect.clone()) {
+            if self.get().is_eof() {
+                Err(SyntaxError::Unclosed(range))
+            } else {
+                self.fail(vec![expect])
+            }
         } else {
             Ok(())
         }

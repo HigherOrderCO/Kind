@@ -6,6 +6,11 @@ use kind_tree::{desugared, Operator};
 use crate::errors::TypeError;
 use desugared::Expr;
 
+type Entry = (String, Box<Expr>, Vec<Box<Expr>>);
+
+#[derive(Debug)]
+pub struct Context(pub Vec<Entry>);
+
 macro_rules! match_opt {
     ($expr:expr, $pat:pat => $end:expr) => {
         match $expr {
@@ -14,11 +19,6 @@ macro_rules! match_opt {
         }
     };
 }
-
-type Entry = (String, Box<Expr>, Vec<Box<Expr>>);
-
-#[derive(Debug)]
-pub struct Context(pub Vec<Entry>);
 
 fn parse_orig(term: &Term) -> Result<Range, String> {
     match_opt!(term, Term::Num { numb } => EncodedSpan(*numb).to_range())
@@ -54,11 +54,25 @@ fn parse_op(term: &Term) -> Result<Operator, String> {
 }
 
 fn parse_name(term: &Term) -> Result<String, String> {
-    match_opt!(*term, Term::Num { numb } => Ident::decode(numb))
+    match term {
+        Term::Num { numb } => Ok(Ident::decode(*numb)),
+        Term::Ctr { name, args: _ } => Ok(name.to_string()),
+        _ => Err("Error while matching opt".to_string()),
+    }
 }
 
 fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
-    todo!()
+    match term {
+        Term::Num { numb } => Ok(QualifiedIdent::new_static(
+            &Ident::decode(*numb),
+            None,
+            Range::ghost_range(),
+        )),
+        Term::Ctr { name, args: _ } => {
+            Ok(QualifiedIdent::new_static(name, None, Range::ghost_range()))
+        }
+        _ => Err("Error while matching opt".to_string()),
+    }
 }
 
 fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {
@@ -112,12 +126,12 @@ fn parse_all_expr(
                 vec![parse_all_expr(names, &args[2])?],
             )),
             "Kind.Quoted.ctr" => Ok(Expr::ctr(
-                parse_orig(&args[0])?,
-                parse_qualified(&args[1])?,
+                parse_orig(&args[1])?,
+                parse_qualified(&args[0])?,
                 {
                     let mut res = Vec::new();
-                    for arg in &args[1..] {
-                        res.push(parse_all_expr(names.clone(), arg)?);
+                    for arg in parse_list(&args[2])? {
+                        res.push(parse_all_expr(names.clone(), &arg)?);
                     }
                     res
                 },
@@ -142,7 +156,10 @@ fn parse_all_expr(
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
             )),
-            _ => Err("Unexpected tag on transforming quoted term".to_string()),
+            tag => Err(format!(
+                "Unexpected tag on transforming quoted term {:?}",
+                tag
+            )),
         },
         _ => Err("Unexpected term on transforming quoted term".to_string()),
     }
@@ -160,7 +177,7 @@ fn parse_list(term: &Term) -> Result<Vec<Box<Term>>, String> {
                     vec.push(args[0].clone());
                     cur = &args[1];
                 } else {
-                    return Err("Unexpected constructor on list".to_string());
+                    return Err(format!("Unexpected constructor on list '{:?}'", name));
                 }
             }
             _ => return Err("Unexpected value on list".to_string()),

@@ -4,7 +4,7 @@ use kind_tree::concrete::expr::Expr;
 
 use kind_tree::concrete::{Binding, ExprKind};
 use kind_tree::desugared;
-use kind_tree::symbol::{QualifiedIdent};
+use kind_tree::symbol::QualifiedIdent;
 
 use crate::errors::PassError;
 
@@ -16,6 +16,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         head: QualifiedIdent,
         spine: Vec<Box<desugared::Expr>>,
+        create_var: bool,
     ) -> Option<Vec<Box<desugared::Expr>>> {
         let entry = self.old_book.get_count_garanteed(head.to_string().as_str());
 
@@ -27,7 +28,11 @@ impl<'a> DesugarState<'a> {
             let mut spine_iter = spine.iter();
             for arg in entry.arguments.iter() {
                 if arg.hidden {
-                    arguments.push(self.gen_hole_expr())
+                    if create_var {
+                        arguments.push(desugared::Expr::var(self.gen_name(arg.range)))
+                    } else {
+                        arguments.push(self.gen_hole_expr())
+                    }
                 } else {
                     arguments.push(spine_iter.next().unwrap().to_owned())
                 }
@@ -49,8 +54,9 @@ impl<'a> DesugarState<'a> {
         range: Range,
         head: QualifiedIdent,
         spine: Vec<Box<desugared::Expr>>,
+        create_var_on_hidden: bool,
     ) -> Box<desugared::Expr> {
-        match self.make_desugared_spine(range, head.clone(), spine) {
+        match self.make_desugared_spine(range, head.clone(), spine, create_var_on_hidden) {
             Some(spine) => desugared::Expr::ctr(range, head, spine),
             None => desugared::Expr::err(range),
         }
@@ -61,21 +67,17 @@ impl<'a> DesugarState<'a> {
         range: Range,
         head: QualifiedIdent,
         spine: Vec<Box<desugared::Expr>>,
+        create_var_on_hidden: bool,
     ) -> Box<desugared::Expr> {
-        match self.make_desugared_spine(range, head.clone(), spine) {
+        match self.make_desugared_spine(range, head.clone(), spine, create_var_on_hidden) {
             Some(spine) => desugared::Expr::fun(range, head, spine),
             None => desugared::Expr::err(range),
         }
     }
 
-    pub(crate) fn desugar_app(
-        &mut self,
-        range: Range,
-        head: &Expr,
-        spine: &[Binding],
-    ) -> Box<desugared::Expr> {
+    pub(crate) fn desugar_app(&mut self, range: Range, head: &Expr) -> Box<desugared::Expr> {
         match &head.data {
-            ExprKind::Constr(entry_name) => {
+            ExprKind::Constr(entry_name, spine) => {
                 let entry = self
                     .old_book
                     .get_count_garanteed(entry_name.to_string().as_str());
@@ -98,7 +100,8 @@ impl<'a> DesugarState<'a> {
                     }
                 } else if entry.arguments.len() != spine.len() {
                     self.send_err(PassError::IncorrectArity(
-                        head.locate(),
+                        entry_name.range,
+                        spine.iter().map(|x| x.locate()).collect(),
                         entry.arguments.len(),
                         hidden,
                     ));
@@ -168,7 +171,7 @@ impl<'a> DesugarState<'a> {
                     span: Span::Locatable(range),
                 })
             }
-            _ => {
+            ExprKind::App(head, spine) => {
                 let mut new_spine = Vec::new();
                 let new_head = self.desugar_expr(head);
                 for arg in spine {
@@ -182,6 +185,7 @@ impl<'a> DesugarState<'a> {
                 }
                 desugared::Expr::app(range, new_head, new_spine)
             }
+            _ => panic!("Internal Error: This function should be used with app and constr"),
         }
     }
 }

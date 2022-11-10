@@ -34,10 +34,11 @@ pub enum Token {
     Ask,
     Return,
     Let,
-    Open,
     Type,
     Record,
     Constructor,
+    Use,
+    As,
 
     // Literals
     Char(char),
@@ -99,5 +100,9 @@ impl Token {
 
     pub fn is_num(&self) -> bool {
         matches!(self, Token::Num(_))
+    }
+
+    pub fn is_eof(&self) -> bool {
+        matches!(self, Token::Eof)
     }
 }

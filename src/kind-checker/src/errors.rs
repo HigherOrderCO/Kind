@@ -20,10 +20,13 @@ pub(crate) enum TypeError {
 
 pub fn context_to_subtitles(ctx: Context, subtitles: &mut Vec<Subtitle>) {
     subtitles.push(Subtitle::LineBreak);
-    subtitles.push(Subtitle::Phrase(
-        Color::Snd,
-        vec![Word::White("Context:".to_string())],
-    ));
+
+    if !ctx.0.is_empty() {
+        subtitles.push(Subtitle::Phrase(
+            Color::Snd,
+            vec![Word::White("Context:".to_string())],
+        ));
+    }
 
     let biggest = ctx
         .0

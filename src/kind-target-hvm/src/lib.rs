@@ -11,7 +11,7 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
         }),
         Lambda(binder, body) => Box::new(Term::Lam {
             name: binder.to_string(),
-            body: compile_term(&body),
+            body: compile_term(body),
         }),
         App(head, spine) => spine.iter().fold(compile_term(head), |func, arg| {
             Box::new(Term::App {
@@ -36,14 +36,14 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
             name: op.to_string(),
             args: vec![compile_term(l), compile_term(r)],
         }),
+        Hole(_) => unreachable!("Internal Error: 'Hole' cannot be a relevant term"),
         Typ => unreachable!("Internal Error: 'Typ' cannot be a relevant term"),
         NumType(desugared::NumType::U60) => unreachable!("Internal Error: 'U60' cannot be a relevant term"),
         NumType(desugared::NumType::U120) => unreachable!("Internal Error: 'U120' cannot be a relevant term"),
+        All(_, _, _) => unreachable!("Internal Error: 'All' cannot be a relevant term"),
         Str(_) => unreachable!("Internal Error: 'Str' cannot be a relevant term"),
-        Hole(_) => unreachable!("Internal Error: 'Hole' cannot be a relevant term"),
         Hlp(_) => unreachable!("Internal Error: 'Hlp' cannot be a relevant term"),
         Err => unreachable!("Internal Error: 'Err' cannot be a relevant term"),
-        All(_, _, _) => unreachable!("Internal Error: 'All' cannot be a relevant term"),
     }
 }
 
@@ -57,7 +57,7 @@ pub fn compile_rule(rule: desugared::Rule) -> Rule {
     }
 }
 
-pub fn compile_entry(file: &mut File, entry: Box<desugared::Entry>) {
+pub fn compile_entry(file: &mut File, entry: desugared::Entry) {
     for rule in entry.rules {
         file.rules.push(compile_rule(rule))
     }
@@ -68,7 +68,7 @@ pub fn compile_book(book: desugared::Book) -> File {
         rules: Default::default(),
     };
     for (_, entry) in book.entrs {
-        compile_entry(&mut file, entry);
+        compile_entry(&mut file, *entry);
     }
     file
 }

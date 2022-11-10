@@ -277,7 +277,10 @@ fn write_code_block<'a, T: Write + Sized>(
     }
 
     let code_lines: Vec<&'a str> = group_code.lines().collect();
-    let mut lines = lines_set.iter().collect::<Vec<&usize>>();
+    let mut lines = lines_set
+        .iter()
+        .filter(|x| **x < code_lines.len())
+        .collect::<Vec<&usize>>();
     lines.sort();
 
     for i in 0..lines.len() {
@@ -409,7 +412,13 @@ impl<'a> Report for Diagnostic<'a> {
             match subtitle {
                 Subtitle::Normal(color, phr) => {
                     let colorizer = get_colorizer(color);
-                    writeln!(fmt, "{:>5} {} {}", "", colorizer("•"), Paint::new(phr))?;
+                    writeln!(
+                        fmt,
+                        "{:>5} {} {}",
+                        "",
+                        colorizer(config.chars.bullet),
+                        Paint::new(phr)
+                    )?;
                 }
                 Subtitle::Bold(color, phr) => {
                     let colorizer = get_colorizer(color);
@@ -417,13 +426,13 @@ impl<'a> Report for Diagnostic<'a> {
                         fmt,
                         "{:>5} {} {}",
                         "",
-                        colorizer("•"),
+                        colorizer(config.chars.bullet),
                         Paint::new(phr).bold()
                     )?;
                 }
                 Subtitle::Phrase(color, words) => {
                     let colorizer = get_colorizer(color);
-                    write!(fmt, "{:>5} {} ", "", colorizer("•"))?;
+                    write!(fmt, "{:>5} {} ", "", colorizer(config.chars.bullet))?;
                     for word in words {
                         match word {
                             Word::Normal(str) => write!(fmt, "{} ", Paint::new(str))?,
@@ -444,7 +453,7 @@ impl<'a> Report for Diagnostic<'a> {
         }
 
         let groups = group_markers(&self.frame.positions);
-        let is_empty = groups.len() == 0;
+        let is_empty = groups.is_empty();
 
         for (ctx, group) in groups {
             writeln!(fmt)?;

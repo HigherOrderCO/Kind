@@ -61,7 +61,7 @@ impl From<DriverError> for DiagnosticFrame {
             DriverError::DefinedMultipleTimes(fst, snd) => DiagnosticFrame {
                 code: 102,
                 severity: Severity::Error,
-                title: "Multiple paths for the same name".to_string(),
+                title: "Defined multiple times for the same name".to_string(),
                 subtitles: vec![],
                 hints: vec![
                     "Rename one of the definitions or remove and look at how names work in Kind at https://kind.kindelia.org/hints/names".to_string()

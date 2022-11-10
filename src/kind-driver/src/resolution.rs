@@ -3,8 +3,7 @@
 //! it returns a desugared book of all of the
 //! depedencies.
 
-use kind_pass::erasure::{self};
-use kind_tree::desugared;
+use kind_pass::expand::uses::expand_uses;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -12,7 +11,6 @@ use std::rc::Rc;
 use strsim::jaro;
 
 use kind_pass::unbound::{self};
-use kind_pass::{desugar, expand};
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
@@ -74,18 +72,22 @@ fn ident_to_path(
     }
 }
 
-fn try_to_insert_new_name<'a>(session: &'a Session, ident: QualifiedIdent, book: &'a mut Book) {
+fn try_to_insert_new_name<'a>(failed: &mut bool, session: &'a Session, ident: QualifiedIdent, book: &'a mut Book) -> bool {
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
         session
             .diagnostic_sender
             .send(DriverError::DefinedMultipleTimes(first_occorence.clone(), ident).into())
             .unwrap();
+        *failed = true;
+        false
     } else {
         book.names.insert(ident.to_string(), ident);
+        true
     }
 }
 
 fn module_to_book<'a>(
+    failed: &mut bool,
     session: &'a Session,
     module: &Module,
     book: &'a mut Book,
@@ -96,25 +98,25 @@ fn module_to_book<'a>(
         match &entry {
             TopLevel::SumType(sum) => {
                 public_names.insert(sum.name.to_string());
-                try_to_insert_new_name(session, sum.name.clone(), book);
-                book.count
-                    .insert(sum.name.to_string(), sum.extract_book_info());
-
-                book.entries.insert(sum.name.to_string(), entry.clone());
+                if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
+                    book.count.insert(sum.name.to_string(), sum.extract_book_info());
+                    book.entries.insert(sum.name.to_string(), entry.clone());
+                }
 
                 for cons in &sum.constructors {
-                    let cons_ident = sum.name.add_segment(cons.name.to_str());
-                    public_names.insert(cons_ident.to_string());
-                    book.count
-                        .insert(cons_ident.to_string(), cons.extract_book_info(sum));
-                    try_to_insert_new_name(session, cons_ident, book);
+                    let mut cons_ident = sum.name.add_segment(cons.name.to_str());
+                    cons_ident.range = cons.name.range.clone();
+                    if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
+                        public_names.insert(cons_ident.to_string());
+                        book.count.insert(cons_ident.to_string(), cons.extract_book_info(sum));
+                    }
                 }
             }
             TopLevel::RecordType(rec) => {
                 public_names.insert(rec.name.to_string());
                 book.count
                     .insert(rec.name.to_string(), rec.extract_book_info());
-                try_to_insert_new_name(session, rec.name.clone(), book);
+                try_to_insert_new_name(failed, session, rec.name.clone(), book);
 
                 book.entries.insert(rec.name.to_string(), entry.clone());
 
@@ -124,10 +126,10 @@ fn module_to_book<'a>(
                     cons_ident.to_string(),
                     rec.extract_book_info_of_constructor(),
                 );
-                try_to_insert_new_name(session, cons_ident, book);
+                try_to_insert_new_name(failed, session, cons_ident, book);
             }
             TopLevel::Entry(entr) => {
-                try_to_insert_new_name(session, entr.name.clone(), book);
+                try_to_insert_new_name(failed, session, entr.name.clone(), book);
                 public_names.insert(entr.name.to_string());
                 book.count
                     .insert(entr.name.to_string(), entr.extract_book_info());
@@ -150,7 +152,7 @@ fn parse_and_store_book_by_identifier<'a>(
 
     match ident_to_path(&session.root, ident, true) {
         Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
-        Ok(None) => false,
+        Ok(None) => true,
         Err(err) => {
             session.diagnostic_sender.send(err).unwrap();
             true
@@ -184,14 +186,23 @@ fn parse_and_store_book_by_path<'a>(
     let (mut module, mut failed) =
         kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
 
-    let (_, unbound_top_level) =
+    let (unbound_vars, unbound_top_level) =
         unbound::get_module_unbound(session.diagnostic_sender.clone(), &mut module);
 
-    for idents in unbound_top_level.values() {
-        failed |= parse_and_store_book_by_identifier(session, &idents[0], book);
+    for idents in unbound_vars.values() {
+        unbound_variable(session, book, idents);
+        failed = true;
     }
 
-    module_to_book(session, &module, book);
+    for idents in unbound_top_level.values() {
+        if idents.iter().any(|x| !x.used_by_sugar) {
+            failed |= parse_and_store_book_by_identifier(session, &idents[0], book);
+        }
+    }
+
+    failed |= expand_uses(&mut module, session.diagnostic_sender.clone());
+
+    module_to_book(&mut failed, session, &module, book);
 
     failed
 }
@@ -212,59 +223,11 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
 pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Book> {
     let mut book = Book::default();
 
-    let mut failed = parse_and_store_book_by_path(session, path, &mut book);
+    let failed = parse_and_store_book_by_path(session, path, &mut book);
 
-    let (unbounds, unbounded_top) = unbound::get_book_unbound(session.diagnostic_sender.clone(), &mut book);
-
-    for idents in unbounds.values() {
-        unbound_variable(session, &book, idents);
-        failed = true;
-    }
-
-    for idents in unbounded_top.values() {
-        if !book.entries.contains_key(&idents[0].to_string()) {
-            let vec = idents.iter().map(|x| x.to_ident()).collect::<Vec<Ident>>();
-            unbound_variable(session, &book, vec.as_slice());
-            failed = true;
-        }
-    }
-
-    if !unbounds.is_empty() || failed {
+    if failed {
         None
     } else {
         Some(book)
-    }
-}
-
-pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
-    let mut concrete_book = parse_and_store_book(session, path)?;
-
-    expand::expand_book(&mut concrete_book);
-
-    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-
-    let succeeded = kind_checker::type_check(&desugared_book, session.diagnostic_sender.clone());
-
-    if !succeeded {
-        return None;
-    }
-
-    let erased = erasure::erase_book(
-        &desugared_book,
-        session.diagnostic_sender.clone(),
-        HashSet::from_iter(vec!["Main".to_string()]),
-    )?;
-
-    Some(erased)
-}
-
-pub fn compile_book(session: &mut Session, path: &PathBuf) -> Option<()> {
-    let book = type_check_book(session, path);
-    match book {
-        None => None,
-        Some(book) => {
-            println!("{}", kind_target_hvm::compile_book(book));
-            Some(())
-        }
     }
 }

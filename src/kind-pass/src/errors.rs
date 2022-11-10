@@ -1,5 +1,5 @@
 use kind_report::data::{Color, DiagnosticFrame, Marker, Severity};
-use kind_span::Range;
+use kind_span::{Range, Span};
 
 pub enum Sugar {
     DoNotation,
@@ -14,7 +14,7 @@ pub enum Sugar {
 pub enum PassError {
     RepeatedVariable(Range, Range),
     CannotUseNamed(Range, Range),
-    IncorrectArity(Range, usize, usize),
+    IncorrectArity(Range, Vec<Range>, usize, usize),
     DuplicatedNamed(Range, Range),
     LetDestructOnlyForRecord(Range),
     LetDestructOnlyForSum(Range),
@@ -26,6 +26,11 @@ pub enum PassError {
     RulesWithInconsistentArity(Vec<(Range, usize)>),
     SugarIsBadlyImplemented(Range, Range, usize),
     CannotUseIrrelevant(Option<Range>, Range, Option<Range>),
+    CannotFindAlias(String, Range),
+    NotATypeConstructor(Range, Range),
+    ShouldBeAParameter(Span, Range),
+    NoFieldCoverage(Range, Vec<String>),
+    DuplicatedConstructor(Range, Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -212,28 +217,32 @@ impl From<PassError> for DiagnosticFrame {
                     main: true,
                 }],
             },
-            PassError::IncorrectArity(head_range, expected, hidden) => DiagnosticFrame {
-                code: 210,
-                severity: Severity::Error,
-                title: "Incorrect arity".to_string(),
-                subtitles: vec![],
-                hints: vec![
-                    if expected == 0 {
-                        "This function expects no arguments".to_string()
-                    } else if hidden == 0 {
-                        format!("This function expects {} arguments", expected)
-                    } else {
-                        format!("This function expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
-                    }
-                ],
-                positions: vec![Marker {
+            PassError::IncorrectArity(head_range, got, expected, hidden) => {
+                let positions = vec![Marker {
                     position: head_range,
                     color: Color::Fst,
                     text: "This function requires a fixed number of arguments".to_string(),
                     no_code: false,
                     main: true,
-                }],
-            },
+                }];
+
+                DiagnosticFrame {
+                    code: 210,
+                    severity: Severity::Error,
+                    title: "Incorrect arity.".to_string(),
+                    subtitles: vec![],
+                    hints: vec![
+                        if expected == 0 {
+                            format!("This function expects no arguments but got {}", got.len())
+                        } else if hidden == 0 {
+                            format!("This function expects {} arguments but got {}", expected, got.len())
+                        } else {
+                            format!("This function expects {} arguments or {} (without hidden ones) but got {}.", expected, expected - hidden, got.len())
+                        }
+                    ],
+                    positions
+                }
+            }
             PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
                 code: 211,
                 severity: Severity::Error,
@@ -312,9 +321,9 @@ impl From<PassError> for DiagnosticFrame {
             PassError::RepeatedVariable(first_decl, last_decl) => DiagnosticFrame {
                 code: 214,
                 severity: Severity::Error,
-                title: "Repeated variable".to_string(),
+                title: "Repeated name".to_string(),
                 subtitles: vec![],
-                hints: vec!["Rename one of the variables".to_string()],
+                hints: vec!["Rename one of the occurences".to_string()],
                 positions: vec![
                     Marker {
                         position: last_decl,
@@ -331,6 +340,115 @@ impl From<PassError> for DiagnosticFrame {
                         main: false,
                     },
                 ],
+            },
+            PassError::CannotFindAlias(name, range) => DiagnosticFrame {
+                code: 214,
+                severity: Severity::Error,
+                title: "Cannot find alias".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![
+                    Marker {
+                        position: range,
+                        color: Color::Fst,
+                        text: format!("Cannot find alias for '{}'", name),
+                        no_code: false,
+                        main: true,
+                    }
+                ],
+            },
+            PassError::ShouldBeAParameter(error_range, declaration_range) => {
+                let mut positions = vec![];
+
+                match error_range {
+                    Span::Generated => (),
+                    Span::Locatable(error_range) => {
+                        positions.push(Marker {
+                            position: error_range,
+                            color: Color::Fst,
+                            text: "This expression is not the parameter".to_string(),
+                            no_code: false,
+                            main: true,
+                        })
+                    },
+                }
+
+                positions.push(
+                    Marker {
+                        position: declaration_range,
+                        color: Color::Snd,
+                        text: "This is the parameter that should be used".to_string(),
+                        no_code: false,
+                        main: false,
+                    }
+                );
+
+                DiagnosticFrame {
+                    code: 214,
+                    severity: Severity::Error,
+                    title: "The expression is not the parameter declared in the type constructor".to_string(),
+                    subtitles: vec![],
+                    hints: vec![],
+                    positions
+                }
+            }
+            PassError::NotATypeConstructor(error_range, declaration_range) => DiagnosticFrame {
+                code: 214,
+                severity: Severity::Error,
+                title: "This is not the type that is being declared.".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![
+                    Marker {
+                        position: error_range,
+                        color: Color::Fst,
+                        text: "This is not the type that is being declared".to_string(),
+                        no_code: false,
+                        main: true,
+                    },
+                    Marker {
+                        position: declaration_range,
+                        color: Color::Snd,
+                        text: "This is the type that should be used instead".to_string(),
+                        no_code: false,
+                        main: false,
+                    }
+                ],
+            },
+            PassError::NoFieldCoverage(place, other) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "The case is not covering all the values inside of it!".to_string(),
+                subtitles: vec![],
+                hints: vec![format!("Need variables for {}", other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", "))],
+                positions: vec![Marker {
+                    position: place,
+                    color: Color::Fst,
+                    text: "This is the incomplete case".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::DuplicatedConstructor(place, other) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "Duplicated constructor name".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: place,
+                    color: Color::Fst,
+                    text: "Here".to_string(),
+                    no_code: false,
+                    main: true,
+                },
+                Marker {
+                    position: other,
+                    color: Color::Fst,
+                    text: "Here".to_string(),
+                    no_code: false,
+                    main: false,
+                }],
             },
         }
     }

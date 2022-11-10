@@ -29,7 +29,7 @@ fn is_valid_id(chr: char) -> bool {
 }
 
 fn is_valid_upper_start(chr: char) -> bool {
-    matches!(chr, 'A'..='Z' | '_')
+    matches!(chr, 'A'..='Z')
 }
 
 fn is_valid_id_start(chr: char) -> bool {
@@ -51,13 +51,15 @@ impl<'a> Lexer<'a> {
 
     pub fn to_keyword(data: &str) -> Token {
         match data {
+            "_" => Token::Hole,
             "ask" => Token::Ask,
             "do" => Token::Do,
             "if" => Token::If,
             "else" => Token::Else,
             "match" => Token::Match,
             "let" => Token::Let,
-            "open" => Token::Open,
+            "use" => Token::Use,
+            "as" => Token::As,
             "return" => Token::Return,
             "type" => Token::Type,
             "record" => Token::Record,
@@ -102,7 +104,7 @@ impl<'a> Lexer<'a> {
                     }
                 }
                 c if c.is_ascii_digit() => self.lex_number(),
-                c if is_valid_upper_start(*c).clone() => {
+                c if is_valid_upper_start(*c) => {
                     let first_part = self.accumulate_while(&is_valid_id).to_string();
                     let peek = self.peekable.peek().cloned();
                     let auxiliar_part = match peek {
@@ -114,7 +116,7 @@ impl<'a> Lexer<'a> {
                         _ => None,
                     };
                     (
-                        Token::UpperId(first_part.to_string(), auxiliar_part),
+                        Token::UpperId(first_part, auxiliar_part),
                         self.mk_range(start),
                     )
                 }

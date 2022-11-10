@@ -52,6 +52,7 @@ impl<'a> DesugarState<'a> {
                 range,
                 bind_ident.clone(),
                 vec![expr, desugared::Expr::lambda(range, name, next)],
+                false,
             )
         };
 
@@ -68,6 +69,7 @@ impl<'a> DesugarState<'a> {
                 let name = self.gen_name(sttm.range);
 
                 let res_destruct = self.desugar_destruct(
+                    next.range,
                     &concrete::Destruct::Destruct(*a, b.to_owned(), c.to_owned(), *d),
                     desugared::Expr::var(name.clone()),
                     &|this| this.desugar_sttm(bind_ident, pure_ident, next),
@@ -84,6 +86,7 @@ impl<'a> DesugarState<'a> {
             concrete::SttmKind::Let(destruct, val, next) => {
                 let res_val = self.desugar_expr(&val.clone());
                 self.desugar_destruct(
+                    next.range,
                     destruct,
                     res_val,
                     &|this| this.desugar_sttm(bind_ident, pure_ident, next),
@@ -99,7 +102,7 @@ impl<'a> DesugarState<'a> {
             }
             concrete::SttmKind::Return(expr) => {
                 let res_expr = self.desugar_expr(expr);
-                self.mk_desugared_fun(expr.locate(), pure_ident.clone(), vec![res_expr])
+                self.mk_desugared_fun(expr.locate(), pure_ident.clone(), vec![res_expr], false)
             }
             concrete::SttmKind::RetExpr(expr) => self.desugar_expr(expr),
         }
@@ -132,7 +135,7 @@ impl<'a> DesugarState<'a> {
         typ: &expr::Expr,
         body: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma = QualifiedIdent::new_static("Sigma".to_string(), None, range);
+        let sigma = QualifiedIdent::new_static("Sigma", None, range);
 
         let entry = self.old_book.entries.get(sigma.to_string().as_str());
         if entry.is_none() {
@@ -142,7 +145,7 @@ impl<'a> DesugarState<'a> {
 
         let name = match name {
             Some(ident) => ident.clone(),
-            None => Ident::generate("_"),
+            None => Ident::generate("_var"),
         };
 
         let spine = vec![
@@ -150,7 +153,7 @@ impl<'a> DesugarState<'a> {
             desugared::Expr::lambda(range, name, self.desugar_expr(body)),
         ];
 
-        self.mk_desugared_ctr(range, sigma, spine)
+        self.mk_desugared_ctr(range, sigma, spine, false)
     }
 
     pub(crate) fn desugar_list(
@@ -158,7 +161,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[expr::Expr],
     ) -> Box<desugared::Expr> {
-        let list_ident = QualifiedIdent::new_static("List".to_string(), None, range);
+        let list_ident = QualifiedIdent::new_static("List", None, range);
         let cons_ident = list_ident.add_segment("cons");
         let nil_ident = list_ident.add_segment("nil");
 
@@ -172,10 +175,10 @@ impl<'a> DesugarState<'a> {
         }
 
         expr.iter().rfold(
-            self.mk_desugared_ctr(range, nil_ident, Vec::new()),
+            self.mk_desugared_ctr(range, nil_ident, Vec::new(), false),
             |res, elem| {
                 let spine = vec![self.desugar_expr(elem), res];
-                self.mk_desugared_ctr(range, cons_ident.clone(), spine)
+                self.mk_desugared_ctr(range, cons_ident.clone(), spine, false)
             },
         )
     }
@@ -187,8 +190,7 @@ impl<'a> DesugarState<'a> {
         if_: &expr::Expr,
         else_: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let bool_ident =
-            QualifiedIdent::new_static("Bool".to_string(), Some("if".to_string()), range);
+        let bool_ident = QualifiedIdent::new_sugared("Bool", "if", range);
 
         let bool_if = self.old_book.entries.get(bool_ident.to_string().as_str());
 
@@ -203,7 +205,7 @@ impl<'a> DesugarState<'a> {
             self.desugar_expr(else_),
         ];
 
-        self.mk_desugared_fun(range, bool_ident, spine)
+        self.mk_desugared_fun(range, bool_ident, spine, false)
     }
 
     pub(crate) fn desugar_pair(
@@ -212,8 +214,7 @@ impl<'a> DesugarState<'a> {
         fst: &expr::Expr,
         snd: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma_new =
-            QualifiedIdent::new_static("Sigma".to_string(), Some("new".to_string()), range);
+        let sigma_new = QualifiedIdent::new_sugared("Sigma", "new", range);
 
         let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
 
@@ -224,13 +225,13 @@ impl<'a> DesugarState<'a> {
 
         let spine = vec![self.desugar_expr(fst), self.desugar_expr(snd)];
 
-        self.mk_desugared_ctr(range, sigma_new, spine)
+        self.mk_desugared_ctr(range, sigma_new, spine, false)
     }
 
     pub(crate) fn desugar_expr(&mut self, expr: &expr::Expr) -> Box<desugared::Expr> {
         use expr::ExprKind::*;
         match &expr.data {
-            Constr(_) => self.desugar_app(expr.range, expr, &[]),
+            Constr(_, _) | App(_, _) => self.desugar_app(expr.range, expr),
             All(ident, typ, body) => desugared::Expr::all(
                 expr.range,
                 ident.clone().unwrap_or_else(|| self.gen_name(expr.range)),
@@ -251,7 +252,6 @@ impl<'a> DesugarState<'a> {
             }
             Var(ident) => desugared::Expr::var(ident.clone()),
             Hole => desugared::Expr::hole(expr.range, self.gen_hole()),
-            App(head, spine) => self.desugar_app(expr.range, head, spine),
             Lit(literal) => self.desugar_literal(expr.range, literal),
             Match(matcher) => self.desugar_match(expr.range, matcher),
             Let(destruct, val, next) => self.desugar_let(expr.range, destruct, val, next),

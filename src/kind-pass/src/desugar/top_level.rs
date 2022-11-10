@@ -1,7 +1,7 @@
 use kind_span::{Range, Span};
 use kind_tree::concrete::{self, Telescope};
-use kind_tree::desugared;
-use kind_tree::symbol::{QualifiedIdent};
+use kind_tree::desugared::{self, ExprKind};
+use kind_tree::symbol::QualifiedIdent;
 
 use crate::errors::{PassError, Sugar};
 
@@ -82,7 +82,32 @@ impl<'a> DesugarState<'a> {
             };
 
             let typ = match cons.typ.clone() {
-                Some(expr) => self.desugar_expr(&expr),
+                Some(expr) => {
+                    let res = self.desugar_expr(&expr);
+                    match &res.data {
+                        ExprKind::Ctr(name, spine)
+                            if name.to_string() == sum_type.name.to_string() =>
+                        {
+                            for (i, parameter) in sum_type.parameters.iter().enumerate() {
+                                match &spine[i].data {
+                                    ExprKind::Var(name)
+                                        if name.to_string() == parameter.name.to_string() => {}
+                                    _ => {
+                                        self.send_err(PassError::ShouldBeAParameter(
+                                            spine[i].span,
+                                            parameter.range,
+                                        ));
+                                    }
+                                }
+                            }
+                        }
+                        _ => self.send_err(PassError::NotATypeConstructor(
+                            expr.range,
+                            sum_type.name.range,
+                        )),
+                    }
+                    res
+                }
                 None => {
                     let args = [irrelevant_params.as_slice(), pre_indices]
                         .concat()
@@ -90,7 +115,7 @@ impl<'a> DesugarState<'a> {
                         .map(|x| desugared::Expr::var(x.name.clone()))
                         .collect::<Vec<Box<desugared::Expr>>>();
 
-                    desugared::Expr::ctr(sum_type.name.range, sum_type.name.clone(), args)
+                    desugared::Expr::ctr(cons.name.range, sum_type.name.clone(), args)
                 }
             };
 
@@ -105,7 +130,7 @@ impl<'a> DesugarState<'a> {
                 typ,
                 rules: Vec::new(),
                 attrs: Vec::new(),
-                span: Span::Locatable(sum_type.name.range),
+                span: Span::Locatable(cons.name.range),
             };
 
             self.new_book
@@ -187,8 +212,7 @@ impl<'a> DesugarState<'a> {
         fst: &concrete::pat::Pat,
         snd: &concrete::pat::Pat,
     ) -> Box<desugared::Expr> {
-        let sigma_new =
-            QualifiedIdent::new_static("Sigma".to_string(), Some("new".to_string()), range);
+        let sigma_new = QualifiedIdent::new_static("Sigma", Some("new".to_string()), range);
 
         let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
         if entry.is_none() {
@@ -198,7 +222,7 @@ impl<'a> DesugarState<'a> {
 
         let spine = vec![self.desugar_pat(fst), self.desugar_pat(snd)];
 
-        self.mk_desugared_ctr(range, sigma_new, spine)
+        self.mk_desugared_ctr(range, sigma_new, spine, true)
     }
 
     pub fn desugar_list_pat(
@@ -206,7 +230,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[concrete::pat::Pat],
     ) -> Box<desugared::Expr> {
-        let list_ident = QualifiedIdent::new_static("List".to_string(), None, range);
+        let list_ident = QualifiedIdent::new_static("List", None, range);
         let cons_ident = list_ident.add_segment("cons");
         let nil_ident = list_ident.add_segment("nil");
 
@@ -220,10 +244,10 @@ impl<'a> DesugarState<'a> {
         }
 
         expr.iter().rfold(
-            self.mk_desugared_ctr(range, nil_ident, Vec::new()),
+            self.mk_desugared_ctr(range, nil_ident, Vec::new(), true),
             |res, elem| {
                 let spine = vec![self.desugar_pat(elem), res];
-                self.mk_desugared_ctr(range, cons_ident.clone(), spine)
+                self.mk_desugared_ctr(range, cons_ident.clone(), spine, true)
             },
         )
     }
@@ -235,12 +259,11 @@ impl<'a> DesugarState<'a> {
                     .old_book
                     .count
                     .get(head.to_string().as_str())
-                    .expect("Cannot find definition");
+                    .expect("Internal Error: Cannot find definition");
 
                 if !entry.is_ctr {
-                    // TODO: Not sure if i should just throw an error?
-                    // We are not requiring that the thing is specifically a constructor
-                    panic!("Incomplete Design: Oh no!")
+                    // TODO: Check if only data constructors declared inside
+                    // inductive types can be used in patterns.
                 }
 
                 let (hidden, _erased) = entry.arguments.count_implicits();
@@ -253,15 +276,18 @@ impl<'a> DesugarState<'a> {
                     let mut count = 0;
                     for i in 0..entry.arguments.len() {
                         if entry.arguments[i].hidden {
-                            new_spine.push(self.gen_hole_expr())
+                            let name = self.gen_name(entry.arguments[i].range);
+                            new_spine.push(desugared::Expr::var(name))
                         } else {
                             new_spine.push(self.desugar_pat(&spine[count]));
                             count += 1;
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
+                    println!("{}", pat);
                     self.send_err(PassError::IncorrectArity(
                         head.range,
+                        spine.iter().map(|x| x.range).collect(),
                         entry.arguments.len(),
                         hidden,
                     ));
@@ -273,10 +299,13 @@ impl<'a> DesugarState<'a> {
                 }
                 desugared::Expr::ctr(pat.range, head.clone(), new_spine)
             }
+            concrete::pat::PatKind::Hole => {
+                let name = self.gen_name(pat.range);
+                desugared::Expr::var(name)
+            }
             concrete::pat::PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
             // TODO: Add u120 pattern literals
             concrete::pat::PatKind::Num(n) => desugared::Expr::num60(pat.range, *n),
-            concrete::pat::PatKind::Hole => desugared::Expr::hole(pat.range, self.gen_hole()),
             concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
             concrete::pat::PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
             concrete::pat::PatKind::Str(string) => {
@@ -339,6 +368,8 @@ impl<'a> DesugarState<'a> {
     }
 
     pub fn desugar_entry(&mut self, entry: &concrete::Entry) {
+        self.name_count = 0;
+
         let rules = entry
             .rules
             .iter()

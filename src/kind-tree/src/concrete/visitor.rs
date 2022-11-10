@@ -365,7 +365,12 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
     ctx.visit_range(&mut expr.range);
     match &mut expr.data {
         ExprKind::Var(ident) => ctx.visit_ident(ident),
-        ExprKind::Constr(ident) => ctx.visit_qualified_ident(ident),
+        ExprKind::Constr(ident, spine) => {
+            ctx.visit_qualified_ident(ident);
+            for arg in spine {
+                ctx.visit_binding(arg);
+            }
+        }
         ExprKind::All(None, typ, body) => {
             ctx.visit_expr(typ);
             ctx.visit_expr(body);
