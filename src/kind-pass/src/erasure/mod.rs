@@ -255,7 +255,7 @@ impl<'a> ErasureState<'a> {
         use kind_tree::desugared::ExprKind::*;
 
         match &expr.data {
-            Typ | U60 | Num(_) | Str(_) | Err => Box::new(expr.clone()),
+            Typ | NumType(_) | Num(_) | Str(_) | Err => Box::new(expr.clone()),
             Hole(_) | Hlp(_) => match &expr.span {
                 kind_span::Span::Generated => Box::new(expr.clone()),
                 kind_span::Span::Locatable(span) => {
