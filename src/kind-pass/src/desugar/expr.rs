@@ -144,7 +144,7 @@ impl<'a> DesugarState<'a> {
 
         let name = match name {
             Some(ident) => ident.clone(),
-            None => Ident::generate("_"),
+            None => Ident::generate("_var"),
         };
 
         let spine = vec![

@@ -165,10 +165,27 @@ impl Visitor for UnboundCollector {
             TopLevel::SumType(entr) => {
                 self.context_vars
                     .push((entr.name.range, entr.name.to_string()));
+
+                let mut repeated_names = FxHashMap::<String, Range>::default();
+                let mut failed = false;
+
                 for cons in &entr.constructors {
+
+                    match repeated_names.get(&cons.name.to_string()) {
+                        Some(_) => {
+                            failed = true;
+                        },
+                        None => {
+                            repeated_names.insert(cons.name.to_string(), cons.name.range);
+                        },
+                    }
+
                     let name_cons = entr.name.add_segment(cons.name.to_str());
-                    self.context_vars
-                        .push((name_cons.range, name_cons.to_string()));
+                    self.context_vars.push((name_cons.range, name_cons.to_string()));
+                }
+
+                if failed {
+                    return;
                 }
 
                 let vars = self.context_vars.clone();

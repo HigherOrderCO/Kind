@@ -151,7 +151,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         types.push(Argument {
             hidden: false,
             erased: false,
-            name: Ident::new_static("_", range),
+            name: Ident::new_static(&format!("_{}", cons.name.to_string()), range),
             typ: Some(cons_type),
             range,
         });

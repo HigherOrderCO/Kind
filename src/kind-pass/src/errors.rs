@@ -29,7 +29,8 @@ pub enum PassError {
     CannotFindAlias(String, Range),
     NotATypeConstructor(Range, Range),
     ShouldBeAParameter(Span, Range),
-    NoFieldCoverage(Range, Vec<String>)
+    NoFieldCoverage(Range, Vec<String>),
+    DuplicatedConstructor(Range, Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -426,6 +427,27 @@ impl From<PassError> for DiagnosticFrame {
                     text: "This is the incomplete case".to_string(),
                     no_code: false,
                     main: true,
+                }],
+            },
+            PassError::DuplicatedConstructor(place, other) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "Duplicated constructor name".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: place,
+                    color: Color::Fst,
+                    text: "Here".to_string(),
+                    no_code: false,
+                    main: true,
+                },
+                Marker {
+                    position: other,
+                    color: Color::Fst,
+                    text: "Here".to_string(),
+                    no_code: false,
+                    main: false,
                 }],
             },
         }

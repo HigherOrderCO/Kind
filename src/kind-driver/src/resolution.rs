@@ -72,18 +72,22 @@ fn ident_to_path(
     }
 }
 
-fn try_to_insert_new_name<'a>(session: &'a Session, ident: QualifiedIdent, book: &'a mut Book) {
+fn try_to_insert_new_name<'a>(failed: &mut bool, session: &'a Session, ident: QualifiedIdent, book: &'a mut Book) -> bool {
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
         session
             .diagnostic_sender
             .send(DriverError::DefinedMultipleTimes(first_occorence.clone(), ident).into())
             .unwrap();
+        *failed = true;
+        false
     } else {
         book.names.insert(ident.to_string(), ident);
+        true
     }
 }
 
 fn module_to_book<'a>(
+    failed: &mut bool,
     session: &'a Session,
     module: &Module,
     book: &'a mut Book,
@@ -94,25 +98,25 @@ fn module_to_book<'a>(
         match &entry {
             TopLevel::SumType(sum) => {
                 public_names.insert(sum.name.to_string());
-                try_to_insert_new_name(session, sum.name.clone(), book);
-                book.count
-                    .insert(sum.name.to_string(), sum.extract_book_info());
-
-                book.entries.insert(sum.name.to_string(), entry.clone());
+                if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
+                    book.count.insert(sum.name.to_string(), sum.extract_book_info());
+                    book.entries.insert(sum.name.to_string(), entry.clone());
+                }
 
                 for cons in &sum.constructors {
-                    let cons_ident = sum.name.add_segment(cons.name.to_str());
-                    public_names.insert(cons_ident.to_string());
-                    book.count
-                        .insert(cons_ident.to_string(), cons.extract_book_info(sum));
-                    try_to_insert_new_name(session, cons_ident, book);
+                    let mut cons_ident = sum.name.add_segment(cons.name.to_str());
+                    cons_ident.range = cons.name.range.clone();
+                    if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
+                        public_names.insert(cons_ident.to_string());
+                        book.count.insert(cons_ident.to_string(), cons.extract_book_info(sum));
+                    }
                 }
             }
             TopLevel::RecordType(rec) => {
                 public_names.insert(rec.name.to_string());
                 book.count
                     .insert(rec.name.to_string(), rec.extract_book_info());
-                try_to_insert_new_name(session, rec.name.clone(), book);
+                try_to_insert_new_name(failed, session, rec.name.clone(), book);
 
                 book.entries.insert(rec.name.to_string(), entry.clone());
 
@@ -122,10 +126,10 @@ fn module_to_book<'a>(
                     cons_ident.to_string(),
                     rec.extract_book_info_of_constructor(),
                 );
-                try_to_insert_new_name(session, cons_ident, book);
+                try_to_insert_new_name(failed, session, cons_ident, book);
             }
             TopLevel::Entry(entr) => {
-                try_to_insert_new_name(session, entr.name.clone(), book);
+                try_to_insert_new_name(failed, session, entr.name.clone(), book);
                 public_names.insert(entr.name.to_string());
                 book.count
                     .insert(entr.name.to_string(), entr.extract_book_info());
@@ -198,7 +202,7 @@ fn parse_and_store_book_by_path<'a>(
 
     failed |= expand_uses(&mut module, session.diagnostic_sender.clone());
 
-    module_to_book(session, &module, book);
+    module_to_book(&mut failed, session, &module, book);
 
     failed
 }
