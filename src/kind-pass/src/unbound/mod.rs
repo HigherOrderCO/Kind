@@ -114,11 +114,12 @@ impl Visitor for UnboundCollector {
             None => (),
         }
 
-        if let Some(fst) = self
+        let res = self
             .context_vars
             .iter()
-            .find(|x| x.1 == argument.name.to_string())
-        {
+            .find(|x| x.1 == argument.name.to_string());
+
+        if let Some(fst) = res {
             self.errors
                 .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
                 .unwrap()
@@ -390,10 +391,6 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Match(matcher) => {
                 self.visit_qualified_ident(matcher.typ.add_segment("match").to_sugar());
-                self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.match", matcher.typ.to_string().as_str()),
-                    expr.range,
-                ));
                 self.visit_match(matcher)
             }
             ExprKind::Subst(subst) => {

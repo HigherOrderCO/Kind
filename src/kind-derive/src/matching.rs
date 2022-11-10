@@ -225,7 +225,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     }
     // Rules
 
-    Entry {
+    let entry = Entry {
         name,
         docs: Vec::new(),
         args: types,
@@ -233,5 +233,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         rules,
         range,
         attrs: Vec::new(),
-    }
+    };
+
+    entry
 }

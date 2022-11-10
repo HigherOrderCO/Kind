@@ -52,7 +52,7 @@ impl<'a> DesugarState<'a> {
             .collect();
 
         if !jump_rest && !names.is_empty() {
-            self.send_err(PassError::NoCoverage(*type_info.0, names))
+            self.send_err(PassError::NoFieldCoverage(*type_info.0, names))
         }
 
         ordered_fields

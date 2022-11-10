@@ -259,12 +259,11 @@ impl<'a> DesugarState<'a> {
                     .old_book
                     .count
                     .get(head.to_string().as_str())
-                    .expect("Cannot find definition");
+                    .expect("Internal Error: Cannot find definition");
 
                 if !entry.is_ctr {
-                    // TODO: Not sure if i should just throw an error?
-                    // We are not requiring that the thing is specifically a constructor
-                    //panic!("Incomplete Design: Oh no! {}", head)
+                    // TODO: Check if only data constructors declared inside
+                    // inductive types can be used in patterns.
                 }
 
                 let (hidden, _erased) = entry.arguments.count_implicits();

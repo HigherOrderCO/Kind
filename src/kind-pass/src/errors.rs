@@ -29,6 +29,7 @@ pub enum PassError {
     CannotFindAlias(String, Range),
     NotATypeConstructor(Range, Range),
     ShouldBeAParameter(Span, Range),
+    NoFieldCoverage(Range, Vec<String>)
 }
 
 // TODO: A way to build an error message with methods
@@ -412,6 +413,20 @@ impl From<PassError> for DiagnosticFrame {
                         main: false,
                     }
                 ],
+            },
+            PassError::NoFieldCoverage(place, other) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "The case is not covering all the values inside of it!".to_string(),
+                subtitles: vec![],
+                hints: vec![format!("Need variables for {}", other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", "))],
+                positions: vec![Marker {
+                    position: place,
+                    color: Color::Fst,
+                    text: "This is the incomplete case".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
             },
         }
     }

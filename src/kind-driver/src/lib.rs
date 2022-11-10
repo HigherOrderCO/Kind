@@ -49,11 +49,17 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
 pub fn erase_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
+    println!("Desugared: {}", desugared_book);
     erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
         HashSet::from_iter(vec!["Main".to_string()]),
     )
+}
+
+pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
+    let concrete_book = to_book(session, path)?;
+    desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)
 }
 
 pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
@@ -81,11 +87,9 @@ pub fn execute_file(file: &backend::File) -> Box<backend::Term> {
 }
 
 pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {
-    // TODO: Change to from_file when hvm support it
     checker::eval_api(book)
 }
 
 pub fn generate_checker(book: &desugared::Book) -> String {
-    // TODO: Change to from_file when hvm support it
     checker::gen_checker(book)
 }

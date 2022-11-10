@@ -50,6 +50,9 @@ enum Command {
     #[clap(aliases = &["e"])]
     Eval { file: String },
 
+    #[clap(aliases = &["k"])]
+    ToKindCore { file : String },
+
     /// Runs Main on the HVM
     #[clap(aliases = &["r"])]
     Run { file: String },
@@ -193,6 +196,15 @@ fn main() {
         Command::Show { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::to_book(session, &PathBuf::from(file.clone()))
+            })
+            .map(|res| {
+                print!("{}", res);
+                res
+            });
+        }
+        Command::ToKindCore { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::desugar_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
                 print!("{}", res);

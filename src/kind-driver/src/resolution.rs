@@ -3,7 +3,6 @@
 //! it returns a desugared book of all of the
 //! depedencies.
 
-use fxhash::FxHashMap;
 use kind_pass::expand::uses::expand_uses;
 use std::collections::HashSet;
 use std::fs;
@@ -142,14 +141,13 @@ fn parse_and_store_book_by_identifier<'a>(
     session: &mut Session,
     ident: &QualifiedIdent,
     book: &'a mut Book,
-    unbound: &mut FxHashMap<String, Vec<QualifiedIdent>>,
 ) -> bool {
     if book.entries.contains_key(ident.to_string().as_str()) {
         return false;
     }
 
     match ident_to_path(&session.root, ident, true) {
-        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book, unbound),
+        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
         Ok(None) => true,
         Err(err) => {
             session.diagnostic_sender.send(err).unwrap();
@@ -162,7 +160,6 @@ fn parse_and_store_book_by_path<'a>(
     session: &mut Session,
     path: &PathBuf,
     book: &'a mut Book,
-    unbound: &mut FxHashMap<String, Vec<QualifiedIdent>>,
 ) -> bool {
     if session.loaded_paths_map.contains_key(path) {
         return false;
@@ -195,16 +192,7 @@ fn parse_and_store_book_by_path<'a>(
 
     for idents in unbound_top_level.values() {
         if idents.iter().any(|x| !x.used_by_sugar) {
-            let res = parse_and_store_book_by_identifier(session, &idents[0], book, unbound);
-            failed |= res;
-            if res {
-                for ident in idents {
-                    if !ident.used_by_sugar {
-                        let entry = unbound.entry(ident.to_string()).or_default();
-                        entry.push(ident.clone())
-                    }
-                }
-            }
+            failed |= parse_and_store_book_by_identifier(session, &idents[0], book);
         }
     }
 
@@ -230,20 +218,8 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
 
 pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Book> {
     let mut book = Book::default();
-    let mut unbound = FxHashMap::default();
 
-    let failed = parse_and_store_book_by_path(session, path, &mut book, &mut unbound);
-
-    for (_, res) in unbound {
-        unbound_variable(
-            session,
-            &book,
-            res.iter()
-                .map(|x| x.to_ident())
-                .collect::<Vec<Ident>>()
-                .as_slice(),
-        )
-    }
+    let failed = parse_and_store_book_by_path(session, path, &mut book);
 
     if failed {
         None
