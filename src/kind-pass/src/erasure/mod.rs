@@ -16,7 +16,7 @@ use fxhash::{FxHashMap, FxHashSet};
 use kind_report::data::DiagnosticFrame;
 
 use kind_span::Range;
-use kind_tree::desugared::{Book, Entry, Expr, ExprKind, Rule};
+use kind_tree::{desugared::{Book, Entry, Expr, ExprKind, Rule, self}, symbol::{QualifiedIdent}};
 
 use crate::errors::PassError;
 
@@ -211,41 +211,60 @@ impl<'a> ErasureState<'a> {
         self.unify_loop(range, left, right, &mut Default::default(), relevance_unify)
     }
 
-    pub fn erase_pat(&mut self, on: (Option<Range>, Relevance), pat: &Expr) {
+    pub fn erase_pat_spine(&mut self, on: (Option<Range>, Relevance), name: &QualifiedIdent, spine: &Vec<Box<Expr>>) -> Vec<Box<Expr>> {
+        let fun = match self.names.get(&name.to_string()) {
+            Some(res) => *res,
+            None => self.new_hole(name.range, name.to_string()),
+        };
+
+        if !self.unify(name.range, on, fun, true) {
+            self.err_irrelevant(None, name.range, None)
+        }
+
+        let entry = self.book.entrs.get(name.to_string().as_str()).unwrap();
+        let erased = entry.args.iter();
+
+        let irrelevances = erased.map(|arg| {
+            if on.1 == Relevance::Irrelevant {
+                on
+            } else if arg.erased {
+                (Some(arg.span), Relevance::Irrelevant)
+            } else {
+                (Some(arg.span), Relevance::Relevant)
+            }
+        });
+
+        spine
+            .iter()
+            .zip(irrelevances)
+            .map(|(arg, relev)| (self.erase_pat(relev, arg), relev.1.clone()))
+            .filter(|res| res.1 == Relevance::Relevant)
+            .map(|res| res.0)
+            .collect()
+    }
+
+    pub fn erase_pat(&mut self, on: (Option<Range>, Relevance), pat: &Expr) -> Box<Expr> {
         use kind_tree::desugared::ExprKind::*;
 
         match &pat.data {
-            Num(_) | Str(_) => (),
+            Num(_) | Str(_) => Box::new(pat.clone()),
             Var(name) => {
                 self.ctx.insert(name.to_string(), (name.range, on));
+                Box::new(pat.clone())
             }
-            Fun(name, spine) | Ctr(name, spine) => {
-                let fun = match self.names.get(&name.to_string()) {
-                    Some(res) => *res,
-                    None => self.new_hole(name.range, name.to_string()),
-                };
-
-                if !self.unify(name.range, on, fun, true) {
-                    self.err_irrelevant(None, name.range, None)
-                }
-
-                let entry = self.book.entrs.get(name.to_string().as_str()).unwrap();
-                let erased = entry.args.iter();
-
-                let irrelevances = erased.map(|arg| {
-                    if on.1 == Relevance::Irrelevant {
-                        on
-                    } else if arg.erased {
-                        (Some(arg.span), Relevance::Irrelevant)
-                    } else {
-                        (Some(arg.span), Relevance::Relevant)
-                    }
-                });
-
-                spine
-                    .iter()
-                    .zip(irrelevances)
-                    .for_each(|(arg, relev)| self.erase_pat(relev, arg));
+            Fun(name, spine) => {
+                let spine = self.erase_pat_spine(on, &name, spine);
+                Box::new(Expr {
+                    span: pat.span.clone(),
+                    data: ExprKind::Fun(name.clone(), spine),
+                })
+            }
+            Ctr(name, spine) => {
+                let spine = self.erase_pat_spine(on, &name, spine);
+                Box::new(Expr {
+                    span: pat.span.clone(),
+                    data: ExprKind::Ctr(name.clone(), spine),
+                })
             }
             res => panic!("Internal Error: Not a pattern {:?}", res),
         }
@@ -313,7 +332,17 @@ impl<'a> ErasureState<'a> {
             }
             App(head, spine) => {
                 let head = self.erase_expr(on, head);
-                let spine = spine.iter().map(|x| self.erase_expr(on, x)).collect();
+                let spine = spine.iter().map(|x| {
+                    let on = if x.erased {
+                        (x.data.span.to_range(), Relevance::Irrelevant)
+                    } else {
+                        on.clone()
+                    };
+                    desugared::AppBinding {
+                        data: self.erase_expr(&on, &x.data),
+                        erased: x.erased
+                    }
+                }).filter(|x| !x.erased).collect();
                 Box::new(Expr {
                     span: expr.span,
                     data: ExprKind::App(head, spine),
@@ -414,26 +443,22 @@ impl<'a> ErasureState<'a> {
     ) -> Rule {
         let ctx = self.ctx.clone();
 
-        args.iter()
+        let new_pats : Vec<_> = args.iter()
             .zip(rule.pats.iter())
-            .for_each(|((range, erased), expr)| {
-                self.erase_pat((Some(*range), erasure_to_relevance(*erased)), expr)
-            });
+            .map(|((range, erased), expr)| {
+                (erased, self.erase_pat((Some(*range), erasure_to_relevance(*erased)), expr))
+            })
+            .filter(|(erased, _)| !*erased)
+            .map(|res| res.1)
+            .collect();
 
         let body = self.erase_expr(place, &rule.body);
 
         self.ctx = ctx;
 
-        let new_pats = args
-            .iter()
-            .zip(rule.pats.iter())
-            .filter(|((_, erased), _)| !*erased)
-            .map(|res| res.1)
-            .cloned();
-
         Rule {
             name: rule.name.clone(),
-            pats: new_pats.collect(),
+            pats: new_pats,
             body,
             span: rule.span,
         }

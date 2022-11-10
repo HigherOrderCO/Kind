@@ -49,7 +49,6 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
 pub fn erase_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    println!("Desugared: {}", desugared_book);
     erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),

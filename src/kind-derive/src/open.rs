@@ -22,7 +22,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
         })
     };
 
-    let mk_app = |left: Box<Expr>, right: Vec<Binding>| -> Box<Expr> {
+    let mk_app = |left: Box<Expr>, right: Vec<AppBinding>| -> Box<Expr> {
         Box::new(Expr {
             data: ExprKind::App(left, right),
             range,
@@ -126,7 +126,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
         mk_var(Ident::generate("fun_")),
         spine
             .iter()
-            .map(|arg| Binding::Positional(mk_var(arg.clone())))
+            .map(|arg| AppBinding { data: mk_var(arg.clone()), erased: false })
             .collect(),
     );
 

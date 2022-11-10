@@ -18,6 +18,12 @@ use crate::{
 pub type Spine = Vec<Box<Expr>>;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct AppBinding {
+    pub data: Box<Expr>,
+    pub erased: bool
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
@@ -26,7 +32,7 @@ pub enum ExprKind {
     /// A anonymous function that receives one argument
     Lambda(Ident, Box<Expr>),
     /// Application of a expression to a spine of expressions
-    App(Box<Expr>, Spine),
+    App(Box<Expr>, Vec<AppBinding>),
     /// Application of a function
     Fun(QualifiedIdent, Spine),
     /// Application of a Construtor
@@ -113,7 +119,7 @@ impl Expr {
             .fold(body, |body, ident| Expr::lambda(range, ident.clone(), body))
     }
 
-    pub fn app(range: Range, ident: Box<Expr>, spine: Vec<Box<Expr>>) -> Box<Expr> {
+    pub fn app(range: Range, ident: Box<Expr>, spine: Vec<AppBinding>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::App(ident, spine),
@@ -302,6 +308,16 @@ impl Expr {
                 }
             }
             _ => format!("{}", self),
+        }
+    }
+}
+
+impl Display for AppBinding {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.erased {
+            write!(f, "{{{}}}", self.data)
+        } else {
+            write!(f, "{}", self.data)
         }
     }
 }

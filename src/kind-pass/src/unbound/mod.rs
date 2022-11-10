@@ -372,7 +372,7 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::App(head, spine) => {
                 self.visit_expr(head);
-                visit_vec!(spine.iter_mut(), arg => self.visit_binding(arg));
+                visit_vec!(spine.iter_mut(), arg => self.visit_expr(&mut arg.data));
             }
             ExprKind::Ann(val, ty) => {
                 self.visit_expr(val);

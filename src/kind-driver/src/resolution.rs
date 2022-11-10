@@ -152,7 +152,7 @@ fn parse_and_store_book_by_identifier<'a>(
 
     match ident_to_path(&session.root, ident, true) {
         Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
-        Ok(None) => true,
+        Ok(None) => false,
         Err(err) => {
             session.diagnostic_sender.send(err).unwrap();
             true
@@ -179,8 +179,8 @@ fn parse_and_store_book_by_path<'a>(
             return true;
         }
     };
-    let ctx_id = session.book_counter;
 
+    let ctx_id = session.book_counter;
     session.add_path(Rc::new(path.to_path_buf()), input.clone());
 
     let (mut module, mut failed) =
@@ -200,7 +200,7 @@ fn parse_and_store_book_by_path<'a>(
         }
     }
 
-    failed |= expand_uses(&mut module, session.diagnostic_sender.clone());
+    expand_uses(&mut module, session.diagnostic_sender.clone());
 
     module_to_book(&mut failed, session, &module, book);
 

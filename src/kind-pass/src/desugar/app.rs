@@ -175,13 +175,10 @@ impl<'a> DesugarState<'a> {
                 let mut new_spine = Vec::new();
                 let new_head = self.desugar_expr(head);
                 for arg in spine {
-                    match arg {
-                        Binding::Positional(v) => new_spine.push(self.desugar_expr(v)),
-                        Binding::Named(r, _, v) => {
-                            self.send_err(PassError::CannotUseNamed(head.range, *r));
-                            new_spine.push(self.desugar_expr(v))
-                        }
-                    }
+                    new_spine.push(desugared::AppBinding {
+                        data: self.desugar_expr(&arg.data),
+                        erased: arg.erased
+                    })
                 }
                 desugared::Expr::app(range, new_head, new_spine)
             }

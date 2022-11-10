@@ -16,7 +16,7 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
         App(head, spine) => spine.iter().fold(compile_term(head), |func, arg| {
             Box::new(Term::App {
                 func,
-                argm: compile_term(arg),
+                argm: compile_term(&arg.data),
             })
         }),
         Fun(head, spine) | Ctr(head, spine) => Box::new(Term::Ctr {

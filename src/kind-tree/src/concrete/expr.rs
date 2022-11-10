@@ -24,6 +24,21 @@ pub enum Binding {
 /// Vector of bindings
 pub type Spine = Vec<Binding>;
 
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct AppBinding {
+    pub data: Box<Expr>,
+    pub erased: bool
+}
+
+impl AppBinding {
+    pub fn explicit(data: Box<Expr>) -> AppBinding {
+        AppBinding {
+            data,
+            erased: false,
+        }
+    }
+}
+
 /// A case binding is a field or a rename of some field
 /// inside a match expression.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -121,7 +136,7 @@ pub enum ExprKind {
     /// A anonymous function that receives one argument
     Lambda(Ident, Option<Box<Expr>>, Box<Expr>),
     /// Application of a expression to a spine of expressions
-    App(Box<Expr>, Spine),
+    App(Box<Expr>, Vec<AppBinding>),
     /// Declaration of a local variable
     Let(Destruct, Box<Expr>, Box<Expr>),
     /// Type ascription (x : y)
@@ -358,6 +373,16 @@ impl Display for Binding {
         match self {
             Binding::Positional(e) => write!(f, "{}", e),
             Binding::Named(_, i, e) => write!(f, "({} : {})", i, e),
+        }
+    }
+}
+
+impl Display for AppBinding {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        if self.erased {
+            write!(f, "{{{}}}", self.data)
+        } else {
+            write!(f, "{}", self.data)
         }
     }
 }

@@ -95,6 +95,13 @@ impl Span {
         Span::Generated
     }
 
+    pub fn to_range(&self) -> Option<Range> {
+        match self {
+            Span::Generated => None,
+            Span::Locatable(pos) => Some(pos.clone()),
+        }
+    }
+
     /// Join two spans and keeps the syntax context of the
     /// first locatable range. If it's generated then it
     /// will be ignored and the other span will be the canonical

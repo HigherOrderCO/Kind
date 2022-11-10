@@ -63,14 +63,8 @@ fn parse_name(term: &Term) -> Result<String, String> {
 
 fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
     match term {
-        Term::Num { numb } => Ok(QualifiedIdent::new_static(
-            &Ident::decode(*numb),
-            None,
-            Range::ghost_range(),
-        )),
-        Term::Ctr { name, args: _ } => {
-            Ok(QualifiedIdent::new_static(name, None, Range::ghost_range()))
-        }
+        Term::Num { numb } => Ok(QualifiedIdent::new_static(&Ident::decode(*numb), None, Range::ghost_range())),
+        Term::Ctr { name, args: _ } => Ok(QualifiedIdent::new_static(name, None, Range::ghost_range())),
         _ => Err("Error while matching opt".to_string()),
     }
 }
@@ -79,10 +73,7 @@ fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {
     parse_all_expr(Default::default(), term)
 }
 
-fn parse_all_expr(
-    names: im::HashMap<String, String>,
-    term: &Term,
-) -> Result<Box<desugared::Expr>, String> {
+fn parse_all_expr(names: im::HashMap<String, String>, term: &Term) -> Result<Box<desugared::Expr>, String> {
     match term {
         Term::Ctr { name, args } => match name.as_str() {
             "Kind.Quoted.all" => Ok(Expr::all(
@@ -103,16 +94,9 @@ fn parse_all_expr(
                 parse_all_expr(names, &args[3])?,
             )),
             "Kind.Quoted.typ" => Ok(Expr::typ(parse_orig(&args[0])?)),
-            "Kind.Quoted.var" => Ok(Expr::var(Ident::new(
-                parse_name(&args[1])?,
-                parse_orig(&args[0])?,
-            ))),
+            "Kind.Quoted.var" => Ok(Expr::var(Ident::new(parse_name(&args[1])?, parse_orig(&args[0])?))),
             "Kind.Quoted.hol" => Ok(Expr::hole(parse_orig(&args[0])?, parse_num(&args[1])?)),
-            "Kind.Quoted.ann" => Ok(Expr::ann(
-                parse_orig(&args[0])?,
-                parse_all_expr(names.clone(), &args[1])?,
-                parse_all_expr(names, &args[2])?,
-            )),
+            "Kind.Quoted.ann" => Ok(Expr::ann(parse_orig(&args[0])?, parse_all_expr(names.clone(), &args[1])?, parse_all_expr(names, &args[2])?)),
             "Kind.Quoted.sub" => Ok(Expr::sub(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
@@ -123,43 +107,37 @@ fn parse_all_expr(
             "Kind.Quoted.app" => Ok(Expr::app(
                 parse_orig(&args[0])?,
                 parse_all_expr(names.clone(), &args[1])?,
-                vec![parse_all_expr(names, &args[2])?],
-            )),
-            "Kind.Quoted.ctr" => Ok(Expr::ctr(
-                parse_orig(&args[1])?,
-                parse_qualified(&args[0])?,
-                {
-                    let mut res = Vec::new();
-                    for arg in parse_list(&args[2])? {
-                        res.push(parse_all_expr(names.clone(), &arg)?);
+                vec![
+                    desugared::AppBinding {
+                        data: parse_all_expr(names, &args[2])?,
+                        erased: false,
                     }
-                    res
-                },
+                ],
             )),
-            "Kind.Quoted.fun" => Ok(Expr::fun(
-                parse_orig(&args[0])?,
-                parse_qualified(&args[1])?,
-                {
-                    let mut res = Vec::new();
-                    for arg in &args[1..] {
-                        res.push(parse_all_expr(names.clone(), arg)?);
-                    }
-                    res
-                },
-            )),
+            "Kind.Quoted.ctr" => Ok(Expr::ctr(parse_orig(&args[1])?, parse_qualified(&args[0])?, {
+                let mut res = Vec::new();
+                for arg in parse_list(&args[2])? {
+                    res.push(parse_all_expr(names.clone(), &arg)?);
+                }
+                res
+            })),
+            "Kind.Quoted.fun" => Ok(Expr::fun(parse_orig(&args[0])?, parse_qualified(&args[1])?, {
+                let mut res = Vec::new();
+                for arg in &args[1..] {
+                    res.push(parse_all_expr(names.clone(), arg)?);
+                }
+                res
+            })),
             "Kind.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
             "Kind.Quoted.u60" => Ok(Expr::u60(parse_orig(&args[0])?)),
-            "Kind.Quoted.num" => Ok(Expr::num60(parse_orig(&args[0])?, parse_num(&args[1])?)),   // TODO: do something about u120?
+            "Kind.Quoted.num" => Ok(Expr::num60(parse_orig(&args[0])?, parse_num(&args[1])?)), // TODO: do something about u120?
             "Kind.Quoted.op2" => Ok(Expr::binary(
                 parse_orig(&args[0])?,
                 parse_op(&args[1])?,
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
             )),
-            tag => Err(format!(
-                "Unexpected tag on transforming quoted term {:?}",
-                tag
-            )),
+            tag => Err(format!("Unexpected tag on transforming quoted term {:?}", tag)),
         },
         _ => Err("Unexpected term on transforming quoted term".to_string()),
     }
@@ -222,14 +200,8 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
                     parse_all_expr(im::HashMap::new(), &args[2])?,
                     parse_all_expr(im::HashMap::new(), &args[3])?,
                 )),
-                "Kind.Error.Quoted.inspection" => Ok(TypeError::Inspection(
-                    ctx,
-                    orig,
-                    parse_all_expr(im::HashMap::new(), &args[2])?,
-                )),
-                "Kind.Error.Quoted.too_many_arguments" => {
-                    Ok(TypeError::TooManyArguments(ctx, orig))
-                }
+                "Kind.Error.Quoted.inspection" => Ok(TypeError::Inspection(ctx, orig, parse_all_expr(im::HashMap::new(), &args[2])?)),
+                "Kind.Error.Quoted.too_many_arguments" => Ok(TypeError::TooManyArguments(ctx, orig)),
                 "Kind.Error.Quoted.type_mismatch" => Ok(TypeError::TypeMismatch(
                     ctx,
                     orig,

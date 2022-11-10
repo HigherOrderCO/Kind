@@ -35,6 +35,7 @@ macro_rules! visit_opt {
 }
 
 use kind_span::{Range, SyntaxCtxIndex};
+
 pub(crate) use visit_opt;
 pub(crate) use visit_vec;
 
@@ -69,6 +70,10 @@ pub trait Visitor: Sized {
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         walk_ident(self, ident);
+    }
+
+    fn visit_app_binding(&mut self, ident: &mut AppBinding) {
+        walk_app_binding(self, ident);
     }
 
     fn visit_destruct(&mut self, ident: &mut Destruct) {
@@ -184,6 +189,10 @@ pub fn walk_binding<T: Visitor>(ctx: &mut T, binding: &mut Binding) {
             ctx.visit_expr(e);
         }
     }
+}
+
+pub fn walk_app_binding<T: Visitor>(ctx: &mut T, binding: &mut AppBinding) {
+    ctx.visit_expr(&mut binding.data)
 }
 
 pub fn walk_case_binding<T: Visitor>(ctx: &mut T, binding: &mut CaseBinding) {
@@ -413,7 +422,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
         ExprKind::App(expr, spine) => {
             ctx.visit_expr(expr);
             for arg in spine {
-                ctx.visit_binding(arg);
+                ctx.visit_app_binding(arg);
             }
         }
         ExprKind::List(spine) => {
