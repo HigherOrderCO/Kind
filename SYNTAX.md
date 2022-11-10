@@ -465,14 +465,6 @@ List.nil)
 
 But underneath the hood, what an implicit argument actually does is automatically put holes in these places.
 
-Moreover, single holes can be shortened as `!`. So it can also be written as:
-
-```
-List.cons!(List.cons!(1, List.cons!(2, List.nil!)),
-List.cons!(List.cons!(3, List.cons!(4, List.nil!)),
-List.nil!))
-```
-
 Of course, in this particular example, we can just use the list notation directly:
 
 ```
