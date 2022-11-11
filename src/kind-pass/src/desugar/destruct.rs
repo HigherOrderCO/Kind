@@ -15,7 +15,7 @@ impl<'a> DesugarState<'a> {
         type_info: (&Range, String),
         fields: &[(String, bool)],
         cases: &[CaseBinding],
-        jump_rest: bool,
+        jump_rest: Option<Range>,
     ) -> Vec<Option<(Range, PatIdent)>> {
         let mut ordered_fields = vec![None; fields.len()];
         let mut names = FxHashMap::default();
@@ -51,7 +51,7 @@ impl<'a> DesugarState<'a> {
             .map(|(name, _)| name.clone())
             .collect();
 
-        if !jump_rest && !names.is_empty() {
+        if jump_rest.is_none() && !names.is_empty() {
             self.send_err(PassError::NoFieldCoverage(*type_info.0, names))
         }
 
@@ -95,7 +95,7 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg {
                         arguments.push(name.0)
                     } else {
-                        arguments.push(self.gen_name(typ.range))
+                        arguments.push(self.gen_name(jump_rest.unwrap_or(typ.range)))
                     }
                 }
 
@@ -105,7 +105,7 @@ impl<'a> DesugarState<'a> {
 
                 let spine = vec![
                     val,
-                    desugared::Expr::unfold_lambda(range, &irrelev, &arguments, next(self)),
+                    desugared::Expr::unfold_lambda(&irrelev, &arguments, next(self)),
                 ];
 
                 self.mk_desugared_fun(range, open_id, spine, false)
@@ -195,7 +195,7 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg {
                         arguments.push(name.0)
                     } else {
-                        arguments.push(self.gen_name(match_.typ.range));
+                        arguments.push(self.gen_name(case.ignore_rest.unwrap_or(match_.typ.range)));
                     }
                 }
                 cases_args[index] = Some((case.constructor.range, arguments, &case.value));
@@ -207,10 +207,9 @@ impl<'a> DesugarState<'a> {
 
         for (i, case_arg) in cases_args.iter().enumerate() {
             let case = &sum.constructors[i];
-            if let Some((range, arguments, val)) = &case_arg {
+            if let Some((_, arguments, val)) = &case_arg {
                 let case: Vec<bool> = case.args.iter().map(|x| x.erased).rev().collect();
                 lambdas.push(desugared::Expr::unfold_lambda(
-                    *range,
                     &case,
                     arguments,
                     self.desugar_expr(val),

@@ -57,7 +57,7 @@ pub struct Case {
     pub constructor: Ident,
     pub bindings: Vec<CaseBinding>,
     pub value: Box<Expr>,
-    pub ignore_rest: bool,
+    pub ignore_rest: Option<Range>,
 }
 
 /// A match block that will be desugared
@@ -100,7 +100,7 @@ pub enum Literal {
 /// and just translates into a eliminator for records.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Destruct {
-    Destruct(Range, QualifiedIdent, Vec<CaseBinding>, bool),
+    Destruct(Range, QualifiedIdent, Vec<CaseBinding>, Option<Range>),
     Ident(Ident),
 }
 
@@ -284,7 +284,7 @@ impl Display for Destruct {
                 for binding in bindings {
                     write!(f, " {}", binding)?;
                 }
-                if *ignore {
+                if ignore.is_some() {
                     write!(f, " ..")?;
                 }
                 Ok(())
@@ -338,7 +338,7 @@ impl Display for Case {
         for bind in &self.bindings {
             write!(f, " {}", bind)?
         }
-        if self.ignore_rest {
+        if self.ignore_rest.is_some() {
             write!(f, " ..")?;
         }
         write!(f, " => {}; ", self.value)

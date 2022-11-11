@@ -308,7 +308,7 @@ impl<'a> ErasureState<'a> {
             Lambda(name, body, erased) => {
                 let ctx = self.ctx.clone();
                 if *erased {
-                    self.ctx.insert(name.to_string(), (name.range, (Some(name.range), Relevance::Irrelevant)));
+                    self.ctx.insert(name.to_string(), (name.range, (None, Relevance::Irrelevant)));
                 } else {
                     self.ctx.insert(name.to_string(), (name.range, *on));
                 }

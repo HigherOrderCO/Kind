@@ -92,19 +92,23 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     });
 
     let params = sum.parameters.map(|x| Binding::Positional(mk_var(x.name.clone())));
+    let indices = sum.indices.map(|x| Binding::Positional(mk_var(x.name.clone())));
 
     // Constructors type
     for cons in &sum.constructors {
         let vars: Vec<Binding> = cons.args.iter().map(|x| Binding::Positional(mk_var(x.name.clone()))).collect();
 
-        let cons_inst = mk_cons(sum.name.add_segment(cons.name.to_str()), [params.as_slice(), vars.as_slice()].concat());
+        let cons_inst = mk_cons(
+            sum.name.add_segment(cons.name.to_str()),
+            [params.as_slice(), if cons.typ.is_none() { indices.as_slice() } else { &[] }, vars.as_slice()].concat(),
+        );
 
         let mut indices_of_cons = match cons.typ.clone().map(|x| x.data) {
             Some(ExprKind::Constr(_, spine)) => spine
                 .iter()
                 .map(|x| match x {
                     Binding::Positional(expr) => AppBinding::explicit(expr.clone()),
-                    Binding::Named(_, _, _) => todo!("Internal Error: Need to reorder"),
+                    Binding::Named(_, _, _) => todo!("Incomplete feature: Need to reorder"),
                 })
                 .collect(),
             _ => [parameter_names.as_slice(), indice_names.as_slice()].concat(),
@@ -114,8 +118,13 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
         let cons_tipo = mk_app(mk_var(motive_ident.clone()), indices_of_cons, range);
 
-        let cons_type = cons
-            .args
+        let args = if cons.typ.is_some() {
+            cons.args.clone()
+        } else {
+            sum.indices.extend(&cons.args)
+        };
+
+        let cons_type = args
             .iter()
             .rfold(cons_tipo, |out, arg| mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or_else(mk_typ), out));
 
@@ -138,11 +147,24 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let cons_ident = sum.name.add_segment(cons.name.to_str());
         let mut pats: Vec<Box<Pat>> = Vec::new();
 
-        let irrelev = cons.args.map(|x| x.hidden).to_vec();
+        let irrelev: Vec<bool>;
+        let spine_params: Vec<Ident>;
+        let spine: Vec<Ident>;
 
-        let spine_params: Vec<Ident> = sum.parameters.extend(&cons.args).map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
-
-        let spine: Vec<Ident> = cons.args.map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
+        if cons.typ.is_none() {
+            irrelev = sum.indices.extend(&cons.args).map(|x| x.hidden).to_vec();
+            spine_params = sum
+                .parameters
+                .extend(&sum.indices)
+                .extend(&cons.args)
+                .map(|x| x.name.with_name(|f| format!("{}_", f)))
+                .to_vec();
+            spine = sum.indices.extend(&cons.args).map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
+        } else {
+            irrelev = cons.args.map(|x| x.hidden).to_vec();
+            spine_params = sum.parameters.extend(&cons.args).map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
+            spine = cons.args.map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
+        }
 
         pats.push(Box::new(Pat {
             data: concrete::pat::PatKind::App(
@@ -186,12 +208,14 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             cons.name.range,
         );
 
-        rules.push(Box::new(Rule {
+        let rule = Box::new(Rule {
             name: name.clone(),
             pats,
             body,
             range: cons.name.range,
-        }))
+        });
+
+        rules.push(rule)
     }
     // Rules
 

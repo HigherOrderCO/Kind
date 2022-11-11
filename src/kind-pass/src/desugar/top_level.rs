@@ -282,7 +282,7 @@ impl<'a> DesugarState<'a> {
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
-                    println!("{}: {:?}", head, entry);
+                    println!("Ata {} {:?}", head, spine.iter().map(|x| x.to_string()).collect::<Vec<String>>());
                     self.send_err(PassError::IncorrectArity(
                         head.range,
                         spine.iter().map(|x| x.range).collect(),

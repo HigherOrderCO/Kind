@@ -554,7 +554,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_destruct_bindings(&mut self) -> Result<(Option<Range>, Vec<CaseBinding>, bool), SyntaxError> {
+    pub fn parse_pat_destruct_bindings(&mut self) -> Result<(Option<Range>, Vec<CaseBinding>, Option<Range>), SyntaxError> {
         let mut ignore_rest_range = None;
         let mut bindings = Vec::new();
         let mut range = None;
@@ -587,7 +587,7 @@ impl<'a> Parser<'a> {
                 return Err(SyntaxError::IgnoreRestShouldBeOnTheEnd(range));
             }
         }
-        Ok((range, bindings, ignore_rest_range.is_some()))
+        Ok((range, bindings, ignore_rest_range))
     }
 
     pub fn parse_match(&mut self) -> Result<Box<Expr>, SyntaxError> {

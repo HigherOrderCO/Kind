@@ -112,12 +112,12 @@ impl Expr {
         })
     }
 
-    pub fn unfold_lambda(range: Range, irrelev: &[bool], idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
+    pub fn unfold_lambda(irrelev: &[bool], idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
         idents
             .iter()
             .rev()
             .zip(irrelev)
-            .fold(body, |body, (ident, irrelev)| Expr::lambda(range, ident.clone(), body, *irrelev))
+            .fold(body, |body, (ident, irrelev)| Expr::lambda(ident.range, ident.clone(), body, *irrelev))
     }
 
     pub fn app(range: Range, ident: Box<Expr>, spine: Vec<AppBinding>) -> Box<Expr> {
