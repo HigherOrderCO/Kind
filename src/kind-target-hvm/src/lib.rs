@@ -9,7 +9,7 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
         Var(name) => Box::new(Term::Var {
             name: name.to_string(),
         }),
-        Lambda(binder, body) => Box::new(Term::Lam {
+        Lambda(binder, body, _erased) => Box::new(Term::Lam {
             name: binder.to_string(),
             body: compile_term(body),
         }),

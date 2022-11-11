@@ -133,7 +133,7 @@ impl<'a> Parser<'a> {
         let end_range = expr.range;
 
         Ok(Box::new(Expr {
-            data: ExprKind::Lambda(ident, None, expr),
+            data: ExprKind::Lambda(ident, None, expr, false),
             range: name_span.mix(end_range),
         }))
     }
@@ -152,7 +152,7 @@ impl<'a> Parser<'a> {
             let body = self.parse_expr(false)?;
             Ok(Box::new(Expr {
                 range: range.mix(body.range),
-                data: ExprKind::Lambda(ident, Some(typ), body),
+                data: ExprKind::Lambda(ident, Some(typ), body, false),
             }))
         } else if self.check_and_eat(Token::RightArrow) {
             let body = self.parse_expr(false)?;
@@ -384,15 +384,16 @@ impl<'a> Parser<'a> {
 
     fn parse_app_binding(&mut self) -> Result<AppBinding, SyntaxError> {
         self.ignore_docs();
-        let (erased, data) = if self.get().same_variant(&Token::LBrace) {
+        let (erased, data) = /*if self.get().same_variant(&Token::LBrace) {
             let start = self.range();
             self.advance(); // '{'
-            let atom = self.parse_expr(true)?;
+            let atom = self.parse_atom()?;
             self.eat_closing_keyword(Token::RBrace, start)?;
             (true, atom)
-        } else {
-            (false, self.parse_expr(false)?)
-        };
+        } else {*/
+            (false, self.parse_atom()?)
+        // }
+        ;
         Ok(AppBinding { data, erased })
     }
 
@@ -594,6 +595,7 @@ impl<'a> Parser<'a> {
         self.advance(); // 'match'
 
         let typ = self.parse_upper_id()?;
+
         let scrutinizer = self.parse_expr(false)?;
 
         self.eat_variant(Token::LBrace)?;

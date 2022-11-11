@@ -305,16 +305,24 @@ impl<'a> ErasureState<'a> {
 
                 Box::new(expr.clone())
             }
-            Lambda(name, body) => {
+            Lambda(name, body, erased) => {
                 let ctx = self.ctx.clone();
-                self.ctx.insert(name.to_string(), (name.range, *on));
+                if *erased {
+                    self.ctx.insert(name.to_string(), (name.range, (Some(name.range), Relevance::Irrelevant)));
+                } else {
+                    self.ctx.insert(name.to_string(), (name.range, *on));
+                }
                 let body = self.erase_expr(on, body);
                 self.ctx = ctx;
 
-                Box::new(Expr {
-                    span: expr.span,
-                    data: ExprKind::Lambda(name.clone(), body),
-                })
+                if *erased {
+                    body
+                } else {
+                    Box::new(Expr {
+                        span: expr.span,
+                        data: ExprKind::Lambda(name.clone(), body, *erased),
+                    })
+                }
             }
             Let(name, val, body) => {
                 let ctx = self.ctx.clone();

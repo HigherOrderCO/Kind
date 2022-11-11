@@ -361,7 +361,7 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
-            ExprKind::Lambda(ident, binder, body) => {
+            ExprKind::Lambda(ident, binder, body, erased) => {
                 match binder {
                     Some(x) => self.visit_expr(x),
                     None => (),

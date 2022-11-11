@@ -134,7 +134,7 @@ pub enum ExprKind {
     /// The dependent product space (e.g. [x : Int] -> y)
     Sigma(Option<Ident>, Box<Expr>, Box<Expr>),
     /// A anonymous function that receives one argument
-    Lambda(Ident, Option<Box<Expr>>, Box<Expr>),
+    Lambda(Ident, Option<Box<Expr>>, Box<Expr>, bool),
     /// Application of a expression to a spine of expressions
     App(Box<Expr>, Vec<AppBinding>),
     /// Declaration of a local variable
@@ -402,8 +402,10 @@ impl Display for Expr {
                 head,
                 spine.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
-            Lambda(binder, None, body) => write!(f, "({} => {})", binder, body),
-            Lambda(binder, Some(typ), body) => write!(f, "(({} : {}) => {})", binder, typ, body),
+            Lambda(binder, None, body, false) => write!(f, "({} => {})", binder, body),
+            Lambda(binder, Some(typ), body, false) => write!(f, "(({} : {}) => {})", binder, typ, body),
+            Lambda(binder, None, body, true) => write!(f, "({{{}}} => {})", binder, body),
+            Lambda(binder, Some(typ), body, true) => write!(f, "({{{} : {}}} => {})", binder, typ, body),
             Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),
             App(head, spine) => write!(
                 f,

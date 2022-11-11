@@ -7,7 +7,7 @@ use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
-pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
+pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
     let mk_var = |name: Ident| -> Box<Expr> {
         Box::new(Expr {
             data: ExprKind::Var(name),
@@ -36,19 +36,19 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
         })
     };
 
-    let name = sum.name.add_segment("open");
+    let name = rec.name.add_segment("open");
 
     let mut types = Telescope::default();
 
-    for arg in sum.parameters.iter() {
+    for arg in rec.parameters.iter() {
         types.push(arg.to_implicit())
     }
 
     // The type
 
-    let all_args = sum.parameters.clone();
+    let all_args = rec.parameters.clone();
     let res_motive_ty = mk_cons(
-        sum.name.clone(),
+        rec.name.clone(),
         all_args
             .iter()
             .cloned()
@@ -66,7 +66,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
 
     let cons_tipo = mk_var(Ident::generate("_res"));
 
-    let cons_type = sum.fields.iter().rfold(cons_tipo, |out, (name, _, typ)| {
+    let cons_type = rec.fields.iter().rfold(cons_tipo, |out, (name, _, typ)| {
         mk_pi(name.clone(), typ.clone(), out)
     });
 
@@ -94,7 +94,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
 
     let mut pats: Vec<Box<Pat>> = Vec::new();
 
-    let spine: Vec<Ident> = sum
+    let spine: Vec<Ident> = rec
         .fields
         .iter()
         .map(|(name, _, _)| name.with_name(|f| format!("{}_", f)))
@@ -102,7 +102,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
 
     pats.push(Box::new(Pat {
         data: concrete::pat::PatKind::App(
-            sum.name.add_segment(sum.constructor.to_str()),
+            rec.name.add_segment(rec.constructor.to_str()),
             spine
                 .iter()
                 .cloned()
@@ -137,7 +137,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
         range,
     })];
 
-    Entry {
+    let entry = Entry {
         name,
         docs: Vec::new(),
         args: types,
@@ -145,5 +145,7 @@ pub fn derive_open(range: Range, sum: &RecordDecl) -> concrete::Entry {
         rules,
         range,
         attrs: Vec::new(),
-    }
+    };
+
+    entry
 }

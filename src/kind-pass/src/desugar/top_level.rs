@@ -266,9 +266,7 @@ impl<'a> DesugarState<'a> {
                     // inductive types can be used in patterns.
                 }
 
-                let (hidden, _erased) = entry.arguments.count_implicits();
-
-                let fill_hidden = spine.len() == entry.arguments.len() - hidden;
+                let fill_hidden = spine.len() == entry.arguments.len() - entry.hiddens;
 
                 let mut new_spine = Vec::new();
 
@@ -284,12 +282,12 @@ impl<'a> DesugarState<'a> {
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
-                    println!("{}", pat);
+                    println!("{}: {:?}", head, entry);
                     self.send_err(PassError::IncorrectArity(
                         head.range,
                         spine.iter().map(|x| x.range).collect(),
                         entry.arguments.len(),
-                        hidden,
+                        entry.hiddens,
                     ));
                     return desugared::Expr::err(pat.range);
                 } else {

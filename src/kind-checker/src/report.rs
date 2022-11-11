@@ -86,6 +86,7 @@ fn parse_all_expr(names: im::HashMap<String, String>, term: &Term) -> Result<Box
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names, &args[2])?,
+                false // TODO: Fix
             )),
             "Kind.Quoted.let" => Ok(Expr::let_(
                 parse_orig(&args[0])?,

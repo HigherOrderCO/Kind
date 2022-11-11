@@ -134,7 +134,7 @@ fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, exp
                 lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
             ],
         ),
-        Lambda(name, body) => mk_quoted_ctr(
+        Lambda(name, body, erased) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Lambda),
             vec![span_to_num(expr.span), mk_u60(name.encode()), lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, body))],
         ),

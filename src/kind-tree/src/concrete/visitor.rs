@@ -411,7 +411,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             ctx.visit_qualified_ident(ident);
             ctx.visit_sttm(sttm)
         }
-        ExprKind::Lambda(ident, binder, body) => {
+        ExprKind::Lambda(ident, binder, body, _erased) => {
             ctx.visit_ident(ident);
             match binder {
                 Some(x) => ctx.visit_expr(x),

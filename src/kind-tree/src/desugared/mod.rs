@@ -30,7 +30,7 @@ pub enum ExprKind {
     /// The dependent function space (e.g. (x : Int) -> y)
     All(Ident, Box<Expr>, Box<Expr>),
     /// A anonymous function that receives one argument
-    Lambda(Ident, Box<Expr>),
+    Lambda(Ident, Box<Expr>, bool),
     /// Application of a expression to a spine of expressions
     App(Box<Expr>, Vec<AppBinding>),
     /// Application of a function
@@ -98,25 +98,26 @@ impl Expr {
         })
     }
 
-    pub fn lambda(range: Range, ident: Ident, body: Box<Expr>) -> Box<Expr> {
+    pub fn lambda(range: Range, ident: Ident, body: Box<Expr>, erased: bool) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::Lambda(ident, body),
+            data: ExprKind::Lambda(ident, body, erased),
         })
     }
 
     pub fn identity_lambda(ident: Ident) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Generated,
-            data: ExprKind::Lambda(ident.clone(), Self::var(ident)),
+            data: ExprKind::Lambda(ident.clone(), Self::var(ident), false),
         })
     }
 
-    pub fn unfold_lambda(range: Range, idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
+    pub fn unfold_lambda(range: Range, irrelev: &[bool], idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
         idents
             .iter()
             .rev()
-            .fold(body, |body, ident| Expr::lambda(range, ident.clone(), body))
+            .zip(irrelev)
+            .fold(body, |body, (ident, irrelev)| Expr::lambda(range, ident.clone(), body, *irrelev))
     }
 
     pub fn app(range: Range, ident: Box<Expr>, spine: Vec<AppBinding>) -> Box<Expr> {
@@ -334,7 +335,8 @@ impl Display for Expr {
             Num(self::Num::U120(n)) => write!(f, "{}u120", n),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),
-            Lambda(binder, body) => write!(f, "({} => {})", binder, body),
+            Lambda(binder, body, false) => write!(f, "({} => {})", binder, body),
+            Lambda(binder, body, true) => write!(f, "({{{}}} => {})", binder, body),
             Sub(name, _, redx, expr) => write!(f, "({} ## {}/{})", expr, name, redx),
             App(head, spine) => write!(
                 f,

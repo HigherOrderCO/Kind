@@ -51,7 +51,7 @@ impl<'a> DesugarState<'a> {
             this.mk_desugared_fun(
                 range,
                 bind_ident.clone(),
-                vec![expr, desugared::Expr::lambda(range, name, next)],
+                vec![expr, desugared::Expr::lambda(range, name, next, false)],
                 false,
             )
         };
@@ -150,7 +150,7 @@ impl<'a> DesugarState<'a> {
 
         let spine = vec![
             self.desugar_expr(typ),
-            desugared::Expr::lambda(range, name, self.desugar_expr(body)),
+            desugared::Expr::lambda(range, name, self.desugar_expr(body), true),
         ];
 
         self.mk_desugared_ctr(range, sigma, spine, false)
@@ -244,8 +244,8 @@ impl<'a> DesugarState<'a> {
                 self.desugar_expr(left),
                 self.desugar_expr(right),
             ),
-            Lambda(ident, _typ, body) => {
-                desugared::Expr::lambda(expr.range, ident.clone(), self.desugar_expr(body))
+            Lambda(ident, _typ, body, erased) => {
+                desugared::Expr::lambda(expr.range, ident.clone(), self.desugar_expr(body), *erased)
             }
             Ann(val, typ) => {
                 desugared::Expr::ann(expr.range, self.desugar_expr(val), self.desugar_expr(typ))

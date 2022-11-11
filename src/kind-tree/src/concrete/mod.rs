@@ -548,13 +548,13 @@ impl RecordDecl {
     }
 
     pub fn extract_book_info_of_constructor(&self) -> EntryMeta {
-        let mut arguments = Telescope::default();
+        let mut arguments;
         let mut hiddens = 0;
         let mut erased = 0;
 
-        hiddens += self.parameters.0.len();
-        erased += self.parameters.0.len();
-        arguments = arguments.extend(&self.parameters);
+        hiddens += self.parameters.len();
+        erased += self.parameters.len();
+        arguments = self.parameters.map(|x| x.to_implicit());
 
         let field_args: Vec<Argument> = self
             .fields

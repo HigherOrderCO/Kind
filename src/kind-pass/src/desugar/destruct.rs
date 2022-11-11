@@ -69,6 +69,7 @@ impl<'a> DesugarState<'a> {
         match binding {
             Destruct::Destruct(_, typ, case, jump_rest) => {
                 let entry = self.old_book.entries.get(&typ.to_string());
+                let count = self.old_book.count.get(&typ.to_string()).unwrap();
 
                 let record = if let Some(TopLevel::RecordType(record)) = entry {
                     record
@@ -100,9 +101,11 @@ impl<'a> DesugarState<'a> {
 
                 let open_id = typ.add_segment("open");
 
+                let irrelev = count.arguments.map(|x| x.erased).to_vec();
+
                 let spine = vec![
                     val,
-                    desugared::Expr::unfold_lambda(range, &arguments, next(self)),
+                    desugared::Expr::unfold_lambda(range, &irrelev, &arguments, next(self)),
                 ];
 
                 self.mk_desugared_fun(range, open_id, spine, false)
@@ -174,6 +177,7 @@ impl<'a> DesugarState<'a> {
                 self.send_err(PassError::DuplicatedNamed(range, case.constructor.range));
             } else {
                 let sum_c = &sum.constructors[index];
+
                 let ordered = self.order_case_arguments(
                     (&case.constructor.range, case.constructor.to_string()),
                     &sum_c
@@ -204,8 +208,10 @@ impl<'a> DesugarState<'a> {
         for (i, case_arg) in cases_args.iter().enumerate() {
             let case = &sum.constructors[i];
             if let Some((range, arguments, val)) = &case_arg {
+                let case: Vec<bool> = case.args.iter().map(|x| x.erased).rev().collect();
                 lambdas.push(desugared::Expr::unfold_lambda(
                     *range,
+                    &case,
                     arguments,
                     self.desugar_expr(val),
                 ))
@@ -226,7 +232,7 @@ impl<'a> DesugarState<'a> {
             let mut idx: Vec<Ident> = sum.parameters.extend(&sum.indices).iter().map(|x| x.name.clone()).collect();
             idx.push(Ident::generate("_val"));
             idx.iter().rfold(self.gen_hole_expr(), |expr, l| {
-                desugared::Expr::lambda(l.range, l.clone(), expr)
+                desugared::Expr::lambda(l.range, l.clone(), expr, false)
             })
         };
 
