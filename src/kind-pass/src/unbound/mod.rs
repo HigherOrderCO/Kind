@@ -30,15 +30,17 @@ pub struct UnboundCollector {
     pub context_vars: Vec<(Range, String)>,
     pub unbound_top_level: FxHashMap<String, Vec<QualifiedIdent>>,
     pub unbound: FxHashMap<String, Vec<Ident>>,
+    pub emit_errs: bool
 }
 
 impl UnboundCollector {
-    pub fn new(diagnostic_sender: Sender<DiagnosticFrame>) -> UnboundCollector {
+    pub fn new(diagnostic_sender: Sender<DiagnosticFrame>, emit_errs: bool) -> UnboundCollector {
         Self {
             errors: diagnostic_sender,
             context_vars: Default::default(),
             unbound_top_level: Default::default(),
             unbound: Default::default(),
+            emit_errs
         }
     }
 }
@@ -46,11 +48,12 @@ impl UnboundCollector {
 pub fn get_module_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     module: &mut Module,
+    emit_errs: bool,
 ) -> (
     FxHashMap<String, Vec<Ident>>,
     FxHashMap<String, Vec<QualifiedIdent>>,
 ) {
-    let mut state = UnboundCollector::new(diagnostic_sender);
+    let mut state = UnboundCollector::new(diagnostic_sender, emit_errs);
     state.visit_module(module);
     (state.unbound, state.unbound_top_level)
 }
@@ -58,11 +61,12 @@ pub fn get_module_unbound(
 pub fn get_book_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     book: &mut Book,
+    emit_errs: bool,
 ) -> (
     FxHashMap<String, Vec<Ident>>,
     FxHashMap<String, Vec<QualifiedIdent>>,
 ) {
-    let mut state = UnboundCollector::new(diagnostic_sender);
+    let mut state = UnboundCollector::new(diagnostic_sender, emit_errs);
     state.visit_book(book);
     (state.unbound, state.unbound_top_level)
 }
@@ -100,9 +104,11 @@ impl Visitor for UnboundCollector {
             .iter()
             .find(|x| x.1 == ident.0.data.to_string())
         {
-            self.errors
+            if self.emit_errs {
+                self.errors
                 .send(PassError::RepeatedVariable(fst.0, ident.0.range).into())
                 .unwrap()
+            }
         } else {
             self.context_vars.push((ident.0.range, ident.0.to_string()))
         }
@@ -120,9 +126,11 @@ impl Visitor for UnboundCollector {
             .find(|x| x.1 == argument.name.to_string());
 
         if let Some(fst) = res {
-            self.errors
+            if self.emit_errs {
+                self.errors
                 .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
                 .unwrap()
+            }
         } else {
             self.context_vars
                 .push((argument.name.range, argument.name.to_string()))
@@ -412,6 +420,7 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Subst(subst) => {
                 self.visit_ident(&mut subst.name);
+                self.visit_ident(&mut subst.redx);
 
                 if let Some(pos) = self
                     .context_vars

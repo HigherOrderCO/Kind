@@ -206,7 +206,7 @@ fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, exp
                 span_to_num(expr.span),
                 mk_u60(name.encode()),
                 mk_u60(*idx as u64),
-                mk_u60(*rdx as u64),
+                mk_var(rdx.to_str()),
                 codegen_all_expr(lhs_rule, lhs, num, quote, expr),
             ],
         ),

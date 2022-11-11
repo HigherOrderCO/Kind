@@ -95,13 +95,13 @@ impl<'a> Parser<'a> {
         self.advance(); // '##'
         let name = self.parse_id()?;
         self.eat_variant(Token::Slash)?;
-        let redx = self.parse_num_lit()?;
+        let redx = self.parse_id()?;
         let expr = self.parse_expr(false)?;
         let range = start.mix(expr.range);
         Ok(Box::new(Expr {
             data: ExprKind::Subst(Substitution {
                 name,
-                redx: redx as usize,
+                redx,
                 indx: 0,
                 expr,
             }),
@@ -311,7 +311,7 @@ impl<'a> Parser<'a> {
             let range = self.range();
             self.advance(); // '('
             let mut expr = self.parse_expr(true)?;
-            if self.get().same_variant(&Token::Colon) {
+            if self.get().same_variant(&Token::ColonColon) {
                 self.advance(); // ':'
                 let typ = self.parse_expr(false)?;
                 let range = range.mix(self.range());

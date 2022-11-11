@@ -21,6 +21,7 @@ pub enum Token {
     DotDot,     // ..
     Dot,        // .
     Tilde,      // ~
+    ColonColon, // ::
 
     Help(String),
     LowerId(String),

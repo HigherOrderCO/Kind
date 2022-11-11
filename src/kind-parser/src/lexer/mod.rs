@@ -170,7 +170,13 @@ impl<'a> Lexer<'a> {
                         _ => (Token::Slash, self.mk_range(start)),
                     }
                 }
-                ':' => self.single_token(Token::Colon, start),
+                ':' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some(':') => self.single_token(Token::ColonColon, start),
+                        _ => (Token::Colon, self.mk_range(start)),
+                    }
+                }
                 ';' => self.single_token(Token::Semi, start),
                 '$' => self.single_token(Token::Dollar, start),
                 ',' => self.single_token(Token::Comma, start),

@@ -255,6 +255,7 @@ impl<'a> DesugarState<'a> {
     pub fn desugar_pat(&mut self, pat: &concrete::pat::Pat) -> Box<desugared::Expr> {
         match &pat.data {
             concrete::pat::PatKind::App(head, spine) => {
+                // TODO: Fix lol
                 let entry = self
                     .old_book
                     .count
@@ -282,7 +283,6 @@ impl<'a> DesugarState<'a> {
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
-                    println!("Ata {} {:?}", head, spine.iter().map(|x| x.to_string()).collect::<Vec<String>>());
                     self.send_err(PassError::IncorrectArity(
                         head.range,
                         spine.iter().map(|x| x.range).collect(),

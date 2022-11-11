@@ -141,6 +141,7 @@ pub fn compile_in_session<T>(
     if diagnostics.is_empty() {
         render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
         eprintln!();
+        res
     } else {
         render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
         eprintln!();
@@ -148,8 +149,8 @@ pub fn compile_in_session<T>(
             let diagnostic: Diagnostic = (&diagnostic).into();
             render_to_stderr(&render_config, &session, &diagnostic)
         }
+        None
     }
-    res
 }
 
 fn main() {

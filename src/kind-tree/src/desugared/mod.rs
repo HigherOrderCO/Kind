@@ -42,7 +42,7 @@ pub enum ExprKind {
     /// Type ascription (x : y)
     Ann(Box<Expr>, Box<Expr>),
     /// Substitution
-    Sub(Ident, usize, usize, Box<Expr>),
+    Sub(Ident, usize, Ident, Box<Expr>),
     /// Type Literal
     Typ,
     /// Primitive numeric types
@@ -91,7 +91,7 @@ impl Expr {
         })
     }
 
-    pub fn sub(range: Range, ident: Ident, idx: usize, rdx: usize, body: Box<Expr>) -> Box<Expr> {
+    pub fn sub(range: Range, ident: Ident, idx: usize, rdx: Ident, body: Box<Expr>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Sub(ident, idx, rdx, body),
@@ -337,7 +337,7 @@ impl Display for Expr {
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body, false) => write!(f, "({} => {})", binder, body),
             Lambda(binder, body, true) => write!(f, "({{{}}} => {})", binder, body),
-            Sub(name, _, redx, expr) => write!(f, "({} ## {}/{})", expr, name, redx),
+            Sub(name, _, redx, expr) => write!(f, "(## {}/{} {})",name, redx, expr),
             App(head, spine) => write!(
                 f,
                 "({}{})",

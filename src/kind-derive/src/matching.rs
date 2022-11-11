@@ -152,7 +152,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let spine: Vec<Ident>;
 
         if cons.typ.is_none() {
-            irrelev = sum.indices.extend(&cons.args).map(|x| x.hidden).to_vec();
+            irrelev = sum.indices.extend(&cons.args).map(|x| x.erased).to_vec();
             spine_params = sum
                 .parameters
                 .extend(&sum.indices)
@@ -161,7 +161,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                 .to_vec();
             spine = sum.indices.extend(&cons.args).map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
         } else {
-            irrelev = cons.args.map(|x| x.hidden).to_vec();
+            irrelev = cons.args.map(|x| x.erased).to_vec();
             spine_params = sum.parameters.extend(&cons.args).map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
             spine = cons.args.map(|x| x.name.with_name(|f| format!("{}_", f))).to_vec();
         }
