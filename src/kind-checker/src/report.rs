@@ -1,3 +1,6 @@
+//! Transforms a answer from the type checker in
+//! a Expr of the kind-tree package.
+
 use kind_span::{EncodedSpan, Range};
 use kind_tree::backend::Term;
 use kind_tree::symbol::{Ident, QualifiedIdent};
@@ -169,7 +172,8 @@ fn parse_list(term: &Term) -> Result<Vec<Box<Term>>, String> {
     Ok(vec)
 }
 
-pub fn parse_entry(term: &Term) -> Result<Entry, String> {
+/// Transforms a HVM quoted entry into a easy to manipulate structure.
+pub fn transform_entry(term: &Term) -> Result<Entry, String> {
     match term {
         Term::Ctr { name, args } if name == "Pair.new" => {
             let fst = parse_name(&args[0])?;
@@ -191,7 +195,7 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
     match expr {
         Term::Ctr { name, args } => {
             let ls = parse_list(&args[0])?;
-            let entries = ls.iter().flat_map(|x| parse_entry(x));
+            let entries = ls.iter().flat_map(|x| transform_entry(x));
             let ctx = Context(entries.collect());
             let orig = match_opt!(*args[1], Term::Num { numb } => EncodedSpan(numb).to_range())?;
             match name.as_str() {

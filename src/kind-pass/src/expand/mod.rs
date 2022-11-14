@@ -1,3 +1,7 @@
+//! Expand some attributes and derivations of each construction.
+//! Currently it just derives `match` and `open` for sum type
+//! and record types respectively.
+
 use fxhash::FxHashMap;
 use kind_derive::matching::derive_match;
 use kind_derive::open::derive_open;

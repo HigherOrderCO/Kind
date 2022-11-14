@@ -1,5 +1,6 @@
-///! Module to derive a dependent
-/// eliminator out of a sum type declaration.
+//! Module to derive a dependent
+//! eliminator out of a sum type declaration.
+
 use kind_span::Range;
 
 use kind_tree::concrete::expr::Expr;

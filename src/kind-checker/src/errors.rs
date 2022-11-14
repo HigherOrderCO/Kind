@@ -18,7 +18,7 @@ pub(crate) enum TypeError {
     TypeMismatch(Context, Range, Box<Expr>, Box<Expr>),
 }
 
-pub fn context_to_subtitles(ctx: Context, subtitles: &mut Vec<Subtitle>) {
+fn context_to_subtitles(ctx: Context, subtitles: &mut Vec<Subtitle>) {
     subtitles.push(Subtitle::LineBreak);
 
     if !ctx.0.is_empty() {

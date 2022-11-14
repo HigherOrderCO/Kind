@@ -1,8 +1,6 @@
 //! This module compiles all of the code to a format
-//! that can run on the HVM. in order to run the type
-//! checker fast we dont rely on elaboration, instead
-//! we just remove all the types and this is the function
-//! that will run when requested by a type during type checking.
+//! that can run on the HVM and inside the checker.hvm
+//! file.
 
 use self::tags::EvalTag;
 use self::tags::{operator_to_constructor, TermTag};
@@ -134,7 +132,7 @@ fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, exp
                 lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
             ],
         ),
-        Lambda(name, body, erased) => mk_quoted_ctr(
+        Lambda(name, body, _erased) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Lambda),
             vec![span_to_num(expr.span), mk_u60(name.encode()), lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, body))],
         ),

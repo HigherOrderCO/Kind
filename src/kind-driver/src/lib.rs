@@ -43,6 +43,12 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
 
     expand::expand_book(&mut concrete_book);
 
+    let failed = resolution::check_unbound_top_level(session, &mut concrete_book);
+
+    if failed {
+        return None
+    }
+
     Some(concrete_book)
 }
 

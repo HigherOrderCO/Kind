@@ -138,7 +138,7 @@ pub fn compile_in_session<T>(
 
     let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
 
-    if diagnostics.is_empty() {
+    if diagnostics.is_empty() && res.is_some() {
         render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
         eprintln!();
         res

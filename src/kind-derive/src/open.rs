@@ -1,4 +1,5 @@
-///! Module to derive a "open" function for records.
+//! Module to derive a "open" function for records.
+
 use kind_span::Range;
 
 use kind_tree::concrete::expr::Expr;

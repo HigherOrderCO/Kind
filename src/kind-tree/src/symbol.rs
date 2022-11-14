@@ -16,6 +16,7 @@ pub struct Symbol(String);
 pub struct Ident {
     pub data: Symbol,
     pub range: Range,
+    pub generated: bool,
 }
 
 /// Qualified Identifiers always refer to top level
@@ -30,6 +31,7 @@ pub struct QualifiedIdent {
     /// trying to collect names created by each of the sintatic
     /// sugars.
     pub used_by_sugar: bool,
+    pub generated: bool,
 }
 
 impl QualifiedIdent {
@@ -39,6 +41,7 @@ impl QualifiedIdent {
             aux,
             range,
             used_by_sugar: false,
+            generated: false
         }
     }
 
@@ -46,11 +49,18 @@ impl QualifiedIdent {
         self.root = Symbol(str);
     }
 
+    pub fn to_generated(&self) -> Self {
+        let mut new = self.clone();
+        new.generated = true;
+        new
+    }
+
     /// Avoid this function. It transforms a QualifiedIdent into a Ident
     pub fn to_ident(&self) -> Ident {
         Ident {
             data: Symbol(self.to_string()),
             range: self.range,
+            generated: self.generated
         }
     }
 
@@ -60,6 +70,7 @@ impl QualifiedIdent {
             aux: aux.map(Symbol),
             range,
             used_by_sugar: false,
+            generated: false
         }
     }
 
@@ -69,6 +80,7 @@ impl QualifiedIdent {
             aux: Some(Symbol(aux.to_string())),
             range,
             used_by_sugar: true,
+            generated: true
         }
     }
 
@@ -78,6 +90,7 @@ impl QualifiedIdent {
             aux: self.aux.clone(),
             range: self.range,
             used_by_sugar: self.used_by_sugar,
+            generated: self.generated
         }
     }
 
@@ -92,6 +105,7 @@ impl Ident {
         Ident {
             data: Symbol(data),
             range,
+            generated: false
         }
     }
 
@@ -99,6 +113,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
+            generated: false
         }
     }
 
@@ -106,6 +121,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
+            generated: true
         }
     }
 
@@ -117,6 +133,12 @@ impl Ident {
 
     pub fn to_str(&self) -> &str {
         &self.data.0
+    }
+
+    pub fn to_generated(&self) -> Self {
+        let mut old = self.clone();
+        old.generated = true;
+        old
     }
 
     pub fn decode(num: u64) -> String {
@@ -168,6 +190,7 @@ impl Ident {
         Ident {
             data: self.data.clone(),
             range,
+            generated: false
         }
     }
 
@@ -175,6 +198,7 @@ impl Ident {
         Ident {
             data: Symbol(format!("{}.{}", self.data.0, name)),
             range: self.range,
+            generated: false
         }
     }
 
@@ -182,6 +206,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range: Range::ghost_range(),
+            generated: true
         }
     }
 }

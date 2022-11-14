@@ -1,8 +1,10 @@
-//! This pass does a lot of things including:
-//! - Setting an unique number for each of the holes
-//! - Desugar of lets and matchs
-//! - Untyped derivations for types and records
-//! - Checking of hidden and erased arguments
+//! This pass transforms a sugared tree into a simpler tree.
+//! 
+//! It does a lot of things like:
+//! * Setting an unique number for each of the holes
+//! * Desugar of lets and matchs
+//! * Untyped derivations for types and records
+//! * Checking of hidden and erased arguments
 
 use std::sync::mpsc::Sender;
 

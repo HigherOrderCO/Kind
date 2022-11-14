@@ -244,10 +244,6 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    fn parse_num_lit(&mut self) -> Result<u64, SyntaxError> {
-        eat_single!(self, Token::Num(x) => *x)
-    }
-
     fn parse_binary_op(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let range = self.range();
         self.advance(); // '('
@@ -277,6 +273,7 @@ impl<'a> Parser<'a> {
         vec.push(*self.parse_expr(false)?);
         let mut initialized = false;
         let mut with_comma = false;
+
         loop {
             let ate_comma = self.check_and_eat(Token::Comma);
             if !initialized {

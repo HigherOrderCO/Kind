@@ -5,9 +5,10 @@
 //! by sugars because it's useful to name resolution
 //! phase.
 
+use std::collections::HashSet;
 use std::sync::mpsc::Sender;
 
-use fxhash::FxHashMap;
+use fxhash::{FxHashMap, FxHashSet};
 use kind_report::data::DiagnosticFrame;
 use kind_span::Range;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
@@ -28,7 +29,7 @@ use crate::errors::PassError;
 pub struct UnboundCollector {
     pub errors: Sender<DiagnosticFrame>,
     pub context_vars: Vec<(Range, String)>,
-    pub unbound_top_level: FxHashMap<String, Vec<QualifiedIdent>>,
+    pub unbound_top_level: FxHashMap<String, FxHashSet<QualifiedIdent>>,
     pub unbound: FxHashMap<String, Vec<Ident>>,
     pub emit_errs: bool
 }
@@ -51,7 +52,7 @@ pub fn get_module_unbound(
     emit_errs: bool,
 ) -> (
     FxHashMap<String, Vec<Ident>>,
-    FxHashMap<String, Vec<QualifiedIdent>>,
+    FxHashMap<String, FxHashSet<QualifiedIdent>>,
 ) {
     let mut state = UnboundCollector::new(diagnostic_sender, emit_errs);
     state.visit_module(module);
@@ -64,7 +65,7 @@ pub fn get_book_unbound(
     emit_errs: bool,
 ) -> (
     FxHashMap<String, Vec<Ident>>,
-    FxHashMap<String, Vec<QualifiedIdent>>,
+    FxHashMap<String, FxHashSet<QualifiedIdent>>,
 ) {
     let mut state = UnboundCollector::new(diagnostic_sender, emit_errs);
     state.visit_book(book);
@@ -93,8 +94,8 @@ impl Visitor for UnboundCollector {
             let entry = self
                 .unbound_top_level
                 .entry(ident.to_string())
-                .or_insert_with(Vec::new);
-            entry.push(ident.clone());
+                .or_default();
+            entry.insert(ident.clone());
         }
     }
 

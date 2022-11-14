@@ -9,7 +9,7 @@ use crate::lexer::tokens::Token;
 /// The lexer state.
 pub struct Lexer<'a> {
     pub input: &'a str,
-    pub peekable: &'a mut Peekable<Chars<'a>>,
+    pub peekable: Peekable<Chars<'a>>,
     pub pos: usize,
     pub ctx: SyntaxCtxIndex,
 
@@ -20,7 +20,7 @@ pub struct Lexer<'a> {
 impl<'a> Lexer<'a> {
     pub fn new(
         input: &'a str,
-        peekable: &'a mut Peekable<Chars<'a>>,
+        peekable: Peekable<Chars<'a>>,
         ctx: SyntaxCtxIndex,
     ) -> Lexer<'a> {
         Lexer {

@@ -458,7 +458,8 @@ impl<'a> Report for Diagnostic<'a> {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            write_code_block(&file.clone(), config, &group, code, fmt)?;
+            let diff = pathdiff::diff_paths(&file.clone(), PathBuf::from(".").canonicalize().unwrap()).unwrap();
+            write_code_block(&diff, config, &group, code, fmt)?;
         }
 
         if !is_empty {

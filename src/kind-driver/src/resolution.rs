@@ -152,7 +152,7 @@ fn parse_and_store_book_by_identifier<'a>(
 
     match ident_to_path(&session.root, ident, true) {
         Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
-        Ok(None) => true,
+        Ok(None) => false,
         Err(err) => {
             session.diagnostic_sender.send(err).unwrap();
             true
@@ -195,7 +195,7 @@ fn parse_and_store_book_by_path<'a>(
     }
 
     for idents in unbound_top_level.values() {
-        failed |= parse_and_store_book_by_identifier(session, &idents[0], book);
+        failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
     }
 
     expand_uses(&mut module, session.diagnostic_sender.clone());
@@ -220,22 +220,25 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
 
 pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Book> {
     let mut book = Book::default();
+    if parse_and_store_book_by_path(session, path, &mut book) {
+        None
+    } else {
+        Some(book)
+    }
+}
 
-    let mut failed = parse_and_store_book_by_path(session, path, &mut book);
+pub fn check_unbound_top_level(session: &mut Session, book : &mut Book) -> bool {
+    let mut failed = false;
 
-    let (_, unbound_tops) = unbound::get_book_unbound(session.diagnostic_sender.clone(), &mut book, true);
+    let (_, unbound_tops) = unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for (_, unbound) in unbound_tops {
-        let res: Vec<Ident> = unbound.iter().filter(|x| !x.used_by_sugar).map(|x| x.to_ident()).collect();
+        let res: Vec<Ident> = unbound.iter().map(|x| x.to_ident()).collect();
         if !res.is_empty() {
             unbound_variable(session, &book, &res);
             failed = true;
         }
     }
 
-    if failed {
-        None
-    } else {
-        Some(book)
-    }
+    failed
 }
