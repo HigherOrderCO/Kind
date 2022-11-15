@@ -67,3 +67,37 @@ fn test_checker() -> Result<(), Error> {
     })?;
     Ok(())
 }
+
+#[test]
+#[timeout(15000)]
+fn test_eval() -> Result<(), Error> {
+    test_kind2(Path::new("./tests/suite/eval"), |path| {
+        let (rx, tx) = std::sync::mpsc::channel();
+        let root = PathBuf::from(".");
+        let mut session = Session::new(root, rx);
+
+        let check = driver::compile_book_to_hvm(&mut session, &PathBuf::from(path));
+
+        let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+        let render = RenderConfig::ascii(2);
+
+        kind_report::check_if_colors_are_supported(true);
+
+        match check {
+            Some(file) if diagnostics.is_empty() => {
+                driver::execute_file(&file).to_string()
+            },
+            _ => {
+                let mut res_string = String::new();
+
+                for diagnostic in diagnostics {
+                    let diag = Into::<Diagnostic>::into(&diagnostic);
+                    diag.render(&mut session, &render, &mut res_string).unwrap();
+                }
+
+                res_string
+            }
+        }
+    })?;
+    Ok(())
+}

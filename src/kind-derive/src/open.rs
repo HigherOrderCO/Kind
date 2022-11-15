@@ -37,7 +37,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         })
     };
 
-    let name = rec.name.add_segment("open");
+    let name = rec.name.add_segment(rec.constructor.to_str()).add_segment("open");
 
     let mut types = Telescope::default();
 

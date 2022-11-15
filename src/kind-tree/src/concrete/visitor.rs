@@ -197,10 +197,10 @@ pub fn walk_app_binding<T: Visitor>(ctx: &mut T, binding: &mut AppBinding) {
 
 pub fn walk_case_binding<T: Visitor>(ctx: &mut T, binding: &mut CaseBinding) {
     match binding {
-        CaseBinding::Field(ident) => ctx.visit_pat_ident(ident),
+        CaseBinding::Field(ident) => ctx.visit_ident(ident),
         CaseBinding::Renamed(ident, rename) => {
             ctx.visit_ident(ident);
-            ctx.visit_pat_ident(rename);
+            ctx.visit_ident(rename);
         }
     }
 }

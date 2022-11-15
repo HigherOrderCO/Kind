@@ -178,7 +178,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
     let mut res: Vec<AppBinding> = [indice_names.as_slice()].concat();
     res.push(AppBinding::explicit(mk_var(Ident::generate("scrutinizer"))));
-    let ret_ty = mk_app(mk_var(motive_ident), res, range);
+    let ret_ty = mk_app(mk_var(motive_ident.clone()), res, range);
 
     let mut rules = Vec::new();
 
@@ -190,30 +190,60 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let spine_params: Vec<Ident>;
         let spine: Vec<Ident>;
 
-        if cons.typ.is_none() {
-            irrelev = sum.indices.extend(&cons.args).map(|x| x.erased).to_vec();
-            spine_params = sum
-                .parameters
-                .extend(&sum.indices)
-                .extend(&cons.args)
-                .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                .to_vec();
-            spine = sum
-                .indices
-                .extend(&cons.args)
-                .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                .to_vec();
-        } else {
-            irrelev = cons.args.map(|x| x.erased).to_vec();
-            spine_params = sum
-                .parameters
-                .extend(&cons.args)
-                .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                .to_vec();
-            spine = cons
-                .args
-                .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                .to_vec();
+        let mut args_indices: Vec<AppBinding>;
+
+        match &cons.typ {
+            Some(expr) => match &**expr {
+                Expr {
+                    data: ExprKind::Constr(_, sp),
+                    ..
+                } => {
+                    irrelev = cons.args.map(|x| x.erased).to_vec();
+                    spine_params = sum
+                        .parameters
+                        .extend(&cons.args)
+                        .map(|x| x.name.with_name(|f| format!("{}", f)))
+                        .to_vec();
+                    spine = cons
+                        .args
+                        .map(|x| x.name.with_name(|f| format!("{}", f)))
+                        .to_vec();
+                    args_indices = sp
+                        .iter()
+                        .map(|x| match x {
+                            Binding::Positional(expr) => AppBinding {
+                                erased: false,
+                                data: expr.clone(),
+                            },
+                            Binding::Named(_, _, _) => unreachable!(),
+                        })
+                        .collect::<Vec<AppBinding>>();
+                    args_indices = args_indices[sum.parameters.len()..].into();
+                }
+                _ => unreachable!(),
+            },
+            None => {
+                irrelev = sum.indices.extend(&cons.args).map(|x| x.erased).to_vec();
+                spine_params = sum
+                    .parameters
+                    .extend(&sum.indices)
+                    .extend(&cons.args)
+                    .map(|x| x.name.with_name(|f| format!("{}", f)))
+                    .to_vec();
+                spine = sum
+                    .indices
+                    .extend(&cons.args)
+                    .map(|x| x.name.with_name(|f| format!("{}", f)))
+                    .to_vec();
+                args_indices = sum
+                    .indices
+                    .clone()
+                    .map(|x| AppBinding {
+                        data: mk_var(x.name.clone()),
+                        erased: false,
+                    })
+                    .to_vec();
+            }
         }
 
         pats.push(Box::new(Pat {
@@ -245,18 +275,41 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             }));
         }
 
-        let body = mk_app(
-            mk_var(cons.name.clone()),
-            spine
-                .iter()
-                .zip(irrelev)
-                .map(|(arg, erased)| AppBinding {
-                    data: mk_var(arg.clone()),
-                    erased,
-                })
-                .collect(),
-            cons.name.range,
-        );
+        let mut args = args_indices.clone();
+
+        args.push(AppBinding {
+            data: Box::new(Expr {
+                data: ExprKind::Constr(
+                    cons_ident.clone(),
+                    spine_params
+                        .iter()
+                        .cloned()
+                        .map(|x| Binding::Positional(mk_var(x)))
+                        .collect(),
+                ),
+                range,
+            }),
+            erased: false,
+        });
+
+        let body = Box::new(Expr {
+            data: ExprKind::Ann(
+                mk_app(
+                    mk_var(cons.name.clone()),
+                    spine
+                        .iter()
+                        .zip(irrelev)
+                        .map(|(arg, erased)| AppBinding {
+                            data: mk_var(arg.clone()),
+                            erased,
+                        })
+                        .collect(),
+                    cons.name.range,
+                ),
+                mk_app(mk_var(motive_ident.clone()), args, range),
+            ),
+            range,
+        });
 
         let rule = Box::new(Rule {
             name: name.clone(),

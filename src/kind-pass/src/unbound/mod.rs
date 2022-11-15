@@ -27,7 +27,10 @@ use crate::errors::PassError;
 
 pub struct UnboundCollector {
     pub errors: Sender<DiagnosticFrame>,
+
+    // Utils for keeping variables tracking and report duplicated ones.
     pub context_vars: Vec<(Range, String)>,
+
     pub top_level_defs: FxHashMap<String, Range>,
     pub unbound_top_level: FxHashMap<String, FxHashSet<QualifiedIdent>>,
     pub unbound: FxHashMap<String, Vec<Ident>>,
@@ -331,8 +334,9 @@ impl Visitor for UnboundCollector {
 
     fn visit_case_binding(&mut self, case_binding: &mut CaseBinding) {
         match case_binding {
-            CaseBinding::Field(pat) => self.visit_pat_ident(pat),
-            CaseBinding::Renamed(_, pat) => self.visit_pat_ident(pat),
+            CaseBinding::Field(ident) | CaseBinding::Renamed(_, ident) => {
+                self.context_vars.push((ident.range, ident.to_string()))
+            }
         }
     }
 

@@ -1,0 +1,12 @@
+   ERROR  The case is not covering all the values inside of it!
+
+      /--[tests/suite/checker/derive/fail/IncompleteCase.kind2:11:9]
+      |
+   10 |        let User.new (ttt = e) e .. = User.new 2 4 1
+   11 |        let User.new (ttt = f) name = User.new 6 7 3
+      |            v-------
+      |            \ This is the incomplete case
+   12 |        e
+
+      Hint: Need variables for 'e'
+

@@ -1,6 +1,5 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::*;
-use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::{Operator, Number, NumType};
 
@@ -612,7 +611,7 @@ impl<'a> Parser<'a> {
                 Token::LowerId(_) => {
                     range = Some(self.range());
                     let name = self.parse_id()?;
-                    bindings.push(CaseBinding::Field(PatIdent(name)));
+                    bindings.push(CaseBinding::Field(name));
                 }
                 Token::LPar => {
                     let start = self.range();
@@ -622,7 +621,7 @@ impl<'a> Parser<'a> {
                     let renamed = self.parse_id()?;
                     range = Some(self.range());
                     self.eat_closing_keyword(Token::RPar, start)?;
-                    bindings.push(CaseBinding::Renamed(name, PatIdent(renamed)));
+                    bindings.push(CaseBinding::Renamed(name, renamed));
                 }
                 Token::DotDot => {
                     ignore_rest_range = Some(self.range());

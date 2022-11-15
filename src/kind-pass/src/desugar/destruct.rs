@@ -1,6 +1,5 @@
 use fxhash::FxHashMap;
 use kind_span::{Locatable, Range};
-use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::{expr, CaseBinding, Destruct, TopLevel};
 use kind_tree::desugared;
 use kind_tree::symbol::Ident;
@@ -16,7 +15,7 @@ impl<'a> DesugarState<'a> {
         fields: &[(String, bool)],
         cases: &[CaseBinding],
         jump_rest: Option<Range>,
-    ) -> Vec<Option<(Range, PatIdent)>> {
+    ) -> Vec<Option<(Range, Ident)>> {
         let mut ordered_fields = vec![None; fields.len()];
         let mut names = FxHashMap::default();
 
@@ -26,7 +25,7 @@ impl<'a> DesugarState<'a> {
 
         for arg in cases {
             let (name, alias) = match arg {
-                CaseBinding::Field(name) => (name.0.clone(), name.clone()),
+                CaseBinding::Field(name) => (name.clone(), name.clone()),
                 CaseBinding::Renamed(name, alias) => (name.clone(), alias.clone()),
             };
 
@@ -68,10 +67,11 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         match binding {
             Destruct::Destruct(_, typ, case, jump_rest) => {
-                let entry = self.old_book.entries.get(&typ.to_string());
                 let count = self.old_book.count.get(&typ.to_string()).unwrap();
 
-                let record = if let Some(TopLevel::RecordType(record)) = entry {
+                let rec = count.is_record_cons_of.clone().and_then(|name| self.old_book.entries.get(&name.to_string()));
+
+                let record = if let Some(TopLevel::RecordType(record)) = rec {
                     record
                 } else {
                     self.send_err(PassError::LetDestructOnlyForRecord(typ.range));
@@ -93,7 +93,7 @@ impl<'a> DesugarState<'a> {
 
                 for arg in ordered_fields {
                     if let Some((_, name)) = arg {
-                        arguments.push(name.0)
+                        arguments.push(name)
                     } else {
                         arguments.push(self.gen_name(jump_rest.unwrap_or(typ.range)))
                     }
@@ -193,7 +193,7 @@ impl<'a> DesugarState<'a> {
 
                 for arg in ordered {
                     if let Some((_, name)) = arg {
-                        arguments.push(name.0)
+                        arguments.push(name)
                     } else {
                         arguments.push(self.gen_name(case.ignore_rest.unwrap_or(match_.typ.range)));
                     }

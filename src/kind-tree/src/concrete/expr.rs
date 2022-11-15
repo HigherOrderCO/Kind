@@ -43,8 +43,8 @@ impl AppBinding {
 /// inside a match expression.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum CaseBinding {
-    Field(PatIdent),
-    Renamed(Ident, PatIdent),
+    Field(Ident),
+    Renamed(Ident, Ident),
 }
 
 /// A match case with a constructor that will matches the
@@ -328,8 +328,8 @@ impl Display for Sttm {
 impl Display for CaseBinding {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
-            CaseBinding::Field(n) => write!(f, "{}", n.0),
-            CaseBinding::Renamed(m, n) => write!(f, "({} = {})", m, n.0),
+            CaseBinding::Field(n) => write!(f, "{}", n),
+            CaseBinding::Renamed(m, n) => write!(f, "({} = {})", m, n),
         }
     }
 }

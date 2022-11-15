@@ -1,6 +1,3 @@
-Equal.match <t: Type> <a: t> <b: t> (scrutinizer: (Equal t a b)) -(motive: ((b : t) -> (Equal t a b) -> Type)) (_refl: (motive a (Equal.refl t a))) : (motive b scrutinizer)
-Equal.match _x1 _x2 _x3 (Equal.refl t_ a_) motive refl = (refl :: ((motive a_) (Equal.refl t_ a_)))
-
-Equal <t: Type> (a: t) (b: t) : Type
-
-Equal.refl <t: Type> <a: t> : (Equal t a a)
+type Equal <t: Type> (a: t) ~ (b: t) {
+    refl : Equal t a a
+}
