@@ -19,3 +19,9 @@ kind-report  = { path = "../kind-report" }
 kind-checker = { path = "../kind-checker" }
 
 clap = { version = "4.0.10", features = ["derive"] }
+
+[dev-dependencies]
+
+pretty_assertions = "1.3.0"
+ntest = "0.8.1"
+walkdir = "2"

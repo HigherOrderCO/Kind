@@ -1,5 +1,4 @@
 //! Crate to parse the kind2 grammar.
-
 pub mod errors;
 pub mod expr;
 pub mod macros;

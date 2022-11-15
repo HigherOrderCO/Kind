@@ -165,6 +165,15 @@ fn parse_and_store_book_by_path<'a>(
     path: &PathBuf,
     book: &'a mut Book,
 ) -> bool {
+
+    if !path.exists() {
+        session
+        .diagnostic_sender
+        .send(DriverError::CannotFindFile(path.to_str().unwrap().to_string()).into())
+        .unwrap();
+        return true;
+    }
+
     if session.loaded_paths_map.contains_key(&fs::canonicalize(path).unwrap()) {
         return false;
     }
