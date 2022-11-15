@@ -192,10 +192,6 @@ pub fn get_kdl_names(book: &CompBook, namespace: &Option<String>) -> Result<Hash
         // If the entry uses a kindelia name, use it
         let kdln = if let Some(kdln_attr) = entry.get_attribute("kdl_name") {
             let kdln = kdln_attr.value.unwrap();
-            if !kdln.0.chars().next().unwrap().is_uppercase() {
-                let err = format!("Kindelia name \"{}\" doesn't start with an uppercase letter.", kdln);
-                return Err(err);
-            }
             if entry.orig {
                 let max_len = KDL_NAME_LEN - ns.len();
                 if kdln.len() > max_len {
