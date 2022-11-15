@@ -32,9 +32,16 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
         Sub(_, _, _, expr) => compile_term(expr),
         Num(kind_tree::Number::U60(numb)) => Box::new(Term::Num { numb: *numb }),
         Num(kind_tree::Number::U120(numb)) => {
-            let hi = Box::new(Term::Num { numb: (numb >> 60) as u64});
-            let lo = Box::new(Term::Num { numb: (numb & 0xFFFFFFFFFFFFFFF) as u64});
-            Box::new(Term::Ctr { name: String::from("U120.new"), args: vec![hi, lo] })
+            let hi = Box::new(Term::Num {
+                numb: (numb >> 60) as u64,
+            });
+            let lo = Box::new(Term::Num {
+                numb: (numb & 0xFFFFFFFFFFFFFFF) as u64,
+            });
+            Box::new(Term::Ctr {
+                name: String::from("U120.new"),
+                args: vec![hi, lo],
+            })
         }
         Binary(op, l, r) => Box::new(Term::Ctr {
             name: op.to_string(),

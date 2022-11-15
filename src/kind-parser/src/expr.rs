@@ -1,7 +1,7 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::*;
 use kind_tree::symbol::{Ident, QualifiedIdent};
-use kind_tree::{Operator, Number, NumType};
+use kind_tree::{NumType, Number, Operator};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;

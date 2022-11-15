@@ -23,7 +23,10 @@ const EXT: &str = "kind2";
 /// Tries to accumulate on a buffer all of the
 /// paths that exists (so we can just throw an
 /// error about ambiguous resolution to the user)
-fn accumulate_neighbour_paths(ident: &QualifiedIdent, raw_path: &Path) -> Result<Option<PathBuf>, DiagnosticFrame> {
+fn accumulate_neighbour_paths(
+    ident: &QualifiedIdent,
+    raw_path: &Path,
+) -> Result<Option<PathBuf>, DiagnosticFrame> {
     let mut canon_path = raw_path.to_path_buf();
     let mut dir_file_path = raw_path.to_path_buf();
     let dir_path = raw_path.to_path_buf();
@@ -62,7 +65,7 @@ fn ident_to_path(
             raw_path.pop();
             accumulate_neighbour_paths(&ident, &raw_path)
         }
-        rest => rest
+        rest => rest,
     }
 }
 
