@@ -303,14 +303,11 @@ impl<'a> DesugarState<'a> {
                 desugared::Expr::var(name)
             }
             PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
-            // TODO: Add u120 pattern literals
             PatKind::Num(kind_tree::Number::U60(n)) => desugared::Expr::num60(pat.range, *n),
             PatKind::Num(kind_tree::Number::U120(n)) => desugared::Expr::num120(pat.range, *n),
             PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
             PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
-            PatKind::Str(string) => {
-                desugared::Expr::str(pat.range, string.to_owned())
-            }
+            PatKind::Str(string) => desugared::Expr::str(pat.range, string.to_owned()),
         }
     }
 
