@@ -25,12 +25,21 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_num(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    pub fn parse_pat_num60(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let start = self.range();
-        let num = eat_single!(self, Token::Num(n) => *n)?;
+        let num = eat_single!(self, Token::Num60(n) => *n)?;
         Ok(Box::new(Pat {
             range: start,
-            data: PatKind::Num(num),
+            data: PatKind::Num(kind_tree::Number::U60(num)),
+        }))
+    }
+
+    pub fn parse_pat_num120(&mut self) -> Result<Box<Pat>, SyntaxError> {
+        let start = self.range();
+        let num = eat_single!(self, Token::Num120(n) => *n)?;
+        Ok(Box::new(Pat {
+            range: start,
+            data: PatKind::Num(kind_tree::Number::U120(num)),
         }))
     }
 
@@ -122,8 +131,10 @@ impl<'a> Parser<'a> {
             self.parse_pat_constructor()
         } else if self.get().is_str() {
             self.parse_pat_str()
-        } else if self.get().is_num() {
-            self.parse_pat_num()
+        } else if self.get().is_num60() {
+            self.parse_pat_num60()
+        } else if self.get().is_num120() {
+            self.parse_pat_num120()
         } else if self.check_actual(Token::LPar) {
             self.parse_pat_group()
         } else if self.get().is_lower_id() {

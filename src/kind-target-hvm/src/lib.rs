@@ -30,20 +30,19 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
         }),
         Ann(left, _) => compile_term(left),
         Sub(_, _, _, expr) => compile_term(expr),
-        Num(desugared::Num::U60(numb)) => Box::new(Term::Num { numb: *numb }),
-        Num(_) => todo!(),
+        Num(kind_tree::Number::U60(numb)) => Box::new(Term::Num { numb: *numb }),
+        Num(kind_tree::Number::U120(numb)) => {
+            let hi = Box::new(Term::Num { numb: (numb >> 60) as u64});
+            let lo = Box::new(Term::Num { numb: (numb & 0xFFFFFFFFFFFFFFF) as u64});
+            Box::new(Term::Ctr { name: String::from("U120.new"), args: vec![hi, lo] })
+        }
         Binary(op, l, r) => Box::new(Term::Ctr {
             name: op.to_string(),
             args: vec![compile_term(l), compile_term(r)],
         }),
         Hole(_) => unreachable!("Internal Error: 'Hole' cannot be a relevant term"),
         Typ => unreachable!("Internal Error: 'Typ' cannot be a relevant term"),
-        NumType(desugared::NumType::U60) => {
-            unreachable!("Internal Error: 'U60' cannot be a relevant term")
-        }
-        NumType(desugared::NumType::U120) => {
-            unreachable!("Internal Error: 'U120' cannot be a relevant term")
-        }
+        NumType(typ) => unreachable!("Internal Error: '{:?}' cannot be a relevant term", typ),
         All(_, _, _) => unreachable!("Internal Error: 'All' cannot be a relevant term"),
         Str(_) => unreachable!("Internal Error: 'Str' cannot be a relevant term"),
         Hlp(_) => unreachable!("Internal Error: 'Hlp' cannot be a relevant term"),

@@ -19,8 +19,8 @@ pub enum PatKind {
     Var(PatIdent),
     /// Application of a constructor
     App(QualifiedIdent, Vec<Box<Pat>>),
-    /// Hole
-    Num(u64),
+    /// Number
+    Num(crate::Number),
     /// Pair
     Pair(Box<Pat>, Box<Pat>),
     /// List
@@ -58,7 +58,8 @@ impl Display for Pat {
                     .join(" ")
             ),
             Str(str) => write!(f, "\"{}\"", str),
-            Num(num) => write!(f, "{}", num),
+            Num(crate::Number::U60(num)) => write!(f, "{}", num),
+            Num(crate::Number::U120(num)) => write!(f, "{}u120", num),
             Pair(fst, snd) => write!(f, "({}, {})", fst, snd),
             Hole => write!(f, "_"),
         }

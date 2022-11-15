@@ -16,9 +16,10 @@ impl<'a> DesugarState<'a> {
         match literal {
             Literal::Type => desugared::Expr::typ(range),
             Literal::Help(name) => desugared::Expr::hlp(range, name.clone()),
-            Literal::U60 => desugared::Expr::u60(range),
-            // TODO: Add u120 literals
-            Literal::Number(num) => desugared::Expr::num60(range, *num),
+            Literal::NumType(kind_tree::NumType::U60) => desugared::Expr::u60(range),
+            Literal::NumType(kind_tree::NumType::U120) => desugared::Expr::u120(range),
+            Literal::Number(kind_tree::Number::U60(num)) => desugared::Expr::num60(range, *num),
+            Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
             Literal::String(string) => desugared::Expr::str(range, string.to_owned()),
             Literal::Char(_) => todo!(),
         }

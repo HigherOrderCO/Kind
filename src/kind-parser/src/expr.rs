@@ -2,7 +2,7 @@ use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::*;
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::{Ident, QualifiedIdent};
-use kind_tree::Operator;
+use kind_tree::{Operator, Number, NumType};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -214,7 +214,8 @@ impl<'a> Parser<'a> {
         let id = self.parse_upper_id()?;
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit(Literal::Type),
-            "U60" => ExprKind::Lit(Literal::U60),
+            "U60" => ExprKind::Lit(Literal::NumType(NumType::U60)),
+            "U120" => ExprKind::Lit(Literal::NumType(NumType::U120)),
             _ => ExprKind::Constr(id.clone(), vec![]),
         };
         Ok(Box::new(Expr {
@@ -228,7 +229,8 @@ impl<'a> Parser<'a> {
         let mut range = id.range;
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit(Literal::Type),
-            "U60" => ExprKind::Lit(Literal::U60),
+            "U60" => ExprKind::Lit(Literal::NumType(NumType::U60)),
+            "U120" => ExprKind::Lit(Literal::NumType(NumType::U120)),
             _ => {
                 let (range_end, spine) = self.parse_call_tail(id.range, multiline)?;
                 range = range_end;
@@ -238,12 +240,21 @@ impl<'a> Parser<'a> {
         Ok(Box::new(Expr { range, data }))
     }
 
-    fn parse_num(&mut self, num: u64) -> Result<Box<Expr>, SyntaxError> {
+    fn parse_num60(&mut self, num: u64) -> Result<Box<Expr>, SyntaxError> {
         let range = self.range();
         self.advance();
         Ok(Box::new(Expr {
             range,
-            data: ExprKind::Lit(Literal::Number(num)),
+            data: ExprKind::Lit(Literal::Number(Number::U60(num))),
+        }))
+    }
+
+    fn parse_num120(&mut self, num: u128) -> Result<Box<Expr>, SyntaxError> {
+        let range = self.range();
+        self.advance();
+        Ok(Box::new(Expr {
+            range,
+            data: ExprKind::Lit(Literal::Number(Number::U120(num))),
         }))
     }
 
@@ -367,7 +378,7 @@ impl<'a> Parser<'a> {
     pub fn parse_num_lit(&mut self) -> Result<usize, SyntaxError> {
         self.ignore_docs();
         match self.get().clone() {
-            Token::Num(num) => {
+            Token::Num60(num) => {
                 self.advance();
                 Ok(num as usize)
             }
@@ -380,7 +391,8 @@ impl<'a> Parser<'a> {
         match self.get().clone() {
             Token::UpperId(_, _) => self.parse_single_upper(),
             Token::LowerId(_) => self.parse_var(),
-            Token::Num(num) => self.parse_num(num),
+            Token::Num60(num) => self.parse_num60(num),
+            Token::Num120(num) => self.parse_num120(num),
             Token::Char(chr) => self.parse_char(chr),
             Token::Str(str) => self.parse_str(str),
             Token::Help(str) => self.parse_help(str),

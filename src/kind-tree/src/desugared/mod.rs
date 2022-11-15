@@ -46,9 +46,9 @@ pub enum ExprKind {
     /// Type Literal
     Typ,
     /// Primitive numeric types
-    NumType(NumType),
+    NumType(crate::NumType),
     /// Primitive numeric values
-    Num(Num),
+    Num(crate::Number),
     /// Very special constructor :)
     Str(String),
     /// Binary operation (e.g. 2 + 3)
@@ -167,28 +167,28 @@ impl Expr {
     pub fn u60(range: Range) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::NumType(NumType::U60),
+            data: ExprKind::NumType(crate::NumType::U60),
         })
     }
 
     pub fn u120(range: Range) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::NumType(NumType::U120),
+            data: ExprKind::NumType(crate::NumType::U120),
         })
     }
 
     pub fn num60(range: Range, num: u64) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::Num(Num::U60(num)),
+            data: ExprKind::Num(crate::Number::U60(num)),
         })
     }
 
     pub fn num120(range: Range, num: u128) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::Num(Num::U120(num)),
+            data: ExprKind::Num(crate::Number::U120(num)),
         })
     }
 
@@ -226,18 +226,6 @@ impl Expr {
             span: Span::Locatable(range),
         })
     }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub enum Num {
-    U60(u64),
-    U120(u128),
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub enum NumType {
-    U60,
-    U120,
 }
 
 /// An argument is a 'binding' of a name to a type
@@ -330,11 +318,11 @@ impl Display for Expr {
         use ExprKind::*;
         match &self.data {
             Typ => write!(f, "Type"),
-            NumType(self::NumType::U60) => write!(f, "U60"),
-            NumType(self::NumType::U120) => write!(f, "U120"),
+            NumType(crate::NumType::U60) => write!(f, "U60"),
+            NumType(crate::NumType::U120) => write!(f, "U120"),
             Str(n) => write!(f, "\"{}\"", n),
-            Num(self::Num::U60(n)) => write!(f, "{}", n),
-            Num(self::Num::U120(n)) => write!(f, "{}u120", n),
+            Num(crate::Number::U60(n)) => write!(f, "{}", n),
+            Num(crate::Number::U120(n)) => write!(f, "{}u120", n),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body, false) => write!(f, "({} => {})", binder, body),

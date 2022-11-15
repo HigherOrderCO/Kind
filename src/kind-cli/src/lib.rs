@@ -185,7 +185,7 @@ pub fn run_cli(config: Cli) {
         }
         Command::Eval { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                driver::erase_book(session, &PathBuf::from(file.clone()))
+                driver::erase_book(session, &PathBuf::from(file.clone()), &["Main".to_string()])
             })
             .map(|res| {
                 println!("{}", driver::eval_in_checker(&res));

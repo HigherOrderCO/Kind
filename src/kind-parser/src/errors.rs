@@ -9,6 +9,7 @@ use crate::lexer::tokens::Token;
 #[derive(Debug, Clone)]
 pub enum EncodeSequence {
     Hexa,
+    Decimal,
     Octal,
     Binary,
     Unicode,
@@ -30,11 +31,13 @@ pub enum SyntaxError {
     UnusedDocString(Range),
     CannotUseUse(Range),
     ImportsCannotHaveAlias(Range),
+    InvalidNumberType(String, Range),
 }
 
 fn encode_name(encode: EncodeSequence) -> &'static str {
     match encode {
         EncodeSequence::Hexa => "hexadecimal",
+        EncodeSequence::Decimal => "decimal",
         EncodeSequence::Octal => "octal",
         EncodeSequence::Binary => "binary",
         EncodeSequence::Unicode => "unicode",
@@ -254,7 +257,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::CannotUseUse(range) => DiagnosticFrame {
-                code: 14,
+                code: 15,
                 severity: Severity::Error,
                 title: "Can only use the 'use' statement in the beggining of the file".to_string(),
                 subtitles: vec![],
@@ -268,7 +271,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::ImportsCannotHaveAlias(range) => DiagnosticFrame {
-                code: 14,
+                code: 16,
                 severity: Severity::Error,
                 title: "The upper cased name cannot have an alias".to_string(),
                 subtitles: vec![],
@@ -277,6 +280,20 @@ impl From<SyntaxError> for DiagnosticFrame {
                     position: range,
                     color: Color::Fst,
                     text: "Use the entire name here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            SyntaxError::InvalidNumberType(type_, range) => DiagnosticFrame {
+                code: 17,
+                severity: Severity::Error,
+                title: format!("The {} number type is invalid", type_),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
                     no_code: false,
                     main: true,
                 }],

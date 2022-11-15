@@ -52,13 +52,13 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
     Some(concrete_book)
 }
 
-pub fn erase_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
+pub fn erase_book(session: &mut Session, path: &PathBuf, entrypoint: &[String]) -> Option<desugared::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
-        HashSet::from_iter(vec!["Main".to_string()]),
+        HashSet::from_iter(entrypoint.to_owned()),
     )
 }
 
@@ -79,7 +79,7 @@ pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desug
 }
 
 pub fn compile_book_to_hvm(session: &mut Session, path: &PathBuf) -> Option<backend::File> {
-    erase_book(session, path).map(kind_target_hvm::compile_book)
+    erase_book(session, path, &["Main".to_string()]).map(kind_target_hvm::compile_book)
 }
 
 pub fn execute_file(file: &backend::File) -> Box<backend::Term> {

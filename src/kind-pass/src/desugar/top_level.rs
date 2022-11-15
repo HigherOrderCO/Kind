@@ -253,8 +253,9 @@ impl<'a> DesugarState<'a> {
     }
 
     pub fn desugar_pat(&mut self, pat: &concrete::pat::Pat) -> Box<desugared::Expr> {
+        use concrete::pat::PatKind;
         match &pat.data {
-            concrete::pat::PatKind::App(head, spine) => {
+            PatKind::App(head, spine) => {
                 // TODO: Fix lol
                 let entry = self
                     .old_book
@@ -297,16 +298,17 @@ impl<'a> DesugarState<'a> {
                 }
                 desugared::Expr::ctr(pat.range, head.clone(), new_spine)
             }
-            concrete::pat::PatKind::Hole => {
+            PatKind::Hole => {
                 let name = self.gen_name(pat.range);
                 desugared::Expr::var(name)
             }
-            concrete::pat::PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
+            PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
             // TODO: Add u120 pattern literals
-            concrete::pat::PatKind::Num(n) => desugared::Expr::num60(pat.range, *n),
-            concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
-            concrete::pat::PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
-            concrete::pat::PatKind::Str(string) => {
+            PatKind::Num(kind_tree::Number::U60(n)) => desugared::Expr::num60(pat.range, *n),
+            PatKind::Num(kind_tree::Number::U120(n)) => desugared::Expr::num120(pat.range, *n),
+            PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
+            PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
+            PatKind::Str(string) => {
                 desugared::Expr::str(pat.range, string.to_owned())
             }
         }
