@@ -6,7 +6,6 @@
 use kind_pass::expand::uses::expand_uses;
 use std::collections::HashSet;
 use std::fs;
-use std::os::linux::raw;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use strsim::jaro;

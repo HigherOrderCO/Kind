@@ -38,3 +38,16 @@ pub enum Operator {
     Gtn,
     Neq,
 }
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum Number {
+    U60(u64),
+    U120(u128),
+    // TODO: F60
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum NumType {
+    U60,
+    U120,
+}

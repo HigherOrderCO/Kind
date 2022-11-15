@@ -54,30 +54,49 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Lex a base-10 digit.
-    fn lex_digit(&mut self, start: usize) -> (Token, Range) {
-        let num = self.accumulate_while(&|x| x.is_ascii_digit() || x == '_');
-        (
-            Token::Num(num.replace('_', "").parse::<u64>().unwrap()),
-            self.mk_range(start),
-        )
-    }
-
-    /// Lexes a number of base @base@ removing the first
-    /// character that indicates the encoding
-    fn lex_base(&mut self, start: usize, base: u32, err: EncodeSequence) -> (Token, Range) {
-        self.next_char();
+    /// Lexes a number of base @base@, figuring out it's type
+    /// Lexes 0 if not at a digit position 
+    fn lex_num_and_type_with_base(&mut self, num_start: usize, base: u32, err: EncodeSequence) -> (Token, Range) {
         let num = self.accumulate_while(&|x| x.is_digit(base) || x == '_');
-        if let Ok(res) = u64::from_str_radix(&num.replace('_', ""), base) {
-            (Token::Num(res), self.mk_range(start))
-        } else {
-            (
-                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(
-                    err,
-                    self.mk_range(start),
-                ))),
-                self.mk_range(start),
-            )
+        let num = if num.is_empty() { "0" } else { num };
+        let num = num.to_string();
+        let type_start = self.span();
+        let make_num_err = |x: &Self| (
+            Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(err, x.mk_range(num_start)))),
+            x.mk_range(num_start),
+        );
+        match self.peekable.peek() {
+            Some('U' | 'u') => {
+                self.next_char();
+                let type_ = self.accumulate_while(&|x| x.is_ascii_digit());
+                match type_ {
+                    "60" => {
+                        if let Ok(res) = u64::from_str_radix(&num.replace('_', ""), base) {
+                            (Token::Num60(res), self.mk_range(num_start))
+                        } else {
+                            make_num_err(self)
+                        }
+                    }
+                    "120" => {
+                        if let Ok(res) = u128::from_str_radix(&num.replace('_', ""), base) {
+                            (Token::Num120(res), self.mk_range(num_start))
+                        } else {
+                            make_num_err(self)
+                        }
+                    }
+                    _ => (
+                        Token::Error(Box::new(SyntaxError::InvalidNumberType(format!("u{}", type_), self.mk_range(type_start)))),
+                        self.mk_range(type_start),
+                    ),
+                }
+            },
+            Some(_) | None => {
+                if let Ok(res) = u64::from_str_radix(&num.replace('_', ""), base) {
+                    (Token::Num60(res), self.mk_range(num_start))
+                } else {
+                    make_num_err(self)
+                }
+            }
         }
     }
 
@@ -89,16 +108,22 @@ impl<'a> Lexer<'a> {
             Some('0') => {
                 self.next_char();
                 match self.peekable.peek() {
-                    Some('x') => self.lex_base(start, 16, EncodeSequence::Hexa),
-                    Some('o') => self.lex_base(start, 8, EncodeSequence::Octal),
-                    Some('b') => self.lex_base(start, 2, EncodeSequence::Binary),
-                    Some('0'..='9') => self.lex_digit(start),
-                    Some(_) => (Token::Num(0), self.mk_range(start)),
-                    None => (Token::Num(0), self.mk_range(start)),
+                    Some('x' | 'X') => {
+                        self.next_char();
+                        self.lex_num_and_type_with_base(start, 16, EncodeSequence::Hexa)
+                    }
+                    Some('o' | 'O') => {
+                        self.next_char();
+                        self.lex_num_and_type_with_base(start, 8, EncodeSequence::Octal)
+                    }
+                    Some('b' | 'B') => {
+                        self.next_char();
+                        self.lex_num_and_type_with_base(start, 2, EncodeSequence::Binary)
+                    }
+                    Some('0'..='9' | _) | None => self.lex_num_and_type_with_base(start, 10, EncodeSequence::Decimal),
                 }
             }
-            Some('0'..='9') => self.lex_digit(start),
-            Some(_) => (Token::Num(0), self.mk_range(start)),
+            Some('0'..='9' | _) => self.lex_num_and_type_with_base(start, 10, EncodeSequence::Decimal),
         }
     }
 

@@ -46,7 +46,8 @@ pub enum Token {
     // Literals
     Char(char),
     Str(String),
-    Num(u64),
+    Num60(u64),
+    Num120(u128),
     Float(u64, u64),
     Hole,
 
@@ -101,8 +102,12 @@ impl Token {
         matches!(self, Token::Str(_))
     }
 
-    pub fn is_num(&self) -> bool {
-        matches!(self, Token::Num(_))
+    pub fn is_num60(&self) -> bool {
+        matches!(self, Token::Num60(_))
+    }
+
+    pub fn is_num120(&self) -> bool {
+        matches!(self, Token::Num120(_))
     }
 
     pub fn is_eof(&self) -> bool {
@@ -148,7 +153,8 @@ impl fmt::Display for Token {
             Token::As => write!(f, "as"),
             Token::Char(c) => write!(f, "'{}'", c),
             Token::Str(s) => write!(f, "\"{}\"", s),
-            Token::Num(n) => write!(f, "{}", n),
+            Token::Num60(n) => write!(f, "{}", n),
+            Token::Num120(n) => write!(f, "{}u120", n),
             Token::Float(start, end) => write!(f, "{}.{}", start, end),
             Token::Hole => write!(f, "-"),
             Token::Plus => write!(f, "+"),

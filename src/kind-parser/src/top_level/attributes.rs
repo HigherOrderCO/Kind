@@ -13,7 +13,7 @@ impl<'a> Parser<'a> {
                 let ident = self.parse_id()?;
                 Ok(AttributeStyle::Ident(range, ident))
             }
-            Token::Num(num) => {
+            Token::Num60(num) => {
                 let range = self.range();
                 self.advance();
                 Ok(AttributeStyle::Number(range, num))

@@ -87,11 +87,11 @@ pub enum Literal {
     /// and the goal (e.g. ?)
     Help(Ident),
     /// The type of 60 bits numberss (e.g. 2 : U60)
-    U60,
+    NumType(crate::NumType),
     // Char literal
     Char(char),
     /// A number literal of 60 bits (e.g 32132)
-    Number(u64),
+    Number(crate::Number),
     // A String literal
     String(String),
 }
@@ -266,9 +266,11 @@ impl Display for Literal {
         match self {
             Literal::Help(s) => write!(f, "?{}", s),
             Literal::Type => write!(f, "Type"),
-            Literal::U60 => write!(f, "U60"),
+            Literal::NumType(crate::NumType::U60) => write!(f, "U60"),
+            Literal::NumType(crate::NumType::U120) => write!(f, "U120"),
             Literal::Char(c) => write!(f, "'{}'", c),
-            Literal::Number(numb) => write!(f, "{}", numb),
+            Literal::Number(crate::Number::U60(numb)) => write!(f, "{}", numb),
+            Literal::Number(crate::Number::U120(numb)) => write!(f, "{}u120", numb),
             Literal::String(str) => {
                 write!(f, "{:?}", str)
             }

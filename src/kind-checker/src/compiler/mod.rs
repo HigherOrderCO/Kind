@@ -130,10 +130,10 @@ fn codegen_all_expr(
 
     match &expr.data {
         Typ => mk_quoted_ctr(eval_ctr(quote, TermTag::Typ), vec![span_to_num(expr.span)]),
-        NumType(desugared::NumType::U60) => {
+        NumType(kind_tree::NumType::U60) => {
             mk_quoted_ctr(eval_ctr(quote, TermTag::U60), vec![span_to_num(expr.span)])
         }
-        NumType(desugared::NumType::U120) => todo!(),
+        NumType(kind_tree::NumType::U120) => todo!(),
         Var(ident) => {
             if quote && !lhs {
                 set_origin(ident)
@@ -241,11 +241,11 @@ fn codegen_all_expr(
                 codegen_all_expr(lhs_rule, lhs, num, quote, inside),
             ],
         ),
-        Num(desugared::Num::U60(n)) => mk_quoted_ctr(
+        Num(kind_tree::Number::U60(n)) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Num),
             vec![span_to_num(expr.span), mk_u60(*n)],
         ),
-        Num(desugared::Num::U120(_)) => todo!(),
+        Num(kind_tree::Number::U120(_)) => todo!(),
         Binary(operator, left, right) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Binary),
             vec![
