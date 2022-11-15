@@ -458,7 +458,9 @@ impl<'a> Report for Diagnostic<'a> {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            let diff = pathdiff::diff_paths(&file.clone(), PathBuf::from(".").canonicalize().unwrap()).unwrap();
+            let diff =
+                pathdiff::diff_paths(&file.clone(), PathBuf::from(".").canonicalize().unwrap())
+                    .unwrap();
             write_code_block(&diff, config, &group, code, fmt)?;
         }
 

@@ -177,7 +177,7 @@ impl<'a> DesugarState<'a> {
                 for arg in spine {
                     new_spine.push(desugared::AppBinding {
                         data: self.desugar_expr(&arg.data),
-                        erased: arg.erased
+                        erased: arg.erased,
                     })
                 }
                 desugared::Expr::app(range, new_head, new_spine)

@@ -127,7 +127,10 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         mk_var(Ident::generate("fun_")),
         spine
             .iter()
-            .map(|arg| AppBinding { data: mk_var(arg.clone()), erased: false })
+            .map(|arg| AppBinding {
+                data: mk_var(arg.clone()),
+                erased: false,
+            })
             .collect(),
     );
 

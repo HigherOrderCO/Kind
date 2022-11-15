@@ -20,7 +20,7 @@ pub type Spine = Vec<Box<Expr>>;
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct AppBinding {
     pub data: Box<Expr>,
-    pub erased: bool
+    pub erased: bool,
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -42,7 +42,7 @@ pub enum ExprKind {
     /// Type ascription (x : y)
     Ann(Box<Expr>, Box<Expr>),
     /// Substitution
-    Sub(Ident, usize, Ident, Box<Expr>),
+    Sub(Ident, usize, usize, Box<Expr>),
     /// Type Literal
     Typ,
     /// Primitive numeric types
@@ -91,7 +91,7 @@ impl Expr {
         })
     }
 
-    pub fn sub(range: Range, ident: Ident, idx: usize, rdx: Ident, body: Box<Expr>) -> Box<Expr> {
+    pub fn sub(range: Range, ident: Ident, idx: usize, rdx: usize, body: Box<Expr>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Sub(ident, idx, rdx, body),
@@ -117,7 +117,9 @@ impl Expr {
             .iter()
             .rev()
             .zip(irrelev)
-            .fold(body, |body, (ident, irrelev)| Expr::lambda(ident.range, ident.clone(), body, *irrelev))
+            .fold(body, |body, (ident, irrelev)| {
+                Expr::lambda(ident.range, ident.clone(), body, *irrelev)
+            })
     }
 
     pub fn app(range: Range, ident: Box<Expr>, spine: Vec<AppBinding>) -> Box<Expr> {
@@ -235,7 +237,7 @@ pub enum Num {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum NumType {
     U60,
-    U120
+    U120,
 }
 
 /// An argument is a 'binding' of a name to a type
@@ -316,7 +318,7 @@ impl Expr {
 impl Display for AppBinding {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.erased {
-            write!(f, "{{{}}}", self.data)
+            write!(f, "-({})", self.data)
         } else {
             write!(f, "{}", self.data)
         }
@@ -337,7 +339,7 @@ impl Display for Expr {
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body, false) => write!(f, "({} => {})", binder, body),
             Lambda(binder, body, true) => write!(f, "({{{}}} => {})", binder, body),
-            Sub(name, _, redx, expr) => write!(f, "(## {}/{} {})",name, redx, expr),
+            Sub(name, _, redx, expr) => write!(f, "(## {}/{} {})", name, redx, expr),
             App(head, spine) => write!(
                 f,
                 "({}{})",

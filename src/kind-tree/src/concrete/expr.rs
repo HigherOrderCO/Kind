@@ -27,7 +27,7 @@ pub type Spine = Vec<Binding>;
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct AppBinding {
     pub data: Box<Expr>,
-    pub erased: bool
+    pub erased: bool,
 }
 
 impl AppBinding {
@@ -74,7 +74,7 @@ pub struct Match {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Substitution {
     pub name: Ident,
-    pub redx: Ident,
+    pub redx: usize,
     pub indx: usize,
     pub expr: Box<Expr>,
 }
@@ -380,7 +380,7 @@ impl Display for Binding {
 impl Display for AppBinding {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         if self.erased {
-            write!(f, "{{{}}}", self.data)
+            write!(f, "-({})", self.data)
         } else {
             write!(f, "{}", self.data)
         }
@@ -403,9 +403,13 @@ impl Display for Expr {
                 spine.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Lambda(binder, None, body, false) => write!(f, "({} => {})", binder, body),
-            Lambda(binder, Some(typ), body, false) => write!(f, "(({} : {}) => {})", binder, typ, body),
+            Lambda(binder, Some(typ), body, false) => {
+                write!(f, "(({} : {}) => {})", binder, typ, body)
+            }
             Lambda(binder, None, body, true) => write!(f, "({{{}}} => {})", binder, body),
-            Lambda(binder, Some(typ), body, true) => write!(f, "({{{} : {}}} => {})", binder, typ, body),
+            Lambda(binder, Some(typ), body, true) => {
+                write!(f, "({{{} : {}}} => {})", binder, typ, body)
+            }
             Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),
             App(head, spine) => write!(
                 f,
@@ -423,7 +427,7 @@ impl Display for Expr {
                     .collect::<Vec<String>>()
                     .join(" ")
             ),
-            Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
+            Ann(expr, typ) => write!(f, "({} :: {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
             Match(matcher) => write!(f, "({})", matcher),
             Subst(subst) => write!(f, "({})", subst),

@@ -1,11 +1,17 @@
-use kind_cli::{run_cli, Cli};
+use kind_driver::session::Session;
+use kind_report::data::{Diagnostic, DiagnosticFrame};
+use kind_report::report::Report;
+use kind_report::RenderConfig;
 
-use ntest::timeout;
-use pretty_assertions::assert_eq;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
+
+use ntest::timeout;
+use pretty_assertions::assert_eq;
 use walkdir::{Error, WalkDir};
+
+use kind_driver as driver;
 
 fn golden_test(path: &Path, run: fn(&Path) -> String) {
     let result = run(path);
@@ -30,24 +36,34 @@ fn test_kind2(path: &Path, run: fn(&Path) -> String) -> Result<(), Error> {
     Ok(())
 }
 
-
 #[test]
 #[timeout(15000)]
 fn test_checker() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/checker"), |path| {
-        let config = Cli {
-            ascii: true,
-            no_color: true,
-            config: None,
-            command: kind_cli::Command::Check { file: path.to_str().unwrap().to_string() },
-            debug: false,
-            warning: true,
-        };
-
-        // let (rx, tx) = std::sync::mpsc::channel();
+        let (rx, tx) = std::sync::mpsc::channel();
         let root = PathBuf::from(".");
-        run_cli(config);
-        todo!()
+        let mut session = Session::new(root, rx);
+
+        let check = driver::type_check_book(&mut session, &PathBuf::from(path));
+
+        let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+        let render = RenderConfig::ascii(2);
+
+        kind_report::check_if_colors_are_supported(true);
+
+        match check {
+            Some(_) if diagnostics.is_empty() => "Ok!".to_string(),
+            _ => {
+                let mut res_string = String::new();
+
+                for diagnostic in diagnostics {
+                    let diag = Into::<Diagnostic>::into(&diagnostic);
+                    diag.render(&mut session, &render, &mut res_string).unwrap();
+                }
+
+                res_string
+            }
+        }
     })?;
     Ok(())
 }

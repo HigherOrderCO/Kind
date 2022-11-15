@@ -1,0 +1,25 @@
+   ERROR  Type mismatch
+
+      * Expected : ((motive _x3) (Equal.refl. t_ a_)) 
+      * Got      : ((motive _x2) (Equal.refl. _x1 _x2)) 
+
+      * Context: 
+      *   _x1    : Type 
+      *   _x2    : _x1 
+      *   _x3    : _x1 
+      *   t_     : Type 
+      *   t_     = _x1 
+      *   a_     : t_ 
+      *   a_     = _x3 
+      *   a_     = _x2 
+      *   motive : ((b : _x1) -> (Equal. _x1 _x2 b) -> Type) 
+      *   refl   : ((motive _x2) (Equal.refl. _x1 _x2)) 
+
+      /--[tests/suite/checker/Eq.kind2:2:5]
+      |
+    1 |    type Equal <t: Type> (a: t) ~ (b: t) {
+    2 |        refl : Equal t a a
+      |        v---
+      |        \ Here!
+    3 |    }
+

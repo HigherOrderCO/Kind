@@ -18,11 +18,7 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(
-        input: &'a str,
-        peekable: Peekable<Chars<'a>>,
-        ctx: SyntaxCtxIndex,
-    ) -> Lexer<'a> {
+    pub fn new(input: &'a str, peekable: Peekable<Chars<'a>>, ctx: SyntaxCtxIndex) -> Lexer<'a> {
         Lexer {
             input,
             pos: 0,

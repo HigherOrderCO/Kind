@@ -95,30 +95,29 @@ impl From<PassError> for DiagnosticFrame {
                 title: "All of the rules of a entry should have the same number of patterns.".to_string(),
                 subtitles: vec![],
                 hints: vec!["Check if you're trying to use a function that manipulats erased variables.".to_string()],
-                positions: arities.iter().map(|(range, size)| {
-                    Marker {
+                positions: arities
+                    .iter()
+                    .map(|(range, size)| Marker {
                         position: *range,
                         color: Color::Fst,
                         text: format!("This rule contains {} patterns", size),
                         no_code: false,
                         main: true,
-                    }
-                }).collect(),
+                    })
+                    .collect(),
             },
             PassError::RuleWithIncorrectArity(place, _got, expected, hidden) => DiagnosticFrame {
                 code: 203,
                 severity: Severity::Error,
                 title: "This rule is with the incorrect arity.".to_string(),
                 subtitles: vec![],
-                hints: vec![
-                    if expected == 0 {
-                        "This rule expects no arguments".to_string()
-                    } else if hidden == 0 {
-                        format!("This rule expects {} arguments", expected)
-                    } else {
-                        format!("This rule expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
-                    }
-                ],
+                hints: vec![if expected == 0 {
+                    "This rule expects no arguments".to_string()
+                } else if hidden == 0 {
+                    format!("This rule expects {} arguments", expected)
+                } else {
+                    format!("This rule expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
+                }],
                 positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
@@ -132,15 +131,13 @@ impl From<PassError> for DiagnosticFrame {
                 severity: Severity::Error,
                 title: "Required functions are not implemented for this type.".to_string(),
                 subtitles: vec![],
-                hints: vec![
-                    match sugar {
-                        Sugar::DoNotation => "You must implement 'bind' and 'pure' for this type in order to use the do notation.".to_string(),
-                        Sugar::List => "You must implement 'List', 'List.cons' and 'List.nil' for this type in order to use the list notation.".to_string(),
-                        Sugar::Sigma => "You must implement 'Sigma' in order to use the sigma notation.".to_string(),
-                        Sugar::Pair => "You must implement 'Sigma' and 'Sigma.new' in order to use the sigma notation.".to_string(),
-                        Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
-                    }
-                ],
+                hints: vec![match sugar {
+                    Sugar::DoNotation => "You must implement 'bind' and 'pure' for this type in order to use the do notation.".to_string(),
+                    Sugar::List => "You must implement 'List', 'List.cons' and 'List.nil' for this type in order to use the list notation.".to_string(),
+                    Sugar::Sigma => "You must implement 'Sigma' in order to use the sigma notation.".to_string(),
+                    Sugar::Pair => "You must implement 'Sigma' and 'Sigma.new' in order to use the sigma notation.".to_string(),
+                    Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
+                }],
                 positions: vec![Marker {
                     position: expr_place,
                     color: Color::Fst,
@@ -169,19 +166,22 @@ impl From<PassError> for DiagnosticFrame {
                 title: format!("Cannot find this field in the definition '{}'.", ty),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marker {
-                    position: place,
-                    color: Color::Fst,
-                    text: "Here!".to_string(),
-                    no_code: false,
-                    main: true,
-                },Marker {
-                    position: def_name,
-                    color: Color::Snd,
-                    text: "This is the definition name".to_string(),
-                    no_code: false,
-                    main: false,
-                }],
+                positions: vec![
+                    Marker {
+                        position: place,
+                        color: Color::Fst,
+                        text: "Here!".to_string(),
+                        no_code: false,
+                        main: true,
+                    },
+                    Marker {
+                        position: def_name,
+                        color: Color::Snd,
+                        text: "This is the definition name".to_string(),
+                        no_code: false,
+                        main: false,
+                    },
+                ],
             },
             PassError::CannotFindConstructor(place, def_name, ty) => DiagnosticFrame {
                 code: 208,
@@ -189,19 +189,22 @@ impl From<PassError> for DiagnosticFrame {
                 title: format!("Cannot find this constructor in the type definition '{}'.", ty),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marker {
-                    position: place,
-                    color: Color::Fst,
-                    text: "Here!".to_string(),
-                    no_code: false,
-                    main: true,
-                },Marker {
-                    position: def_name,
-                    color: Color::Snd,
-                    text: "This is the definition name".to_string(),
-                    no_code: false,
-                    main: false,
-                }],
+                positions: vec![
+                    Marker {
+                        position: place,
+                        color: Color::Fst,
+                        text: "Here!".to_string(),
+                        no_code: false,
+                        main: true,
+                    },
+                    Marker {
+                        position: def_name,
+                        color: Color::Snd,
+                        text: "This is the definition name".to_string(),
+                        no_code: false,
+                        main: false,
+                    },
+                ],
             },
             PassError::NoCoverage(place, other) => DiagnosticFrame {
                 code: 209,
@@ -231,16 +234,19 @@ impl From<PassError> for DiagnosticFrame {
                     severity: Severity::Error,
                     title: "Incorrect arity.".to_string(),
                     subtitles: vec![],
-                    hints: vec![
-                        if expected == 0 {
-                            format!("This function expects no arguments but got {}", got.len())
-                        } else if hidden == 0 {
-                            format!("This function expects {} arguments but got {}", expected, got.len())
-                        } else {
-                            format!("This function expects {} arguments or {} (without hidden ones) but got {}.", expected, expected - hidden, got.len())
-                        }
-                    ],
-                    positions
+                    hints: vec![if expected == 0 {
+                        format!("This function expects no arguments but got {}", got.len())
+                    } else if hidden == 0 {
+                        format!("This function expects {} arguments but got {}", expected, got.len())
+                    } else {
+                        format!(
+                            "This function expects {} arguments or {} (without hidden ones) but got {}.",
+                            expected,
+                            expected - hidden,
+                            got.len()
+                        )
+                    }],
+                    positions,
                 }
             }
             PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
@@ -251,25 +257,26 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![format!(
                     "Take a look at how sugar functions should be implemented at https://kind2.kindelia.com/hints/sugars."
                 )],
-                positions: vec![Marker {
-                    position: head_range,
-                    color: Color::Fst,
-                    text:
-                        if expected == 0 {
+                positions: vec![
+                    Marker {
+                        position: head_range,
+                        color: Color::Fst,
+                        text: if expected == 0 {
                             "This rule expects no arguments".to_string()
                         } else {
                             format!("This rule expects {} explicit arguments", expected)
-                        }
-                    ,
-                    no_code: false,
-                    main: true,
-                },Marker {
-                    position: place_range,
-                    color: Color::Snd,
-                    text: "This is what triggers the sugar".to_string(),
-                    no_code: false,
-                    main: false,
-                }],
+                        },
+                        no_code: false,
+                        main: true,
+                    },
+                    Marker {
+                        position: place_range,
+                        color: Color::Snd,
+                        text: "This is what triggers the sugar".to_string(),
+                        no_code: false,
+                        main: false,
+                    },
+                ],
             },
             PassError::DuplicatedNamed(first_decl, last_decl) => DiagnosticFrame {
                 code: 212,
@@ -297,8 +304,7 @@ impl From<PassError> for DiagnosticFrame {
             PassError::CannotUseNamed(fun_range, binding_range) => DiagnosticFrame {
                 code: 213,
                 severity: Severity::Error,
-                title: "Cannot use named parameters in this type of function application"
-                    .to_string(),
+                title: "Cannot use named parameters in this type of function application".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![
@@ -347,41 +353,35 @@ impl From<PassError> for DiagnosticFrame {
                 title: "Cannot find alias".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![
-                    Marker {
-                        position: range,
-                        color: Color::Fst,
-                        text: format!("Cannot find alias for '{}'", name),
-                        no_code: false,
-                        main: true,
-                    }
-                ],
+                positions: vec![Marker {
+                    position: range,
+                    color: Color::Fst,
+                    text: format!("Cannot find alias for '{}'", name),
+                    no_code: false,
+                    main: true,
+                }],
             },
             PassError::ShouldBeAParameter(error_range, declaration_range) => {
                 let mut positions = vec![];
 
                 match error_range {
                     Span::Generated => (),
-                    Span::Locatable(error_range) => {
-                        positions.push(Marker {
-                            position: error_range,
-                            color: Color::Fst,
-                            text: "This expression is not the parameter".to_string(),
-                            no_code: false,
-                            main: true,
-                        })
-                    },
+                    Span::Locatable(error_range) => positions.push(Marker {
+                        position: error_range,
+                        color: Color::Fst,
+                        text: "This expression is not the parameter".to_string(),
+                        no_code: false,
+                        main: true,
+                    }),
                 }
 
-                positions.push(
-                    Marker {
-                        position: declaration_range,
-                        color: Color::Snd,
-                        text: "This is the parameter that should be used".to_string(),
-                        no_code: false,
-                        main: false,
-                    }
-                );
+                positions.push(Marker {
+                    position: declaration_range,
+                    color: Color::Snd,
+                    text: "This is the parameter that should be used".to_string(),
+                    no_code: false,
+                    main: false,
+                });
 
                 DiagnosticFrame {
                     code: 214,
@@ -389,7 +389,7 @@ impl From<PassError> for DiagnosticFrame {
                     title: "The expression is not the parameter declared in the type constructor".to_string(),
                     subtitles: vec![],
                     hints: vec![],
-                    positions
+                    positions,
                 }
             }
             PassError::NotATypeConstructor(error_range, declaration_range) => DiagnosticFrame {
@@ -412,7 +412,7 @@ impl From<PassError> for DiagnosticFrame {
                         text: "This is the type that should be used instead".to_string(),
                         no_code: false,
                         main: false,
-                    }
+                    },
                 ],
             },
             PassError::NoFieldCoverage(place, other) => DiagnosticFrame {
@@ -420,7 +420,10 @@ impl From<PassError> for DiagnosticFrame {
                 severity: Severity::Error,
                 title: "The case is not covering all the values inside of it!".to_string(),
                 subtitles: vec![],
-                hints: vec![format!("Need variables for {}", other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", "))],
+                hints: vec![format!(
+                    "Need variables for {}",
+                    other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", ")
+                )],
                 positions: vec![Marker {
                     position: place,
                     color: Color::Fst,
@@ -435,20 +438,22 @@ impl From<PassError> for DiagnosticFrame {
                 title: "Duplicated constructor name".to_string(),
                 subtitles: vec![],
                 hints: vec![],
-                positions: vec![Marker {
-                    position: place,
-                    color: Color::Fst,
-                    text: "Here".to_string(),
-                    no_code: false,
-                    main: true,
-                },
-                Marker {
-                    position: other,
-                    color: Color::Fst,
-                    text: "Here".to_string(),
-                    no_code: false,
-                    main: false,
-                }],
+                positions: vec![
+                    Marker {
+                        position: place,
+                        color: Color::Fst,
+                        text: "Here".to_string(),
+                        no_code: false,
+                        main: true,
+                    },
+                    Marker {
+                        position: other,
+                        color: Color::Fst,
+                        text: "Here".to_string(),
+                        no_code: false,
+                        main: false,
+                    },
+                ],
             },
         }
     }

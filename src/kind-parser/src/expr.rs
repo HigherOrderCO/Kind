@@ -66,16 +66,22 @@ impl<'a> Parser<'a> {
             unused = true;
         }
         if unused {
-            self.errs.send(SyntaxError::UnusedDocString(start.mix(last)).into()).unwrap()
+            self.errs
+                .send(SyntaxError::UnusedDocString(start.mix(last)).into())
+                .unwrap()
         }
     }
 
     pub fn is_pi_type(&self) -> bool {
-        self.get().same_variant(&Token::LPar) && self.peek(1).is_lower_id() && self.peek(2).same_variant(&Token::Colon)
+        self.get().same_variant(&Token::LPar)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).same_variant(&Token::Colon)
     }
 
     pub fn is_named_parameter(&self) -> bool {
-        self.get().same_variant(&Token::LPar) && self.peek(1).is_lower_id() && self.peek(2).same_variant(&Token::Eq)
+        self.get().same_variant(&Token::LPar)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).same_variant(&Token::Eq)
     }
 
     pub fn is_lambda(&self) -> bool {
@@ -83,7 +89,9 @@ impl<'a> Parser<'a> {
     }
 
     pub fn is_sigma_type(&self) -> bool {
-        self.get().same_variant(&Token::LBracket) && self.peek(1).is_lower_id() && self.peek(2).same_variant(&Token::Colon)
+        self.get().same_variant(&Token::LBracket)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).same_variant(&Token::Colon)
     }
 
     pub fn is_substitution(&self) -> bool {
@@ -95,7 +103,7 @@ impl<'a> Parser<'a> {
         self.advance(); // '##'
         let name = self.parse_id()?;
         self.eat_variant(Token::Slash)?;
-        let redx = self.parse_id()?;
+        let redx = self.parse_num_lit()?;
         let expr = self.parse_expr(false)?;
         let range = start.mix(expr.range);
         Ok(Box::new(Expr {
@@ -118,7 +126,8 @@ impl<'a> Parser<'a> {
 
     pub fn parse_upper_id(&mut self) -> Result<QualifiedIdent, SyntaxError> {
         let range = self.range();
-        let (start, end) = eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
+        let (start, end) =
+            eat_single!(self, Token::UpperId(start, end) => (start.clone(), end.clone()))?;
         let ident = QualifiedIdent::new_static(start.as_str(), end, range);
         Ok(ident)
     }
@@ -208,7 +217,10 @@ impl<'a> Parser<'a> {
             "U60" => ExprKind::Lit(Literal::U60),
             _ => ExprKind::Constr(id.clone(), vec![]),
         };
-        Ok(Box::new(Expr { range: id.range, data }))
+        Ok(Box::new(Expr {
+            range: id.range,
+            data,
+        }))
     }
 
     fn parse_data(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
@@ -267,7 +279,10 @@ impl<'a> Parser<'a> {
 
         if self.check_actual(Token::RBracket) {
             let range = self.advance().1.mix(range);
-            return Ok(Box::new(Expr { range, data: ExprKind::List(vec) }));
+            return Ok(Box::new(Expr {
+                range,
+                data: ExprKind::List(vec),
+            }));
         }
 
         vec.push(*self.parse_expr(false)?);
@@ -298,7 +313,10 @@ impl<'a> Parser<'a> {
         let end = self.eat_variant(Token::RBracket)?.1;
         let range = range.mix(end);
 
-        Ok(Box::new(Expr { range, data: ExprKind::List(vec) }))
+        Ok(Box::new(Expr {
+            range,
+            data: ExprKind::List(vec),
+        }))
     }
 
     fn parse_paren(&mut self) -> Result<Box<Expr>, SyntaxError> {
@@ -346,6 +364,17 @@ impl<'a> Parser<'a> {
         }))
     }
 
+    pub fn parse_num_lit(&mut self) -> Result<usize, SyntaxError> {
+        self.ignore_docs();
+        match self.get().clone() {
+            Token::Num(num) => {
+                self.advance();
+                Ok(num as usize)
+            }
+            _ => self.fail(vec![]),
+        }
+    }
+
     pub fn parse_atom(&mut self) -> Result<Box<Expr>, SyntaxError> {
         self.ignore_docs();
         match self.get().clone() {
@@ -381,16 +410,16 @@ impl<'a> Parser<'a> {
 
     fn parse_app_binding(&mut self) -> Result<AppBinding, SyntaxError> {
         self.ignore_docs();
-        let (erased, data) = /*if self.get().same_variant(&Token::LBrace) {
+        let (erased, data) = if self.get().same_variant(&Token::Minus) {
+            self.advance();
             let start = self.range();
-            self.advance(); // '{'
+            self.eat_variant(Token::LPar)?;
             let atom = self.parse_atom()?;
-            self.eat_closing_keyword(Token::RBrace, start)?;
+            self.eat_closing_keyword(Token::RPar, start)?;
             (true, atom)
-        } else {*/
+        } else {
             (false, self.parse_atom()?)
-        // }
-        ;
+        };
         Ok(AppBinding { data, erased })
     }
 
@@ -424,7 +453,11 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_call_tail(&mut self, start: Range, multiline: bool) -> Result<(Range, Vec<Binding>), SyntaxError> {
+    fn parse_call_tail(
+        &mut self,
+        start: Range,
+        multiline: bool,
+    ) -> Result<(Range, Vec<Binding>), SyntaxError> {
         let mut spine = Vec::new();
         let mut end = start;
         while (!self.is_linebreak() || multiline) && !self.get().same_variant(&Token::Eof) {
@@ -478,7 +511,12 @@ impl<'a> Parser<'a> {
         if self.get().is_upper_id() {
             let upper = self.parse_upper_id()?;
             let (range, bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
-            Ok(Destruct::Destruct(upper.range.mix(range.unwrap_or(upper.range)), upper, bindings, ignore_rest))
+            Ok(Destruct::Destruct(
+                upper.range.mix(range.unwrap_or(upper.range)),
+                upper,
+                bindings,
+                ignore_rest,
+            ))
         } else {
             let name = self.parse_id()?;
             Ok(Destruct::Ident(name))
@@ -551,7 +589,9 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_destruct_bindings(&mut self) -> Result<(Option<Range>, Vec<CaseBinding>, Option<Range>), SyntaxError> {
+    pub fn parse_pat_destruct_bindings(
+        &mut self,
+    ) -> Result<(Option<Range>, Vec<CaseBinding>, Option<Range>), SyntaxError> {
         let mut ignore_rest_range = None;
         let mut bindings = Vec::new();
         let mut range = None;
@@ -623,7 +663,12 @@ impl<'a> Parser<'a> {
             None
         };
 
-        let match_ = Box::new(Match { typ, scrutinizer, cases, motive });
+        let match_ = Box::new(Match {
+            typ,
+            scrutinizer,
+            cases,
+            motive,
+        });
 
         Ok(Box::new(Expr {
             data: ExprKind::Match(match_),

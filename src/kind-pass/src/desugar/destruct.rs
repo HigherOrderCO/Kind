@@ -228,7 +228,12 @@ impl<'a> DesugarState<'a> {
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)
         } else {
-            let mut idx: Vec<Ident> = sum.parameters.extend(&sum.indices).iter().map(|x| x.name.clone()).collect();
+            let mut idx: Vec<Ident> = sum
+                .parameters
+                .extend(&sum.indices)
+                .iter()
+                .map(|x| x.name.clone())
+                .collect();
             idx.push(Ident::generate("_val"));
             idx.iter().rfold(self.gen_hole_expr(), |expr, l| {
                 desugared::Expr::lambda(l.range, l.clone(), expr, false)

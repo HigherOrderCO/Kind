@@ -42,7 +42,11 @@ pub struct ErasureState<'a> {
     failed: bool,
 }
 
-pub fn erase_book(book: &Book, errs: Sender<DiagnosticFrame>, entrypoint: FxHashSet<String>) -> Option<Book> {
+pub fn erase_book(
+    book: &Book,
+    errs: Sender<DiagnosticFrame>,
+    entrypoint: FxHashSet<String>,
+) -> Option<Book> {
     let mut state = ErasureState {
         errs,
         book,
@@ -61,7 +65,9 @@ pub fn erase_book(book: &Book, errs: Sender<DiagnosticFrame>, entrypoint: FxHash
 
     for name in entrypoint {
         let count = state.holes.len();
-        state.names.insert(name.to_string(), (None, Relevance::Hole(count)));
+        state
+            .names
+            .insert(name.to_string(), (None, Relevance::Hole(count)));
         state.holes.push(Some(Relevance::Relevant));
     }
 
@@ -101,8 +107,15 @@ impl<'a> ErasureState<'a> {
         local_relevance
     }
 
-    pub fn err_irrelevant(&mut self, declared_val: Option<Range>, used: Range, declared_ty: Option<Range>) {
-        self.errs.send(PassError::CannotUseIrrelevant(declared_val, used, declared_ty).into()).unwrap();
+    pub fn err_irrelevant(
+        &mut self,
+        declared_val: Option<Range>,
+        used: Range,
+        declared_ty: Option<Range>,
+    ) {
+        self.errs
+            .send(PassError::CannotUseIrrelevant(declared_val, used, declared_ty).into())
+            .unwrap();
         self.failed = true;
     }
 
@@ -123,7 +136,14 @@ impl<'a> ErasureState<'a> {
         }
     }
 
-    pub fn unify_loop(&mut self, range: Range, left: (Option<Range>, Relevance), right: (Option<Range>, Relevance), visited: &mut FxHashSet<usize>, relevance_unify: bool) -> bool {
+    pub fn unify_loop(
+        &mut self,
+        range: Range,
+        left: (Option<Range>, Relevance),
+        right: (Option<Range>, Relevance),
+        visited: &mut FxHashSet<usize>,
+        relevance_unify: bool,
+    ) -> bool {
         match (left.1, right.1) {
             (Relevance::Hole(hole), t) => match (self.holes[hole], t) {
                 (Some(res), _) if !visited.contains(&hole) => {
@@ -154,11 +174,22 @@ impl<'a> ErasureState<'a> {
         }
     }
 
-    pub fn unify(&mut self, range: Range, left: (Option<Range>, Relevance), right: (Option<Range>, Relevance), relevance_unify: bool) -> bool {
+    pub fn unify(
+        &mut self,
+        range: Range,
+        left: (Option<Range>, Relevance),
+        right: (Option<Range>, Relevance),
+        relevance_unify: bool,
+    ) -> bool {
         self.unify_loop(range, left, right, &mut Default::default(), relevance_unify)
     }
 
-    pub fn erase_pat_spine(&mut self, on: (Option<Range>, Relevance), name: &QualifiedIdent, spine: &Vec<Box<Expr>>) -> Vec<Box<Expr>> {
+    pub fn erase_pat_spine(
+        &mut self,
+        on: (Option<Range>, Relevance),
+        name: &QualifiedIdent,
+        spine: &Vec<Box<Expr>>,
+    ) -> Vec<Box<Expr>> {
         let fun = match self.names.get(&name.to_string()) {
             Some(res) => *res,
             None => self.new_hole(name.range, name.to_string()),
@@ -171,7 +202,13 @@ impl<'a> ErasureState<'a> {
         let entry = self.book.entrs.get(name.to_string().as_str()).unwrap();
         let erased = entry.args.iter();
 
-        let irrelevances = erased.map(|arg| if arg.erased { (Some(arg.span), Relevance::Irrelevant) } else { on });
+        let irrelevances = erased.map(|arg| {
+            if arg.erased {
+                (Some(arg.span), Relevance::Irrelevant)
+            } else {
+                on
+            }
+        });
 
         spine
             .iter()
@@ -247,7 +284,10 @@ impl<'a> ErasureState<'a> {
             Lambda(name, body, erased) => {
                 let ctx = self.ctx.clone();
                 if *erased {
-                    self.ctx.insert(name.to_string(), (name.range, (None, Relevance::Irrelevant)));
+                    self.ctx.insert(
+                        name.to_string(),
+                        (name.range, (None, Relevance::Irrelevant)),
+                    );
                 } else {
                     self.ctx.insert(name.to_string(), (name.range, *on));
                 }
@@ -285,7 +325,7 @@ impl<'a> ErasureState<'a> {
                         let on = if x.erased {
                             (x.data.span.to_range(), Relevance::Irrelevant)
                         } else {
-                            (x.data.span.to_range(), Relevance::Relevant)
+                            on.clone()
                         };
                         desugared::AppBinding {
                             data: self.erase_expr(&on, &x.data),
@@ -300,7 +340,13 @@ impl<'a> ErasureState<'a> {
                 })
             }
             Fun(head, spine) => {
-                let args = self.book.entrs.get(head.to_string().as_str()).unwrap().args.iter();
+                let args = self
+                    .book
+                    .entrs
+                    .get(head.to_string().as_str())
+                    .unwrap()
+                    .args
+                    .iter();
 
                 let fun = match self.names.get(&head.to_string()) {
                     Some(res) => *res,
@@ -316,7 +362,10 @@ impl<'a> ErasureState<'a> {
                     .zip(args)
                     .map(|(expr, arg)| {
                         if arg.erased {
-                            (self.erase_expr(&(Some(arg.span), Relevance::Irrelevant), expr), arg)
+                            (
+                                self.erase_expr(&(Some(arg.span), Relevance::Irrelevant), expr),
+                                arg,
+                            )
                         } else {
                             (self.erase_expr(on, expr), arg)
                         }
@@ -329,7 +378,13 @@ impl<'a> ErasureState<'a> {
                 })
             }
             Ctr(head, spine) => {
-                let args = self.book.entrs.get(head.to_string().as_str()).unwrap().args.iter();
+                let args = self
+                    .book
+                    .entrs
+                    .get(head.to_string().as_str())
+                    .unwrap()
+                    .args
+                    .iter();
 
                 let fun = match self.names.get(&head.to_string()) {
                     Some(res) => *res,
@@ -345,7 +400,10 @@ impl<'a> ErasureState<'a> {
                     .zip(args)
                     .map(|(expr, arg)| {
                         if arg.erased {
-                            (self.erase_expr(&(Some(arg.span), Relevance::Irrelevant), expr), arg)
+                            (
+                                self.erase_expr(&(Some(arg.span), Relevance::Irrelevant), expr),
+                                arg,
+                            )
                         } else {
                             (self.erase_expr(on, expr), arg)
                         }
@@ -370,13 +428,23 @@ impl<'a> ErasureState<'a> {
         }
     }
 
-    pub fn erase_rule(&mut self, place: &(Option<Range>, Relevance), args: Vec<(Range, bool)>, rule: &Rule) -> Rule {
+    pub fn erase_rule(
+        &mut self,
+        place: &(Option<Range>, Relevance),
+        args: Vec<(Range, bool)>,
+        rule: &Rule,
+    ) -> Rule {
         let ctx = self.ctx.clone();
 
         let new_pats: Vec<_> = args
             .iter()
             .zip(rule.pats.iter())
-            .map(|((range, erased), expr)| (erased, self.erase_pat((Some(*range), erasure_to_relevance(*erased)), expr)))
+            .map(|((range, erased), expr)| {
+                (
+                    erased,
+                    self.erase_pat((Some(*range), erasure_to_relevance(*erased)), expr),
+                )
+            })
             .filter(|(erased, _)| !*erased)
             .map(|res| res.1)
             .collect();
@@ -401,7 +469,11 @@ impl<'a> ErasureState<'a> {
         };
 
         let args: Vec<(Range, bool)> = entry.args.iter().map(|x| (x.span, x.erased)).collect();
-        let rules = entry.rules.iter().map(|rule| self.erase_rule(&place, args.clone(), rule)).collect::<Vec<Rule>>();
+        let rules = entry
+            .rules
+            .iter()
+            .map(|rule| self.erase_rule(&place, args.clone(), rule))
+            .collect::<Vec<Rule>>();
         Box::new(Entry {
             name: entry.name.clone(),
             args: entry.args.clone(),

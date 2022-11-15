@@ -6,6 +6,7 @@
 use kind_pass::expand::uses::expand_uses;
 use std::collections::HashSet;
 use std::fs;
+use std::os::linux::raw;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use strsim::jaro;
@@ -23,20 +24,23 @@ const EXT: &str = "kind2";
 /// Tries to accumulate on a buffer all of the
 /// paths that exists (so we can just throw an
 /// error about ambiguous resolution to the user)
-fn accumulate_neighbour_paths(raw_path: &Path, other: &mut Vec<PathBuf>) {
+fn accumulate_neighbour_paths(ident: &QualifiedIdent, raw_path: &Path) -> Result<Option<PathBuf>, DiagnosticFrame> {
     let mut canon_path = raw_path.to_path_buf();
+    let mut dir_file_path = raw_path.to_path_buf();
+    let dir_path = raw_path.to_path_buf();
+
     canon_path.set_extension(EXT);
+    dir_file_path.push("_");
+    dir_file_path.set_extension(EXT);
 
-    if canon_path.is_file() {
-        other.push(canon_path);
-    }
-
-    let mut deferred_path = raw_path.to_path_buf();
-    deferred_path.push("_");
-    deferred_path.set_extension(EXT);
-
-    if deferred_path.is_file() {
-        other.push(deferred_path);
+    if canon_path.exists() && dir_path.exists() && canon_path.is_file() && dir_path.is_dir() {
+        Err(DriverError::MultiplePaths(ident.clone(), vec![canon_path, dir_path]).into())
+    } else if canon_path.is_file() {
+        Ok(Some(canon_path))
+    } else if dir_file_path.is_file() {
+        Ok(Some(dir_file_path))
+    } else {
+        Ok(None)
     }
 }
 
@@ -54,25 +58,21 @@ fn ident_to_path(
     let mut raw_path = root.to_path_buf();
     raw_path.push(PathBuf::from(segments.join("/")));
 
-    let mut paths = Vec::new();
-    accumulate_neighbour_paths(&raw_path, &mut paths);
-
-    // TODO: Check if impacts too much while trying to search
-    if search_on_parent {
-        raw_path.pop();
-        accumulate_neighbour_paths(&raw_path, &mut paths);
-    }
-
-    if paths.is_empty() {
-        Ok(None)
-    } else if paths.len() == 1 {
-        Ok(Some(paths[0].clone()))
-    } else {
-        Err(DriverError::MultiplePaths(ident.clone(), paths).into())
+    match accumulate_neighbour_paths(&ident, &raw_path) {
+        Ok(None) if search_on_parent => {
+            raw_path.pop();
+            accumulate_neighbour_paths(&ident, &raw_path)
+        }
+        rest => rest
     }
 }
 
-fn try_to_insert_new_name<'a>(failed: &mut bool, session: &'a Session, ident: QualifiedIdent, book: &'a mut Book) -> bool {
+fn try_to_insert_new_name<'a>(
+    failed: &mut bool,
+    session: &'a Session,
+    ident: QualifiedIdent,
+    book: &'a mut Book,
+) -> bool {
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
         session
             .diagnostic_sender
@@ -99,7 +99,8 @@ fn module_to_book<'a>(
             TopLevel::SumType(sum) => {
                 public_names.insert(sum.name.to_string());
                 if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
-                    book.count.insert(sum.name.to_string(), sum.extract_book_info());
+                    book.count
+                        .insert(sum.name.to_string(), sum.extract_book_info());
                     book.entries.insert(sum.name.to_string(), entry.clone());
                 }
 
@@ -108,7 +109,8 @@ fn module_to_book<'a>(
                     cons_ident.range = cons.name.range.clone();
                     if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
                         public_names.insert(cons_ident.to_string());
-                        book.count.insert(cons_ident.to_string(), cons.extract_book_info(sum));
+                        book.count
+                            .insert(cons_ident.to_string(), cons.extract_book_info(sum));
                     }
                 }
             }
@@ -165,16 +167,18 @@ fn parse_and_store_book_by_path<'a>(
     path: &PathBuf,
     book: &'a mut Book,
 ) -> bool {
-
     if !path.exists() {
         session
-        .diagnostic_sender
-        .send(DriverError::CannotFindFile(path.to_str().unwrap().to_string()).into())
-        .unwrap();
+            .diagnostic_sender
+            .send(DriverError::CannotFindFile(path.to_str().unwrap().to_string()).into())
+            .unwrap();
         return true;
     }
 
-    if session.loaded_paths_map.contains_key(&fs::canonicalize(path).unwrap()) {
+    if session
+        .loaded_paths_map
+        .contains_key(&fs::canonicalize(path).unwrap())
+    {
         return false;
     }
 
@@ -236,10 +240,11 @@ pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Boo
     }
 }
 
-pub fn check_unbound_top_level(session: &mut Session, book : &mut Book) -> bool {
+pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
     let mut failed = false;
 
-    let (_, unbound_tops) = unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
+    let (_, unbound_tops) =
+        unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for (_, unbound) in unbound_tops {
         let res: Vec<Ident> = unbound.iter().map(|x| x.to_ident()).collect();

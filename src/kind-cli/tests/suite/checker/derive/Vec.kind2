@@ -1,0 +1,10 @@
+type Nat {
+    succ (pred: Nat)
+    zero
+}
+
+type Vec (t: Type) ~ (n: Nat) {
+    cons <size: Nat> (x: t) (xs: Vec t size) : Vec t (Nat.succ size)
+    nil : Vec t Nat.zero
+}
+

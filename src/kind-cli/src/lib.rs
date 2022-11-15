@@ -51,7 +51,7 @@ pub enum Command {
     Eval { file: String },
 
     #[clap(aliases = &["k"])]
-    ToKindCore { file : String },
+    ToKindCore { file: String },
 
     /// Runs Main on the HVM
     #[clap(aliases = &["r"])]
@@ -154,7 +154,6 @@ pub fn compile_in_session<T>(
 }
 
 pub fn run_cli(config: Cli) {
-
     kind_report::check_if_colors_are_supported(config.no_color);
 
     let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2);

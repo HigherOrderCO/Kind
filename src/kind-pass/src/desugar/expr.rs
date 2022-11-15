@@ -33,7 +33,7 @@ impl<'a> DesugarState<'a> {
             range,
             sub.name.clone(),
             sub.indx,
-            sub.redx.clone(),
+            sub.redx,
             self.desugar_expr(&sub.expr),
         )
     }

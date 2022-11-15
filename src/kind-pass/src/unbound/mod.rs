@@ -5,7 +5,6 @@
 //! by sugars because it's useful to name resolution
 //! phase.
 
-use std::collections::HashSet;
 use std::sync::mpsc::Sender;
 
 use fxhash::{FxHashMap, FxHashSet};
@@ -29,9 +28,10 @@ use crate::errors::PassError;
 pub struct UnboundCollector {
     pub errors: Sender<DiagnosticFrame>,
     pub context_vars: Vec<(Range, String)>,
+    pub top_level_defs: FxHashMap<String, Range>,
     pub unbound_top_level: FxHashMap<String, FxHashSet<QualifiedIdent>>,
     pub unbound: FxHashMap<String, Vec<Ident>>,
-    pub emit_errs: bool
+    pub emit_errs: bool,
 }
 
 impl UnboundCollector {
@@ -39,9 +39,10 @@ impl UnboundCollector {
         Self {
             errors: diagnostic_sender,
             context_vars: Default::default(),
+            top_level_defs: Default::default(),
             unbound_top_level: Default::default(),
             unbound: Default::default(),
-            emit_errs
+            emit_errs,
         }
     }
 }
@@ -72,6 +73,33 @@ pub fn get_book_unbound(
     (state.unbound, state.unbound_top_level)
 }
 
+impl UnboundCollector {
+    fn visit_top_level_names(&mut self, toplevel: &mut TopLevel) {
+        match toplevel {
+            TopLevel::SumType(sum) => {
+                self.top_level_defs
+                    .insert(sum.name.to_string(), sum.name.range);
+                for cons in &sum.constructors {
+                    let name_cons = sum.name.add_segment(cons.name.to_str());
+                    self.top_level_defs
+                        .insert(name_cons.to_string(), name_cons.range);
+                }
+            }
+            TopLevel::RecordType(rec) => {
+                self.top_level_defs
+                    .insert(rec.name.to_string(), rec.name.range);
+                let name_cons = rec.name.add_segment(rec.constructor.to_str());
+                self.top_level_defs
+                    .insert(name_cons.to_string(), name_cons.range);
+            }
+            TopLevel::Entry(entry) => {
+                self.top_level_defs
+                    .insert(entry.name.to_string(), entry.name.range);
+            }
+        }
+    }
+}
+
 impl Visitor for UnboundCollector {
     fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
 
@@ -90,11 +118,8 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
-        if !self.context_vars.iter().any(|x| x.1 == ident.to_string()) {
-            let entry = self
-                .unbound_top_level
-                .entry(ident.to_string())
-                .or_default();
+        if !self.top_level_defs.contains_key(&ident.to_string()) {
+            let entry = self.unbound_top_level.entry(ident.to_string()).or_default();
             entry.insert(ident.clone());
         }
     }
@@ -107,8 +132,8 @@ impl Visitor for UnboundCollector {
         {
             if self.emit_errs {
                 self.errors
-                .send(PassError::RepeatedVariable(fst.0, ident.0.range).into())
-                .unwrap()
+                    .send(PassError::RepeatedVariable(fst.0, ident.0.range).into())
+                    .unwrap()
             }
         } else {
             self.context_vars.push((ident.0.range, ident.0.to_string()))
@@ -129,8 +154,8 @@ impl Visitor for UnboundCollector {
         if let Some(fst) = res {
             if self.emit_errs {
                 self.errors
-                .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
-                .unwrap()
+                    .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
+                    .unwrap()
             }
         } else {
             self.context_vars
@@ -151,9 +176,6 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_entry(&mut self, entry: &mut Entry) {
-        self.context_vars
-            .push((entry.name.range, entry.name.to_string()));
-
         let vars = self.context_vars.clone();
 
         for arg in entry.args.iter_mut() {
@@ -172,25 +194,21 @@ impl Visitor for UnboundCollector {
     fn visit_top_level(&mut self, toplevel: &mut TopLevel) {
         match toplevel {
             TopLevel::SumType(entr) => {
-                self.context_vars
-                    .push((entr.name.range, entr.name.to_string()));
-
                 let mut repeated_names = FxHashMap::<String, Range>::default();
                 let mut failed = false;
 
                 for cons in &entr.constructors {
-
                     match repeated_names.get(&cons.name.to_string()) {
                         Some(_) => {
                             failed = true;
-                        },
+                        }
                         None => {
                             repeated_names.insert(cons.name.to_string(), cons.name.range);
-                        },
+                        }
                     }
-
                     let name_cons = entr.name.add_segment(cons.name.to_str());
-                    self.context_vars.push((name_cons.range, name_cons.to_string()));
+                    self.context_vars
+                        .push((name_cons.range, name_cons.to_string()));
                 }
 
                 if failed {
@@ -214,16 +232,7 @@ impl Visitor for UnboundCollector {
                 self.context_vars = vars;
             }
             TopLevel::RecordType(entr) => {
-                self.context_vars
-                    .push((entr.name.range, entr.name.to_string()));
-
-                let name_cons = entr.name.add_segment(entr.constructor.to_str());
-
-                self.context_vars
-                    .push((name_cons.range, name_cons.to_string()));
-
                 let inside_vars = self.context_vars.clone();
-
                 visit_vec!(entr.parameters.iter_mut(), arg => self.visit_argument(arg));
                 visit_vec!(entr.fields.iter_mut(), (_, _, typ) => {
                     self.visit_expr(typ);
@@ -237,16 +246,17 @@ impl Visitor for UnboundCollector {
 
     fn visit_module(&mut self, book: &mut kind_tree::concrete::Module) {
         for entr in &mut book.entries {
+            self.visit_top_level_names(entr);
+        }
+        for entr in &mut book.entries {
             self.visit_top_level(entr)
         }
     }
 
     fn visit_book(&mut self, book: &mut Book) {
-        self.context_vars = book
-            .names
-            .values()
-            .map(|name| (name.range, name.to_string()))
-            .collect();
+        for entr in book.entries.values_mut() {
+            self.visit_top_level_names(entr);
+        }
         for entr in book.entries.values_mut() {
             self.visit_top_level(entr)
         }
@@ -370,7 +380,7 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
-            ExprKind::Lambda(ident, binder, body, erased) => {
+            ExprKind::Lambda(ident, binder, body, _erased) => {
                 match binder {
                     Some(x) => self.visit_expr(x),
                     None => (),
@@ -421,7 +431,6 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Subst(subst) => {
                 self.visit_ident(&mut subst.name);
-                self.visit_ident(&mut subst.redx);
 
                 if let Some(pos) = self
                     .context_vars

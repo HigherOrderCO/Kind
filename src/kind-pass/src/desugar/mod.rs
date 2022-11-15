@@ -1,5 +1,5 @@
 //! This pass transforms a sugared tree into a simpler tree.
-//! 
+//!
 //! It does a lot of things like:
 //! * Setting an unique number for each of the holes
 //! * Desugar of lets and matchs

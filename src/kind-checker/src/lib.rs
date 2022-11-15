@@ -4,8 +4,8 @@
 //! version that the Rust side can manipulate.
 
 pub mod compiler;
-pub mod report;
 mod errors;
+pub mod report;
 
 use std::sync::mpsc::Sender;
 
@@ -38,7 +38,8 @@ pub fn type_check(book: &Book, tx: Sender<DiagnosticFrame>) -> bool {
     runtime.normalize(main);
     let term = runtime.readback(main);
 
-    let errs = parse_report(&term).expect("Internal Error: Cannot parse the report message from the type checker");
+    let errs = parse_report(&term)
+        .expect("Internal Error: Cannot parse the report message from the type checker");
     let succeeded = errs.is_empty();
 
     for err in errs {

@@ -41,7 +41,7 @@ impl QualifiedIdent {
             aux,
             range,
             used_by_sugar: false,
-            generated: false
+            generated: false,
         }
     }
 
@@ -60,7 +60,7 @@ impl QualifiedIdent {
         Ident {
             data: Symbol(self.to_string()),
             range: self.range,
-            generated: self.generated
+            generated: self.generated,
         }
     }
 
@@ -70,7 +70,7 @@ impl QualifiedIdent {
             aux: aux.map(Symbol),
             range,
             used_by_sugar: false,
-            generated: false
+            generated: false,
         }
     }
 
@@ -80,7 +80,7 @@ impl QualifiedIdent {
             aux: Some(Symbol(aux.to_string())),
             range,
             used_by_sugar: true,
-            generated: true
+            generated: true,
         }
     }
 
@@ -90,7 +90,7 @@ impl QualifiedIdent {
             aux: self.aux.clone(),
             range: self.range,
             used_by_sugar: self.used_by_sugar,
-            generated: self.generated
+            generated: self.generated,
         }
     }
 
@@ -105,7 +105,7 @@ impl Ident {
         Ident {
             data: Symbol(data),
             range,
-            generated: false
+            generated: false,
         }
     }
 
@@ -113,7 +113,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
-            generated: false
+            generated: false,
         }
     }
 
@@ -121,7 +121,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
-            generated: true
+            generated: true,
         }
     }
 
@@ -190,7 +190,7 @@ impl Ident {
         Ident {
             data: self.data.clone(),
             range,
-            generated: false
+            generated: false,
         }
     }
 
@@ -198,7 +198,7 @@ impl Ident {
         Ident {
             data: Symbol(format!("{}.{}", self.data.0, name)),
             range: self.range,
-            generated: false
+            generated: false,
         }
     }
 
@@ -206,7 +206,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range: Range::ghost_range(),
-            generated: true
+            generated: true,
         }
     }
 }

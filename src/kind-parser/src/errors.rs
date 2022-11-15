@@ -228,7 +228,7 @@ impl From<SyntaxError> for DiagnosticFrame {
             SyntaxError::UnexpectedToken(token, range, _expect) => DiagnosticFrame {
                 code: 13,
                 severity: Severity::Error,
-                title: format!("Unexpected token {:?}.", token),
+                title: format!("Unexpected token '{}'.", token),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
