@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use kind_report::data::{Color, DiagnosticFrame, Marker, Severity, Subtitle, Word};
+use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
 /// Describes all of the possible errors inside each
@@ -15,9 +15,9 @@ pub(crate) enum DriverError {
     DefinedMultipleTimes(QualifiedIdent, QualifiedIdent),
 }
 
-impl From<DriverError> for DiagnosticFrame {
-    fn from(err: DriverError) -> Self {
-        match err {
+impl Diagnostic for DriverError {
+    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+        match self {
             DriverError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,
                 severity: Severity::Error,

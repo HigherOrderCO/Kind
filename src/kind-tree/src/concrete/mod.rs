@@ -187,7 +187,7 @@ pub struct EntryMeta {
     pub arguments: Telescope<Argument>,
     pub is_ctr: bool,
     pub range: Range,
-    pub is_record_cons_of: Option<QualifiedIdent>
+    pub is_record_cons_of: Option<QualifiedIdent>,
 }
 
 /// A book stores definitions by name. It's generated
@@ -468,7 +468,7 @@ impl SumTypeDecl {
             arguments,
             is_ctr: true,
             range: self.name.range,
-            is_record_cons_of: None
+            is_record_cons_of: None,
         }
     }
 }
@@ -509,7 +509,7 @@ impl Constructor {
             arguments,
             is_ctr: true,
             range: self.name.range,
-            is_record_cons_of: None
+            is_record_cons_of: None,
         }
     }
 }
@@ -547,7 +547,7 @@ impl RecordDecl {
             arguments,
             is_ctr: true,
             range: self.name.range,
-            is_record_cons_of: None
+            is_record_cons_of: None,
         }
     }
 
@@ -576,7 +576,7 @@ impl RecordDecl {
             arguments,
             is_ctr: true,
             range: self.name.range,
-            is_record_cons_of: Some(self.name.clone())
+            is_record_cons_of: Some(self.name.clone()),
         }
     }
 }
@@ -599,7 +599,7 @@ impl Entry {
             arguments,
             is_ctr: self.rules.is_empty(),
             range: self.name.range,
-            is_record_cons_of: None
+            is_record_cons_of: None,
         }
     }
 }

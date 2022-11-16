@@ -1,5 +1,5 @@
 use kind_driver::session::Session;
-use kind_report::data::{Diagnostic, DiagnosticFrame};
+use kind_report::data::Diagnostic;
 use kind_report::report::Report;
 use kind_report::RenderConfig;
 
@@ -46,7 +46,7 @@ fn test_checker() -> Result<(), Error> {
 
         let check = driver::type_check_book(&mut session, &PathBuf::from(path));
 
-        let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+        let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
         let render = RenderConfig::ascii(2);
 
         kind_report::check_if_colors_are_supported(true);
@@ -56,8 +56,7 @@ fn test_checker() -> Result<(), Error> {
             _ => {
                 let mut res_string = String::new();
 
-                for diagnostic in diagnostics {
-                    let diag = Into::<Diagnostic>::into(&diagnostic);
+                for diag in diagnostics {
                     diag.render(&mut session, &render, &mut res_string).unwrap();
                 }
 
@@ -78,20 +77,17 @@ fn test_eval() -> Result<(), Error> {
 
         let check = driver::compile_book_to_hvm(&mut session, &PathBuf::from(path));
 
-        let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+        let diagnostics = tx.try_iter().collect::<Vec<_>>();
         let render = RenderConfig::ascii(2);
 
         kind_report::check_if_colors_are_supported(true);
 
         match check {
-            Some(file) if diagnostics.is_empty() => {
-                driver::execute_file(&file).to_string()
-            },
+            Some(file) if diagnostics.is_empty() => driver::execute_file(&file).to_string(),
             _ => {
                 let mut res_string = String::new();
 
-                for diagnostic in diagnostics {
-                    let diag = Into::<Diagnostic>::into(&diagnostic);
+                for diag in diagnostics {
                     diag.render(&mut session, &render, &mut res_string).unwrap();
                 }
 

@@ -41,8 +41,8 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugare
 pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> {
     let mut concrete_book = resolution::parse_and_store_book(session, path)?;
 
-    expand::expand_book(&mut concrete_book);
-    
+    expand::expand_book(session.diagnostic_sender.clone(), &mut concrete_book);
+
     let failed = resolution::check_unbound_top_level(session, &mut concrete_book);
 
     if failed {

@@ -4,7 +4,7 @@ use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
 use kind_driver::session::Session;
-use kind_report::data::{Diagnostic, DiagnosticFrame, Log};
+use kind_report::data::{Diagnostic, Log};
 use kind_report::report::{FileCache, Report};
 use kind_report::RenderConfig;
 
@@ -136,7 +136,7 @@ pub fn compile_in_session<T>(
 
     let res = fun(&mut session);
 
-    let diagnostics = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+    let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
 
     if diagnostics.is_empty() && res.is_some() {
         render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
@@ -146,7 +146,6 @@ pub fn compile_in_session<T>(
         render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
         eprintln!();
         for diagnostic in diagnostics {
-            let diagnostic: Diagnostic = (&diagnostic).into();
             render_to_stderr(&render_config, &session, &diagnostic)
         }
         None
@@ -221,10 +220,10 @@ pub fn run_cli(config: Cli) {
         }
         Command::Watch { file: _ } => {
             todo!()
-        },
+        }
         Command::Repl => {
             todo!()
-        },
+        }
         Command::ToKDL {
             file: _,
             namespace: _,

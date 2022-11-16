@@ -281,7 +281,7 @@ impl<'a> Parser<'a> {
                     uses.insert(alias, origin);
                 }
                 Err(err) => {
-                    self.errs.send(err.into()).unwrap();
+                    self.errs.send(Box::new(err)).unwrap();
                     self.failed = true;
                     break;
                 }
@@ -293,7 +293,7 @@ impl<'a> Parser<'a> {
                 Ok(entry) => entries.push(entry),
                 Err(err) => {
                     self.advance();
-                    self.errs.send(err.into()).unwrap();
+                    self.errs.send(Box::new(err)).unwrap();
                     self.failed = true;
                     while (!self.is_top_level_start() || !self.is_linebreak())
                         && !self.get().same_variant(&Token::Eof)
@@ -309,7 +309,7 @@ impl<'a> Parser<'a> {
         match res {
             Ok(_) => (),
             Err(err) => {
-                self.errs.send(err.into()).unwrap();
+                self.errs.send(Box::new(err)).unwrap();
                 self.failed = true;
             }
         }

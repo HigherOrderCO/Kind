@@ -66,7 +66,7 @@ impl<'a> Parser<'a> {
         }
         if unused {
             self.errs
-                .send(SyntaxError::UnusedDocString(start.mix(last)).into())
+                .send(Box::new(SyntaxError::UnusedDocString(start.mix(last))))
                 .unwrap()
         }
     }

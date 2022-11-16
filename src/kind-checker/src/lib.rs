@@ -10,7 +10,7 @@ pub mod report;
 use std::sync::mpsc::Sender;
 
 use hvm::Term;
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 use kind_tree::desugared::Book;
 
 use crate::report::parse_report;
@@ -29,7 +29,7 @@ pub fn gen_checker(book: &Book) -> String {
 
 /// Type checks a dessugared book. It spawns an HVM instance in order
 /// to run a compiled version of the book
-pub fn type_check(book: &Book, tx: Sender<DiagnosticFrame>) -> bool {
+pub fn type_check(book: &Book, tx: Sender<Box<dyn Diagnostic>>) -> bool {
     let check_code = gen_checker(book);
 
     let mut runtime = hvm::Runtime::from_code(&check_code).unwrap();
@@ -43,7 +43,7 @@ pub fn type_check(book: &Book, tx: Sender<DiagnosticFrame>) -> bool {
     let succeeded = errs.is_empty();
 
     for err in errs {
-        tx.send(err.into()).unwrap()
+        tx.send(Box::new(err)).unwrap()
     }
 
     succeeded

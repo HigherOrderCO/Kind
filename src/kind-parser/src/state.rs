@@ -2,7 +2,7 @@
 
 use std::{collections::VecDeque, sync::mpsc::Sender};
 
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 use kind_span::Range;
 
 use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
@@ -20,7 +20,7 @@ pub struct Parser<'a> {
     /// because it's a ring buffer.
     pub queue: VecDeque<(Token, Range)>,
     pub breaks: VecDeque<bool>,
-    pub errs: Sender<DiagnosticFrame>,
+    pub errs: Sender<Box<dyn Diagnostic>>,
     /// It's useful when we have to try to parse something
     /// that fails in the first token. as the parser ignores some
     /// tokens, we cannot rely on the count provided by the
@@ -30,7 +30,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(mut lexer: Lexer<'a>, sender: Sender<DiagnosticFrame>) -> Parser<'a> {
+    pub fn new(mut lexer: Lexer<'a>, sender: Sender<Box<dyn Diagnostic>>) -> Parser<'a> {
         let mut queue = VecDeque::with_capacity(3);
         let mut breaks = VecDeque::with_capacity(3);
         for _ in 0..3 {

@@ -53,25 +53,12 @@ pub struct DiagnosticFrame {
     pub positions: Vec<Marker>,
 }
 
-impl<'a> DiagnosticFrame {
-    pub fn to_diagnostic(&'a self) -> Diagnostic<'a> {
-        Diagnostic { frame: self }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Diagnostic<'a> {
-    pub frame: &'a DiagnosticFrame,
-}
-
 pub enum Log {
     Checking(String),
     Checked(Duration),
     Failed(Duration),
 }
 
-impl<'a> From<&'a DiagnosticFrame> for Diagnostic<'a> {
-    fn from(frame: &'a DiagnosticFrame) -> Self {
-        Diagnostic { frame }
-    }
+pub trait Diagnostic {
+    fn to_diagnostic_frame(&self) -> DiagnosticFrame;
 }

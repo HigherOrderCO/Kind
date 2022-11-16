@@ -8,7 +8,7 @@
 
 use std::sync::mpsc::Sender;
 
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 use kind_span::{Range, Span};
 use kind_tree::{
     concrete::{self},
@@ -25,7 +25,7 @@ pub mod expr;
 pub mod top_level;
 
 pub struct DesugarState<'a> {
-    pub errors: Sender<DiagnosticFrame>,
+    pub errors: Sender<Box<dyn Diagnostic>>,
     pub old_book: &'a concrete::Book,
     pub new_book: desugared::Book,
     pub name_count: u64,
@@ -34,7 +34,7 @@ pub struct DesugarState<'a> {
 }
 
 pub fn desugar_book(
-    errors: Sender<DiagnosticFrame>,
+    errors: Sender<Box<dyn Diagnostic>>,
     book: &concrete::Book,
 ) -> Option<desugared::Book> {
     let mut state = DesugarState {
@@ -72,7 +72,7 @@ impl<'a> DesugarState<'a> {
     }
 
     fn send_err(&mut self, err: PassError) {
-        self.errors.send(err.into()).unwrap();
+        self.errors.send(Box::new(err)).unwrap();
         self.failed = true;
     }
 

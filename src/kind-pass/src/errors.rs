@@ -1,4 +1,4 @@
-use kind_report::data::{Color, DiagnosticFrame, Marker, Severity};
+use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::{Range, Span};
 
 pub enum Sugar {
@@ -13,7 +13,6 @@ pub enum Sugar {
 /// of the passes inside this crate.
 pub enum PassError {
     RepeatedVariable(Range, Range),
-    CannotUseNamed(Range, Range),
     IncorrectArity(Range, Vec<Range>, usize, usize),
     DuplicatedNamed(Range, Range),
     LetDestructOnlyForRecord(Range),
@@ -30,17 +29,16 @@ pub enum PassError {
     NotATypeConstructor(Range, Range),
     ShouldBeAParameter(Span, Range),
     NoFieldCoverage(Range, Vec<String>),
-    DuplicatedConstructor(Range, Range),
     CannotPatternMatchOnErased(Range),
 }
 
 // TODO: A way to build an error message with methods
-impl From<PassError> for DiagnosticFrame {
-    fn from(err: PassError) -> Self {
-        match err {
+impl Diagnostic for PassError {
+    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+        match self {
             PassError::CannotUseIrrelevant(var_decl, place, declarated_place) => {
                 let mut positions = vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "It's in relevant position!".to_string(),
                     no_code: false,
@@ -49,7 +47,7 @@ impl From<PassError> for DiagnosticFrame {
 
                 if let Some(range) = declarated_place {
                     positions.push(Marker {
-                        position: range,
+                        position: *range,
                         color: Color::Snd,
                         text: "Declared here as erased (or implicit without '+')".to_string(),
                         no_code: false,
@@ -59,7 +57,7 @@ impl From<PassError> for DiagnosticFrame {
 
                 if let Some(range) = var_decl {
                     positions.push(Marker {
-                        position: range,
+                        position: *range,
                         color: Color::Thr,
                         text: "This variable corresponds to the erased argument".to_string(),
                         no_code: false,
@@ -83,7 +81,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -97,7 +95,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -126,15 +124,15 @@ impl From<PassError> for DiagnosticFrame {
                 severity: Severity::Error,
                 title: "This rule is with the incorrect arity.".to_string(),
                 subtitles: vec![],
-                hints: vec![if expected == 0 {
+                hints: vec![if *expected == 0 {
                     "This rule expects no arguments".to_string()
-                } else if hidden == 0 {
+                } else if *hidden == 0 {
                     format!("This rule expects {} arguments", expected)
                 } else {
                     format!("This rule expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
                 }],
                 positions: vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -154,7 +152,7 @@ impl From<PassError> for DiagnosticFrame {
                     Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
                 }],
                 positions: vec![Marker {
-                    position: expr_place,
+                    position: *expr_place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -168,7 +166,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -183,14 +181,14 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![],
                 positions: vec![
                     Marker {
-                        position: place,
+                        position: *place,
                         color: Color::Fst,
                         text: "Here!".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
-                        position: def_name,
+                        position: *def_name,
                         color: Color::Snd,
                         text: "This is the definition name".to_string(),
                         no_code: false,
@@ -206,14 +204,14 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![],
                 positions: vec![
                     Marker {
-                        position: place,
+                        position: *place,
                         color: Color::Fst,
                         text: "Here!".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
-                        position: def_name,
+                        position: *def_name,
                         color: Color::Snd,
                         text: "This is the definition name".to_string(),
                         no_code: false,
@@ -228,7 +226,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![format!("Need a case for {}", other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", "))],
                 positions: vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "This is the incomplete case".to_string(),
                     no_code: false,
@@ -237,7 +235,7 @@ impl From<PassError> for DiagnosticFrame {
             },
             PassError::IncorrectArity(head_range, got, expected, hidden) => {
                 let positions = vec![Marker {
-                    position: head_range,
+                    position: *head_range,
                     color: Color::Fst,
                     text: "This function requires a fixed number of arguments".to_string(),
                     no_code: false,
@@ -249,9 +247,9 @@ impl From<PassError> for DiagnosticFrame {
                     severity: Severity::Error,
                     title: "Incorrect arity.".to_string(),
                     subtitles: vec![],
-                    hints: vec![if expected == 0 {
+                    hints: vec![if *expected == 0 {
                         format!("This function expects no arguments but got {}", got.len())
-                    } else if hidden == 0 {
+                    } else if *hidden == 0 {
                         format!("This function expects {} arguments but got {}", expected, got.len())
                     } else {
                         format!(
@@ -274,9 +272,9 @@ impl From<PassError> for DiagnosticFrame {
                 )],
                 positions: vec![
                     Marker {
-                        position: head_range,
+                        position: *head_range,
                         color: Color::Fst,
-                        text: if expected == 0 {
+                        text: if *expected == 0 {
                             "This rule expects no arguments".to_string()
                         } else {
                             format!("This rule expects {} explicit arguments", expected)
@@ -285,7 +283,7 @@ impl From<PassError> for DiagnosticFrame {
                         main: true,
                     },
                     Marker {
-                        position: place_range,
+                        position: *place_range,
                         color: Color::Snd,
                         text: "This is what triggers the sugar".to_string(),
                         no_code: false,
@@ -301,39 +299,16 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![],
                 positions: vec![
                     Marker {
-                        position: last_decl,
+                        position: *last_decl,
                         color: Color::Fst,
                         text: "Second occurence".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
-                        position: first_decl,
+                        position: *first_decl,
                         color: Color::Snd,
                         text: "First occurence".to_string(),
-                        no_code: false,
-                        main: false,
-                    },
-                ],
-            },
-            PassError::CannotUseNamed(fun_range, binding_range) => DiagnosticFrame {
-                code: 213,
-                severity: Severity::Error,
-                title: "Cannot use named parameters in this type of function application".to_string(),
-                subtitles: vec![],
-                hints: vec![],
-                positions: vec![
-                    Marker {
-                        position: fun_range,
-                        color: Color::Fst,
-                        text: "This is the head of the application".to_string(),
-                        no_code: false,
-                        main: true,
-                    },
-                    Marker {
-                        position: binding_range,
-                        color: Color::Snd,
-                        text: "This isn't allowed for this kind of application".to_string(),
                         no_code: false,
                         main: false,
                     },
@@ -347,14 +322,14 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec!["Rename one of the occurences".to_string()],
                 positions: vec![
                     Marker {
-                        position: last_decl,
+                        position: *last_decl,
                         color: Color::Fst,
                         text: "Second occurence".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
-                        position: first_decl,
+                        position: *first_decl,
                         color: Color::Snd,
                         text: "First occurence".to_string(),
                         no_code: false,
@@ -369,7 +344,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: format!("Cannot find alias for '{}'", name),
                     no_code: false,
@@ -382,7 +357,7 @@ impl From<PassError> for DiagnosticFrame {
                 match error_range {
                     Span::Generated => (),
                     Span::Locatable(error_range) => positions.push(Marker {
-                        position: error_range,
+                        position: *error_range,
                         color: Color::Fst,
                         text: "This expression is not the parameter".to_string(),
                         no_code: false,
@@ -391,7 +366,7 @@ impl From<PassError> for DiagnosticFrame {
                 }
 
                 positions.push(Marker {
-                    position: declaration_range,
+                    position:* declaration_range,
                     color: Color::Snd,
                     text: "This is the parameter that should be used".to_string(),
                     no_code: false,
@@ -415,14 +390,14 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![],
                 positions: vec![
                     Marker {
-                        position: error_range,
+                        position: *error_range,
                         color: Color::Fst,
                         text: "This is not the type that is being declared".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
-                        position: declaration_range,
+                        position: *declaration_range,
                         color: Color::Snd,
                         text: "This is the type that should be used instead".to_string(),
                         no_code: false,
@@ -440,35 +415,12 @@ impl From<PassError> for DiagnosticFrame {
                     other.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", ")
                 )],
                 positions: vec![Marker {
-                    position: place,
+                    position: *place,
                     color: Color::Fst,
                     text: "This is the incomplete case".to_string(),
                     no_code: false,
                     main: true,
                 }],
-            },
-            PassError::DuplicatedConstructor(place, other) => DiagnosticFrame {
-                code: 209,
-                severity: Severity::Error,
-                title: "Duplicated constructor name".to_string(),
-                subtitles: vec![],
-                hints: vec![],
-                positions: vec![
-                    Marker {
-                        position: place,
-                        color: Color::Fst,
-                        text: "Here".to_string(),
-                        no_code: false,
-                        main: true,
-                    },
-                    Marker {
-                        position: other,
-                        color: Color::Fst,
-                        text: "Here".to_string(),
-                        no_code: false,
-                        main: false,
-                    },
-                ],
             },
         }
     }

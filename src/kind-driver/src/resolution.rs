@@ -10,8 +10,9 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use strsim::jaro;
 
-use kind_pass::unbound::{self};
-use kind_report::data::DiagnosticFrame;
+use kind_pass::unbound::{self, UnboundCollector};
+use kind_report::data::Diagnostic;
+use kind_tree::concrete::visitor::Visitor;
 use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
@@ -26,7 +27,7 @@ const EXT: &str = "kind2";
 fn accumulate_neighbour_paths(
     ident: &QualifiedIdent,
     raw_path: &Path,
-) -> Result<Option<PathBuf>, DiagnosticFrame> {
+) -> Result<Option<PathBuf>, Box<dyn Diagnostic>> {
     let mut canon_path = raw_path.to_path_buf();
     let mut dir_file_path = raw_path.to_path_buf();
     let dir_path = raw_path.to_path_buf();
@@ -34,9 +35,12 @@ fn accumulate_neighbour_paths(
     canon_path.set_extension(EXT);
     dir_file_path.push("_");
     dir_file_path.set_extension(EXT);
-    
+
     if canon_path.exists() && dir_path.exists() && canon_path.is_file() && dir_path.is_dir() {
-        Err(DriverError::MultiplePaths(ident.clone(), vec![canon_path, dir_path]).into())
+        Err(Box::new(DriverError::MultiplePaths(
+            ident.clone(),
+            vec![canon_path, dir_path],
+        )))
     } else if canon_path.is_file() {
         Ok(Some(canon_path))
     } else if dir_file_path.is_file() {
@@ -54,7 +58,7 @@ fn ident_to_path(
     root: &Path,
     ident: &QualifiedIdent,
     search_on_parent: bool,
-) -> Result<Option<PathBuf>, DiagnosticFrame> {
+) -> Result<Option<PathBuf>, Box<dyn Diagnostic>> {
     let name = ident.root.to_string();
     let segments = name.as_str().split('.').collect::<Vec<&str>>();
     let mut raw_path = root.to_path_buf();
@@ -78,7 +82,10 @@ fn try_to_insert_new_name<'a>(
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
         session
             .diagnostic_sender
-            .send(DriverError::DefinedMultipleTimes(first_occorence.clone(), ident).into())
+            .send(Box::new(DriverError::DefinedMultipleTimes(
+                first_occorence.clone(),
+                ident,
+            )))
             .unwrap();
         *failed = true;
         false
@@ -172,7 +179,9 @@ fn parse_and_store_book_by_path<'a>(
     if !path.exists() {
         session
             .diagnostic_sender
-            .send(DriverError::CannotFindFile(path.to_str().unwrap().to_string()).into())
+            .send(Box::new(DriverError::CannotFindFile(
+                path.to_str().unwrap().to_string(),
+            )))
             .unwrap();
         return true;
     }
@@ -189,7 +198,9 @@ fn parse_and_store_book_by_path<'a>(
         Err(_) => {
             session
                 .diagnostic_sender
-                .send(DriverError::CannotFindFile(path.to_str().unwrap().to_string()).into())
+                .send(Box::new(DriverError::CannotFindFile(
+                    path.to_str().unwrap().to_string(),
+                )))
                 .unwrap();
             return true;
         }
@@ -201,15 +212,15 @@ fn parse_and_store_book_by_path<'a>(
     let (mut module, mut failed) =
         kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
 
-    let (unbound_vars, unbound_top_level) =
-        unbound::get_module_unbound(session.diagnostic_sender.clone(), &mut module, false);
+    let mut state = UnboundCollector::new(session.diagnostic_sender.clone(), false);
+    state.visit_module(&mut module);
 
-    for idents in unbound_vars.values() {
+    for idents in state.unbound.values() {
         unbound_variable(session, book, idents);
         failed = true;
     }
 
-    for idents in unbound_top_level.values() {
+    for idents in state.unbound_top_level.values() {
         failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
     }
 
@@ -229,7 +240,10 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
         .collect();
     session
         .diagnostic_sender
-        .send(DriverError::UnboundVariable(idents.to_vec(), similar_names).into())
+        .send(Box::new(DriverError::UnboundVariable(
+            idents.to_vec(),
+            similar_names,
+        )))
         .unwrap();
 }
 
@@ -249,7 +263,11 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
         unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for (_, unbound) in unbound_tops {
-        let res: Vec<Ident> = unbound.iter().filter(|x| !x.used_by_sugar).map(|x| x.to_ident()).collect();
+        let res: Vec<Ident> = unbound
+            .iter()
+            .filter(|x| !x.used_by_sugar)
+            .map(|x| x.to_ident())
+            .collect();
         if !res.is_empty() {
             unbound_variable(session, &book, &res);
             failed = true;

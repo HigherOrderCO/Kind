@@ -8,7 +8,7 @@
 
 use std::sync::mpsc::Sender;
 
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 use kind_span::Range;
 
 use crate::errors::SyntaxError;
@@ -68,12 +68,12 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn get_next_no_error(&mut self, vec: Sender<DiagnosticFrame>) -> (Token, Range) {
+    pub fn get_next_no_error(&mut self, vec: Sender<Box<dyn Diagnostic>>) -> (Token, Range) {
         loop {
             let (token, span) = self.lex_token();
             match token {
                 Token::Error(x) => {
-                    vec.send(x.into()).unwrap();
+                    vec.send(x).unwrap();
                     continue;
                 }
                 Token::Comment(false, _) => continue,

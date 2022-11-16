@@ -1,5 +1,5 @@
 use fxhash::FxHashMap;
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 use kind_tree::concrete::{visitor::Visitor, Module};
 /// Expands sum type and record definitions to a lot of
 /// helper definitions like eliminators and replace qualified identifiers
@@ -10,7 +10,7 @@ use crate::errors::PassError;
 
 pub struct Expand {
     pub names: FxHashMap<String, String>,
-    pub errors: Sender<DiagnosticFrame>,
+    pub errors: Sender<Box<dyn Diagnostic>>,
     pub failed: bool,
 }
 
@@ -23,7 +23,10 @@ impl Visitor for Expand {
             Some(path) => path,
             None => {
                 self.errors
-                    .send(PassError::CannotFindAlias(ident.root.to_string(), ident.range).into())
+                    .send(Box::new(PassError::CannotFindAlias(
+                        ident.root.to_string(),
+                        ident.range,
+                    )))
                     .unwrap();
                 self.failed = true;
                 return;
@@ -39,7 +42,7 @@ impl Visitor for Expand {
     }
 }
 
-pub fn expand_uses(module: &mut Module, errors: Sender<DiagnosticFrame>) -> bool {
+pub fn expand_uses(module: &mut Module, errors: Sender<Box<dyn Diagnostic>>) -> bool {
     let mut session = Expand {
         names: module.uses.clone(),
         errors,

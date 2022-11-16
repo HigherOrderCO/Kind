@@ -8,7 +8,7 @@
 use std::sync::mpsc::Sender;
 
 use fxhash::{FxHashMap, FxHashSet};
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 use kind_span::Range;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
@@ -26,7 +26,7 @@ use kind_tree::{visit_opt, visit_vec};
 use crate::errors::PassError;
 
 pub struct UnboundCollector {
-    pub errors: Sender<DiagnosticFrame>,
+    pub errors: Sender<Box<dyn Diagnostic>>,
 
     // Utils for keeping variables tracking and report duplicated ones.
     pub context_vars: Vec<(Range, String)>,
@@ -38,7 +38,10 @@ pub struct UnboundCollector {
 }
 
 impl UnboundCollector {
-    pub fn new(diagnostic_sender: Sender<DiagnosticFrame>, emit_errs: bool) -> UnboundCollector {
+    pub fn new(
+        diagnostic_sender: Sender<Box<dyn Diagnostic>>,
+        emit_errs: bool,
+    ) -> UnboundCollector {
         Self {
             errors: diagnostic_sender,
             context_vars: Default::default(),
@@ -51,7 +54,7 @@ impl UnboundCollector {
 }
 
 pub fn get_module_unbound(
-    diagnostic_sender: Sender<DiagnosticFrame>,
+    diagnostic_sender: Sender<Box<dyn Diagnostic>>,
     module: &mut Module,
     emit_errs: bool,
 ) -> (
@@ -64,7 +67,7 @@ pub fn get_module_unbound(
 }
 
 pub fn get_book_unbound(
-    diagnostic_sender: Sender<DiagnosticFrame>,
+    diagnostic_sender: Sender<Box<dyn Diagnostic>>,
     book: &mut Book,
     emit_errs: bool,
 ) -> (
@@ -135,7 +138,7 @@ impl Visitor for UnboundCollector {
         {
             if self.emit_errs {
                 self.errors
-                    .send(PassError::RepeatedVariable(fst.0, ident.0.range).into())
+                    .send(Box::new(PassError::RepeatedVariable(fst.0, ident.0.range)))
                     .unwrap()
             }
         } else {
@@ -157,7 +160,10 @@ impl Visitor for UnboundCollector {
         if let Some(fst) = res {
             if self.emit_errs {
                 self.errors
-                    .send(PassError::RepeatedVariable(fst.0, argument.name.range).into())
+                    .send(Box::new(PassError::RepeatedVariable(
+                        fst.0,
+                        argument.name.range,
+                    )))
                     .unwrap()
             }
         } else {
@@ -268,7 +274,11 @@ impl Visitor for UnboundCollector {
     fn visit_destruct(&mut self, destruct: &mut Destruct) {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
-                self.visit_qualified_ident(&mut QualifiedIdent::add_segment(ty, "open").to_sugar().to_generated());
+                self.visit_qualified_ident(
+                    &mut QualifiedIdent::add_segment(ty, "open")
+                        .to_sugar()
+                        .to_generated(),
+                );
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);
                 for bind in bindings {

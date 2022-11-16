@@ -15,7 +15,7 @@ use std::sync::mpsc::Sender;
 
 use fxhash::{FxHashMap, FxHashSet};
 
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 
 use kind_span::Range;
 use kind_tree::{
@@ -32,7 +32,7 @@ pub enum Relevance {
     Hole(usize),
 }
 pub struct ErasureState<'a> {
-    errs: Sender<DiagnosticFrame>,
+    errs: Sender<Box<dyn Diagnostic>>,
     book: &'a Book,
 
     ctx: im::HashMap<String, (Range, (Option<Range>, Relevance))>,
@@ -44,7 +44,7 @@ pub struct ErasureState<'a> {
 
 pub fn erase_book(
     book: &Book,
-    errs: Sender<DiagnosticFrame>,
+    errs: Sender<Box<dyn Diagnostic>>,
     entrypoint: FxHashSet<String>,
 ) -> Option<Book> {
     let mut state = ErasureState {
@@ -114,7 +114,11 @@ impl<'a> ErasureState<'a> {
         declared_ty: Option<Range>,
     ) {
         self.errs
-            .send(PassError::CannotUseIrrelevant(declared_val, used, declared_ty).into())
+            .send(Box::new(PassError::CannotUseIrrelevant(
+                declared_val,
+                used,
+                declared_ty,
+            )))
             .unwrap();
         self.failed = true;
     }
@@ -232,7 +236,7 @@ impl<'a> ErasureState<'a> {
             Fun(name, spine) | Ctr(name, spine) if on.1 == Relevance::Irrelevant => {
                 let range = pat.span.to_range().unwrap_or_else(|| name.range.clone());
                 self.errs
-                    .send(PassError::CannotPatternMatchOnErased(range).into())
+                    .send(Box::new(PassError::CannotPatternMatchOnErased(range)))
                     .unwrap();
                 self.failed = true;
                 self.erase_pat_spine(on, &name, spine);

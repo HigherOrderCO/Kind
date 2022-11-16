@@ -393,7 +393,7 @@ pub trait Report {
     ) -> std::fmt::Result;
 }
 
-impl<'a> Report for Diagnostic<'a> {
+impl Report for Box<dyn Diagnostic> {
     fn render<T: Write + Sized, C: FileCache>(
         &self,
         cache: &C,
@@ -401,14 +401,17 @@ impl<'a> Report for Diagnostic<'a> {
         fmt: &mut T,
     ) -> std::fmt::Result {
         write!(fmt, " ")?;
-        render_tag(&self.frame.severity, fmt)?;
-        writeln!(fmt, "{}", Paint::new(&self.frame.title).bold())?;
 
-        if !self.frame.subtitles.is_empty() {
+        let frame = self.to_diagnostic_frame();
+
+        render_tag(&frame.severity, fmt)?;
+        writeln!(fmt, "{}", Paint::new(&frame.title).bold())?;
+
+        if !frame.subtitles.is_empty() {
             writeln!(fmt)?;
         }
 
-        for subtitle in &self.frame.subtitles {
+        for subtitle in &frame.subtitles {
             match subtitle {
                 Subtitle::Normal(color, phr) => {
                     let colorizer = get_colorizer(color);
@@ -452,7 +455,7 @@ impl<'a> Report for Diagnostic<'a> {
             }
         }
 
-        let groups = group_markers(&self.frame.positions);
+        let groups = group_markers(&frame.positions);
         let is_empty = groups.is_empty();
 
         for (ctx, group) in groups {
@@ -468,7 +471,7 @@ impl<'a> Report for Diagnostic<'a> {
             writeln!(fmt)?;
         }
 
-        for hint in &self.frame.hints {
+        for hint in &frame.hints {
             writeln!(
                 fmt,
                 "{:>5} {} {}",
@@ -478,7 +481,7 @@ impl<'a> Report for Diagnostic<'a> {
             )?;
         }
 
-        if !self.frame.hints.is_empty() {
+        if !frame.hints.is_empty() {
             writeln!(fmt)?;
         }
 

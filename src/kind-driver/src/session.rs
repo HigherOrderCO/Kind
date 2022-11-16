@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
 use fxhash::FxHashMap;
-use kind_report::data::DiagnosticFrame;
+use kind_report::data::Diagnostic;
 
 #[derive(Debug, Clone)]
 pub struct Session {
@@ -20,14 +20,14 @@ pub struct Session {
     /// to make the public and private decls
     pub public_names: FxHashMap<PathBuf, HashSet<String>>,
 
-    pub diagnostic_sender: Sender<DiagnosticFrame>,
+    pub diagnostic_sender: Sender<Box<dyn Diagnostic>>,
     pub root: PathBuf,
 
     pub book_counter: usize,
 }
 
 impl Session {
-    pub fn new(root: PathBuf, sender: Sender<DiagnosticFrame>) -> Session {
+    pub fn new(root: PathBuf, sender: Sender<Box<dyn Diagnostic>>) -> Session {
         Session {
             loaded_paths: Vec::new(),
             loaded_sources: Vec::new(),

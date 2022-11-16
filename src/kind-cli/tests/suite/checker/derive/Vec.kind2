@@ -1,7 +1,9 @@
 type Nat {
+    succ (pred : Nat)
     zero
-    succ
 }
 
-Nat.zero : U60
-Nat.zero = 2
+type Vec (t: Type) ~ (n: Nat) {
+    cons <size : Nat> (x : t) (xs : Vec t size) : Vec t (Nat.succ size)
+    nil : Vec t Nat.zero
+}

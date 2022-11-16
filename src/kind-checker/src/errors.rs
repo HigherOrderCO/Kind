@@ -1,6 +1,6 @@
 //! Errors created by the type checker.
 
-use kind_report::data::{Color, DiagnosticFrame, Marker, Severity, Subtitle, Word};
+use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word};
 use kind_span::Range;
 use kind_tree::desugared::Expr;
 
@@ -18,7 +18,7 @@ pub(crate) enum TypeError {
     TypeMismatch(Context, Range, Box<Expr>, Box<Expr>),
 }
 
-fn context_to_subtitles(ctx: Context, subtitles: &mut Vec<Subtitle>) {
+fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
     subtitles.push(Subtitle::LineBreak);
 
     if !ctx.0.is_empty() {
@@ -35,7 +35,7 @@ fn context_to_subtitles(ctx: Context, subtitles: &mut Vec<Subtitle>) {
         .map(|x| x.0.len())
         .unwrap_or(0);
 
-    for (name, typ, vals) in ctx.0 {
+    for (name, typ, vals) in &ctx.0 {
         subtitles.push(Subtitle::Phrase(
             Color::Snd,
             vec![
@@ -57,9 +57,9 @@ fn context_to_subtitles(ctx: Context, subtitles: &mut Vec<Subtitle>) {
     }
 }
 
-impl From<TypeError> for DiagnosticFrame {
-    fn from(err: TypeError) -> Self {
-        match err {
+impl Diagnostic for TypeError {
+    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+        match self {
             TypeError::TypeMismatch(ctx, range, detected, expected) => {
                 let mut subtitles = vec![
                     Subtitle::Phrase(
@@ -85,7 +85,7 @@ impl From<TypeError> for DiagnosticFrame {
                     subtitles,
                     hints: vec![],
                     positions: vec![Marker {
-                        position: range,
+                        position: *range,
                         color: Color::Fst,
                         text: "Here!".to_string(),
                         no_code: false,
@@ -111,7 +111,7 @@ impl From<TypeError> for DiagnosticFrame {
                     subtitles,
                     hints: vec![],
                     positions: vec![Marker {
-                        position: range,
+                        position: *range,
                         color: Color::Snd,
                         text: "Here!".to_string(),
                         no_code: false,
@@ -141,7 +141,7 @@ impl From<TypeError> for DiagnosticFrame {
                 ],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -155,7 +155,7 @@ impl From<TypeError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -169,7 +169,7 @@ impl From<TypeError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -183,7 +183,7 @@ impl From<TypeError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -197,7 +197,7 @@ impl From<TypeError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -211,7 +211,7 @@ impl From<TypeError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,

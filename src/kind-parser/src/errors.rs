@@ -1,7 +1,7 @@
 //! All of the sintatic erros both from the
 //! lexer and the parser.
 
-use kind_report::data::{Color, DiagnosticFrame, Marker, Severity};
+use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
 use crate::lexer::tokens::Token;
@@ -44,9 +44,9 @@ fn encode_name(encode: EncodeSequence) -> &'static str {
     }
 }
 
-impl From<SyntaxError> for DiagnosticFrame {
-    fn from(err: SyntaxError) -> Self {
-        match err {
+impl Diagnostic for SyntaxError {
+    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+        match self {
             SyntaxError::UnfinishedString(range) => DiagnosticFrame {
                 code: 1,
                 severity: Severity::Error,
@@ -54,7 +54,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["You need to close the string with another quote, take a look at the beggining".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "The string starts in this position!".to_string(),
                     no_code: false,
@@ -68,7 +68,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["Put it on the end of the clause or remove it.".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "It should not be in the middle of this!".to_string(),
                     no_code: false,
@@ -82,7 +82,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["Take a look at the rules for doc comments at https://kind.kindelia.org/hints/documentation-strings".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::For,
                     text: "Remove the entire comment or transform it in a simple comment with '//'".to_string(),
                     no_code: false,
@@ -96,7 +96,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["You need to close the character with another quote, take a look at the beginning".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "The char starts in this position!".to_string(),
                     no_code: false,
@@ -114,7 +114,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                     format!("Change it to '{}{}'", fst, c.as_str())
                 }],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Wrong case for this name".to_string(),
                     no_code: false,
@@ -129,14 +129,14 @@ impl From<SyntaxError> for DiagnosticFrame {
                 hints: vec!["If you indend to make another clause, just replace the name in red.".to_string()],
                 positions: vec![
                     Marker {
-                        position: snd,
+                        position: *snd,
                         color: Color::Fst,
                         text: "This is the unexpected token".to_string(),
                         no_code: false,
                         main: true,
                     },
                     Marker {
-                        position: fst,
+                        position: *fst,
                         color: Color::Snd,
                         text: "This is the definition. All clauses should use the same name.".to_string(),
                         no_code: false,
@@ -151,7 +151,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["You need to close the string with '*/', take a look at the beggining".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "The comment starts in this position!".to_string(),
                     no_code: false,
@@ -161,11 +161,11 @@ impl From<SyntaxError> for DiagnosticFrame {
             SyntaxError::InvalidEscapeSequence(kind, range) => DiagnosticFrame {
                 code: 8,
                 severity: Severity::Error,
-                title: format!("The {} character sequence is invalid!", encode_name(kind)),
+                title: format!("The {} character sequence is invalid!", encode_name(kind.clone())),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -175,11 +175,11 @@ impl From<SyntaxError> for DiagnosticFrame {
             SyntaxError::InvalidNumberRepresentation(repr, range) => DiagnosticFrame {
                 code: 9,
                 severity: Severity::Error,
-                title: format!("The {} number sequence is invalid!", encode_name(repr)),
+                title: format!("The {} number sequence is invalid!", encode_name(repr.clone())),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -193,7 +193,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["Try to remove it!".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -207,7 +207,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: true,
@@ -221,7 +221,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec!["Remove this documentation comment or place it in a correct place.".to_string()],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -235,7 +235,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -249,7 +249,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Starts here! try to add another one".to_string(),
                     no_code: false,
@@ -263,7 +263,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Move it to the beggining".to_string(),
                     no_code: false,
@@ -277,7 +277,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Use the entire name here!".to_string(),
                     no_code: false,
@@ -291,7 +291,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range,
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,
@@ -304,6 +304,6 @@ impl From<SyntaxError> for DiagnosticFrame {
 
 impl From<Box<SyntaxError>> for DiagnosticFrame {
     fn from(err: Box<SyntaxError>) -> Self {
-        (*err).into()
+        (err).into()
     }
 }

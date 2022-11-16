@@ -69,7 +69,10 @@ impl<'a> DesugarState<'a> {
             Destruct::Destruct(_, typ, case, jump_rest) => {
                 let count = self.old_book.count.get(&typ.to_string()).unwrap();
 
-                let rec = count.is_record_cons_of.clone().and_then(|name| self.old_book.entries.get(&name.to_string()));
+                let rec = count
+                    .is_record_cons_of
+                    .clone()
+                    .and_then(|name| self.old_book.entries.get(&name.to_string()));
 
                 let record = if let Some(TopLevel::RecordType(record)) = rec {
                     record
