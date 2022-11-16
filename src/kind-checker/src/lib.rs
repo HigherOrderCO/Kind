@@ -57,6 +57,7 @@ pub fn eval_api(book: &Book) -> Box<Term> {
 
     let mut runtime = hvm::Runtime::from_code(&check_code).unwrap();
     let main = runtime.alloc_code("Kind.API.eval_main").unwrap();
+
     runtime.run_io(main);
     runtime.normalize(main);
     runtime.readback(main)

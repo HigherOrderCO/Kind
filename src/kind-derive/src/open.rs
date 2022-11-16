@@ -60,12 +60,12 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
     types.push(Argument {
         hidden: true,
         erased: true,
-        name: Ident::generate("_res"),
+        name: Ident::generate("res_"),
         typ: None,
         range,
     });
 
-    let cons_tipo = mk_var(Ident::generate("_res"));
+    let cons_tipo = mk_var(Ident::generate("res_"));
 
     let cons_type = rec.fields.iter().rfold(cons_tipo, |out, (name, _, typ)| {
         mk_pi(name.clone(), typ.clone(), out)
@@ -91,7 +91,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
 
     // Motive with indices
 
-    let ret_ty = mk_var(Ident::generate("_res"));
+    let ret_ty = mk_var(Ident::generate("res_"));
 
     let mut pats: Vec<Box<Pat>> = Vec::new();
 
