@@ -295,7 +295,7 @@ impl<'a> Parser<'a> {
                     self.advance();
                     self.errs.send(err.into()).unwrap();
                     self.failed = true;
-                    while !self.is_top_level_start() && !self.get().same_variant(&Token::Eof) {
+                    while !self.is_top_level_start() && !self.get().same_variant(&Token::Eof) && !self.is_linebreak() {
                         self.advance();
                     }
                 }
