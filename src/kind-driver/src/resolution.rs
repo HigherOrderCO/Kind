@@ -34,7 +34,7 @@ fn accumulate_neighbour_paths(
     canon_path.set_extension(EXT);
     dir_file_path.push("_");
     dir_file_path.set_extension(EXT);
-
+    
     if canon_path.exists() && dir_path.exists() && canon_path.is_file() && dir_path.is_dir() {
         Err(DriverError::MultiplePaths(ident.clone(), vec![canon_path, dir_path]).into())
     } else if canon_path.is_file() {
@@ -249,7 +249,7 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
         unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for (_, unbound) in unbound_tops {
-        let res: Vec<Ident> = unbound.iter().map(|x| x.to_ident()).collect();
+        let res: Vec<Ident> = unbound.iter().filter(|x| !x.used_by_sugar).map(|x| x.to_ident()).collect();
         if !res.is_empty() {
             unbound_variable(session, &book, &res);
             failed = true;

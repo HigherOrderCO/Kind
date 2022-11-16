@@ -18,10 +18,10 @@ fn is_hidden_arg(token: &Token) -> bool {
 
 impl<'a> Parser<'a> {
     pub fn is_top_level_entry_continuation(&self) -> bool {
-        self.peek(1).same_variant(&Token::Colon) // ':'
-            || self.peek(1).same_variant(&Token::LPar) // '('
+        self.peek(1).same_variant(&Token::Colon)         // ':'
+            || self.peek(1).same_variant(&Token::LPar)   // '('
             || self.peek(1).same_variant(&Token::LBrace) // '{'
-            || self.peek(1).same_variant(&Token::Less) // '<'
+            || self.peek(1).same_variant(&Token::Less)   // '<'
             || self.peek(1).same_variant(&Token::Minus)  // '-'
             || self.peek(1).same_variant(&Token::Plus) // '+'
     }
@@ -295,7 +295,9 @@ impl<'a> Parser<'a> {
                     self.advance();
                     self.errs.send(err.into()).unwrap();
                     self.failed = true;
-                    while !self.is_top_level_start() && !self.get().same_variant(&Token::Eof) && !self.is_linebreak() {
+                    while (!self.is_top_level_start() || !self.is_linebreak())
+                        && !self.get().same_variant(&Token::Eof)
+                    {
                         self.advance();
                     }
                 }

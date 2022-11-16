@@ -31,6 +31,7 @@ pub enum PassError {
     ShouldBeAParameter(Span, Range),
     NoFieldCoverage(Range, Vec<String>),
     DuplicatedConstructor(Range, Range),
+    CannotPatternMatchOnErased(Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -79,6 +80,20 @@ impl From<PassError> for DiagnosticFrame {
                 code: 200,
                 severity: Severity::Error,
                 title: "Can only destruct record types.".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: place,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::CannotPatternMatchOnErased(place) => DiagnosticFrame {
+                code: 223,
+                severity: Severity::Error,
+                title: "Cannot pattern match on erased arguments.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {

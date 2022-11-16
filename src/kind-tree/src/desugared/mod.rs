@@ -347,7 +347,7 @@ impl Display for Expr {
                 }
             }
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
-            Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
+            Ann(expr, typ) => write!(f, "({} :: {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
             Hole(_) => write!(f, "_"),
             Hlp(name) => write!(f, "?{}", name),

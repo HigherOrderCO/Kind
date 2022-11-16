@@ -492,15 +492,7 @@ impl<'a> Parser<'a> {
                 range,
             });
         }
-        if self.check_and_eat(Token::Colon) {
-            let expr = self.parse_expr(false)?;
-            Ok(Box::new(Expr {
-                range: head.range.mix(expr.range),
-                data: ExprKind::Ann(head, expr),
-            }))
-        } else {
-            Ok(head)
-        }
+        Ok(head)
     }
 
     pub fn parse_ask(&mut self) -> Result<Box<Sttm>, SyntaxError> {

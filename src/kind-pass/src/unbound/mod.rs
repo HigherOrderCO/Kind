@@ -268,7 +268,7 @@ impl Visitor for UnboundCollector {
     fn visit_destruct(&mut self, destruct: &mut Destruct) {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
-                self.visit_qualified_ident(QualifiedIdent::add_segment(ty, "open").to_sugar());
+                self.visit_qualified_ident(&mut QualifiedIdent::add_segment(ty, "open").to_sugar().to_generated());
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);
                 for bind in bindings {

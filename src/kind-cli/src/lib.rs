@@ -219,11 +219,15 @@ pub fn run_cli(config: Cli) {
                 res
             });
         }
+        Command::Watch { file: _ } => {
+            todo!()
+        },
+        Command::Repl => {
+            todo!()
+        },
         Command::ToKDL {
             file: _,
             namespace: _,
         } => todo!(),
-        Command::Watch { file: _ } => todo!(),
-        Command::Repl => todo!(),
     }
 }

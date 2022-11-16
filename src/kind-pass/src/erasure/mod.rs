@@ -150,10 +150,11 @@ impl<'a> ErasureState<'a> {
                     visited.insert(hole);
                     self.unify_loop(range, (left.0, res), right, visited, relevance_unify)
                 }
-                (None, Relevance::Irrelevant) => {
-                    self.holes[hole] = Some(t);
-                    true
-                }
+
+                // TODO: It should unify iff we want functions that are considered
+                // "erased" in the sense that we can just remove them from the runtime and it'll
+                // be fine.
+                (None, Relevance::Irrelevant) => false,
                 (_, _) => true,
             },
             (Relevance::Relevant, Relevance::Hole(hole)) => match self.holes[hole] {
@@ -227,6 +228,15 @@ impl<'a> ErasureState<'a> {
             Var(name) => {
                 self.ctx.insert(name.to_string(), (name.range, on));
                 Box::new(pat.clone())
+            }
+            Fun(name, spine) | Ctr(name, spine) if on.1 == Relevance::Irrelevant => {
+                let range = pat.span.to_range().unwrap_or_else(|| name.range.clone());
+                self.errs
+                    .send(PassError::CannotPatternMatchOnErased(range).into())
+                    .unwrap();
+                self.failed = true;
+                self.erase_pat_spine(on, &name, spine);
+                desugared::Expr::err(range)
             }
             Fun(name, spine) => {
                 let spine = self.erase_pat_spine(on, &name, spine);
