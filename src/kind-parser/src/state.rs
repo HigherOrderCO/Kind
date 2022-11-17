@@ -105,6 +105,13 @@ impl<'a> Parser<'a> {
         }
     }
 
+    pub fn eat_id(&mut self, expect: &str) -> Result<(Token, Range), SyntaxError> {
+        match self.get() {
+            Token::LowerId(x) if x == expect => Ok(self.advance()),
+            _ => self.fail(vec![Token::LowerId(expect.to_string())])
+        }
+    }
+
     pub fn eat<T>(&mut self, expect: fn(&Token) -> Option<T>) -> Result<T, SyntaxError> {
         match expect(self.get()) {
             None => self.fail(vec![]),
@@ -126,6 +133,10 @@ impl<'a> Parser<'a> {
 
     pub fn check_actual(&mut self, expect: Token) -> bool {
         self.get().same_variant(&expect)
+    }
+
+    pub fn check_actual_id(&self, expect: &str) -> bool {
+        matches!(self.get(), Token::LowerId(x) if x == expect)
     }
 
     pub fn try_single<T>(

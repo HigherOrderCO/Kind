@@ -7,6 +7,8 @@ pub enum Sugar {
     Sigma,
     Pair,
     BoolIf,
+    Match(String),
+    Open(String),
 }
 
 /// Describes all of the possible errors inside each
@@ -30,6 +32,11 @@ pub enum PassError {
     ShouldBeAParameter(Span, Range),
     NoFieldCoverage(Range, Vec<String>),
     CannotPatternMatchOnErased(Range),
+    
+    AttributeDoesNotAcceptEqual(Range),
+    InvalidAttributeArgument(Range),
+    DuplicatedAttributeArgument(Range, Range),
+    CannotDerive(String, Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -150,11 +157,13 @@ impl Diagnostic for PassError {
                     Sugar::Sigma => "You must implement 'Sigma' in order to use the sigma notation.".to_string(),
                     Sugar::Pair => "You must implement 'Sigma' and 'Sigma.new' in order to use the sigma notation.".to_string(),
                     Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
+                    Sugar::Match(name) => format!("You must implement '{}.match' in order to use the match notation (or derive match with #derive[match]).", name),
+                    Sugar::Open(name) => format!("You must implement '{}.open' in order to use the open notation (or derive open with #derive[open]).", name),
                 }],
                 positions: vec![Marker {
                     position: *expr_place,
                     color: Color::Fst,
-                    text: "Here!".to_string(),
+                    text: "You cannot use this expression!".to_string(),
                     no_code: false,
                     main: true,
                 }],
@@ -418,6 +427,68 @@ impl Diagnostic for PassError {
                     position: *place,
                     color: Color::Fst,
                     text: "This is the incomplete case".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::AttributeDoesNotAcceptEqual(place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "This attribute does not support values!".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Try to remove everything after the equal".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::InvalidAttributeArgument(place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "Invalid attribute argument".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Remove it or replace".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::CannotDerive(name, place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: format!("Cannot derive '{}' for this definition", name),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::DuplicatedAttributeArgument(first, sec) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Warning,
+                title: "Duplicated attribute argument".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *sec,
+                    color: Color::For,
+                    text: "Second declaration".to_string(),
+                    no_code: false,
+                    main: true,
+                },Marker {
+                    position: *first,
+                    color: Color::For,
+                    text: "First declaration!".to_string(),
                     no_code: false,
                     main: true,
                 }],

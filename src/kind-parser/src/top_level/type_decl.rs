@@ -7,7 +7,7 @@ use crate::state::Parser;
 impl<'a> Parser<'a> {
     pub fn parse_constructor(&mut self) -> Result<Constructor, SyntaxError> {
         let docs = self.parse_docs()?;
-        let name = self.parse_id()?;
+        let name = self.parse_any_id()?;
         let args = self.parse_arguments()?;
 
         let typ = if self.check_and_eat(Token::Colon) {
@@ -29,7 +29,7 @@ impl<'a> Parser<'a> {
         docs: Vec<String>,
         attrs: Vec<Attribute>,
     ) -> Result<SumTypeDecl, SyntaxError> {
-        self.eat_variant(Token::Type)?;
+        self.eat_id("type")?;
         let name = self.parse_upper_id()?;
 
         let parameters = self.parse_arguments()?;
@@ -66,7 +66,7 @@ impl<'a> Parser<'a> {
         docs: Vec<String>,
         attrs: Vec<Attribute>,
     ) -> Result<RecordDecl, SyntaxError> {
-        self.eat_variant(Token::Record)?;
+        self.eat_id("record")?;
         let name = self.parse_upper_id()?;
 
         let parameters = self.parse_arguments()?;
@@ -74,7 +74,7 @@ impl<'a> Parser<'a> {
         let range = self.range();
 
         self.eat_variant(Token::LBrace)?;
-        self.eat_variant(Token::Constructor)?;
+        self.eat_id("constructor")?;
 
         let constructor = self.parse_id()?;
 

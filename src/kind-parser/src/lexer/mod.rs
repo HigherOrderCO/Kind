@@ -52,18 +52,6 @@ impl<'a> Lexer<'a> {
     pub fn to_keyword(data: &str) -> Token {
         match data {
             "_" => Token::Hole,
-            "ask" => Token::Ask,
-            "do" => Token::Do,
-            "if" => Token::If,
-            "else" => Token::Else,
-            "match" => Token::Match,
-            "let" => Token::Let,
-            "use" => Token::Use,
-            "as" => Token::As,
-            "return" => Token::Return,
-            "type" => Token::Type,
-            "record" => Token::Record,
-            "constructor" => Token::Constructor,
             _ => Token::LowerId(data.to_string()),
         }
     }

@@ -1,6 +1,7 @@
 //! Module to derive a dependent
 //! eliminator out of a sum type declaration.
 
+use fxhash::FxHashMap;
 use kind_span::Range;
 
 use kind_tree::concrete::expr::Expr;
@@ -8,6 +9,8 @@ use kind_tree::concrete::pat::{Pat, PatIdent};
 use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
 use kind_tree::symbol::{Ident, QualifiedIdent};
+
+use crate::subst::{substitute_in_expr};
 
 /// Derives an eliminator from a sum type declaration.
 pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
@@ -202,11 +205,11 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                     spine_params = sum
                         .parameters
                         .extend(&cons.args)
-                        .map(|x| x.name.with_name(|f| format!("{}", f)))
+                        .map(|x| x.name.with_name(|f| format!("_{}_", f)))
                         .to_vec();
                     spine = cons
                         .args
-                        .map(|x| x.name.with_name(|f| format!("{}", f)))
+                        .map(|x| x.name.with_name(|f| format!("_{}_", f)))
                         .to_vec();
                     args_indices = sp
                         .iter()
@@ -218,7 +221,22 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                             Binding::Named(_, _, _) => unreachable!(),
                         })
                         .collect::<Vec<AppBinding>>();
-                    args_indices = args_indices[sum.parameters.len()..].into();
+                    args_indices = {
+                        let mut indices = args_indices[sum.parameters.len()..].to_vec();
+
+                        let renames = FxHashMap::from_iter(
+                            sum.parameters
+                                .extend(&cons.args)
+                                .map(|x| (x.name.to_string(), format!("_{}_", x.name.to_string())))
+                                .iter()
+                                .cloned(),
+                        );
+
+                        for indice in &mut indices {
+                            substitute_in_expr(&mut indice.data, &renames)
+                        }
+                        indices
+                    };
                 }
                 _ => unreachable!(),
             },
@@ -228,12 +246,12 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                     .parameters
                     .extend(&sum.indices)
                     .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("{}", f)))
+                    .map(|x| x.name.with_name(|f| format!("_{}_", f)))
                     .to_vec();
                 spine = sum
                     .indices
                     .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("{}", f)))
+                    .map(|x| x.name.with_name(|f| format!("_{}_", f)))
                     .to_vec();
                 args_indices = sum
                     .indices

@@ -4,7 +4,7 @@ use kind_tree::concrete::{expr, CaseBinding, Destruct, TopLevel};
 use kind_tree::desugared;
 use kind_tree::symbol::Ident;
 
-use crate::errors::PassError;
+use crate::errors::{PassError, Sugar};
 
 use super::DesugarState;
 
@@ -68,6 +68,7 @@ impl<'a> DesugarState<'a> {
         match binding {
             Destruct::Destruct(_, typ, case, jump_rest) => {
                 let count = self.old_book.count.get(&typ.to_string()).unwrap();
+                let open_id = typ.add_segment("open");
 
                 let rec = count
                     .is_record_cons_of
@@ -80,6 +81,11 @@ impl<'a> DesugarState<'a> {
                     self.send_err(PassError::LetDestructOnlyForRecord(typ.range));
                     return desugared::Expr::err(typ.range);
                 };
+
+                if self.old_book.count.get(&open_id.to_string()).is_none() {
+                    self.send_err(PassError::NeedToImplementMethods(binding.locate(), Sugar::Open(typ.to_string())));
+                    return desugared::Expr::err(range);
+                }
 
                 let ordered_fields = self.order_case_arguments(
                     (&typ.range, typ.to_string()),
@@ -101,8 +107,6 @@ impl<'a> DesugarState<'a> {
                         arguments.push(self.gen_name(jump_rest.unwrap_or(typ.range)))
                     }
                 }
-
-                let open_id = typ.add_segment("open");
 
                 let irrelev = count.arguments.map(|x| x.erased).to_vec();
 
@@ -147,6 +151,13 @@ impl<'a> DesugarState<'a> {
         match_: &expr::Match,
     ) -> Box<desugared::Expr> {
         let entry = self.old_book.entries.get(&match_.typ.to_string()).unwrap();
+
+        let match_id = match_.typ.add_segment("match");
+
+        if self.old_book.entries.get(&match_id.to_string()).is_none() {
+            self.send_err(PassError::NeedToImplementMethods(range, Sugar::Match(match_.typ.to_string())));
+            return desugared::Expr::err(range);
+        }
 
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
@@ -226,7 +237,6 @@ impl<'a> DesugarState<'a> {
             self.send_err(PassError::NoCoverage(range, unbound))
         }
 
-        let match_id = match_.typ.add_segment("match");
 
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)

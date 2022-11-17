@@ -123,6 +123,13 @@ impl<'a> Parser<'a> {
         Ok(ident)
     }
 
+    pub fn parse_any_id(&mut self) -> Result<Ident, SyntaxError> {
+        let range = self.range();
+        let id = eat_single!(self, Token::LowerId(x) | Token::UpperId(x, None) => x.clone())?;
+        let ident = Ident::new_static(&id, range);
+        Ok(ident)
+    }
+
     pub fn parse_upper_id(&mut self) -> Result<QualifiedIdent, SyntaxError> {
         let range = self.range();
         let (start, end) =
@@ -554,11 +561,11 @@ impl<'a> Parser<'a> {
 
     pub fn parse_sttm(&mut self) -> Result<Box<Sttm>, SyntaxError> {
         let start = self.range();
-        if self.check_actual(Token::Ask) {
+        if self.check_actual_id("ask") {
             self.parse_ask()
-        } else if self.check_actual(Token::Return) {
+        } else if self.check_actual_id("return") {
             self.parse_return()
-        } else if self.check_actual(Token::Let) {
+        } else if self.check_actual_id("let") {
             self.parse_monadic_let()
         } else {
             let expr = self.parse_expr(false)?;
@@ -643,7 +650,7 @@ impl<'a> Parser<'a> {
         let mut cases = Vec::new();
 
         while !self.get().same_variant(&Token::RBrace) {
-            let constructor = self.parse_id()?;
+            let constructor = self.parse_any_id()?;
             let (_range, bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
             self.eat_variant(Token::FatArrow)?;
             let value = self.parse_expr(false)?;
@@ -722,7 +729,7 @@ impl<'a> Parser<'a> {
         self.eat_variant(Token::LBrace)?;
         let if_ = self.parse_expr(false)?;
         self.eat_variant(Token::RBrace)?;
-        self.eat_variant(Token::Else)?;
+        self.eat_id("else")?;
         self.eat_variant(Token::LBrace)?;
         let els_ = self.parse_expr(false)?;
         let end = self.eat_variant(Token::RBrace)?.1;
@@ -738,13 +745,13 @@ impl<'a> Parser<'a> {
     /// some looakhead tokens.
     pub fn parse_expr(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
         self.ignore_docs();
-        if self.check_actual(Token::Do) {
+        if self.check_actual_id("do") {
             self.parse_do()
-        } else if self.check_actual(Token::Match) {
+        } else if self.check_actual_id("match") {
             self.parse_match()
-        } else if self.check_actual(Token::Let) {
+        } else if self.check_actual_id("let") {
             self.parse_let()
-        } else if self.check_actual(Token::If) {
+        } else if self.check_actual_id("if") {
             self.parse_if()
         } else if self.check_actual(Token::Dollar) {
             self.parse_sigma_pair()

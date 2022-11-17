@@ -6,6 +6,6 @@
 
 pub mod desugar;
 pub mod erasure;
-mod errors;
 pub mod expand;
 pub mod unbound;
+mod errors;

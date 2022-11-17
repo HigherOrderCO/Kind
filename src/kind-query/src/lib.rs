@@ -15,8 +15,7 @@ pub struct Resource<T> {
     path: PathBuf,
 
     concrete_tree: concrete::Module,
-    /// Accumulated diagnostics while
-    diagnostics: Vec<Box<dyn Diagnostic>>,
+
     /// Useful for LSP URIs
     ext: T,
 }

@@ -32,8 +32,8 @@ impl<'a> Parser<'a> {
 
     pub fn is_top_level_start(&self) -> bool {
         self.is_top_level_entry()
-            || self.get().same_variant(&Token::Type)
-            || self.get().same_variant(&Token::Record)
+            || self.check_actual_id("type")
+            || self.check_actual_id("record")
             || self.get().same_variant(&Token::Hash)
             || self.get().is_doc()
     }
@@ -231,13 +231,13 @@ impl<'a> Parser<'a> {
         let docs = self.parse_docs()?;
         let attrs = self.parse_attrs()?;
 
-        if self.check_actual(Token::Type) {
+        if self.check_actual_id("type") {
             Ok(TopLevel::SumType(self.parse_sum_type_def(docs, attrs)?))
-        } else if self.check_actual(Token::Record) {
+        } else if self.check_actual_id("record") {
             Ok(TopLevel::RecordType(self.parse_record_def(docs, attrs)?))
         } else if self.is_top_level_entry_continuation() {
             Ok(TopLevel::Entry(self.parse_entry(docs, attrs)?))
-        } else if self.check_actual(Token::Use) {
+        } else if self.check_actual_id("use") {
             Err(SyntaxError::CannotUseUse(self.range()))
         } else {
             self.fail(vec![])
@@ -245,9 +245,9 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_use(&mut self) -> Result<(String, String), SyntaxError> {
-        self.eat_variant(Token::Use)?;
+        self.eat_id("use")?;
         let origin = self.parse_upper_id()?;
-        self.eat_variant(Token::As)?;
+        self.eat_id("as")?;
         let alias = self.parse_upper_id()?;
 
         match (origin, alias) {
@@ -275,7 +275,7 @@ impl<'a> Parser<'a> {
         let mut entries: Vec<TopLevel> = Vec::new();
         let mut uses: FxHashMap<String, String> = Default::default();
 
-        while self.get().same_variant(&Token::Use) {
+        while self.check_actual_id("use") {
             match self.parse_use() {
                 Ok((origin, alias)) => {
                     uses.insert(alias, origin);

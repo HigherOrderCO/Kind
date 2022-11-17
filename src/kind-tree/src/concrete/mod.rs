@@ -67,6 +67,7 @@ pub enum AttributeStyle {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Attribute {
     pub name: Ident,
+    pub args: Vec<AttributeStyle>,
     pub value: Option<AttributeStyle>,
     pub range: Range,
 }
@@ -362,6 +363,14 @@ impl Display for AttributeStyle {
 impl Display for Attribute {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "#{}", self.name)?;
+        if !self.args.is_empty() {
+            write!(f, "[")?;
+            write!(f, "{}", self.args[0])?;
+            for arg in self.args[1..].iter() {
+                write!(f, ", {}", arg)?;
+            }
+            write!(f, "]")?;
+        }
         if let Some(res) = &self.value {
             write!(f, " = {}", res)?;
         }

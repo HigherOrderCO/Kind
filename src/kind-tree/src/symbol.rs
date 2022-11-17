@@ -11,6 +11,12 @@ use kind_span::{Range, SyntaxCtxIndex};
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Symbol(String);
 
+impl Symbol {
+    pub fn new(str: String) -> Symbol {
+        Symbol(str)
+    }
+}
+
 /// Identifier inside a syntax context.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Ident {
