@@ -1,3 +1,4 @@
+use errors::DriverError;
 use kind_pass::{desugar, erasure, expand};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
@@ -82,8 +83,20 @@ pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desug
     Some(desugared_book)
 }
 
-pub fn compile_book_to_hvm(session: &mut Session, path: &PathBuf) -> Option<backend::File> {
-    erase_book(session, path, &["Main".to_string()]).map(kind_target_hvm::compile_book)
+pub fn compile_book_to_hvm(book: desugared::Book) -> backend::File {
+    kind_target_hvm::compile_book(book)
+}
+
+pub fn check_main_entry(session: &mut Session, book: &desugared::Book) -> Option<()> {
+    if !book.entrs.contains_key("Main") {
+        session
+            .diagnostic_sender
+            .send(Box::new(DriverError::ThereIsntAMain))
+            .unwrap();
+        None
+    } else {
+        Some(())
+    }
 }
 
 pub fn execute_file(file: &backend::File) -> Box<backend::Term> {

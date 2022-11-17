@@ -21,7 +21,7 @@ impl<'a> DesugarState<'a> {
             Literal::Number(kind_tree::Number::U60(num)) => desugared::Expr::num60(range, *num),
             Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
             Literal::String(string) => desugared::Expr::str(range, string.to_owned()),
-            Literal::Char(_) => todo!(),
+            Literal::Char(cht) => desugared::Expr::num60(range, *cht as u64),
         }
     }
 

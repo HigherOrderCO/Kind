@@ -26,7 +26,7 @@ impl<'a> DesugarState<'a> {
 
     fn attr_expects_a_value(&mut self, attr: &Attribute) {
         if !attr.value.is_some() {
-            self.send_err(PassError::InvalidAttributeArgument(attr.range))
+            self.send_err(PassError::AttributeExpectsAValue(attr.range))
         };
     }
 

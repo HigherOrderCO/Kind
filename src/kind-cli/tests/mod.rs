@@ -75,7 +75,7 @@ fn test_eval() -> Result<(), Error> {
         let root = PathBuf::from(".");
         let mut session = Session::new(root, rx);
 
-        let check = driver::compile_book_to_hvm(&mut session, &PathBuf::from(path));
+        let check = driver::erase_book(&mut session, &PathBuf::from(path), &["Main".to_string()]).map(driver::compile_book_to_hvm);
 
         let diagnostics = tx.try_iter().collect::<Vec<_>>();
         let render = RenderConfig::ascii(2);

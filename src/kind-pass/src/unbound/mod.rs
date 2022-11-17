@@ -155,7 +155,7 @@ impl Visitor for UnboundCollector {
         let res = self
             .context_vars
             .iter()
-            .find(|x| x.1 == argument.name.to_string());
+            .find(|x| x.1 == argument.name.to_str());
 
         if let Some(fst) = res {
             if self.emit_errs {
@@ -295,15 +295,15 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(val);
                 let vars = self.context_vars.clone();
                 self.visit_destruct(ident);
-                self.context_vars = vars;
                 self.visit_sttm(next);
+                self.context_vars = vars;
             }
             SttmKind::Let(ident, val, next) => {
                 self.visit_expr(val);
                 let vars = self.context_vars.clone();
                 self.visit_destruct(ident);
-                self.context_vars = vars;
                 self.visit_sttm(next);
+                self.context_vars = vars;
             }
             SttmKind::Expr(expr, next) => {
                 self.visit_expr(expr);

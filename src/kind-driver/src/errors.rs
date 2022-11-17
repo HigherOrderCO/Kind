@@ -13,6 +13,7 @@ pub(crate) enum DriverError {
     UnboundVariable(Vec<Ident>, Vec<String>),
     MultiplePaths(QualifiedIdent, Vec<PathBuf>),
     DefinedMultipleTimes(QualifiedIdent, QualifiedIdent),
+    ThereIsntAMain,
 }
 
 impl Diagnostic for DriverError {
@@ -86,6 +87,15 @@ impl Diagnostic for DriverError {
                 code: 103,
                 severity: Severity::Error,
                 title: format!("Cannot find file '{}'", file),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![],
+            },
+
+            DriverError::ThereIsntAMain => DiagnosticFrame {
+                code: 103,
+                severity: Severity::Error,
+                title: format!("Cannot find 'Main' function to run the file."),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![],

@@ -187,6 +187,30 @@ impl<'a> Lexer<'a> {
                     let str = self.accumulate_while(&is_valid_id);
                     (Token::Help(str.to_string()), self.mk_range(start))
                 }
+                '\'' => {
+                    let start = self.span();
+                    self.next_char();
+                    let chr = match self.lex_char() {
+                        Ok(res) => res,
+                        Err(err) => return (Token::Error(err.into()), self.mk_range(start)),
+                    };
+                    match self.peekable.peek() {
+                        Some('\'') => self.single_token(Token::Char(chr), start),
+                        Some(c) => (
+                            Token::Error(Box::new(SyntaxError::UnexpectedChar(
+                                *c,
+                                self.mk_range(start),
+                            ))),
+                            self.mk_range(start),
+                        ),
+                        None => (
+                            Token::Error(Box::new(SyntaxError::UnfinishedChar(
+                                self.mk_range(start),
+                            ))),
+                            self.mk_range(start),
+                        ),
+                    }
+                }
                 '!' => {
                     self.next_char();
                     match self.peekable.peek() {

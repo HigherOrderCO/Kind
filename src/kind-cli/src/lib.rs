@@ -166,7 +166,9 @@ pub fn run_cli(config: Cli) {
         }
         Command::ToHVM { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                driver::compile_book_to_hvm(session, &PathBuf::from(file.clone()))
+                // TODO: Who sets the entrypoint?
+                let book = driver::erase_book(session, &PathBuf::from(file.clone()), &["Main".to_string()])?;
+                Some(driver::compile_book_to_hvm(book))
             })
             .map(|res| {
                 println!("{}", res);
@@ -175,7 +177,9 @@ pub fn run_cli(config: Cli) {
         }
         Command::Run { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                driver::compile_book_to_hvm(session, &PathBuf::from(file.clone()))
+                let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
+                driver::check_main_entry(session, &book)?;
+                Some(driver::compile_book_to_hvm(book))
             })
             .map(|res| {
                 println!("{}", driver::execute_file(&res));
@@ -184,7 +188,9 @@ pub fn run_cli(config: Cli) {
         }
         Command::Eval { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                driver::desugar_book(session, &PathBuf::from(file.clone()))
+                let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
+                driver::check_main_entry(session, &book)?;
+                Some(book)
             })
             .map(|res| {
                 println!("{}", driver::eval_in_checker(&res));

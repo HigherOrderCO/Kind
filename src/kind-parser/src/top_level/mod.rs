@@ -38,6 +38,13 @@ impl<'a> Parser<'a> {
             || self.get().is_doc()
     }
 
+    pub fn is_safe_level_start(&self) -> bool {
+        self.check_actual_id("type")
+        || self.check_actual_id("record")
+        || self.get().same_variant(&Token::Hash)
+        || self.get().is_doc()
+    }
+
     pub fn complement_binding_op(&self) -> Option<Token> {
         match self.get() {
             Token::LPar => Some(Token::RPar),
@@ -295,7 +302,7 @@ impl<'a> Parser<'a> {
                     self.advance();
                     self.errs.send(Box::new(err)).unwrap();
                     self.failed = true;
-                    while (!self.is_top_level_start() || !self.is_linebreak())
+                    while (!self.is_safe_level_start() || !self.is_linebreak())
                         && !self.get().same_variant(&Token::Eof)
                     {
                         self.advance();

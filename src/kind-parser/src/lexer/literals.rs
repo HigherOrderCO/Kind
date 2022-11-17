@@ -144,6 +144,27 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    pub fn lex_char(&mut self) -> Result<char, SyntaxError> {
+        let start = self.span();
+        if let Some(&x) = self.peekable.peek() {
+            let chr_start = self.span();
+            match x {
+                '\\' => {
+                    self.next_char();
+                    match self.lex_escaped_char(chr_start) {
+                        Ok(x) => Ok(x),
+                        Err(t) => Err(t)
+                    }
+                }
+                x => {
+                    self.next_char();
+                    Ok(x)
+                },
+            }
+        } else {
+            Err(SyntaxError::UnfinishedChar(self.mk_range(start)))
+        }
+    }
     /// Lexes a string that starts with '"' and ends with the
     /// same char. each string item can contain a escaped char
     /// and if the esaped char is not well-formed then it will
@@ -174,6 +195,7 @@ impl<'a> Lexer<'a> {
                 }
                 x => string.push(x),
             }
+            // FIXME: Not sure if it causes a bug!
             self.next_char();
         }
 

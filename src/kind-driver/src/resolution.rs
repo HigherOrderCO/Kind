@@ -232,17 +232,20 @@ fn parse_and_store_book_by_path<'a>(
 }
 
 fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
-    let similar_names = book
+    let mut similar_names = book
         .names
         .keys()
-        .filter(|x| jaro(x, idents[0].to_string().as_str()).abs() > 0.8)
-        .cloned()
-        .collect();
+        .map(|x| (jaro(x, idents[0].to_str()).abs(), x))
+        .filter(|x| x.0 > 0.8)
+        .collect::<Vec<_>>();
+
+    similar_names.sort_by(|x, y| x.0.total_cmp(&y.0));
+    
     session
         .diagnostic_sender
         .send(Box::new(DriverError::UnboundVariable(
             idents.to_vec(),
-            similar_names,
+            similar_names.iter().take(5).map(|x| x.1.clone()).collect(),
         )))
         .unwrap();
 }

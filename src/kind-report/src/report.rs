@@ -481,9 +481,7 @@ impl Report for Box<dyn Diagnostic> {
             )?;
         }
 
-        if !frame.hints.is_empty() {
-            writeln!(fmt)?;
-        }
+        writeln!(fmt)?;
 
         Ok(())
     }
