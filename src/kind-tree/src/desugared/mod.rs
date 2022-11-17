@@ -257,7 +257,13 @@ pub struct Rule {
 /// Attributes describes some compiler specific aspects
 /// like inlining and derivations.
 #[derive(Clone, Debug)]
-pub enum Attribute {}
+pub enum Attribute {
+    Inline,
+    KdlRun,
+    KdlErase,
+    KdlName(Ident),
+    KdlState(Ident),
+}
 
 /// An entry describes a function that is typed
 /// and has rules. The type of the function

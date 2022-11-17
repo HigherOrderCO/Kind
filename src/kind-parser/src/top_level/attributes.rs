@@ -1,4 +1,4 @@
-use kind_span::Locatable;
+use kind_span::{Locatable, Range};
 use kind_tree::concrete::{Attribute, AttributeStyle};
 
 use crate::errors::SyntaxError;
@@ -6,10 +6,10 @@ use crate::lexer::tokens::Token;
 use crate::state::Parser;
 
 impl<'a> Parser<'a> {
-    pub fn parse_attr_args(&mut self) -> Result<Vec<AttributeStyle>, SyntaxError> {
+    pub fn parse_attr_args(&mut self) -> Result<(Vec<AttributeStyle>, Range), SyntaxError> {
         let mut attrs = Vec::new();
 
-        let range = self.range();
+        let mut range = self.range();
 
         if self.check_and_eat(Token::LBracket) {
             while let Some(res) = self.try_single(&|fun| fun.parse_attr_style())? {
@@ -18,11 +18,12 @@ impl<'a> Parser<'a> {
                     break;
                 }
             }
-
-            self.eat_closing_keyword(Token::RBracket, range)?;
+            let start = range;
+            range = self.range();
+            self.eat_closing_keyword(Token::RBracket, start)?;
         }
 
-        Ok(attrs)   
+        Ok((attrs, range))   
     }
 
     pub fn parse_attr_style(&mut self) -> Result<AttributeStyle, SyntaxError> {
@@ -68,15 +69,17 @@ impl<'a> Parser<'a> {
 
         let name = self.parse_id()?;
 
-        let args = self.parse_attr_args()?;
+        let (args, mut last) = self.parse_attr_args()?;
 
         let style = if self.check_and_eat(Token::Eq) {
-            Some(self.parse_attr_style()?)
+            let res = self.parse_attr_style()?;
+            last = res.locate();
+            Some(res)
         } else {
             None
         };
         Ok(Attribute {
-            range: start.mix(style.clone().map(|x| x.locate()).unwrap_or(name.range)),
+            range: start.mix(last),
             value: style,
             args,
             name,

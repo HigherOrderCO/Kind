@@ -33,10 +33,13 @@ pub enum PassError {
     NoFieldCoverage(Range, Vec<String>),
     CannotPatternMatchOnErased(Range),
     
-    AttributeDoesNotAcceptEqual(Range),
+    AttributeDoesNotExpectEqual(Range),
+    AttributeDoesNotExpectArgs(Range),
     InvalidAttributeArgument(Range),
+    AttributeExpectsAValue(Range),
     DuplicatedAttributeArgument(Range, Range),
     CannotDerive(String, Range),
+    AttributeDoesNotExists(Range)
 }
 
 // TODO: A way to build an error message with methods
@@ -431,7 +434,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::AttributeDoesNotAcceptEqual(place) => DiagnosticFrame {
+            PassError::AttributeDoesNotExpectEqual(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "This attribute does not support values!".to_string(),
@@ -441,6 +444,20 @@ impl Diagnostic for PassError {
                     position: *place,
                     color: Color::Fst,
                     text: "Try to remove everything after the equal".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::AttributeDoesNotExpectArgs(place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "This attribute does not expect arguments".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Try to remove all of the arguments".to_string(),
                     no_code: false,
                     main: true,
                 }],
@@ -463,6 +480,35 @@ impl Diagnostic for PassError {
                 code: 209,
                 severity: Severity::Error,
                 title: format!("Cannot derive '{}' for this definition", name),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+
+            PassError::AttributeExpectsAValue(place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: format!("This attribute expects a value"),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassError::AttributeDoesNotExists(place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: format!("This attribute does not exists"),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {

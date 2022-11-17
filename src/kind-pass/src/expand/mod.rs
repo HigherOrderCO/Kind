@@ -75,7 +75,7 @@ pub fn expand_derive(
 
         if let Some(attr) = &attr.value {
             error_channel
-                .send(Box::new(PassError::AttributeDoesNotAcceptEqual(
+                .send(Box::new(PassError::AttributeDoesNotExpectEqual(
                     attr.locate(),
                 )))
                 .unwrap();
