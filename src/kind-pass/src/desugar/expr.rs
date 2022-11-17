@@ -8,6 +8,21 @@ use crate::errors::{PassError, Sugar};
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
+    
+    pub(crate) fn desugar_str(&self, range: Range, input: &str) -> Box<desugared::Expr> {
+        let cons = QualifiedIdent::new_static("String.cons", None, range);
+        input.chars().rfold(
+            desugared::Expr::ctr(range, QualifiedIdent::new_static("String.nil", None, range), vec![]),
+            |right, chr| {
+                desugared::Expr::ctr(range, cons.clone(), vec![
+                    desugared::Expr::num60(range, chr as u64),
+                    right
+                ])
+            },
+        )
+    }
+
+    
     pub(crate) fn desugar_literal(
         &mut self,
         range: Range,
@@ -20,7 +35,7 @@ impl<'a> DesugarState<'a> {
             Literal::NumType(kind_tree::NumType::U120) => desugared::Expr::u120(range),
             Literal::Number(kind_tree::Number::U60(num)) => desugared::Expr::num60(range, *num),
             Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
-            Literal::String(string) => desugared::Expr::str(range, string.to_owned()),
+            Literal::String(string) => self.desugar_str(range, string),
             Literal::Char(cht) => desugared::Expr::num60(range, *cht as u64),
         }
     }
@@ -191,9 +206,10 @@ impl<'a> DesugarState<'a> {
         if_: &expr::Expr,
         else_: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let bool_ident = QualifiedIdent::new_sugared("Bool", "if", range);
+        let boolean = QualifiedIdent::new_static("Bool", None, range);
+        let bool_if_ident = boolean.add_segment("if");
 
-        let bool_if = self.old_book.entries.get(bool_ident.to_string().as_str());
+        let bool_if = self.old_book.entries.get(bool_if_ident.to_string().as_str());
 
         if bool_if.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::BoolIf));
@@ -206,7 +222,7 @@ impl<'a> DesugarState<'a> {
             self.desugar_expr(else_),
         ];
 
-        self.mk_desugared_fun(range, bool_ident, spine, false)
+        self.mk_desugared_fun(range, bool_if_ident, spine, false)
     }
 
     pub(crate) fn desugar_pair(

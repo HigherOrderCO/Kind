@@ -268,7 +268,6 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
     for (_, unbound) in unbound_tops {
         let res: Vec<Ident> = unbound
             .iter()
-            .filter(|x| !x.used_by_sugar)
             .map(|x| x.to_ident())
             .collect();
         if !res.is_empty() {

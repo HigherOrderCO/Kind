@@ -241,9 +241,7 @@ impl<'a> DesugarState<'a> {
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)
         } else {
-            let mut idx: Vec<Ident> = sum
-                .parameters
-                .extend(&sum.indices)
+            let mut idx: Vec<Ident> = sum.indices
                 .iter()
                 .map(|x| x.name.clone())
                 .collect();

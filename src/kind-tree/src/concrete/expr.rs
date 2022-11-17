@@ -393,7 +393,7 @@ impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
         match &self.data {
-            Do(id, sttms) => write!(f, "do {} ({})", id, sttms),
+            Do(id, sttms) => write!(f, "do {} {{{}}}", id, sttms),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Lit(lit) => write!(f, "{}", lit),

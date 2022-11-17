@@ -80,10 +80,10 @@ impl QualifiedIdent {
         }
     }
 
-    pub fn new_sugared(root: &str, aux: &str, range: Range) -> QualifiedIdent {
+    pub fn new_sugared(root: &str, extension: &str, range: Range) -> QualifiedIdent {
         QualifiedIdent {
-            root: Symbol(root.to_string()),
-            aux: Some(Symbol(aux.to_string())),
+            root: Symbol(format!("{}.{}", root, extension)),
+            aux: None,
             range,
             used_by_sugar: true,
             generated: true,

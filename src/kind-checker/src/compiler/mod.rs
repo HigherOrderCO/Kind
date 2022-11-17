@@ -129,7 +129,6 @@ fn codegen_all_expr(
     expr: &Expr,
 ) -> Box<Term> {
     use kind_tree::desugared::ExprKind::*;
-
     match &expr.data {
         Typ => mk_lifted_ctr(eval_ctr(quote, TermTag::Typ), vec![span_to_num(expr.span)]),
         NumType(kind_tree::NumType::U60) => {
@@ -251,8 +250,8 @@ fn codegen_all_expr(
         Binary(operator, left, right) => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Binary),
             vec![
-                mk_single_ctr(operator_to_constructor(*operator).to_owned()),
                 span_to_num(expr.span),
+                mk_single_ctr(operator_to_constructor(*operator).to_owned()),
                 codegen_all_expr(lhs_rule, lhs, num, quote, left),
                 codegen_all_expr(lhs_rule, lhs, num, quote, right),
             ],
@@ -262,7 +261,7 @@ fn codegen_all_expr(
             vec![span_to_num(expr.span), mk_u60(*num)],
         ),
         Hlp(_) => mk_lifted_ctr(eval_ctr(quote, TermTag::Hlp), vec![span_to_num(expr.span)]),
-        Str(input) => codegen_str(input),
+        Str(_) => todo!("Strings in codegen"),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),
     }
 }

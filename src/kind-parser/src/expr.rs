@@ -302,7 +302,7 @@ impl<'a> Parser<'a> {
             }));
         }
 
-        vec.push(*self.parse_expr(false)?);
+        vec.push(*self.parse_atom()?);
         let mut initialized = false;
         let mut with_comma = false;
 
@@ -572,7 +572,7 @@ impl<'a> Parser<'a> {
             if self.get().same_variant(&Token::RBrace) {
                 let end = expr.range;
                 Ok(Box::new(Sttm {
-                    data: SttmKind::Return(expr),
+                    data: SttmKind::RetExpr(expr),
                     range: start.mix(end),
                 }))
             } else {
