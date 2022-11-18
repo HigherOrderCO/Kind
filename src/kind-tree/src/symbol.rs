@@ -4,6 +4,7 @@ use std::fmt::Display;
 
 use kind_span::{Range, SyntaxCtxIndex};
 
+
 /// Stores the name of a variable or constructor.
 /// It's simply a string because in the future i plan
 /// to store all the names and only reference them with
@@ -49,6 +50,19 @@ impl QualifiedIdent {
             used_by_sugar: false,
             generated: false,
         }
+    }
+
+    /// Most of the times a qualified ident will not have the `aux` field
+    /// because it's removed at the `expand_uses` phase. It returns the root
+    /// and avoid a copy of the string.
+    #[inline]
+    pub fn to_str(&self) -> &str {
+        &self.root.0
+    }
+
+    #[inline]
+    pub fn get_root(&self) -> String {
+        self.root.0.clone()
     }
 
     pub fn change_root(&mut self, str: String) {

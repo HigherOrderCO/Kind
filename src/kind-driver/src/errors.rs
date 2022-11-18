@@ -17,6 +17,16 @@ pub(crate) enum DriverError {
 }
 
 impl Diagnostic for DriverError {
+    fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
+        match self {
+            DriverError::CannotFindFile(_) => None,
+            DriverError::ThereIsntAMain => None,
+            DriverError::UnboundVariable(v, _) => Some(v[0].range.ctx),
+            DriverError::MultiplePaths(id, _) => Some(id.range.ctx),
+            DriverError::DefinedMultipleTimes(fst, _) => Some(fst.range.ctx),
+        }
+    }
+
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
             DriverError::UnboundVariable(idents, suggestions) => DiagnosticFrame {

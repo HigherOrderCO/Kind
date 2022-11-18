@@ -205,11 +205,11 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                     spine_params = sum
                         .parameters
                         .extend(&cons.args)
-                        .map(|x| x.name.with_name(|f| format!("_{}_", f)))
+                        .map(|x| x.name.with_name(|f| format!("{}_", f)))
                         .to_vec();
                     spine = cons
                         .args
-                        .map(|x| x.name.with_name(|f| format!("_{}_", f)))
+                        .map(|x| x.name.with_name(|f| format!("{}_", f)))
                         .to_vec();
                     args_indices = sp
                         .iter()
@@ -227,7 +227,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                         let renames = FxHashMap::from_iter(
                             sum.parameters
                                 .extend(&cons.args)
-                                .map(|x| (x.name.to_string(), format!("_{}_", x.name.to_string())))
+                                .map(|x| (x.name.to_string(), format!("{}_", x.name.to_string())))
                                 .iter()
                                 .cloned(),
                         );
@@ -246,12 +246,12 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                     .parameters
                     .extend(&sum.indices)
                     .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("_{}_", f)))
+                    .map(|x| x.name.with_name(|f| format!("{}_", f)))
                     .to_vec();
                 spine = sum
                     .indices
                     .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("_{}_", f)))
+                    .map(|x| x.name.with_name(|f| format!("{}_", f)))
                     .to_vec();
                 args_indices = sum
                     .indices

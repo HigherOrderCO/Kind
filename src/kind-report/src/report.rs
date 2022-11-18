@@ -459,9 +459,7 @@ impl Report for Box<dyn Diagnostic> {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            let diff =
-                pathdiff::diff_paths(&file.clone(), PathBuf::from(".").canonicalize().unwrap())
-                    .unwrap();
+            let diff =file.clone();
             write_code_block(&diff, config, &group, code, fmt)?;
         }
 

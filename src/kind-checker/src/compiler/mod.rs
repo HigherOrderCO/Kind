@@ -83,6 +83,11 @@ fn mk_ctr_name(ident: &QualifiedIdent) -> Box<Term> {
     mk_single_ctr(format!("{}.", ident))
 }
 
+fn mk_ctr_name_from_str(ident: &str) -> Box<Term> {
+    // Adds an empty segment (so it just appends a dot in the end)
+    mk_single_ctr(format!("{}.", ident))
+}
+
 fn span_to_num(span: Span) -> Box<Term> {
     Box::new(Term::Num {
         numb: span.encode().0,
@@ -506,12 +511,12 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
 
 /// Compiles a book into an format that is executed by the
 /// type checker in HVM.
-pub fn codegen_book(book: &Book) -> lang::File {
+pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File {
     let mut file = lang::File { rules: vec![] };
 
     let functions_entry = lang::Rule {
         lhs: mk_ctr("Functions".to_owned(), vec![]),
-        rhs: codegen_vec(book.entrs.values().map(|x| mk_ctr_name(&x.name))),
+        rhs: codegen_vec(functions_to_check.iter().map(|x| mk_ctr_name_from_str(&x))),
     };
 
     for entry in book.entrs.values() {

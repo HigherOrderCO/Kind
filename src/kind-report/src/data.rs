@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use kind_span::Range;
+use kind_span::{Range, SyntaxCtxIndex};
 
 #[derive(Debug, Clone)]
 pub enum Severity {
@@ -60,5 +60,6 @@ pub enum Log {
 }
 
 pub trait Diagnostic {
+    fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex>;
     fn to_diagnostic_frame(&self) -> DiagnosticFrame;
 }

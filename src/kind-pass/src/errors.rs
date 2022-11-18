@@ -1,5 +1,6 @@
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
-use kind_span::{Range, Span};
+use kind_span::{Range, Span, SyntaxCtxIndex};
+use kind_tree::symbol::Ident;
 
 pub enum Sugar {
     DoNotation,
@@ -32,6 +33,7 @@ pub enum PassError {
     ShouldBeAParameter(Span, Range),
     NoFieldCoverage(Range, Vec<String>),
     CannotPatternMatchOnErased(Range),
+    UnboundVariable(Vec<Ident>, Vec<String>),
     
     AttributeDoesNotExpectEqual(Range),
     AttributeDoesNotExpectArgs(Range),
@@ -44,8 +46,63 @@ pub enum PassError {
 
 // TODO: A way to build an error message with methods
 impl Diagnostic for PassError {
+    fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex> {
+        match self {
+            PassError::RepeatedVariable(range, _) => Some(range.ctx),
+            PassError::IncorrectArity(range, _, _, _) => Some(range.ctx),
+            PassError::DuplicatedNamed(range, _) => Some(range.ctx),
+            PassError::LetDestructOnlyForRecord(range) => Some(range.ctx),
+            PassError::LetDestructOnlyForSum(range) => Some(range.ctx),
+            PassError::NoCoverage(range, _) => Some(range.ctx),
+            PassError::CannotFindField(range, _, _) => Some(range.ctx),
+            PassError::CannotFindConstructor(range, _, _) => Some(range.ctx),
+            PassError::NeedToImplementMethods(range, _) => Some(range.ctx),
+            PassError::RuleWithIncorrectArity(range, _, _, _) => Some(range.ctx),
+            PassError::RulesWithInconsistentArity(range) => Some(range[0].0.ctx),
+            PassError::SugarIsBadlyImplemented(range, _, _) => Some(range.ctx),
+            PassError::CannotUseIrrelevant(_, range, _) => Some(range.ctx),
+            PassError::CannotFindAlias(_, range) => Some(range.ctx),
+            PassError::NotATypeConstructor(range, _) => Some(range.ctx),
+            PassError::ShouldBeAParameter(_, range) => Some(range.ctx),
+            PassError::NoFieldCoverage(range, _) => Some(range.ctx),
+            PassError::CannotPatternMatchOnErased(range) => Some(range.ctx),
+            PassError::UnboundVariable(ranges, _) => Some(ranges[0].range.ctx),
+            PassError::AttributeDoesNotExpectEqual(range) => Some(range.ctx),
+            PassError::AttributeDoesNotExpectArgs(range) => Some(range.ctx),
+            PassError::InvalidAttributeArgument(range) => Some(range.ctx),
+            PassError::AttributeExpectsAValue(range) => Some(range.ctx),
+            PassError::DuplicatedAttributeArgument(range, _) => Some(range.ctx),
+            PassError::CannotDerive(_, range) => Some(range.ctx),
+            PassError::AttributeDoesNotExists(range) => Some(range.ctx),
+        }
+    }
+    
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
+            PassError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
+                code: 100,
+                severity: Severity::Error,
+                title: format!("Cannot find the definition '{}'.", idents[0].to_str()),
+                subtitles: vec![],
+                hints: vec![if !suggestions.is_empty() {
+                    format!(
+                        "Maybe you're looking for {}",
+                        suggestions.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", ")
+                    )
+                } else {
+                    "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()
+                }],
+                positions: idents
+                    .iter()
+                    .map(|ident| Marker {
+                        position: ident.range,
+                        color: Color::Fst,
+                        text: "Here!".to_string(),
+                        no_code: false,
+                        main: true,
+                    })
+                    .collect(),
+            },
             PassError::CannotUseIrrelevant(var_decl, place, declarated_place) => {
                 let mut positions = vec![Marker {
                     position: *place,

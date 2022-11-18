@@ -80,15 +80,15 @@ fn try_to_insert_new_name<'a>(
     book: &'a mut Book,
 ) -> bool {
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
-        /*session
+        session
             .diagnostic_sender
             .send(Box::new(DriverError::DefinedMultipleTimes(
                 first_occorence.clone(),
                 ident,
             )))
             .unwrap();
-        *failed = true;*/
-        true
+        *failed = true;
+        false
     } else {
         book.names.insert(ident.to_string(), ident);
         true

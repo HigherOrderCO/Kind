@@ -1,18 +1,20 @@
-use std::collections::HashMap;
-
 use fxhash::{FxHashSet, FxHashMap};
 
-struct Node<T> {
-    data: T,
-    invalidated: bool,
-    children: FxHashSet<usize>,
-    parents: FxHashSet<usize>,
-    root: bool,
+#[derive(Debug)]
+pub struct Node<T> {
+    pub data: T,
+    pub invalidated: bool,
+    pub hash: u64,
+    pub children: FxHashSet<usize>,
+    pub parents: FxHashSet<usize>,
+    pub root: bool,
+    pub failed: bool,
 }
 
+#[derive(Debug)]
 pub struct Graph<T> {
     // Using a hashmap to make it easier to add or remove node.s
-    nodes: FxHashMap<usize, Node<T>>,
+    pub nodes: FxHashMap<usize, Node<T>>,
     count: usize,
 }
 
@@ -23,7 +25,15 @@ impl<T> Default for Graph<T> {
 }
 
 impl<T> Graph<T> {
-    pub fn add(&mut self, data: T, root: bool) {
+    pub fn get(&self, id: &usize) -> Option<&Node<T>> {
+        self.nodes.get(id)
+    }
+
+    pub fn get_mut(&mut self, id: &usize) -> Option<&mut Node<T>> {
+        self.nodes.get_mut(id)
+    }
+
+    pub fn add(&mut self, data: T, hash: u64, root: bool) {
         self.nodes.insert(
             self.count,
             Node {
@@ -31,6 +41,8 @@ impl<T> Graph<T> {
                 invalidated: false,
                 children: FxHashSet::default(),
                 parents: FxHashSet::default(),
+                hash,
+                failed: false,
                 root
             },
         );
@@ -76,9 +88,9 @@ impl<T> Graph<T> {
         fx
     }
 
-    fn flood_invalidation(&mut self, node: usize) {
+    pub fn flood_invalidation(&mut self, node: usize) {
         if let Some(node) = self.nodes.get_mut(&node) {
-            if node.invalidated {
+            if !node.invalidated {
                 node.invalidated = true;
                 for parent in node.parents.clone() {
                     self.flood_invalidation(parent)

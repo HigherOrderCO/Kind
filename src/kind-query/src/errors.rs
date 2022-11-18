@@ -9,14 +9,20 @@ use kind_tree::symbol::{Ident, QualifiedIdent};
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
 pub(crate) enum DriverError {
-    CannotFindFile(String),
     UnboundVariable(Vec<Ident>, Vec<String>),
     MultiplePaths(QualifiedIdent, Vec<PathBuf>),
     DefinedMultipleTimes(QualifiedIdent, QualifiedIdent),
-    ThereIsntAMain,
 }
 
 impl Diagnostic for DriverError {
+    fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
+        match self {
+            DriverError::UnboundVariable(v, _) => Some(v[0].range.ctx),
+            DriverError::MultiplePaths(id, _) => Some(id.range.ctx),
+            DriverError::DefinedMultipleTimes(fst, _) => Some(fst.range.ctx),
+        }
+    }
+
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
             DriverError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
@@ -83,23 +89,7 @@ impl Diagnostic for DriverError {
                     },
                 ],
             },
-            DriverError::CannotFindFile(file) => DiagnosticFrame {
-                code: 103,
-                severity: Severity::Error,
-                title: format!("Cannot find file '{}'", file),
-                subtitles: vec![],
-                hints: vec![],
-                positions: vec![],
-            },
-
-            DriverError::ThereIsntAMain => DiagnosticFrame {
-                code: 103,
-                severity: Severity::Error,
-                title: format!("Cannot find 'Main' function to run the file."),
-                subtitles: vec![],
-                hints: vec![],
-                positions: vec![],
-            },
         }
     }
+
 }

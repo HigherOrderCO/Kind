@@ -25,7 +25,9 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugare
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
-    let succeeded = checker::type_check(&desugared_book, session.diagnostic_sender.clone());
+    let all = desugared_book.names.keys().cloned().collect();
+
+    let succeeded = checker::type_check(&desugared_book, session.diagnostic_sender.clone(), all);
 
     if !succeeded {
         return None;
@@ -114,5 +116,5 @@ pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {
 }
 
 pub fn generate_checker(book: &desugared::Book) -> String {
-    checker::gen_checker(book)
+    checker::gen_checker(book, book.names.keys().cloned().collect())
 }

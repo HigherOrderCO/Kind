@@ -58,6 +58,19 @@ fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
 }
 
 impl Diagnostic for TypeError {
+    fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
+        match self {
+            TypeError::UnboundVariable(_, range) => Some(range.ctx),
+            TypeError::CantInferHole(_, range) => Some(range.ctx),
+            TypeError::CantInferLambda(_, range) => Some(range.ctx),
+            TypeError::InvalidCall(_, range) => Some(range.ctx),
+            TypeError::ImpossibleCase(_, range, _, _) => Some(range.ctx),
+            TypeError::Inspection(_, range, _) => Some(range.ctx),
+            TypeError::TooManyArguments(_, range) => Some(range.ctx),
+            TypeError::TypeMismatch(_, range, _, _) => Some(range.ctx),
+        }
+    }
+
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
             TypeError::TypeMismatch(ctx, range, detected, expected) => {

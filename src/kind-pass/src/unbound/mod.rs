@@ -1,5 +1,6 @@
-//! Collects all the unbound variables and
-//! check if patterns are linear.
+//! Collects all the unbound variables,
+//! check if patterns are linear and check
+//! if the name belongs to the current module.
 //!
 //! It also gets all of the identifiers used
 //! by sugars because it's useful to name resolution
@@ -31,8 +32,10 @@ pub struct UnboundCollector {
     // Utils for keeping variables tracking and report duplicated ones.
     pub context_vars: Vec<(Range, String)>,
 
+    // Keep track of top level definitions.
     pub top_level_defs: FxHashMap<String, Range>,
     pub unbound_top_level: FxHashMap<String, FxHashSet<QualifiedIdent>>,
+
     pub unbound: FxHashMap<String, Vec<Ident>>,
     pub emit_errs: bool,
 }
@@ -53,19 +56,31 @@ impl UnboundCollector {
     }
 }
 
-pub fn get_module_unbound(
+/// Collects all of the unbound variables in a module.
+///
+/// Invariant: All qualified ident should be expanded.
+pub fn collect_module_info(
     diagnostic_sender: Sender<Box<dyn Diagnostic>>,
     module: &mut Module,
     emit_errs: bool,
-) -> (
-    FxHashMap<String, Vec<Ident>>,
-    FxHashMap<String, FxHashSet<QualifiedIdent>>,
-) {
-    let mut state = UnboundCollector::new(diagnostic_sender, emit_errs);
+) -> UnboundCollector {
+    let mut state = UnboundCollector::new(diagnostic_sender.clone(), emit_errs);
     state.visit_module(module);
-    (state.unbound, state.unbound_top_level)
+
+    for idents in state.unbound.values() {
+        diagnostic_sender.send(Box::new(PassError::UnboundVariable(
+            idents.to_vec(),
+            vec![],
+        )))
+        .unwrap();
+    }
+
+    state
 }
 
+/// Collects all of the unbound variables in a book.
+///
+/// Invariant: All qualified ident should be expanded.
 pub fn get_book_unbound(
     diagnostic_sender: Sender<Box<dyn Diagnostic>>,
     book: &mut Book,
@@ -83,24 +98,32 @@ impl UnboundCollector {
     fn visit_top_level_names(&mut self, toplevel: &mut TopLevel) {
         match toplevel {
             TopLevel::SumType(sum) => {
+                debug_assert!(sum.name.aux.is_none());
                 self.top_level_defs
-                    .insert(sum.name.to_string(), sum.name.range);
+                    .insert(sum.name.get_root(), sum.name.range);
                 for cons in &sum.constructors {
                     let name_cons = sum.name.add_segment(cons.name.to_str());
+                    debug_assert!(name_cons.aux.is_none());
                     self.top_level_defs
-                        .insert(name_cons.to_string(), name_cons.range);
+                        .insert(name_cons.get_root(), name_cons.range);
                 }
             }
             TopLevel::RecordType(rec) => {
-                self.top_level_defs
-                    .insert(rec.name.to_string(), rec.name.range);
                 let name_cons = rec.name.add_segment(rec.constructor.to_str());
+
+                debug_assert!(rec.name.aux.is_none());
+                debug_assert!(name_cons.aux.is_none());
+
                 self.top_level_defs
-                    .insert(name_cons.to_string(), name_cons.range);
+                    .insert(rec.name.get_root(), rec.name.range);
+                self.top_level_defs
+                    .insert(name_cons.get_root(), name_cons.range);
             }
+
             TopLevel::Entry(entry) => {
+                debug_assert!(entry.name.aux.is_none());
                 self.top_level_defs
-                    .insert(entry.name.to_string(), entry.name.range);
+                    .insert(entry.name.get_root(), entry.name.range);
             }
         }
     }
@@ -111,11 +134,7 @@ impl Visitor for UnboundCollector {
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         let name = ident.to_str();
-        if self
-            .context_vars
-            .iter()
-            .all(|x| x.1 != name)
-        {
+        if self.context_vars.iter().all(|x| x.1 != name) {
             let entry = self
                 .unbound
                 .entry(name.to_string())
@@ -125,19 +144,16 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
-        if !self.top_level_defs.contains_key(&ident.to_string()) {
-            let entry = self.unbound_top_level.entry(ident.to_string()).or_default();
+        debug_assert!(ident.aux.is_none());
+        if !self.top_level_defs.contains_key(&ident.get_root()) {
+            let entry = self.unbound_top_level.entry(ident.get_root()).or_default();
             entry.insert(ident.clone());
         }
     }
 
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
         let name = ident.0.to_str();
-        if let Some(fst) = self
-            .context_vars
-            .iter()
-            .find(|x| x.1 == name)
-        {
+        if let Some(fst) = self.context_vars.iter().find(|x| x.1 == name) {
             if self.emit_errs {
                 self.errors
                     .send(Box::new(PassError::RepeatedVariable(fst.0, ident.0.range)))

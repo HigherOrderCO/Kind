@@ -9,6 +9,9 @@ use kind_report::report::{FileCache, Report};
 use kind_report::RenderConfig;
 
 use kind_driver as driver;
+use watch::watch_session;
+
+mod watch;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -231,7 +234,7 @@ pub fn run_cli(config: Cli) {
                 driver::desugar_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
-                print!("Ok");
+                print!("{}", res);
                 res
             });
         }
@@ -253,8 +256,8 @@ pub fn run_cli(config: Cli) {
                 res
             });
         }
-        Command::Watch { file: _ } => {
-            todo!()
+        Command::Watch { file } => {
+            watch_session(root, PathBuf::from(file.clone()), render_config)
         }
         Command::Repl => {
             todo!()

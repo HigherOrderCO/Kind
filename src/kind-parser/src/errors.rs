@@ -2,7 +2,7 @@
 //! lexer and the parser.
 
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
-use kind_span::Range;
+use kind_span::{Range, SyntaxCtxIndex};
 
 use crate::lexer::tokens::Token;
 
@@ -45,6 +45,27 @@ fn encode_name(encode: EncodeSequence) -> &'static str {
 }
 
 impl Diagnostic for SyntaxError {
+
+    fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex> {
+        match self {
+            SyntaxError::UnfinishedString(range) => Some(range.ctx),
+            SyntaxError::UnfinishedChar(range) => Some(range.ctx),
+            SyntaxError::UnfinishedComment(range) => Some(range.ctx),
+            SyntaxError::InvalidEscapeSequence(_, range) => Some(range.ctx),
+            SyntaxError::InvalidNumberRepresentation(_, range) => Some(range.ctx),
+            SyntaxError::UnexpectedChar(_, range) => Some(range.ctx),
+            SyntaxError::UnexpectedToken(_,range, _) => Some(range.ctx),
+            SyntaxError::LowerCasedDefinition(_, range) => Some(range.ctx),
+            SyntaxError::NotAClauseOfDef(range, _) => Some(range.ctx),
+            SyntaxError::Unclosed(range) => Some(range.ctx),
+            SyntaxError::IgnoreRestShouldBeOnTheEnd(range) => Some(range.ctx),
+            SyntaxError::UnusedDocString(range) => Some(range.ctx),
+            SyntaxError::CannotUseUse(range) => Some(range.ctx),
+            SyntaxError::ImportsCannotHaveAlias(range) => Some(range.ctx),
+            SyntaxError::InvalidNumberType(_, range) => Some(range.ctx),
+        }
+    }
+
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
             SyntaxError::UnfinishedString(range) => DiagnosticFrame {
