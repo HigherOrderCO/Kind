@@ -36,6 +36,12 @@ pub struct Cli {
     #[arg(short, long)]
     pub ascii: bool,
 
+    #[arg(short, long)]
+    entrypoint: Option<String>,
+
+    #[arg(short, long, value_name = "FILE")]
+    pub root: Option<PathBuf>,
+
     #[command(subcommand)]
     pub command: Command,
 }
@@ -47,11 +53,14 @@ pub enum Command {
     Check { file: String },
 
     /// Evaluates Main on Kind2
-    #[clap(aliases = &["e"])]
+    #[clap(aliases = &["er"])]
     Eval { file: String },
 
     #[clap(aliases = &["k"])]
     ToKindCore { file: String },
+
+    #[clap(aliases = &["e"])]
+    Erase { file: String },
 
     /// Runs Main on the HVM
     #[clap(aliases = &["r"])]
@@ -76,7 +85,9 @@ pub enum Command {
 
     /// Compiles a file to HVM (.hvm)
     #[clap(aliases = &["hvm"])]
-    ToHVM { file: String },
+    ToHVM {
+        file: String
+    },
 
     /// Watch for file changes and then
     /// check when some file change.
@@ -156,7 +167,13 @@ pub fn run_cli(config: Cli) {
     kind_report::check_if_colors_are_supported(config.no_color);
 
     let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2);
-    let root = PathBuf::from(".");
+    let root = config.root.unwrap_or_else(|| PathBuf::from("."));
+
+    let mut entrypoints = vec!["Main".to_string()];
+
+    if let Some(res) = &config.entrypoint {
+        entrypoints.push(res.clone())
+    }
 
     match config.command {
         Command::Check { file } => {
@@ -166,8 +183,7 @@ pub fn run_cli(config: Cli) {
         }
         Command::ToHVM { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                // TODO: Who sets the entrypoint?
-                let book = driver::erase_book(session, &PathBuf::from(file.clone()), &["Main".to_string()])?;
+                let book = driver::erase_book(session, &PathBuf::from(file.clone()), &entrypoints)?;
                 Some(driver::compile_book_to_hvm(book))
             })
             .map(|res| {
@@ -177,7 +193,11 @@ pub fn run_cli(config: Cli) {
         }
         Command::Run { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
-                let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
+                let book = driver::erase_book(
+                    session,
+                    &PathBuf::from(file.clone()),
+                    &["Main".to_string()],
+                )?;
                 driver::check_main_entry(session, &book)?;
                 Some(driver::compile_book_to_hvm(book))
             })
@@ -209,6 +229,15 @@ pub fn run_cli(config: Cli) {
         Command::ToKindCore { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
                 driver::desugar_book(session, &PathBuf::from(file.clone()))
+            })
+            .map(|res| {
+                print!("Ok");
+                res
+            });
+        }
+        Command::Erase { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                driver::erase_book(session, &PathBuf::from(file.clone()), &entrypoints)
             })
             .map(|res| {
                 print!("{}", res);

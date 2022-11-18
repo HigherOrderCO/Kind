@@ -1,43 +1,63 @@
 use std::collections::HashMap;
 
-use fxhash::FxHashSet;
+use fxhash::{FxHashSet, FxHashMap};
 
 struct Node<T> {
     data: T,
     invalidated: bool,
     children: FxHashSet<usize>,
     parents: FxHashSet<usize>,
+    root: bool,
 }
 
-#[derive(Default)]
 pub struct Graph<T> {
     // Using a hashmap to make it easier to add or remove node.s
-    nodes: HashMap<usize, Node<T>>,
+    nodes: FxHashMap<usize, Node<T>>,
     count: usize,
 }
 
+impl<T> Default for Graph<T> {
+    fn default() -> Self {
+        Self { nodes: Default::default(), count: Default::default() }
+    }
+}
+
 impl<T> Graph<T> {
-    pub fn add(&mut self, data: T, parent: usize) {
+    pub fn add(&mut self, data: T, root: bool) {
         self.nodes.insert(
             self.count,
             Node {
                 data,
                 invalidated: false,
                 children: FxHashSet::default(),
-                parents: FxHashSet::from_iter(vec![parent]),
+                parents: FxHashSet::default(),
+                root
             },
         );
         self.count += 1;
     }
 
-    pub fn remove(&mut self, node_idx: usize) {
-        if let Some(node) = self.nodes.get(&node_idx) {
+    pub fn connect(&mut self, parent: usize, child: usize) {
+        if let Some(parent) = self.nodes.get_mut(&parent) {
+            parent.children.insert(child);
+        }
+        if let Some(child) = self.nodes.get_mut(&child) {
+            child.parents.insert(parent);
+        }
+    }
+
+    fn remove_recursive(&mut self, node_idx: usize, to_delete: &mut FxHashSet<usize>) {
+        if let Some(node) = self.nodes.remove(&node_idx) {
             let children = node.children.clone();
             let parents = node.parents.clone();
 
-            for child in children {
-                if let Some(child) = self.nodes.get_mut(&child) {
+            for child_idx in children {
+                if let Some(child) = self.nodes.get_mut(&child_idx) {
                     child.parents.remove(&node_idx);
+                    if child.parents.is_empty() && !child.root {
+                        to_delete.insert(child_idx);
+                        self.remove_recursive(child_idx, to_delete)
+                    }
                 }
             }
 
@@ -48,6 +68,12 @@ impl<T> Graph<T> {
                 self.flood_invalidation(parent);
             }
         }
+    }
+
+    pub fn remove(&mut self, node_idx: usize) -> FxHashSet<usize> {
+        let mut fx = Default::default();
+        self.remove_recursive(node_idx, &mut fx);
+        fx
     }
 
     fn flood_invalidation(&mut self, node: usize) {

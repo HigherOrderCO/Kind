@@ -1,11 +1,12 @@
 use errors::DriverError;
+use fxhash::FxHashSet;
 use kind_pass::{desugar, erasure, expand};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
 use kind_tree::{backend, concrete, desugared};
 use session::Session;
-use std::{collections::HashSet, path::PathBuf};
+use std::{path::PathBuf};
 
 use kind_checker as checker;
 
@@ -33,7 +34,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugare
     let erased = erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
-        HashSet::from_iter(vec!["Main".to_string()]),
+        FxHashSet::from_iter(vec!["Main".to_string()]),
     )?;
 
     Some(erased)
@@ -63,7 +64,7 @@ pub fn erase_book(
     erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
-        HashSet::from_iter(entrypoint.to_owned()),
+        FxHashSet::from_iter(entrypoint.to_owned()),
     )
 }
 
@@ -78,7 +79,7 @@ pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desug
     erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
-        HashSet::from_iter(vec!["Main".to_string()]),
+        FxHashSet::from_iter(vec!["Main".to_string()]),
     )?;
     Some(desugared_book)
 }

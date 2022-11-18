@@ -4,14 +4,12 @@
 // pretty printers are always a disaster to write. expect
 // that in the future i can rewrite it in a better way.
 
-use std::collections::HashSet;
-
 use std::fmt::{Display, Write};
 use std::path::{Path, PathBuf};
 
 use std::str;
 
-use fxhash::FxHashMap;
+use fxhash::{FxHashMap, FxHashSet};
 use kind_span::{Pos, SyntaxCtxIndex};
 use unicode_width::UnicodeWidthStr;
 use yansi::Paint;
@@ -235,7 +233,7 @@ fn write_code_block<'a, T: Write + Sized>(
 
     writeln!(fmt, "{:>5} {}", "", paint_line(config.chars.vbar))?;
 
-    let mut lines_set = HashSet::new();
+    let mut lines_set = FxHashSet::default();
 
     let mut markers_by_line: FxHashMap<usize, Vec<(Point, Point, &Marker)>> = FxHashMap::default();
 

@@ -51,6 +51,12 @@ impl<T> Telescope<T> {
     }
 }
 
+impl<T> Telescope<T> where T : Clone {
+    pub fn drop(self, num: usize) -> Telescope<T> {
+        Telescope(self.0[num..].to_vec())
+    }
+}
+
 /// A value of a attribute
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum AttributeStyle {
@@ -270,11 +276,12 @@ impl Display for TopLevel {
                     write!(f, " {}", arg)?;
                 }
                 writeln!(f, " {{")?;
+                writeln!(f, "  constructor {}", rec.constructor.to_str())?;
                 for (name, docs, cons) in &rec.fields {
                     for doc in docs {
                         writeln!(f, "  /// {}", doc)?;
                     }
-                    writeln!(f, "  {}: {}, ", name, cons)?;
+                    writeln!(f, "  {} : {} ", name, cons)?;
                 }
                 writeln!(f, "}}\n")
             }

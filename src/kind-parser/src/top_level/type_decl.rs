@@ -16,6 +16,8 @@ impl<'a> Parser<'a> {
             None
         };
 
+        self.check_and_eat(Token::Semi);
+        
         Ok(Constructor {
             name,
             docs,

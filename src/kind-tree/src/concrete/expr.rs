@@ -300,20 +300,20 @@ impl Display for SttmKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
             SttmKind::Ask(name, block, next) => {
-                write!(f, "ask {} = {}; {}", name, block, next)
+                write!(f, "ask {} = {};\n {}", name, block, next)
             }
             SttmKind::Let(name, block, next) => {
-                write!(f, "let {} = {}; {}", name, block, next)
+                write!(f, "let {} = {};\n {}", name, block, next)
             }
             SttmKind::Expr(expr, next) => {
-                write!(f, "{};{}", expr, next)
+                write!(f, "{};\n{}", expr, next)
             }
             SttmKind::Return(ret) => {
-                write!(f, "return {}", ret)
+                write!(f, "return {}\n", ret)
             }
 
             SttmKind::RetExpr(ret) => {
-                write!(f, "{}", ret)
+                write!(f, "{}\n", ret)
             }
         }
     }
@@ -343,7 +343,7 @@ impl Display for Case {
         if self.ignore_rest.is_some() {
             write!(f, " ..")?;
         }
-        write!(f, " => {}; ", self.value)
+        write!(f, " => {}", self.value)
     }
 }
 
@@ -393,7 +393,7 @@ impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
         match &self.data {
-            Do(id, sttms) => write!(f, "do {} {{{}}}", id, sttms),
+            Do(id, sttms) => write!(f, "(do {} {{{}}})", id, sttms),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Lit(lit) => write!(f, "{}", lit),

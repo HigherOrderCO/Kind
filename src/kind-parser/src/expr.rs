@@ -553,6 +553,7 @@ impl<'a> Parser<'a> {
         self.advance(); // 'return'
         let expr = self.parse_expr(false)?;
         let end = expr.range;
+        self.check_and_eat(Token::Semi);
         Ok(Box::new(Sttm {
             data: SttmKind::Return(expr),
             range: start.mix(end),
@@ -576,6 +577,7 @@ impl<'a> Parser<'a> {
                     range: start.mix(end),
                 }))
             } else {
+                self.check_and_eat(Token::Semi);
                 let next = self.parse_sttm()?;
                 let end = next.range;
                 Ok(Box::new(Sttm {
@@ -654,6 +656,7 @@ impl<'a> Parser<'a> {
             let (_range, bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
             self.eat_variant(Token::FatArrow)?;
             let value = self.parse_expr(false)?;
+            self.check_and_eat(Token::Semi);
 
             cases.push(Case {
                 constructor,

@@ -74,7 +74,7 @@ pub fn erase_book(
     for (name, v) in &book.entrs {
         entries.insert(name, state.erase_entry(v));
     }
-
+    
     if state.failed {
         return None;
     }
@@ -90,13 +90,6 @@ pub fn erase_book(
     Some(new_book)
 }
 
-pub fn erasure_to_relevance(erased: bool) -> Relevance {
-    if erased {
-        Relevance::Irrelevant
-    } else {
-        Relevance::Relevant
-    }
-}
 
 impl<'a> ErasureState<'a> {
     pub fn new_hole(&mut self, range: Range, name: String) -> (Option<Range>, Relevance) {
@@ -159,6 +152,12 @@ impl<'a> ErasureState<'a> {
                 // "erased" in the sense that we can just remove them from the runtime and it'll
                 // be fine.
                 (None, Relevance::Irrelevant) => false,
+                
+                (None, Relevance::Hole(n)) => {
+                    self.holes[hole] = Some(Relevance::Hole(n));
+                    true
+                },
+
                 (_, _) => true,
             },
             (Relevance::Relevant, Relevance::Hole(hole)) => match self.holes[hole] {
@@ -195,6 +194,7 @@ impl<'a> ErasureState<'a> {
         name: &QualifiedIdent,
         spine: &Vec<Box<Expr>>,
     ) -> Vec<Box<Expr>> {
+    
         let fun = match self.names.get(&name.to_string()) {
             Some(res) => *res,
             None => self.new_hole(name.range, name.to_string()),
@@ -207,19 +207,18 @@ impl<'a> ErasureState<'a> {
         let entry = self.book.entrs.get(name.to_string().as_str()).unwrap();
         let erased = entry.args.iter();
 
-        let irrelevances = erased.map(|arg| {
-            if arg.erased {
-                (Some(arg.span), Relevance::Irrelevant)
-            } else {
-                on
-            }
-        });
-
         spine
             .iter()
-            .zip(irrelevances)
-            .map(|(arg, relev)| (self.erase_pat(relev, arg), relev.1.clone()))
-            .filter(|res| res.1 == Relevance::Relevant)
+            .zip(erased)
+            .map(|(elem, arg)| {
+                let relev = if arg.erased {
+                    (Some(arg.span), Relevance::Irrelevant)
+                } else {
+                    on.clone()
+                };
+                (self.erase_pat(relev, elem), arg.erased)
+            })
+            .filter(|res| !res.1)
             .map(|res| res.0)
             .collect()
     }
@@ -456,7 +455,7 @@ impl<'a> ErasureState<'a> {
             .map(|((range, erased), expr)| {
                 (
                     erased,
-                    self.erase_pat((Some(*range), erasure_to_relevance(*erased)), expr),
+                    self.erase_pat((Some(*range), if *erased { Relevance::Irrelevant} else { place.1.clone() }), expr),
                 )
             })
             .filter(|(erased, _)| !*erased)

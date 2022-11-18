@@ -3,8 +3,8 @@
 //! it returns a desugared book of all of the
 //! depedencies.
 
+use fxhash::FxHashSet;
 use kind_pass::expand::uses::expand_uses;
-use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
@@ -80,15 +80,15 @@ fn try_to_insert_new_name<'a>(
     book: &'a mut Book,
 ) -> bool {
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
-        session
+        /*session
             .diagnostic_sender
             .send(Box::new(DriverError::DefinedMultipleTimes(
                 first_occorence.clone(),
                 ident,
             )))
             .unwrap();
-        *failed = true;
-        false
+        *failed = true;*/
+        true
     } else {
         book.names.insert(ident.to_string(), ident);
         true
@@ -98,20 +98,15 @@ fn try_to_insert_new_name<'a>(
 fn module_to_book<'a>(
     failed: &mut bool,
     session: &'a Session,
-    module: &Module,
+    module: Module,
     book: &'a mut Book,
-) -> HashSet<String> {
-    let mut public_names = HashSet::new();
+) -> FxHashSet<String> {
+    let mut public_names = FxHashSet::default();
 
-    for entry in &module.entries {
-        match &entry {
+    for entry in module.entries {
+        match entry {
             TopLevel::SumType(sum) => {
                 public_names.insert(sum.name.to_string());
-                if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
-                    book.count
-                        .insert(sum.name.to_string(), sum.extract_book_info());
-                    book.entries.insert(sum.name.to_string(), entry.clone());
-                }
 
                 for cons in &sum.constructors {
                     let mut cons_ident = sum.name.add_segment(cons.name.to_str());
@@ -119,8 +114,14 @@ fn module_to_book<'a>(
                     if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
                         public_names.insert(cons_ident.to_string());
                         book.count
-                            .insert(cons_ident.to_string(), cons.extract_book_info(sum));
+                            .insert(cons_ident.to_string(), cons.extract_book_info(&sum));
                     }
+                }
+                
+                if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
+                    book.count
+                        .insert(sum.name.to_string(), sum.extract_book_info());
+                    book.entries.insert(sum.name.to_string(), TopLevel::SumType(sum));
                 }
             }
             TopLevel::RecordType(rec) => {
@@ -128,9 +129,7 @@ fn module_to_book<'a>(
                 book.count
                     .insert(rec.name.to_string(), rec.extract_book_info());
                 try_to_insert_new_name(failed, session, rec.name.clone(), book);
-
-                book.entries.insert(rec.name.to_string(), entry.clone());
-
+                
                 let cons_ident = rec.name.add_segment(rec.constructor.to_str());
                 public_names.insert(cons_ident.to_string());
                 book.count.insert(
@@ -138,13 +137,15 @@ fn module_to_book<'a>(
                     rec.extract_book_info_of_constructor(),
                 );
                 try_to_insert_new_name(failed, session, cons_ident, book);
+
+                book.entries.insert(rec.name.to_string(), TopLevel::RecordType(rec));
             }
             TopLevel::Entry(entr) => {
                 try_to_insert_new_name(failed, session, entr.name.clone(), book);
                 public_names.insert(entr.name.to_string());
                 book.count
                     .insert(entr.name.to_string(), entr.extract_book_info());
-                book.entries.insert(entr.name.to_string(), entry.clone());
+                book.entries.insert(entr.name.to_string(), TopLevel::Entry(entr));
             }
         }
     }
@@ -226,7 +227,7 @@ fn parse_and_store_book_by_path<'a>(
 
     expand_uses(&mut module, session.diagnostic_sender.clone());
 
-    module_to_book(&mut failed, session, &module, book);
+    module_to_book(&mut failed, session, module, book);
 
     failed
 }
@@ -268,6 +269,7 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
     for (_, unbound) in unbound_tops {
         let res: Vec<Ident> = unbound
             .iter()
+            .filter(|x| !x.used_by_sugar)
             .map(|x| x.to_ident())
             .collect();
         if !res.is_empty() {

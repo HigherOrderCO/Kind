@@ -108,7 +108,8 @@ impl<'a> DesugarState<'a> {
                     }
                 }
 
-                let irrelev = count.arguments.map(|x| x.erased).to_vec();
+                let mut irrelev = count.arguments.map(|x| x.erased).to_vec();
+                irrelev = irrelev[record.parameters.len()..].to_vec();
 
                 let spine = vec![
                     val,

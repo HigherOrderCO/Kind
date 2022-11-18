@@ -137,6 +137,7 @@ impl Ident {
         new
     }
 
+    #[inline]
     pub fn to_str(&self) -> &str {
         &self.data.0
     }

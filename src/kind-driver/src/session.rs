@@ -2,12 +2,11 @@
 //! model because I want to change it to a query based compiler
 //! later.
 
-use std::collections::HashSet;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
-use fxhash::FxHashMap;
+use fxhash::{FxHashMap, FxHashSet};
 use kind_report::data::Diagnostic;
 
 #[derive(Debug, Clone)]
@@ -18,7 +17,7 @@ pub struct Session {
 
     /// It will be useful in the future
     /// to make the public and private decls
-    pub public_names: FxHashMap<PathBuf, HashSet<String>>,
+    pub public_names: FxHashSet<String>,
 
     pub diagnostic_sender: Sender<Box<dyn Diagnostic>>,
     pub root: PathBuf,
@@ -32,7 +31,7 @@ impl Session {
             loaded_paths: Vec::new(),
             loaded_sources: Vec::new(),
             loaded_paths_map: FxHashMap::default(),
-            public_names: FxHashMap::default(),
+            public_names: FxHashSet::default(),
             root,
             book_counter: 0,
             diagnostic_sender: sender,

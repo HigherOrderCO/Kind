@@ -110,14 +110,15 @@ impl Visitor for UnboundCollector {
     fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
 
     fn visit_ident(&mut self, ident: &mut Ident) {
+        let name = ident.to_str();
         if self
             .context_vars
             .iter()
-            .all(|x| x.1 != ident.data.to_string())
+            .all(|x| x.1 != name)
         {
             let entry = self
                 .unbound
-                .entry(ident.to_string())
+                .entry(name.to_string())
                 .or_insert_with(Vec::new);
             entry.push(ident.clone());
         }
@@ -131,10 +132,11 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
+        let name = ident.0.to_str();
         if let Some(fst) = self
             .context_vars
             .iter()
-            .find(|x| x.1 == ident.0.data.to_string())
+            .find(|x| x.1 == name)
         {
             if self.emit_errs {
                 self.errors
@@ -142,7 +144,7 @@ impl Visitor for UnboundCollector {
                     .unwrap()
             }
         } else {
-            self.context_vars.push((ident.0.range, ident.0.to_string()))
+            self.context_vars.push((ident.0.range, name.to_string()))
         }
     }
 
