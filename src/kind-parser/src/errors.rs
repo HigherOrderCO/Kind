@@ -16,7 +16,7 @@ pub enum EncodeSequence {
 }
 
 #[derive(Debug, Clone)]
-pub enum SyntaxError {
+pub enum SyntaxDiagnostic {
     UnfinishedString(Range),
     UnfinishedChar(Range),
     UnfinishedComment(Range),
@@ -44,31 +44,30 @@ fn encode_name(encode: EncodeSequence) -> &'static str {
     }
 }
 
-impl Diagnostic for SyntaxError {
-
+impl Diagnostic for SyntaxDiagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex> {
         match self {
-            SyntaxError::UnfinishedString(range) => Some(range.ctx),
-            SyntaxError::UnfinishedChar(range) => Some(range.ctx),
-            SyntaxError::UnfinishedComment(range) => Some(range.ctx),
-            SyntaxError::InvalidEscapeSequence(_, range) => Some(range.ctx),
-            SyntaxError::InvalidNumberRepresentation(_, range) => Some(range.ctx),
-            SyntaxError::UnexpectedChar(_, range) => Some(range.ctx),
-            SyntaxError::UnexpectedToken(_,range, _) => Some(range.ctx),
-            SyntaxError::LowerCasedDefinition(_, range) => Some(range.ctx),
-            SyntaxError::NotAClauseOfDef(range, _) => Some(range.ctx),
-            SyntaxError::Unclosed(range) => Some(range.ctx),
-            SyntaxError::IgnoreRestShouldBeOnTheEnd(range) => Some(range.ctx),
-            SyntaxError::UnusedDocString(range) => Some(range.ctx),
-            SyntaxError::CannotUseUse(range) => Some(range.ctx),
-            SyntaxError::ImportsCannotHaveAlias(range) => Some(range.ctx),
-            SyntaxError::InvalidNumberType(_, range) => Some(range.ctx),
+            SyntaxDiagnostic::UnfinishedString(range) => Some(range.ctx),
+            SyntaxDiagnostic::UnfinishedChar(range) => Some(range.ctx),
+            SyntaxDiagnostic::UnfinishedComment(range) => Some(range.ctx),
+            SyntaxDiagnostic::InvalidEscapeSequence(_, range) => Some(range.ctx),
+            SyntaxDiagnostic::InvalidNumberRepresentation(_, range) => Some(range.ctx),
+            SyntaxDiagnostic::UnexpectedChar(_, range) => Some(range.ctx),
+            SyntaxDiagnostic::UnexpectedToken(_, range, _) => Some(range.ctx),
+            SyntaxDiagnostic::LowerCasedDefinition(_, range) => Some(range.ctx),
+            SyntaxDiagnostic::NotAClauseOfDef(range, _) => Some(range.ctx),
+            SyntaxDiagnostic::Unclosed(range) => Some(range.ctx),
+            SyntaxDiagnostic::IgnoreRestShouldBeOnTheEnd(range) => Some(range.ctx),
+            SyntaxDiagnostic::UnusedDocString(range) => Some(range.ctx),
+            SyntaxDiagnostic::CannotUseUse(range) => Some(range.ctx),
+            SyntaxDiagnostic::ImportsCannotHaveAlias(range) => Some(range.ctx),
+            SyntaxDiagnostic::InvalidNumberType(_, range) => Some(range.ctx),
         }
     }
 
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
-            SyntaxError::UnfinishedString(range) => DiagnosticFrame {
+            SyntaxDiagnostic::UnfinishedString(range) => DiagnosticFrame {
                 code: 1,
                 severity: Severity::Error,
                 title: "Unfinished String".to_string(),
@@ -82,7 +81,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::IgnoreRestShouldBeOnTheEnd(range) => DiagnosticFrame {
+            SyntaxDiagnostic::IgnoreRestShouldBeOnTheEnd(range) => DiagnosticFrame {
                 code: 2,
                 severity: Severity::Error,
                 title: "Invalid position of the '..' operator".to_string(),
@@ -96,7 +95,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::UnusedDocString(range) => DiagnosticFrame {
+            SyntaxDiagnostic::UnusedDocString(range) => DiagnosticFrame {
                 code: 3,
                 severity: Severity::Warning,
                 title: "This entire documentation comment is in a invalid position".to_string(),
@@ -110,7 +109,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::UnfinishedChar(range) => DiagnosticFrame {
+            SyntaxDiagnostic::UnfinishedChar(range) => DiagnosticFrame {
                 code: 4,
                 severity: Severity::Error,
                 title: "Unfinished Char".to_string(),
@@ -124,7 +123,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::LowerCasedDefinition(name, range) => DiagnosticFrame {
+            SyntaxDiagnostic::LowerCasedDefinition(name, range) => DiagnosticFrame {
                 code: 5,
                 severity: Severity::Error,
                 title: "The definition name must be capitalized.".to_string(),
@@ -142,7 +141,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::NotAClauseOfDef(fst, snd) => DiagnosticFrame {
+            SyntaxDiagnostic::NotAClauseOfDef(fst, snd) => DiagnosticFrame {
                 code: 6,
                 severity: Severity::Error,
                 title: "Unexpected capitalized name that does not refer to the definition".to_string(),
@@ -165,7 +164,7 @@ impl Diagnostic for SyntaxError {
                     },
                 ],
             },
-            SyntaxError::UnfinishedComment(range) => DiagnosticFrame {
+            SyntaxDiagnostic::UnfinishedComment(range) => DiagnosticFrame {
                 code: 7,
                 severity: Severity::Error,
                 title: "Unfinished Comment".to_string(),
@@ -179,7 +178,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::InvalidEscapeSequence(kind, range) => DiagnosticFrame {
+            SyntaxDiagnostic::InvalidEscapeSequence(kind, range) => DiagnosticFrame {
                 code: 8,
                 severity: Severity::Error,
                 title: format!("The {} character sequence is invalid!", encode_name(kind.clone())),
@@ -193,7 +192,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::InvalidNumberRepresentation(repr, range) => DiagnosticFrame {
+            SyntaxDiagnostic::InvalidNumberRepresentation(repr, range) => DiagnosticFrame {
                 code: 9,
                 severity: Severity::Error,
                 title: format!("The {} number sequence is invalid!", encode_name(repr.clone())),
@@ -207,7 +206,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::UnexpectedChar(chr, range) => DiagnosticFrame {
+            SyntaxDiagnostic::UnexpectedChar(chr, range) => DiagnosticFrame {
                 code: 10,
                 severity: Severity::Error,
                 title: format!("The char '{}' is invalid", chr),
@@ -221,7 +220,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::UnexpectedToken(Token::Eof, range, _expect) => DiagnosticFrame {
+            SyntaxDiagnostic::UnexpectedToken(Token::Eof, range, _expect) => DiagnosticFrame {
                 code: 11,
                 severity: Severity::Error,
                 title: "Unexpected end of file.".to_string(),
@@ -235,7 +234,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::UnexpectedToken(Token::Comment(_, _), range, _expect) => DiagnosticFrame {
+            SyntaxDiagnostic::UnexpectedToken(Token::Comment(_, _), range, _expect) => DiagnosticFrame {
                 code: 12,
                 severity: Severity::Error,
                 title: "Unexpected documentation comment.".to_string(),
@@ -249,7 +248,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::UnexpectedToken(token, range, _expect) => DiagnosticFrame {
+            SyntaxDiagnostic::UnexpectedToken(token, range, _expect) => DiagnosticFrame {
                 code: 13,
                 severity: Severity::Error,
                 title: format!("Unexpected token '{}'.", token),
@@ -263,7 +262,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::Unclosed(range) => DiagnosticFrame {
+            SyntaxDiagnostic::Unclosed(range) => DiagnosticFrame {
                 code: 14,
                 severity: Severity::Error,
                 title: "Unclosed parenthesis.".to_string(),
@@ -277,7 +276,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::CannotUseUse(range) => DiagnosticFrame {
+            SyntaxDiagnostic::CannotUseUse(range) => DiagnosticFrame {
                 code: 15,
                 severity: Severity::Error,
                 title: "Can only use the 'use' statement in the beggining of the file".to_string(),
@@ -291,7 +290,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::ImportsCannotHaveAlias(range) => DiagnosticFrame {
+            SyntaxDiagnostic::ImportsCannotHaveAlias(range) => DiagnosticFrame {
                 code: 16,
                 severity: Severity::Error,
                 title: "The upper cased name cannot have an alias".to_string(),
@@ -305,7 +304,7 @@ impl Diagnostic for SyntaxError {
                     main: true,
                 }],
             },
-            SyntaxError::InvalidNumberType(type_, range) => DiagnosticFrame {
+            SyntaxDiagnostic::InvalidNumberType(type_, range) => DiagnosticFrame {
                 code: 17,
                 severity: Severity::Error,
                 title: format!("The {} number type is invalid", type_),
@@ -323,8 +322,8 @@ impl Diagnostic for SyntaxError {
     }
 }
 
-impl From<Box<SyntaxError>> for DiagnosticFrame {
-    fn from(err: Box<SyntaxError>) -> Self {
+impl From<Box<SyntaxDiagnostic>> for DiagnosticFrame {
+    fn from(err: Box<SyntaxDiagnostic>) -> Self {
         (err).into()
     }
 }

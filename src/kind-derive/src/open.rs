@@ -11,28 +11,33 @@ use kind_tree::symbol::{Ident, QualifiedIdent};
 pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
     let mk_var = |name: Ident| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Var(name),
+            data: ExprKind::Var { name },
             range,
         })
     };
 
-    let mk_cons = |name: QualifiedIdent, spine: Vec<Binding>| -> Box<Expr> {
+    let mk_cons = |name: QualifiedIdent, args: Vec<Binding>| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Constr(name, spine),
+            data: ExprKind::Constr { name, args },
             range,
         })
     };
 
-    let mk_app = |left: Box<Expr>, right: Vec<AppBinding>| -> Box<Expr> {
+    let mk_app = |fun: Box<Expr>, args: Vec<AppBinding>| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::App(left, right),
+            data: ExprKind::App { fun, args },
             range,
         })
     };
 
-    let mk_pi = |name: Ident, left: Box<Expr>, right: Box<Expr>| -> Box<Expr> {
+    let mk_pi = |name: Ident, typ: Box<Expr>, body: Box<Expr>, erased: bool| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::All(Some(name), left, right),
+            data: ExprKind::All {
+                param: Some(name),
+                typ,
+                body,
+                erased,
+            },
             range,
         })
     };
@@ -71,7 +76,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
     let cons_tipo = mk_var(Ident::generate("res_"));
 
     let cons_type = rec.fields.iter().rfold(cons_tipo, |out, (name, _, typ)| {
-        mk_pi(name.clone(), typ.clone(), out)
+        mk_pi(name.clone(), typ.clone(), out, false)
     });
 
     // Sccrutinzies

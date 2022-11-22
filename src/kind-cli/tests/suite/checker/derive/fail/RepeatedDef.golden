@@ -5,12 +5,12 @@
     1 |    type Nat {
     2 |        zero
       |        v---
-      |        \ The first ocorrence
+      |        \The first ocorrence
     3 |        succ
       :     
     6 |    Nat.zero : U60
       |    v-------
-      |    \ Second occorrence here!
+      |    \Second occorrence here!
 
       Hint: Rename one of the definitions or remove and look at how names work in Kind at https://kind.kindelia.org/hints/names
 

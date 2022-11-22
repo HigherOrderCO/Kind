@@ -1,23 +1,16 @@
-   ERROR  Repeated named variable
+   ERROR  Cannot find the definition 'User.new.open'.
 
-      /--[tests/suite/checker/derive/fail/Repeated.kind2:11:19]
+      /--[tests/suite/checker/derive/fail/Repeated.kind2:10:9]
       |
+    9 |    Main = 
    10 |        let User.new (ttt = e) e .. = User.new 2 4 1
-   11 |        let User.new (ttt = f)  ttt = User.new 6 7 3
-      |                      v--       v--
-      |                      |         \ Second occurence
-      |                      \ First occurence
-   12 |        e
-
-   ERROR  The case is not covering all the values inside of it!
-
-      /--[tests/suite/checker/derive/fail/Repeated.kind2:11:9]
-      |
-   10 |        let User.new (ttt = e) e .. = User.new 2 4 1
+      |            v-------
+      |            \Here!
+      :     
    11 |        let User.new (ttt = f)  ttt = User.new 6 7 3
       |            v-------
-      |            \ This is the incomplete case
+      |            \Here!
    12 |        e
 
-      Hint: Need variables for 'e', 'name'
+      Hint: Maybe you're looking for 'User.new'
 

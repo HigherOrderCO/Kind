@@ -9,9 +9,6 @@ use kind_report::report::{FileCache, Report};
 use kind_report::RenderConfig;
 
 use kind_driver as driver;
-use watch::watch_session;
-
-mod watch;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -88,9 +85,7 @@ pub enum Command {
 
     /// Compiles a file to HVM (.hvm)
     #[clap(aliases = &["hvm"])]
-    ToHVM {
-        file: String
-    },
+    ToHVM { file: String },
 
     /// Watch for file changes and then
     /// check when some file change.
@@ -195,7 +190,7 @@ pub fn run_cli(config: Cli) {
             });
         }
         Command::Run { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            let res = compile_in_session(render_config, root, file.clone(), &mut |session| {
                 let book = driver::erase_book(
                     session,
                     &PathBuf::from(file.clone()),
@@ -203,22 +198,14 @@ pub fn run_cli(config: Cli) {
                 )?;
                 driver::check_main_entry(session, &book)?;
                 Some(driver::compile_book_to_hvm(book))
-            })
-            .map(|res| {
-                println!("{}", driver::execute_file(&res));
-                res
             });
-        }
-        Command::Eval { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
-                let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
-                driver::check_main_entry(session, &book)?;
-                Some(book)
-            })
-            .map(|res| {
-                println!("{}", driver::eval_in_checker(&res));
-                res
-            });
+
+            if let Some(res) = res {
+                match driver::execute_file(res) {
+                    Ok(res) => println!("{}", res),
+                    Err(err) => println!("{}", err),
+                }
+            }
         }
         Command::Show { file } => {
             compile_in_session(render_config, root, file.clone(), &mut |session| {
@@ -256,8 +243,16 @@ pub fn run_cli(config: Cli) {
                 res
             });
         }
-        Command::Watch { file } => {
-            watch_session(root, PathBuf::from(file.clone()), render_config)
+        Command::Eval { file } => {
+            compile_in_session(render_config, root, file.clone(), &mut |session| {
+                let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
+                driver::check_main_entry(session, &book)?;
+                Some(book)
+            })
+            .map(|res| println!("{}", driver::eval_in_checker(&res)));
+        }
+        Command::Watch { file: _ } => {
+            todo!()
         }
         Command::Repl => {
             todo!()

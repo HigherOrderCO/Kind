@@ -28,7 +28,7 @@ pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
     /// The dependent function space (e.g. (x : Int) -> y)
-    All(Ident, Box<Expr>, Box<Expr>),
+    All(Ident, Box<Expr>, Box<Expr>, bool),
     /// A anonymous function that receives one argument
     Lambda(Ident, Box<Expr>, bool),
     /// Application of a expression to a spine of expressions
@@ -84,10 +84,16 @@ impl Expr {
         })
     }
 
-    pub fn all(range: Range, ident: Ident, typ: Box<Expr>, body: Box<Expr>) -> Box<Expr> {
+    pub fn all(
+        range: Range,
+        ident: Ident,
+        typ: Box<Expr>,
+        body: Box<Expr>,
+        erased: bool,
+    ) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
-            data: ExprKind::All(ident, typ, body),
+            data: ExprKind::All(ident, typ, body, erased),
         })
     }
 
@@ -297,11 +303,13 @@ impl Expr {
 
     pub fn traverse_pi_types(&self) -> String {
         match &self.data {
-            ExprKind::All(binder, typ, body) => {
+            ExprKind::All(binder, typ, body, erased) => {
+                let tilde = if *erased { "~" } else { "" };
                 if binder.to_string().starts_with('_') {
-                    format!("{} -> {}", typ, body.traverse_pi_types())
+                    format!("{}{} -> {}", tilde, typ, body.traverse_pi_types())
                 } else {
-                    format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types())
+                    let body = body.traverse_pi_types();
+                    format!("({}{} : {}) -> {}", tilde, binder, typ, body)
                 }
             }
             _ => format!("{}", self),
@@ -329,10 +337,10 @@ impl Display for Expr {
             Str(n) => write!(f, "\"{}\"", n),
             Num(crate::Number::U60(n)) => write!(f, "{}", n),
             Num(crate::Number::U120(n)) => write!(f, "{}u120", n),
-            All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
+            All(_, _, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body, false) => write!(f, "({} => {})", binder, body),
-            Lambda(binder, body, true) => write!(f, "({{{}}} => {})", binder, body),
+            Lambda(binder, body, true) => write!(f, "(~{} => {})", binder, body),
             Sub(name, _, redx, expr) => write!(f, "(## {}/{} {})", name, redx, expr),
             App(head, spine) => write!(
                 f,

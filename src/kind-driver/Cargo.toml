@@ -14,7 +14,8 @@ kind-checker = { path = "../kind-checker" }
 kind-pass = { path = "../kind-pass" }
 kind-target-hvm = { path = "../kind-target-hvm" }
 
-hvm = "0.1.81"
+hvm = { path = "../../../HVM/crates/hvm" }
+
 strsim = "0.10.0"
 fxhash = "0.2.1"
 dashmap = "5.4.0"

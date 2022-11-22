@@ -1,11 +1,13 @@
-use kind_tree::{concrete::{self, Attribute, AttributeStyle}, desugared};
+use kind_tree::{
+    concrete::{self, Attribute, AttributeStyle},
+    desugared,
+};
 
 use crate::errors::PassError;
 
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-
     fn args_should_be_empty(&mut self, attr: &Attribute) {
         if !attr.args.is_empty() {
             self.send_err(PassError::AttributeDoesNotExpectArgs(attr.range))
@@ -51,7 +53,7 @@ impl<'a> DesugarState<'a> {
                     self.attr_without_value(attr);
                     vec.push(desugared::Attribute::KdlRun);
                 }
-                "kdl_erase"  => {
+                "kdl_erase" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);
                     vec.push(desugared::Attribute::KdlErase);
@@ -61,22 +63,22 @@ impl<'a> DesugarState<'a> {
                     match &attr.value {
                         Some(AttributeStyle::Ident(_, ident)) => {
                             vec.push(desugared::Attribute::KdlState(ident.clone()));
-                        },
+                        }
                         Some(_) => self.attr_invalid_argument(attr),
-                        None => self.attr_expects_a_value(attr)
+                        None => self.attr_expects_a_value(attr),
                     }
-                },
+                }
                 "kdl_state" => {
                     self.args_should_be_empty(attr);
                     match &attr.value {
                         Some(AttributeStyle::Ident(_, ident)) => {
                             vec.push(desugared::Attribute::KdlState(ident.clone()));
-                        },
+                        }
                         Some(_) => self.attr_invalid_argument(attr),
-                        None => self.attr_expects_a_value(attr)
+                        None => self.attr_expects_a_value(attr),
                     }
-                },
-                _ => self.send_err(PassError::AttributeDoesNotExists(attr.range))
+                }
+                _ => self.send_err(PassError::AttributeDoesNotExists(attr.range)),
             }
         }
         vec

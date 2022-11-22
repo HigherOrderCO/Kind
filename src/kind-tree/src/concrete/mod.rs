@@ -51,7 +51,10 @@ impl<T> Telescope<T> {
     }
 }
 
-impl<T> Telescope<T> where T : Clone {
+impl<T> Telescope<T>
+where
+    T: Clone,
+{
     pub fn drop(self, num: usize) -> Telescope<T> {
         Telescope(self.0[num..].to_vec())
     }

@@ -24,11 +24,11 @@ macro_rules! match_opt {
 }
 
 fn parse_orig(term: &Term) -> Result<Range, String> {
-    match_opt!(term, Term::Num { numb } => EncodedSpan(*numb).to_range())
+    match_opt!(term, Term::U6O { numb } => EncodedSpan(*numb).to_range())
 }
 
 fn parse_num(term: &Term) -> Result<u64, String> {
-    match_opt!(term, Term::Num { numb } => *numb)
+    match_opt!(term, Term::U6O { numb } => *numb)
 }
 
 fn parse_op(term: &Term) -> Result<Operator, String> {
@@ -58,7 +58,7 @@ fn parse_op(term: &Term) -> Result<Operator, String> {
 
 fn parse_name(term: &Term) -> Result<String, String> {
     match term {
-        Term::Num { numb } => Ok(Ident::decode(*numb)),
+        Term::U6O { numb } => Ok(Ident::decode(*numb)),
         Term::Ctr { name, args: _ } => Ok(name.to_string()),
         _ => Err("Error while matching ident".to_string()),
     }
@@ -66,7 +66,7 @@ fn parse_name(term: &Term) -> Result<String, String> {
 
 fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
     match term {
-        Term::Num { numb } => Ok(QualifiedIdent::new_static(
+        Term::U6O { numb } => Ok(QualifiedIdent::new_static(
             &Ident::decode(*numb),
             None,
             Range::ghost_range(),
@@ -93,6 +93,7 @@ fn parse_all_expr(
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
+                false, // TODO: Fix
             )),
             "Kind.Quoted.lam" => Ok(Expr::lambda(
                 parse_orig(&args[0])?,
@@ -215,10 +216,13 @@ pub fn transform_entry(term: &Term) -> Result<Entry, String> {
 fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
     match expr {
         Term::Ctr { name, args } => {
+            if args.len() < 2 {
+                return Err("Invalid argument length for constructor".to_string());
+            }
             let ls = parse_list(&args[0])?;
             let entries = ls.iter().flat_map(|x| transform_entry(x));
             let ctx = Context(entries.collect());
-            let orig = match_opt!(*args[1], Term::Num { numb } => EncodedSpan(numb).to_range())?;
+            let orig = match_opt!(*args[1], Term::U6O { numb } => EncodedSpan(numb).to_range())?;
             match name.as_str() {
                 "Kind.Error.Quoted.unbound_variable" => Ok(TypeError::UnboundVariable(ctx, orig)),
                 "Kind.Error.Quoted.cant_infer_hole" => Ok(TypeError::CantInferHole(ctx, orig)),

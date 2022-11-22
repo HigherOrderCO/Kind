@@ -1,18 +1,18 @@
 //! Crate to parse the kind2 grammar.
-pub mod errors;
-pub mod expr;
-pub mod macros;
-pub mod pat;
-pub mod state;
-pub mod top_level;
+mod errors;
+mod expr;
+mod lexer;
+mod macros;
+mod pat;
+mod state;
+mod top_level;
 
-pub mod lexer;
 use std::sync::mpsc::Sender;
 
 use kind_report::data::Diagnostic;
 use kind_span::SyntaxCtxIndex;
 use kind_tree::concrete::Module;
-pub use lexer::state::*;
+use lexer::state::*;
 use state::Parser;
 
 pub fn parse_book(errs: Sender<Box<dyn Diagnostic>>, ctx_id: usize, input: &str) -> (Module, bool) {

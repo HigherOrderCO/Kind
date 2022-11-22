@@ -14,7 +14,7 @@ pub struct Node<T> {
 #[derive(Debug)]
 pub struct Graph<T> {
     // Using a hashmap to make it easier to add or remove node.s
-    pub nodes: FxHashMap<usize, Node<T>>,
+    nodes: FxHashMap<usize, Node<T>>,
     count: usize,
 }
 
@@ -85,7 +85,20 @@ impl<T> Graph<T> {
     pub fn remove(&mut self, node_idx: usize) -> FxHashSet<usize> {
         let mut fx = Default::default();
         self.remove_recursive(node_idx, &mut fx);
+        fx.insert(node_idx);
         fx
+    }
+
+    pub fn disconnect_parent(&mut self, child: usize, parent: usize) -> bool {
+        if let Some(parent) = self.nodes.get_mut(&parent) {
+            parent.children.remove(&child);
+        }
+        if let Some(child) = self.nodes.get_mut(&child) {
+            child.parents.remove(&parent);
+            child.parents.len() == 0
+        } else {
+            false
+        }
     }
 
     pub fn flood_invalidation(&mut self, node: usize) {

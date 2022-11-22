@@ -17,3 +17,6 @@ members = [
   # "src/kind-query",
   # "src/kind-macros",
 ]
+
+[profile.release]
+debug = true

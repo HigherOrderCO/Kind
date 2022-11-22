@@ -3,7 +3,7 @@
 
 use core::fmt;
 
-use crate::errors::SyntaxError;
+use crate::errors::SyntaxDiagnostic;
 
 #[derive(Debug, Clone)]
 pub enum Token {
@@ -78,7 +78,7 @@ pub enum Token {
     Eof,
 
     // The error token that is useful to error recovery.
-    Error(Box<SyntaxError>),
+    Error(Box<SyntaxDiagnostic>),
 }
 
 impl Token {

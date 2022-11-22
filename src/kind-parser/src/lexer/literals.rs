@@ -5,7 +5,7 @@
 
 use kind_span::Range;
 
-use crate::errors::{EncodeSequence, SyntaxError};
+use crate::errors::{EncodeSequence, SyntaxDiagnostic};
 use crate::lexer::tokens::Token;
 use crate::Lexer;
 
@@ -18,22 +18,22 @@ impl<'a> Lexer<'a> {
         size: usize,
         base: u32,
         err: EncodeSequence,
-    ) -> Result<char, SyntaxError> {
+    ) -> Result<char, SyntaxDiagnostic> {
         let string = self.next_chars(size);
         let to_chr = string.and_then(|x| u32::from_str_radix(x, base).ok());
         if let Some(chr) = to_chr.and_then(char::from_u32) {
             return Ok(chr);
         }
-        Err(SyntaxError::InvalidEscapeSequence(
+        Err(SyntaxDiagnostic::InvalidEscapeSequence(
             err,
             self.mk_range(start),
         ))
     }
 
     /// Turns a escaped char into a normal char.
-    fn lex_escaped_char(&mut self, start: usize) -> Result<char, SyntaxError> {
+    fn lex_escaped_char(&mut self, start: usize) -> Result<char, SyntaxDiagnostic> {
         match self.peekable.peek() {
-            None => Err(SyntaxError::UnfinishedString(
+            None => Err(SyntaxDiagnostic::UnfinishedString(
                 self.mk_one_column_range(start),
             )),
             Some(&x) => {
@@ -68,7 +68,7 @@ impl<'a> Lexer<'a> {
         let type_start = self.span();
         let make_num_err = |x: &Self| {
             (
-                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(
+                Token::Error(Box::new(SyntaxDiagnostic::InvalidNumberRepresentation(
                     err,
                     x.mk_range(num_start),
                 ))),
@@ -95,7 +95,7 @@ impl<'a> Lexer<'a> {
                         }
                     }
                     _ => (
-                        Token::Error(Box::new(SyntaxError::InvalidNumberType(
+                        Token::Error(Box::new(SyntaxDiagnostic::InvalidNumberType(
                             format!("u{}", type_),
                             self.mk_range(type_start),
                         ))),
@@ -144,7 +144,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn lex_char(&mut self) -> Result<char, SyntaxError> {
+    pub fn lex_char(&mut self) -> Result<char, SyntaxDiagnostic> {
         let start = self.span();
         if let Some(&x) = self.peekable.peek() {
             let chr_start = self.span();
@@ -153,16 +153,16 @@ impl<'a> Lexer<'a> {
                     self.next_char();
                     match self.lex_escaped_char(chr_start) {
                         Ok(x) => Ok(x),
-                        Err(t) => Err(t)
+                        Err(t) => Err(t),
                     }
                 }
                 x => {
                     self.next_char();
                     Ok(x)
-                },
+                }
             }
         } else {
-            Err(SyntaxError::UnfinishedChar(self.mk_range(start)))
+            Err(SyntaxDiagnostic::UnfinishedChar(self.mk_range(start)))
         }
     }
     /// Lexes a string that starts with '"' and ends with the
@@ -203,7 +203,7 @@ impl<'a> Lexer<'a> {
             (_, Some(err)) => err,
             (Some('"'), _) => (Token::Str(string), self.mk_range(start)),
             _ => (
-                Token::Error(Box::new(SyntaxError::UnfinishedString(
+                Token::Error(Box::new(SyntaxDiagnostic::UnfinishedString(
                     self.mk_one_column_range(start),
                 ))),
                 self.mk_range(start),

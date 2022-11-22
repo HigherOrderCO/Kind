@@ -34,14 +34,14 @@ pub enum PassError {
     NoFieldCoverage(Range, Vec<String>),
     CannotPatternMatchOnErased(Range),
     UnboundVariable(Vec<Ident>, Vec<String>),
-    
+
     AttributeDoesNotExpectEqual(Range),
     AttributeDoesNotExpectArgs(Range),
     InvalidAttributeArgument(Range),
     AttributeExpectsAValue(Range),
     DuplicatedAttributeArgument(Range, Range),
     CannotDerive(String, Range),
-    AttributeDoesNotExists(Range)
+    AttributeDoesNotExists(Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -76,7 +76,7 @@ impl Diagnostic for PassError {
             PassError::AttributeDoesNotExists(range) => Some(range.ctx),
         }
     }
-    
+
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
             PassError::UnboundVariable(idents, suggestions) => DiagnosticFrame {

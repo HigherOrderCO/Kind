@@ -77,10 +77,8 @@ impl<'a> DesugarState<'a> {
 
     pub(crate) fn desugar_app(&mut self, range: Range, head: &Expr) -> Box<desugared::Expr> {
         match &head.data {
-            ExprKind::Constr(entry_name, spine) => {
-                let entry = self
-                    .old_book
-                    .get_count_garanteed(entry_name.to_string().as_str());
+            ExprKind::Constr { name, args } => {
+                let entry = self.old_book.get_count_garanteed(name.to_string().as_str());
 
                 let mut positions = FxHashMap::default();
                 let mut arguments = vec![None; entry.arguments.len()];
@@ -88,7 +86,7 @@ impl<'a> DesugarState<'a> {
                 let (hidden, _erased) = entry.arguments.count_implicits();
 
                 // Check if we should just fill all the implicits
-                let fill_hidden = spine.len() == entry.arguments.len() - hidden;
+                let fill_hidden = args.len() == entry.arguments.len() - hidden;
 
                 if fill_hidden {
                     for i in 0..entry.arguments.len() {
@@ -98,10 +96,10 @@ impl<'a> DesugarState<'a> {
                             arguments[i] = Some((Range::ghost_range(), self.gen_hole_expr()))
                         }
                     }
-                } else if entry.arguments.len() != spine.len() {
+                } else if entry.arguments.len() != args.len() {
                     self.send_err(PassError::IncorrectArity(
-                        entry_name.range,
-                        spine.iter().map(|x| x.locate()).collect(),
+                        name.range,
+                        args.iter().map(|x| x.locate()).collect(),
                         entry.arguments.len(),
                         hidden,
                     ));
@@ -112,7 +110,7 @@ impl<'a> DesugarState<'a> {
                     positions.insert(entry.arguments[i].name.to_str(), i);
                 }
 
-                for arg in spine {
+                for arg in args {
                     match arg {
                         Binding::Positional(_) => (),
                         Binding::Named(r, name, v) => {
@@ -121,8 +119,8 @@ impl<'a> DesugarState<'a> {
                                 None => {
                                     self.send_err(PassError::CannotFindField(
                                         name.range,
-                                        entry_name.range,
-                                        entry_name.to_string(),
+                                        name.range,
+                                        name.to_string(),
                                     ));
                                     continue;
                                 }
@@ -137,7 +135,7 @@ impl<'a> DesugarState<'a> {
                     }
                 }
 
-                for arg in spine {
+                for arg in args {
                     match arg {
                         Binding::Positional(v) => {
                             for i in 0..entry.arguments.len() {
@@ -145,7 +143,7 @@ impl<'a> DesugarState<'a> {
                                 if (fill_hidden && arg_decl.hidden) || arguments[i].is_some() {
                                     continue;
                                 }
-                                arguments[i] = Some((v.range, self.desugar_expr(v)));
+                                arguments[i] = Some((v.range, self.desugar_expr(&v)));
                                 break;
                             }
                         }
@@ -164,17 +162,17 @@ impl<'a> DesugarState<'a> {
 
                 Box::new(desugared::Expr {
                     data: if entry.is_ctr {
-                        desugared::ExprKind::Ctr(entry_name.clone(), new_spine)
+                        desugared::ExprKind::Ctr(name.clone(), new_spine)
                     } else {
-                        desugared::ExprKind::Fun(entry_name.clone(), new_spine)
+                        desugared::ExprKind::Fun(name.clone(), new_spine)
                     },
                     span: Span::Locatable(range),
                 })
             }
-            ExprKind::App(head, spine) => {
+            ExprKind::App { fun, args } => {
                 let mut new_spine = Vec::new();
-                let new_head = self.desugar_expr(head);
-                for arg in spine {
+                let new_head = self.desugar_expr(fun);
+                for arg in args {
                     new_spine.push(desugared::AppBinding {
                         data: self.desugar_expr(&arg.data),
                         erased: arg.erased,

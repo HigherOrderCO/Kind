@@ -11,7 +11,7 @@ use std::sync::mpsc::Sender;
 use kind_report::data::Diagnostic;
 use kind_span::Range;
 
-use crate::errors::SyntaxError;
+use crate::errors::SyntaxDiagnostic;
 
 use self::{state::Lexer, tokens::Token};
 
@@ -50,10 +50,7 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn to_keyword(data: &str) -> Token {
-        match data {
-            "_" => Token::Hole,
-            _ => Token::LowerId(data.to_string()),
-        }
+        Token::LowerId(data.to_string())
     }
 
     pub fn get_next_no_error(&mut self, vec: Sender<Box<dyn Diagnostic>>) -> (Token, Range) {
@@ -197,14 +194,14 @@ impl<'a> Lexer<'a> {
                     match self.peekable.peek() {
                         Some('\'') => self.single_token(Token::Char(chr), start),
                         Some(c) => (
-                            Token::Error(Box::new(SyntaxError::UnexpectedChar(
+                            Token::Error(Box::new(SyntaxDiagnostic::UnexpectedChar(
                                 *c,
                                 self.mk_range(start),
                             ))),
                             self.mk_range(start),
                         ),
                         None => (
-                            Token::Error(Box::new(SyntaxError::UnfinishedChar(
+                            Token::Error(Box::new(SyntaxDiagnostic::UnfinishedChar(
                                 self.mk_range(start),
                             ))),
                             self.mk_range(start),
@@ -221,7 +218,7 @@ impl<'a> Lexer<'a> {
                 &c => {
                     self.next_char();
                     (
-                        Token::Error(Box::new(SyntaxError::UnexpectedChar(
+                        Token::Error(Box::new(SyntaxDiagnostic::UnexpectedChar(
                             c,
                             self.mk_range(start),
                         ))),

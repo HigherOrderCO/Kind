@@ -1,3 +1,4 @@
+#derive[open]
 record User {
     constructor new
     name : U60

@@ -4,10 +4,8 @@
 //! error messages.
 
 use super::pat::PatIdent;
-use crate::{
-    symbol::{Ident, QualifiedIdent},
-    Operator,
-};
+use crate::symbol::{Ident, QualifiedIdent};
+use crate::Operator;
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
 
@@ -126,40 +124,72 @@ pub struct Sttm {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ExprKind {
     /// Name of a variable
-    Var(Ident),
+    Var { name: Ident },
     /// Name of a function/constructor
-    Constr(QualifiedIdent, Spine),
+    Constr { name: QualifiedIdent, args: Spine },
     /// The dependent function space (e.g. (x : Int) -> y)
-    All(Option<Ident>, Box<Expr>, Box<Expr>),
+    All {
+        param: Option<Ident>,
+        typ: Box<Expr>,
+        body: Box<Expr>,
+        erased: bool,
+    },
     /// The dependent product space (e.g. [x : Int] -> y)
-    Sigma(Option<Ident>, Box<Expr>, Box<Expr>),
+    Sigma {
+        param: Option<Ident>,
+        fst: Box<Expr>,
+        snd: Box<Expr>,
+    },
     /// A anonymous function that receives one argument
-    Lambda(Ident, Option<Box<Expr>>, Box<Expr>, bool),
+    Lambda {
+        param: Ident,
+        typ: Option<Box<Expr>>,
+        body: Box<Expr>,
+        erased: bool,
+    },
     /// Application of a expression to a spine of expressions
-    App(Box<Expr>, Vec<AppBinding>),
+    App {
+        fun: Box<Expr>,
+        args: Vec<AppBinding>,
+    },
     /// Declaration of a local variable
-    Let(Destruct, Box<Expr>, Box<Expr>),
+    Let {
+        name: Destruct,
+        val: Box<Expr>,
+        next: Box<Expr>,
+    },
     /// Type ascription (x : y)
-    Ann(Box<Expr>, Box<Expr>),
+    Ann { val: Box<Expr>, typ: Box<Expr> },
     /// Literal
-    Lit(Literal),
+    Lit { lit: Literal },
     /// Binary operation (e.g. 2 + 3)
-    Binary(Operator, Box<Expr>, Box<Expr>),
+    Binary {
+        op: Operator,
+        fst: Box<Expr>,
+        snd: Box<Expr>,
+    },
     /// A expression open to unification (e.g. _)
     Hole,
+    /// Do notation
+    Do {
+        typ: QualifiedIdent,
+        sttm: Box<Sttm>,
+    },
+    /// If else statement
+    If {
+        cond: Box<Expr>,
+        then_: Box<Expr>,
+        else_: Box<Expr>,
+    },
+    /// If else statement
+    Pair { fst: Box<Expr>, snd: Box<Expr> },
+    /// Array
+    List { args: Vec<Expr> },
     /// Substituion
     Subst(Substitution),
     /// A match block that will be translated
     /// into an eliminator of a datatype.
     Match(Box<Match>),
-    /// Do notation
-    Do(QualifiedIdent, Box<Sttm>),
-    /// If else statement
-    If(Box<Expr>, Box<Expr>, Box<Expr>),
-    /// If else statement
-    Pair(Box<Expr>, Box<Expr>),
-    /// Array
-    List(Vec<Expr>),
 }
 
 /// Describes a single expression inside Kind2.
@@ -197,13 +227,27 @@ impl Display for Operator {
 impl Expr {
     pub fn traverse_pi_types(&self) -> String {
         match &self.data {
-            ExprKind::All(binder, typ, body) => match binder {
-                None => format!("{} -> {}", typ, body.traverse_pi_types()),
-                Some(binder) => format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types()),
-            },
-            ExprKind::Sigma(binder, typ, body) => match binder {
-                None => format!("{} -> {}", typ, body.traverse_pi_types()),
-                Some(binder) => format!("[{} : {}] -> {}", binder, typ, body.traverse_pi_types()),
+            ExprKind::All {
+                param,
+                typ,
+                body,
+                erased,
+            } => {
+                let tilde = if *erased { "~" } else { "" };
+                match param {
+                    None => format!("{}{} -> {}", tilde, typ, body.traverse_pi_types()),
+                    Some(binder) => format!(
+                        "{}({} : {}) -> {}",
+                        tilde,
+                        binder,
+                        typ,
+                        body.traverse_pi_types()
+                    ),
+                }
+            }
+            ExprKind::Sigma { param, fst, snd } => match param {
+                None => format!("{} -> {}", fst, snd.traverse_pi_types()),
+                Some(binder) => format!("[{} : {}] -> {}", binder, fst, snd.traverse_pi_types()),
             },
             _ => format!("{}", self),
         }
@@ -393,44 +437,66 @@ impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
         match &self.data {
-            Do(id, sttms) => write!(f, "(do {} {{{}}})", id, sttms),
-            All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
-            Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
-            Lit(lit) => write!(f, "{}", lit),
-            Var(name) => write!(f, "{}", name),
-            Constr(head, spine) => write!(
+            Do { typ, sttm } => write!(f, "(do {} {{{}}})", typ, sttm),
+            All { .. } => write!(f, "({})", self.traverse_pi_types()),
+            Sigma { .. } => write!(f, "({})", self.traverse_pi_types()),
+            Lit { lit } => write!(f, "{}", lit),
+            Var { name } => write!(f, "{}", name),
+            Constr { name, args } => write!(
                 f,
                 "({}{})",
-                head,
-                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+                name,
+                args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
-            Lambda(binder, None, body, false) => write!(f, "({} => {})", binder, body),
-            Lambda(binder, Some(typ), body, false) => {
-                write!(f, "(({} : {}) => {})", binder, typ, body)
+            Lambda {
+                param,
+                typ: None,
+                body,
+                erased: false,
+            } => write!(f, "({} => {})", param, body),
+            Lambda {
+                param,
+                typ: Some(typ),
+                body,
+                erased: false,
+            } => {
+                write!(f, "(({} : {}) => {})", param, typ, body)
             }
-            Lambda(binder, None, body, true) => write!(f, "({{{}}} => {})", binder, body),
-            Lambda(binder, Some(typ), body, true) => {
-                write!(f, "({{{} : {}}} => {})", binder, typ, body)
+            Lambda {
+                param,
+                typ: None,
+                body,
+                erased: true,
+            } => write!(f, "(-({}) => {})", param, body),
+            Lambda {
+                param,
+                typ: Some(typ),
+                body,
+                erased: true,
+            } => {
+                write!(f, "({{{} : {}}} => {})", param, typ, body)
             }
-            Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),
-            App(head, spine) => write!(
+            Pair { fst, snd } => write!(f, "($ {} {})", fst, snd),
+            App { fun, args } => write!(
                 f,
                 "({}{})",
-                head,
-                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+                fun,
+                args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
-            Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
-            If(cond, if_, else_) => write!(f, "(if {} {{{}}} else {{{}}})", cond, if_, else_),
-            List(vec) => write!(
+            Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
+            If { cond, then_, else_ } => {
+                write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
+            }
+            List { args } => write!(
                 f,
                 "[{}]",
-                vec.iter()
+                args.iter()
                     .map(|x| format!("{}", x))
                     .collect::<Vec<String>>()
                     .join(" ")
             ),
-            Ann(expr, typ) => write!(f, "({} :: {})", expr, typ),
-            Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
+            Ann { val: name, typ } => write!(f, "({} :: {})", name, typ),
+            Binary { op, fst, snd } => write!(f, "({} {} {})", op, fst, snd),
             Match(matcher) => write!(f, "({})", matcher),
             Subst(subst) => write!(f, "({})", subst),
             Hole => write!(f, "_"),

@@ -117,11 +117,12 @@ fn module_to_book<'a>(
                             .insert(cons_ident.to_string(), cons.extract_book_info(&sum));
                     }
                 }
-                
+
                 if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
                     book.count
                         .insert(sum.name.to_string(), sum.extract_book_info());
-                    book.entries.insert(sum.name.to_string(), TopLevel::SumType(sum));
+                    book.entries
+                        .insert(sum.name.to_string(), TopLevel::SumType(sum));
                 }
             }
             TopLevel::RecordType(rec) => {
@@ -129,7 +130,7 @@ fn module_to_book<'a>(
                 book.count
                     .insert(rec.name.to_string(), rec.extract_book_info());
                 try_to_insert_new_name(failed, session, rec.name.clone(), book);
-                
+
                 let cons_ident = rec.name.add_segment(rec.constructor.to_str());
                 public_names.insert(cons_ident.to_string());
                 book.count.insert(
@@ -138,14 +139,16 @@ fn module_to_book<'a>(
                 );
                 try_to_insert_new_name(failed, session, cons_ident, book);
 
-                book.entries.insert(rec.name.to_string(), TopLevel::RecordType(rec));
+                book.entries
+                    .insert(rec.name.to_string(), TopLevel::RecordType(rec));
             }
             TopLevel::Entry(entr) => {
                 try_to_insert_new_name(failed, session, entr.name.clone(), book);
                 public_names.insert(entr.name.to_string());
                 book.count
                     .insert(entr.name.to_string(), entr.extract_book_info());
-                book.entries.insert(entr.name.to_string(), TopLevel::Entry(entr));
+                book.entries
+                    .insert(entr.name.to_string(), TopLevel::Entry(entr));
             }
         }
     }
@@ -221,13 +224,13 @@ fn parse_and_store_book_by_path<'a>(
         failed = true;
     }
 
-    for idents in state.unbound_top_level.values() {
-        failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
-    }
-
     expand_uses(&mut module, session.diagnostic_sender.clone());
 
     module_to_book(&mut failed, session, module, book);
+
+    for idents in state.unbound_top_level.values() {
+        failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
+    }
 
     failed
 }
@@ -241,7 +244,7 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
         .collect::<Vec<_>>();
 
     similar_names.sort_by(|x, y| x.0.total_cmp(&y.0));
-    
+
     session
         .diagnostic_sender
         .send(Box::new(DriverError::UnboundVariable(
@@ -267,11 +270,7 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
         unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for (_, unbound) in unbound_tops {
-        let res: Vec<Ident> = unbound
-            .iter()
-            .filter(|x| !x.used_by_sugar)
-            .map(|x| x.to_ident())
-            .collect();
+        let res: Vec<Ident> = unbound.iter().map(|x| x.to_ident()).collect();
         if !res.is_empty() {
             unbound_variable(session, &book, &res);
             failed = true;

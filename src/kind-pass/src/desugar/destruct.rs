@@ -83,7 +83,10 @@ impl<'a> DesugarState<'a> {
                 };
 
                 if self.old_book.count.get(&open_id.to_string()).is_none() {
-                    self.send_err(PassError::NeedToImplementMethods(binding.locate(), Sugar::Open(typ.to_string())));
+                    self.send_err(PassError::NeedToImplementMethods(
+                        binding.locate(),
+                        Sugar::Open(typ.to_string()),
+                    ));
                     return desugared::Expr::err(range);
                 }
 
@@ -156,7 +159,10 @@ impl<'a> DesugarState<'a> {
         let match_id = match_.typ.add_segment("match");
 
         if self.old_book.entries.get(&match_id.to_string()).is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::Match(match_.typ.to_string())));
+            self.send_err(PassError::NeedToImplementMethods(
+                range,
+                Sugar::Match(match_.typ.to_string()),
+            ));
             return desugared::Expr::err(range);
         }
 
@@ -238,14 +244,10 @@ impl<'a> DesugarState<'a> {
             self.send_err(PassError::NoCoverage(range, unbound))
         }
 
-
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)
         } else {
-            let mut idx: Vec<Ident> = sum.indices
-                .iter()
-                .map(|x| x.name.clone())
-                .collect();
+            let mut idx: Vec<Ident> = sum.indices.iter().map(|x| x.name.clone()).collect();
             idx.push(Ident::generate("_val"));
             idx.iter().rfold(self.gen_hole_expr(), |expr, l| {
                 desugared::Expr::lambda(l.range, l.clone(), expr, false)

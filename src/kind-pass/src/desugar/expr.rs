@@ -8,21 +8,24 @@ use crate::errors::{PassError, Sugar};
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-    
     pub(crate) fn desugar_str(&self, range: Range, input: &str) -> Box<desugared::Expr> {
         let cons = QualifiedIdent::new_static("String.cons", None, range);
         input.chars().rfold(
-            desugared::Expr::ctr(range, QualifiedIdent::new_static("String.nil", None, range), vec![]),
+            desugared::Expr::ctr(
+                range,
+                QualifiedIdent::new_static("String.nil", None, range),
+                vec![],
+            ),
             |right, chr| {
-                desugared::Expr::ctr(range, cons.clone(), vec![
-                    desugared::Expr::num60(range, chr as u64),
-                    right
-                ])
+                desugared::Expr::ctr(
+                    range,
+                    cons.clone(),
+                    vec![desugared::Expr::num60(range, chr as u64), right],
+                )
             },
         )
     }
 
-    
     pub(crate) fn desugar_literal(
         &mut self,
         range: Range,
@@ -209,7 +212,10 @@ impl<'a> DesugarState<'a> {
         let boolean = QualifiedIdent::new_static("Bool", None, range);
         let bool_if_ident = boolean.add_segment("if");
 
-        let bool_if = self.old_book.entries.get(bool_if_ident.to_string().as_str());
+        let bool_if = self
+            .old_book
+            .entries
+            .get(bool_if_ident.to_string().as_str());
 
         if bool_if.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::BoolIf));
@@ -248,36 +254,68 @@ impl<'a> DesugarState<'a> {
     pub(crate) fn desugar_expr(&mut self, expr: &expr::Expr) -> Box<desugared::Expr> {
         use expr::ExprKind::*;
         match &expr.data {
-            Constr(_, _) | App(_, _) => self.desugar_app(expr.range, expr),
-            All(ident, typ, body) => desugared::Expr::all(
+            Constr { .. } | App { .. } => self.desugar_app(expr.range, expr),
+            All {
+                param,
+                typ,
+                body,
+                erased,
+            } => desugared::Expr::all(
                 expr.range,
-                ident.clone().unwrap_or_else(|| self.gen_name(expr.range)),
+                param.clone().unwrap_or_else(|| self.gen_name(expr.range)),
                 self.desugar_expr(typ),
                 self.desugar_expr(body),
+                *erased,
             ),
-            Binary(op, left, right) => desugared::Expr::binary(
+            Binary { op, fst, snd } => desugared::Expr::binary(
                 expr.range,
                 *op,
-                self.desugar_expr(left),
-                self.desugar_expr(right),
+                self.desugar_expr(fst),
+                self.desugar_expr(snd),
             ),
-            Lambda(ident, _typ, body, erased) => {
-                desugared::Expr::lambda(expr.range, ident.clone(), self.desugar_expr(body), *erased)
+            Lambda {
+                param,
+                typ: None,
+                body,
+                erased,
+            } => {
+                desugared::Expr::lambda(expr.range, param.clone(), self.desugar_expr(body), *erased)
             }
-            Ann(val, typ) => {
+            Lambda {
+                param,
+                typ: Some(typ),
+                body,
+                erased,
+            } => desugared::Expr::ann(
+                expr.range,
+                desugared::Expr::lambda(
+                    expr.range,
+                    param.clone(),
+                    self.desugar_expr(body),
+                    *erased,
+                ),
+                desugared::Expr::all(
+                    typ.range,
+                    self.gen_name(expr.range),
+                    self.desugar_expr(typ),
+                    self.gen_hole_expr(),
+                    *erased,
+                ),
+            ),
+            Ann { val, typ } => {
                 desugared::Expr::ann(expr.range, self.desugar_expr(val), self.desugar_expr(typ))
             }
-            Var(ident) => desugared::Expr::var(ident.clone()),
+            Var { name } => desugared::Expr::var(name.clone()),
             Hole => desugared::Expr::hole(expr.range, self.gen_hole()),
-            Lit(literal) => self.desugar_literal(expr.range, literal),
+            Lit { lit } => self.desugar_literal(expr.range, lit),
+            Let { name, val, next } => self.desugar_let(expr.range, name, val, next),
+            Do { typ, sttm } => self.desugar_do(expr.range, typ, sttm),
+            Sigma { param, fst, snd } => self.desugar_sigma(expr.range, param, fst, snd),
+            List { args } => self.desugar_list(expr.range, args),
+            If { cond, then_, else_ } => self.desugar_if(expr.range, cond, then_, else_),
+            Pair { fst, snd } => self.desugar_pair(expr.range, fst, snd),
             Match(matcher) => self.desugar_match(expr.range, matcher),
-            Let(destruct, val, next) => self.desugar_let(expr.range, destruct, val, next),
             Subst(sub) => self.desugar_sub(expr.range, sub),
-            Do(typ, sttm) => self.desugar_do(expr.range, typ, sttm),
-            Sigma(name, typ, body) => self.desugar_sigma(expr.range, name, typ, body),
-            List(ls) => self.desugar_list(expr.range, ls),
-            If(cond, if_, else_) => self.desugar_if(expr.range, cond, if_, else_),
-            Pair(fst, snd) => self.desugar_pair(expr.range, fst, snd),
         }
     }
 }

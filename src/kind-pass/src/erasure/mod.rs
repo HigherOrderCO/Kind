@@ -43,13 +43,13 @@ pub struct ErasureState<'a> {
 }
 
 pub fn erase_book(
-    book: &Book,
+    book: Book,
     errs: Sender<Box<dyn Diagnostic>>,
     entrypoint: FxHashSet<String>,
 ) -> Option<Book> {
     let mut state = ErasureState {
         errs,
-        book,
+        book: &book,
         ctx: Default::default(),
         names: Default::default(),
         holes: Default::default(),
@@ -74,22 +74,21 @@ pub fn erase_book(
     for (name, v) in &book.entrs {
         entries.insert(name, state.erase_entry(v));
     }
-    
+
     if state.failed {
         return None;
     }
 
     for (name, (_, relev)) in &state.names {
         if let Some(Relevance::Relevant) = state.normalize(*relev) {
-            if let Some(res) = entries.get(name) {
-                new_book.entrs.insert(name.to_string(), res.clone());
+            if let Some(res) = entries.remove(name) {
+                new_book.entrs.insert(name.to_string(), res);
             }
         }
     }
 
     Some(new_book)
 }
-
 
 impl<'a> ErasureState<'a> {
     pub fn new_hole(&mut self, range: Range, name: String) -> (Option<Range>, Relevance) {
@@ -152,11 +151,11 @@ impl<'a> ErasureState<'a> {
                 // "erased" in the sense that we can just remove them from the runtime and it'll
                 // be fine.
                 (None, Relevance::Irrelevant) => false,
-                
+
                 (None, Relevance::Hole(n)) => {
                     self.holes[hole] = Some(Relevance::Hole(n));
                     true
-                },
+                }
 
                 (_, _) => true,
             },
@@ -194,8 +193,7 @@ impl<'a> ErasureState<'a> {
         name: &QualifiedIdent,
         spine: &Vec<Box<Expr>>,
     ) -> Vec<Box<Expr>> {
-    
-        let fun = match self.names.get(&name.to_string()) {
+        let fun = match self.names.get(name.to_str()) {
             Some(res) => *res,
             None => self.new_hole(name.range, name.to_string()),
         };
@@ -204,7 +202,7 @@ impl<'a> ErasureState<'a> {
             self.err_irrelevant(None, name.range, None)
         }
 
-        let entry = self.book.entrs.get(name.to_string().as_str()).unwrap();
+        let entry = self.book.entrs.get(name.to_str()).unwrap();
         let erased = entry.args.iter();
 
         spine
@@ -274,7 +272,7 @@ impl<'a> ErasureState<'a> {
                 }
             },
             Var(name) => {
-                let relev = self.ctx.get(&name.to_string()).unwrap();
+                let relev = self.ctx.get(name.to_str()).unwrap();
                 let declared_ty = (relev.1).0;
                 let declared_val = relev.0;
                 if !self.unify(name.range, *on, relev.1, false) {
@@ -282,7 +280,7 @@ impl<'a> ErasureState<'a> {
                 }
                 Box::new(expr.clone())
             }
-            All(name, typ, body) => {
+            All(name, typ, body, _erased) => {
                 let ctx = self.ctx.clone();
 
                 // Relevant inside the context that is it's being used?
@@ -353,15 +351,9 @@ impl<'a> ErasureState<'a> {
                 })
             }
             Fun(head, spine) => {
-                let args = self
-                    .book
-                    .entrs
-                    .get(head.to_string().as_str())
-                    .unwrap()
-                    .args
-                    .iter();
+                let args = self.book.entrs.get(head.to_str()).unwrap().args.iter();
 
-                let fun = match self.names.get(&head.to_string()) {
+                let fun = match self.names.get(head.to_str()) {
                     Some(res) => *res,
                     None => self.new_hole(head.range, head.to_string()),
                 };
@@ -391,13 +383,7 @@ impl<'a> ErasureState<'a> {
                 })
             }
             Ctr(head, spine) => {
-                let args = self
-                    .book
-                    .entrs
-                    .get(head.to_string().as_str())
-                    .unwrap()
-                    .args
-                    .iter();
+                let args = self.book.entrs.get(head.to_str()).unwrap().args.iter();
 
                 let fun = match self.names.get(&head.to_string()) {
                     Some(res) => *res,
@@ -455,7 +441,17 @@ impl<'a> ErasureState<'a> {
             .map(|((range, erased), expr)| {
                 (
                     erased,
-                    self.erase_pat((Some(*range), if *erased { Relevance::Irrelevant} else { place.1.clone() }), expr),
+                    self.erase_pat(
+                        (
+                            Some(*range),
+                            if *erased {
+                                Relevance::Irrelevant
+                            } else {
+                                place.1.clone()
+                            },
+                        ),
+                        expr,
+                    ),
                 )
             })
             .filter(|(erased, _)| !*erased)
@@ -475,7 +471,7 @@ impl<'a> ErasureState<'a> {
     }
 
     pub fn erase_entry(&mut self, entry: &Entry) -> Box<Entry> {
-        let place = if let Some(res) = self.names.get(&entry.name.to_string()) {
+        let place = if let Some(res) = self.names.get(entry.name.to_str()) {
             *res
         } else {
             self.new_hole(entry.name.range, entry.name.to_string())

@@ -1,16 +1,16 @@
 use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 
-use crate::errors::SyntaxError;
+use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::macros::eat_single;
 use crate::state::Parser;
 
 impl<'a> Parser<'a> {
-    pub fn is_pat_cons(&self) -> bool {
+    fn is_pat_cons(&self) -> bool {
         self.get().same_variant(&Token::LPar) && self.peek(1).is_upper_id()
     }
 
-    pub fn parse_pat_constructor(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_constructor(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
         self.advance(); // '('
         let name = self.parse_upper_id()?;
@@ -25,7 +25,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_num60(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_num60(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
         let num = eat_single!(self, Token::Num60(n) => *n)?;
         Ok(Box::new(Pat {
@@ -34,7 +34,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_num120(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_num120(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
         let num = eat_single!(self, Token::Num120(n) => *n)?;
         Ok(Box::new(Pat {
@@ -43,7 +43,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_str(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_str(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
         let string = eat_single!(self, Token::Str(str) => str.clone())?;
         Ok(Box::new(Pat {
@@ -52,7 +52,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_group(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_group(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
         self.advance(); // '('
         let mut pat = self.parse_pat()?;
@@ -61,7 +61,7 @@ impl<'a> Parser<'a> {
         Ok(pat)
     }
 
-    pub fn parse_pat_var(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_var(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let id = self.parse_id()?;
         Ok(Box::new(Pat {
             range: id.range,
@@ -69,7 +69,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_single_cons(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_single_cons(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let id = self.parse_upper_id()?;
         Ok(Box::new(Pat {
             range: id.range,
@@ -77,7 +77,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_hole(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_hole(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let range = self.range();
         self.eat_variant(Token::Hole)?;
         Ok(Box::new(Pat {
@@ -86,7 +86,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let range = self.range();
         self.advance(); // '['
         let mut vec = Vec::new();
@@ -126,7 +126,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat(&mut self) -> Result<Box<Pat>, SyntaxError> {
+    pub fn parse_pat(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         if self.is_pat_cons() {
             self.parse_pat_constructor()
         } else if self.get().is_str() {

@@ -4,12 +4,12 @@
 
 use self::tags::EvalTag;
 use self::tags::{operator_to_constructor, TermTag};
-use hvm::Term;
+use hvm::syntax::Term;
 use kind_span::Span;
 use kind_tree::desugared::{self, Book, Expr};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
-use hvm::language as lang;
+use hvm::syntax as lang;
 
 mod tags;
 
@@ -68,7 +68,7 @@ fn mk_var(ident: &str) -> Box<Term> {
 }
 
 fn mk_u60(numb: u64) -> Box<Term> {
-    Box::new(Term::Num { numb })
+    Box::new(Term::U6O { numb })
 }
 
 fn mk_single_ctr(head: String) -> Box<Term> {
@@ -89,7 +89,7 @@ fn mk_ctr_name_from_str(ident: &str) -> Box<Term> {
 }
 
 fn span_to_num(span: Span) -> Box<Term> {
-    Box::new(Term::Num {
+    Box::new(Term::U6O {
         numb: span.encode().0,
     })
 }
@@ -157,7 +157,7 @@ fn codegen_all_expr(
                 mk_var(ident.to_str())
             }
         }
-        All(name, typ, body) => mk_lifted_ctr(
+        All(name, typ, body, _erased) => mk_lifted_ctr(
             eval_ctr(quote, TermTag::All),
             vec![
                 span_to_num(expr.span),

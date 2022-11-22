@@ -3,7 +3,7 @@
 
 use kind_span::Range;
 
-use crate::errors::SyntaxError;
+use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::Lexer;
 
@@ -61,7 +61,7 @@ impl<'a> Lexer<'a> {
         self.pos += size;
         if self.comment_depth != 0 {
             (
-                Token::Error(Box::new(SyntaxError::UnfinishedComment(
+                Token::Error(Box::new(SyntaxDiagnostic::UnfinishedComment(
                     self.mk_range(start),
                 ))),
                 self.mk_range(start),

@@ -52,13 +52,11 @@ pub struct DiagnosticFrame {
     pub hints: Vec<String>,
     pub positions: Vec<Marker>,
 }
-
 pub enum Log {
     Checking(String),
     Checked(Duration),
     Failed(Duration),
 }
-
 pub trait Diagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex>;
     fn to_diagnostic_frame(&self) -> DiagnosticFrame;

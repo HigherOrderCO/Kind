@@ -22,7 +22,7 @@ pub mod uses;
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Derive {
     Match,
-    Open
+    Open,
 }
 
 impl Display for Derive {
@@ -43,12 +43,15 @@ pub fn insert_or_report(
     match hashmap.get(&key) {
         Some(last_range) => {
             channel
-            .send(Box::new(PassError::DuplicatedAttributeArgument(last_range.clone(), range)))
-            .unwrap();
-        },
+                .send(Box::new(PassError::DuplicatedAttributeArgument(
+                    last_range.clone(),
+                    range,
+                )))
+                .unwrap();
+        }
         None => {
             hashmap.insert(key, range);
-        },
+        }
     }
 }
 
@@ -59,7 +62,6 @@ fn string_to_derive(name: &str) -> Option<Derive> {
         _ => None,
     }
 }
-
 
 pub fn expand_derive(
     error_channel: Sender<Box<dyn Diagnostic>>,
@@ -86,7 +88,9 @@ pub fn expand_derive(
         for arg in &attr.args {
             match arg {
                 Ident(range, ident) => match string_to_derive(ident.to_str()) {
-                    Some(key) => insert_or_report(error_channel.clone(), &mut def, key, range.clone()),
+                    Some(key) => {
+                        insert_or_report(error_channel.clone(), &mut def, key, range.clone())
+                    }
                     _ => {
                         error_channel
                             .send(Box::new(PassError::InvalidAttributeArgument(
@@ -113,7 +117,6 @@ pub fn expand_derive(
     } else {
         Some(def)
     }
-
 }
 
 pub fn expand_book(error_channel: Sender<Box<dyn Diagnostic>>, book: &mut Book) -> bool {
@@ -128,15 +131,17 @@ pub fn expand_book(error_channel: Sender<Box<dyn Diagnostic>>, book: &mut Book) 
                     for (key, val) in derive {
                         match key {
                             Derive::Match => {
-                                let res = derive_match(sum.name.range, sum);
+                                let (res, errs) = derive_match(sum.name.range, sum);
                                 let info = res.extract_book_info();
                                 entries.insert(res.name.to_string(), (res, info));
+                                for err in errs {
+                                    error_channel.send(err).unwrap();
+                                    failed = true;
+                                }
                             }
                             other => {
                                 error_channel
-                                    .send(Box::new(PassError::CannotDerive(
-                                        other.to_string(), val,
-                                    )))
+                                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
                                     .unwrap();
                                 failed = true;
                             }
@@ -157,9 +162,7 @@ pub fn expand_book(error_channel: Sender<Box<dyn Diagnostic>>, book: &mut Book) 
                             }
                             other => {
                                 error_channel
-                                    .send(Box::new(PassError::CannotDerive(
-                                        other.to_string(), val,
-                                    )))
+                                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
                                     .unwrap();
                                 failed = true;
                             }

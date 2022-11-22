@@ -13,12 +13,12 @@ use super::DesugarState;
 /// NOTE: Does not work with Pi types.
 pub fn is_data_constructor_of(expr: concrete::expr::Expr, type_name: &str) -> bool {
     match expr.data {
-        concrete::ExprKind::Var(name) => name.to_string().as_str() == type_name,
-        concrete::ExprKind::App(head, _) => {
+        concrete::ExprKind::Var { name } => name.to_string().as_str() == type_name,
+        concrete::ExprKind::App { fun, args: _ } => {
             if let concrete::expr::Expr {
-                data: concrete::ExprKind::Var(name),
+                data: concrete::ExprKind::Var { name },
                 ..
-            } = *head
+            } = *fun
             {
                 name.to_string().as_str() == type_name
             } else {

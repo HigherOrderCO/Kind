@@ -1,22 +1,41 @@
 //! Describes identifiers and symbols inside the language.
 
-use std::fmt::Display;
-
 use kind_span::{Range, SyntaxCtxIndex};
-
+use std::fmt::Display;
+use std::hash::Hash;
 
 /// Stores the name of a variable or constructor.
 /// It's simply a string because in the future i plan
 /// to store all the names and only reference them with
 /// a u64.
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Symbol(String);
+#[derive(Clone, Debug)]
+pub struct Symbol {
+    data: String,
+    hash: u64,
+}
 
 impl Symbol {
     pub fn new(str: String) -> Symbol {
-        Symbol(str)
+        Symbol {
+            hash: fxhash::hash64(&str),
+            data: str,
+        }
     }
 }
+
+impl PartialEq for Symbol {
+    fn eq(&self, other: &Self) -> bool {
+        self.hash == other.hash
+    }
+}
+
+impl Hash for Symbol {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u64(self.hash);
+    }
+}
+
+impl Eq for Symbol {}
 
 /// Identifier inside a syntax context.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -37,7 +56,6 @@ pub struct QualifiedIdent {
     /// Flag that is useful to avoid unbound errors while
     /// trying to collect names created by each of the sintatic
     /// sugars.
-    pub used_by_sugar: bool,
     pub generated: bool,
 }
 
@@ -47,7 +65,6 @@ impl QualifiedIdent {
             root,
             aux,
             range,
-            used_by_sugar: false,
             generated: false,
         }
     }
@@ -57,16 +74,16 @@ impl QualifiedIdent {
     /// and avoid a copy of the string.
     #[inline]
     pub fn to_str(&self) -> &str {
-        &self.root.0
+        &self.root.data
     }
 
     #[inline]
     pub fn get_root(&self) -> String {
-        self.root.0.clone()
+        self.root.data.clone()
     }
 
     pub fn change_root(&mut self, str: String) {
-        self.root = Symbol(str);
+        self.root = Symbol::new(str);
     }
 
     pub fn to_generated(&self) -> Self {
@@ -78,7 +95,7 @@ impl QualifiedIdent {
     /// Avoid this function. It transforms a QualifiedIdent into a Ident
     pub fn to_ident(&self) -> Ident {
         Ident {
-            data: Symbol(self.to_string()),
+            data: Symbol::new(self.to_string()),
             range: self.range,
             generated: self.generated,
         }
@@ -86,44 +103,36 @@ impl QualifiedIdent {
 
     pub fn new_static(root: &str, aux: Option<String>, range: Range) -> QualifiedIdent {
         QualifiedIdent {
-            root: Symbol(root.to_string()),
-            aux: aux.map(Symbol),
+            root: Symbol::new(root.to_string()),
+            aux: aux.map(Symbol::new),
             range,
-            used_by_sugar: false,
             generated: false,
         }
     }
 
     pub fn new_sugared(root: &str, extension: &str, range: Range) -> QualifiedIdent {
         QualifiedIdent {
-            root: Symbol(format!("{}.{}", root, extension)),
+            root: Symbol::new(format!("{}.{}", root, extension)),
             aux: None,
             range,
-            used_by_sugar: true,
             generated: true,
         }
     }
 
     pub fn add_segment(&self, extension: &str) -> QualifiedIdent {
         QualifiedIdent {
-            root: Symbol(format!("{}.{}", self.root.0, extension)),
+            root: Symbol::new(format!("{}.{}", self.root.data, extension)),
             aux: self.aux.clone(),
             range: self.range,
-            used_by_sugar: self.used_by_sugar,
             generated: self.generated,
         }
-    }
-
-    pub fn to_sugar(&mut self) -> &mut QualifiedIdent {
-        self.used_by_sugar = true;
-        self
     }
 }
 
 impl Ident {
     pub fn new(data: String, range: Range) -> Ident {
         Ident {
-            data: Symbol(data),
+            data: Symbol::new(data),
             range,
             generated: false,
         }
@@ -131,7 +140,7 @@ impl Ident {
 
     pub fn new_static(data: &str, range: Range) -> Ident {
         Ident {
-            data: Symbol(data.to_string()),
+            data: Symbol::new(data.to_string()),
             range,
             generated: false,
         }
@@ -139,7 +148,7 @@ impl Ident {
 
     pub fn new_by_sugar(data: &str, range: Range) -> Ident {
         Ident {
-            data: Symbol(data.to_string()),
+            data: Symbol::new(data.to_string()),
             range,
             generated: true,
         }
@@ -147,13 +156,13 @@ impl Ident {
 
     pub fn with_name(&self, f: fn(String) -> String) -> Ident {
         let mut new = self.clone();
-        new.data = Symbol(f(new.data.0));
+        new.data = Symbol::new(f(new.data.data));
         new
     }
 
     #[inline]
     pub fn to_str(&self) -> &str {
-        &self.data.0
+        &self.data.data
     }
 
     pub fn to_generated(&self) -> Self {
@@ -217,7 +226,7 @@ impl Ident {
 
     pub fn add_segment(&self, name: &str) -> Ident {
         Ident {
-            data: Symbol(format!("{}.{}", self.data.0, name)),
+            data: Symbol::new(format!("{}.{}", self.data.data, name)),
             range: self.range,
             generated: false,
         }
@@ -225,7 +234,7 @@ impl Ident {
 
     pub fn generate(data: &str) -> Ident {
         Ident {
-            data: Symbol(data.to_string()),
+            data: Symbol::new(data.to_string()),
             range: Range::ghost_range(),
             generated: true,
         }
@@ -234,7 +243,7 @@ impl Ident {
 
 impl Display for Symbol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.data)
     }
 }
 

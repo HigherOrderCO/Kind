@@ -373,78 +373,98 @@ pub fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
 pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
     ctx.visit_range(&mut expr.range);
     match &mut expr.data {
-        ExprKind::Var(ident) => ctx.visit_ident(ident),
-        ExprKind::Constr(ident, spine) => {
-            ctx.visit_qualified_ident(ident);
-            for arg in spine {
+        ExprKind::Var { name } => ctx.visit_ident(name),
+        ExprKind::Constr { name, args } => {
+            ctx.visit_qualified_ident(name);
+            for arg in args {
                 ctx.visit_binding(arg);
             }
         }
-        ExprKind::All(None, typ, body) => {
-            ctx.visit_expr(typ);
-            ctx.visit_expr(body);
-        }
-        ExprKind::Pair(fst, snd) => {
+        ExprKind::Pair { fst, snd } => {
             ctx.visit_expr(fst);
             ctx.visit_expr(snd);
         }
-        ExprKind::All(Some(ident), typ, body) => {
+        ExprKind::All {
+            param: None,
+            typ,
+            body,
+            ..
+        } => {
+            ctx.visit_expr(typ);
+            ctx.visit_expr(body);
+        }
+        ExprKind::All {
+            param: Some(ident),
+            typ,
+            body,
+            ..
+        } => {
             ctx.visit_ident(ident);
             ctx.visit_expr(typ);
             ctx.visit_expr(body);
         }
-        ExprKind::Sigma(None, typ, body) => {
-            ctx.visit_expr(typ);
-            ctx.visit_expr(body);
+        ExprKind::Sigma {
+            param: None,
+            fst,
+            snd,
+        } => {
+            ctx.visit_expr(fst);
+            ctx.visit_expr(snd);
         }
-        ExprKind::If(cond, if_, else_) => {
+        ExprKind::If { cond, then_, else_ } => {
             ctx.visit_expr(cond);
-            ctx.visit_expr(if_);
+            ctx.visit_expr(then_);
             ctx.visit_expr(else_);
         }
-        ExprKind::Sigma(Some(ident), typ, body) => {
+        ExprKind::Sigma {
+            param: Some(ident),
+            fst,
+            snd,
+        } => {
             ctx.visit_ident(ident);
-            ctx.visit_expr(typ);
-            ctx.visit_expr(body);
+            ctx.visit_expr(fst);
+            ctx.visit_expr(snd);
         }
-        ExprKind::Do(ident, sttm) => {
-            ctx.visit_qualified_ident(ident);
+        ExprKind::Do { typ, sttm } => {
+            ctx.visit_qualified_ident(typ);
             ctx.visit_sttm(sttm)
         }
-        ExprKind::Lambda(ident, binder, body, _erased) => {
-            ctx.visit_ident(ident);
-            match binder {
+        ExprKind::Lambda {
+            param, typ, body, ..
+        } => {
+            ctx.visit_ident(param);
+            match typ {
                 Some(x) => ctx.visit_expr(x),
                 None => (),
             }
             ctx.visit_expr(body);
         }
-        ExprKind::App(expr, spine) => {
-            ctx.visit_expr(expr);
-            for arg in spine {
+        ExprKind::App { fun, args } => {
+            ctx.visit_expr(fun);
+            for arg in args {
                 ctx.visit_app_binding(arg);
             }
         }
-        ExprKind::List(spine) => {
-            for arg in spine {
+        ExprKind::List { args } => {
+            for arg in args {
                 ctx.visit_expr(arg);
             }
         }
-        ExprKind::Let(destruct, val, body) => {
-            ctx.visit_destruct(destruct);
+        ExprKind::Let { name, val, next } => {
+            ctx.visit_destruct(name);
             ctx.visit_expr(val);
-            ctx.visit_expr(body);
+            ctx.visit_expr(next);
         }
-        ExprKind::Ann(val, ty) => {
+        ExprKind::Ann { val, typ } => {
             ctx.visit_expr(val);
-            ctx.visit_expr(ty);
+            ctx.visit_expr(typ);
         }
-        ExprKind::Lit(lit) => {
+        ExprKind::Lit { lit } => {
             ctx.visit_literal(lit);
         }
-        ExprKind::Binary(_op, a, b) => {
-            ctx.visit_expr(a);
-            ctx.visit_expr(b);
+        ExprKind::Binary { op: _, fst, snd } => {
+            ctx.visit_expr(fst);
+            ctx.visit_expr(snd);
         }
         ExprKind::Hole => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),

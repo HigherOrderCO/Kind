@@ -2,6 +2,7 @@
 //! eliminator out of a sum type declaration.
 
 use fxhash::FxHashMap;
+use kind_report::data::Diagnostic;
 use kind_span::Range;
 
 use kind_tree::concrete::expr::Expr;
@@ -10,41 +11,52 @@ use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
-use crate::subst::{substitute_in_expr};
+use crate::errors::DeriveError;
+use crate::subst::substitute_in_expr;
 
 /// Derives an eliminator from a sum type declaration.
-pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
+pub fn derive_match(
+    range: Range,
+    sum: &SumTypeDecl,
+) -> (concrete::Entry, Vec<Box<dyn Diagnostic>>) {
+    let mut errs: Vec<Box<dyn Diagnostic>> = Vec::new();
+
     let mk_var = |name: Ident| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Var(name),
+            data: ExprKind::Var { name },
             range,
         })
     };
 
-    let mk_cons = |name: QualifiedIdent, spine: Vec<Binding>| -> Box<Expr> {
+    let mk_cons = |name: QualifiedIdent, args: Vec<Binding>| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Constr(name, spine),
+            data: ExprKind::Constr { name, args },
             range,
         })
     };
 
-    let mk_app = |left: Box<Expr>, right: Vec<AppBinding>, range: Range| -> Box<Expr> {
+    let mk_app = |fun: Box<Expr>, args: Vec<AppBinding>, range: Range| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::App(left, right),
+            data: ExprKind::App { fun, args },
             range,
         })
     };
 
-    let mk_pi = |name: Ident, left: Box<Expr>, right: Box<Expr>| -> Box<Expr> {
+    let mk_pi = |name: Ident, typ: Box<Expr>, body: Box<Expr>| -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::All(Some(name), left, right),
+            data: ExprKind::All {
+                param: Some(name),
+                typ,
+                body,
+                erased: false,
+            },
             range,
         })
     };
 
     let mk_typ = || -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Lit(Literal::Type),
+            data: ExprKind::Lit { lit: Literal::Type },
             range,
         })
     };
@@ -142,13 +154,19 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         );
 
         let mut indices_of_cons = match cons.typ.clone().map(|x| x.data) {
-            Some(ExprKind::Constr(_, spine)) => spine[sum.parameters.len()..]
-                .iter()
-                .map(|x| match x {
-                    Binding::Positional(expr) => AppBinding::explicit(expr.clone()),
-                    Binding::Named(_, _, _) => todo!("Incomplete feature: Need to reorder"),
-                })
-                .collect(),
+            Some(ExprKind::Constr { name: _, args }) => {
+                let mut new_args = Vec::with_capacity(args.len());
+                for arg in &args[sum.parameters.len()..].to_vec() {
+                    new_args.push(match arg {
+                        Binding::Positional(expr) => AppBinding::explicit(expr.clone()),
+                        Binding::Named(range, _, expr) => {
+                            errs.push(Box::new(DeriveError::CannotUseNamedVariable(range.clone())));
+                            AppBinding::explicit(expr.clone())
+                        }
+                    });
+                }
+                new_args
+            }
             _ => [indice_names.as_slice()].concat(),
         };
 
@@ -179,6 +197,22 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         });
     }
 
+    if !errs.is_empty() {
+        let entry = Entry {
+            name,
+            docs: Vec::new(),
+            args: types,
+            typ: Box::new(Expr {
+                data: ExprKind::Hole,
+                range,
+            }),
+            rules: vec![],
+            range,
+            attrs: Vec::new(),
+        };
+        return (entry, errs);
+    }
+
     let mut res: Vec<AppBinding> = [indice_names.as_slice()].concat();
     res.push(AppBinding::explicit(mk_var(Ident::generate("scrutinizer"))));
     let ret_ty = mk_app(mk_var(motive_ident.clone()), res, range);
@@ -198,7 +232,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         match &cons.typ {
             Some(expr) => match &**expr {
                 Expr {
-                    data: ExprKind::Constr(_, sp),
+                    data: ExprKind::Constr { args, .. },
                     ..
                 } => {
                     irrelev = cons.args.map(|x| x.erased).to_vec();
@@ -211,7 +245,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                         .args
                         .map(|x| x.name.with_name(|f| format!("{}_", f)))
                         .to_vec();
-                    args_indices = sp
+                    args_indices = args
                         .iter()
                         .map(|x| match x {
                             Binding::Positional(expr) => AppBinding {
@@ -297,22 +331,22 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
         args.push(AppBinding {
             data: Box::new(Expr {
-                data: ExprKind::Constr(
-                    cons_ident.clone(),
-                    spine_params
+                data: ExprKind::Constr {
+                    name: cons_ident.clone(),
+                    args: spine_params
                         .iter()
                         .cloned()
                         .map(|x| Binding::Positional(mk_var(x)))
                         .collect(),
-                ),
+                },
                 range,
             }),
             erased: false,
         });
 
         let body = Box::new(Expr {
-            data: ExprKind::Ann(
-                mk_app(
+            data: ExprKind::Ann {
+                val: mk_app(
                     mk_var(cons.name.clone()),
                     spine
                         .iter()
@@ -324,8 +358,8 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
                         .collect(),
                     cons.name.range,
                 ),
-                mk_app(mk_var(motive_ident.clone()), args, range),
-            ),
+                typ: mk_app(mk_var(motive_ident.clone()), args, range),
+            },
             range,
         });
 
@@ -350,5 +384,5 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         attrs: Vec::new(),
     };
 
-    entry
+    (entry, errs)
 }

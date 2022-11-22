@@ -6,7 +6,7 @@ use kind_span::SyntaxCtxIndex;
 
 use kind_tree::{backend, concrete, desugared};
 use session::Session;
-use std::{path::PathBuf};
+use std::path::PathBuf;
 
 use kind_checker as checker;
 
@@ -25,7 +25,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugare
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
-    let all = desugared_book.names.keys().cloned().collect();
+    let all = desugared_book.entrs.iter().map(|x| x.0).cloned().collect();
 
     let succeeded = checker::type_check(&desugared_book, session.diagnostic_sender.clone(), all);
 
@@ -34,7 +34,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugare
     }
 
     let erased = erasure::erase_book(
-        &desugared_book,
+        desugared_book,
         session.diagnostic_sender.clone(),
         FxHashSet::from_iter(vec!["Main".to_string()]),
     )?;
@@ -64,7 +64,7 @@ pub fn erase_book(
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     erasure::erase_book(
-        &desugared_book,
+        desugared_book,
         session.diagnostic_sender.clone(),
         FxHashSet::from_iter(entrypoint.to_owned()),
     )
@@ -79,7 +79,7 @@ pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desug
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     erasure::erase_book(
-        &desugared_book,
+        desugared_book.clone(),
         session.diagnostic_sender.clone(),
         FxHashSet::from_iter(vec!["Main".to_string()]),
     )?;
@@ -102,13 +102,9 @@ pub fn check_main_entry(session: &mut Session, book: &desugared::Book) -> Option
     }
 }
 
-pub fn execute_file(file: &backend::File) -> Box<backend::Term> {
-    // TODO: Change to from_file when hvm support it
-    let mut runtime = hvm::Runtime::from_code(&file.to_string()).unwrap();
-    let main = runtime.alloc_code("Main").unwrap();
-    runtime.run_io(main);
-    runtime.normalize(main);
-    runtime.readback(main)
+pub fn execute_file(file: backend::File) -> Result<String, String> {
+    let res = hvm::eval_main_default(file)?;
+    Ok(res.0)
 }
 
 pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {

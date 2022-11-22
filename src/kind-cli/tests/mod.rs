@@ -75,7 +75,8 @@ fn test_eval() -> Result<(), Error> {
         let root = PathBuf::from(".");
         let mut session = Session::new(root, rx);
 
-        let check = driver::erase_book(&mut session, &PathBuf::from(path), &["Main".to_string()]).map(driver::compile_book_to_hvm);
+        let check = driver::erase_book(&mut session, &PathBuf::from(path), &["Main".to_string()])
+            .map(driver::compile_book_to_hvm);
 
         let diagnostics = tx.try_iter().collect::<Vec<_>>();
         let render = RenderConfig::ascii(2);
@@ -83,7 +84,9 @@ fn test_eval() -> Result<(), Error> {
         kind_report::check_if_colors_are_supported(true);
 
         match check {
-            Some(file) if diagnostics.is_empty() => driver::execute_file(&file).to_string(),
+            Some(file) if diagnostics.is_empty() => {
+                driver::execute_file(file).map_or_else(|e| e, |f| f)
+            }
             _ => {
                 let mut res_string = String::new();
 

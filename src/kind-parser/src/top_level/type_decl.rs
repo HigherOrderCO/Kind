@@ -1,11 +1,11 @@
 use kind_tree::concrete::{Attribute, Constructor, RecordDecl, SumTypeDecl, Telescope};
 
-use crate::errors::SyntaxError;
+use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::state::Parser;
 
 impl<'a> Parser<'a> {
-    pub fn parse_constructor(&mut self) -> Result<Constructor, SyntaxError> {
+    pub fn parse_constructor(&mut self) -> Result<Constructor, SyntaxDiagnostic> {
         let docs = self.parse_docs()?;
         let name = self.parse_any_id()?;
         let args = self.parse_arguments()?;
@@ -17,7 +17,7 @@ impl<'a> Parser<'a> {
         };
 
         self.check_and_eat(Token::Semi);
-        
+
         Ok(Constructor {
             name,
             docs,
@@ -30,8 +30,9 @@ impl<'a> Parser<'a> {
         &mut self,
         docs: Vec<String>,
         attrs: Vec<Attribute>,
-    ) -> Result<SumTypeDecl, SyntaxError> {
+    ) -> Result<SumTypeDecl, SyntaxDiagnostic> {
         self.eat_id("type")?;
+
         let name = self.parse_upper_id()?;
 
         let parameters = self.parse_arguments()?;
@@ -67,7 +68,7 @@ impl<'a> Parser<'a> {
         &mut self,
         docs: Vec<String>,
         attrs: Vec<Attribute>,
-    ) -> Result<RecordDecl, SyntaxError> {
+    ) -> Result<RecordDecl, SyntaxDiagnostic> {
         self.eat_id("record")?;
         let name = self.parse_upper_id()?;
 

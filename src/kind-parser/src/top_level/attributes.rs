@@ -1,12 +1,12 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::{Attribute, AttributeStyle};
 
-use crate::errors::SyntaxError;
+use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::state::Parser;
 
 impl<'a> Parser<'a> {
-    pub fn parse_attr_args(&mut self) -> Result<(Vec<AttributeStyle>, Range), SyntaxError> {
+    fn parse_attr_args(&mut self) -> Result<(Vec<AttributeStyle>, Range), SyntaxDiagnostic> {
         let mut attrs = Vec::new();
 
         let mut range = self.range();
@@ -23,10 +23,10 @@ impl<'a> Parser<'a> {
             self.eat_closing_keyword(Token::RBracket, start)?;
         }
 
-        Ok((attrs, range))   
+        Ok((attrs, range))
     }
 
-    pub fn parse_attr_style(&mut self) -> Result<AttributeStyle, SyntaxError> {
+    fn parse_attr_style(&mut self) -> Result<AttributeStyle, SyntaxDiagnostic> {
         match self.get().clone() {
             Token::LowerId(_) | Token::UpperId(_, None) => {
                 let range = self.range();
@@ -63,7 +63,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_attr(&mut self) -> Result<Attribute, SyntaxError> {
+    fn parse_attr(&mut self) -> Result<Attribute, SyntaxDiagnostic> {
         let start = self.range();
         self.eat_variant(Token::Hash)?;
 
@@ -86,7 +86,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    pub fn parse_attrs(&mut self) -> Result<Vec<Attribute>, SyntaxError> {
+    pub fn parse_attrs(&mut self) -> Result<Vec<Attribute>, SyntaxDiagnostic> {
         let mut attrs = Vec::new();
         while let Some(res) = self.try_single(&|fun| fun.parse_attr())? {
             attrs.push(res);

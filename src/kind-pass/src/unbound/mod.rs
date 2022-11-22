@@ -11,17 +11,12 @@ use std::sync::mpsc::Sender;
 use fxhash::{FxHashMap, FxHashSet};
 use kind_report::data::Diagnostic;
 use kind_span::Range;
-use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
-use kind_tree::concrete::pat::PatIdent;
-use kind_tree::concrete::{Book, Module, TopLevel};
-use kind_tree::symbol::{Ident, QualifiedIdent};
 
-use kind_tree::concrete::{
-    expr::{Expr, ExprKind, SttmKind},
-    pat::{Pat, PatKind},
-    visitor::Visitor,
-    Argument, Entry, Rule,
-};
+use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct, Expr, ExprKind, SttmKind};
+use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
+use kind_tree::concrete::visitor::Visitor;
+use kind_tree::concrete::{Argument, Book, Entry, Module, Rule, TopLevel};
+use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::{visit_opt, visit_vec};
 
 use crate::errors::PassError;
@@ -68,11 +63,12 @@ pub fn collect_module_info(
     state.visit_module(module);
 
     for idents in state.unbound.values() {
-        diagnostic_sender.send(Box::new(PassError::UnboundVariable(
-            idents.to_vec(),
-            vec![],
-        )))
-        .unwrap();
+        diagnostic_sender
+            .send(Box::new(PassError::UnboundVariable(
+                idents.to_vec(),
+                vec![],
+            )))
+            .unwrap();
     }
 
     state
@@ -293,9 +289,7 @@ impl Visitor for UnboundCollector {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
                 self.visit_qualified_ident(
-                    &mut QualifiedIdent::add_segment(ty, "open")
-                        .to_sugar()
-                        .to_generated(),
+                    &mut QualifiedIdent::add_segment(ty, "open").to_generated(),
                 );
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);
@@ -397,68 +391,88 @@ impl Visitor for UnboundCollector {
 
     fn visit_expr(&mut self, expr: &mut Expr) {
         match &mut expr.data {
-            ExprKind::Var(ident) => self.visit_ident(ident),
-            ExprKind::Constr(ident, spine) => {
-                self.visit_qualified_ident(ident);
-                visit_vec!(spine.iter_mut(), arg => self.visit_binding(arg));
+            ExprKind::Var { name } => self.visit_ident(name),
+            ExprKind::Constr { name, args } => {
+                self.visit_qualified_ident(name);
+                visit_vec!(args.iter_mut(), arg => self.visit_binding(arg));
             }
-            ExprKind::All(None, typ, body) => {
+            ExprKind::All {
+                param: None,
+                typ,
+                body,
+                ..
+            } => {
                 self.visit_expr(typ);
                 self.visit_expr(body);
             }
-            ExprKind::All(Some(ident), typ, body) => {
+            ExprKind::All {
+                param: Some(ident),
+                typ,
+                body,
+                ..
+            } => {
                 self.visit_expr(typ);
                 self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
-            ExprKind::Lambda(ident, binder, body, _erased) => {
-                match binder {
+            ExprKind::Lambda {
+                param, typ, body, ..
+            } => {
+                match typ {
                     Some(x) => self.visit_expr(x),
                     None => (),
                 }
-                self.context_vars.push((ident.range, ident.to_string()));
+                self.context_vars.push((param.range, param.to_string()));
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
-            ExprKind::App(head, spine) => {
-                self.visit_expr(head);
-                visit_vec!(spine.iter_mut(), arg => self.visit_expr(&mut arg.data));
+            ExprKind::App { fun, args } => {
+                self.visit_expr(fun);
+                visit_vec!(args.iter_mut(), arg => self.visit_expr(&mut arg.data));
             }
-            ExprKind::Ann(val, ty) => {
+            ExprKind::Ann { val, typ } => {
                 self.visit_expr(val);
-                self.visit_expr(ty);
+                self.visit_expr(typ);
             }
-            ExprKind::Lit(lit) => self.visit_literal(lit),
-            ExprKind::Binary(_, l, r) => {
-                self.visit_expr(l);
-                self.visit_expr(r);
+            ExprKind::Lit { lit } => self.visit_literal(lit),
+            ExprKind::Binary { op: _, fst, snd } => {
+                self.visit_expr(fst);
+                self.visit_expr(snd);
             }
-            ExprKind::Let(ident, val, body) => {
+            ExprKind::Let { name, val, next } => {
                 self.visit_expr(val);
                 let vars = self.context_vars.clone();
-                self.visit_destruct(ident);
-                self.visit_expr(body);
+                self.visit_destruct(name);
+                self.visit_expr(next);
                 self.context_vars = vars;
             }
-            ExprKind::Sigma(None, typ, body) => {
-                self.visit_qualified_ident(
-                    QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
-                );
-                self.visit_expr(typ);
-                self.visit_expr(body);
+            ExprKind::Sigma {
+                param: None,
+                fst,
+                snd,
+            } => {
+                self.visit_qualified_ident(&mut QualifiedIdent::new_static(
+                    "Sigma", None, expr.range,
+                ));
+                self.visit_expr(fst);
+                self.visit_expr(snd);
             }
-            ExprKind::Sigma(Some(ident), typ, body) => {
-                self.visit_qualified_ident(
-                    QualifiedIdent::new_static("Sigma", None, expr.range).to_sugar(),
-                );
-                self.visit_expr(typ);
+            ExprKind::Sigma {
+                param: Some(ident),
+                fst,
+                snd,
+            } => {
+                self.visit_qualified_ident(&mut QualifiedIdent::new_static(
+                    "Sigma", None, expr.range,
+                ));
+                self.visit_expr(fst);
                 self.context_vars.push((ident.range, ident.to_string()));
-                self.visit_expr(body);
+                self.visit_expr(snd);
                 self.context_vars.pop();
             }
             ExprKind::Match(matcher) => {
-                self.visit_qualified_ident(matcher.typ.add_segment("match").to_sugar());
+                self.visit_qualified_ident(&mut matcher.typ.add_segment("match"));
                 self.visit_match(matcher)
             }
             ExprKind::Subst(subst) => {
@@ -475,34 +489,34 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(&mut subst.expr)
             }
             ExprKind::Hole => {}
-            ExprKind::Do(typ, sttm) => {
-                self.visit_qualified_ident(typ.add_segment("pure").to_sugar());
-                self.visit_qualified_ident(typ.add_segment("bind").to_sugar());
+            ExprKind::Do { typ, sttm } => {
+                self.visit_qualified_ident(&mut typ.add_segment("pure"));
+                self.visit_qualified_ident(&mut typ.add_segment("bind"));
                 self.visit_sttm(sttm)
             }
-            ExprKind::If(cond, if_, else_) => {
+            ExprKind::If { cond, then_, else_ } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
                     "Bool", "if", expr.range,
                 ));
                 self.visit_expr(cond);
-                self.visit_expr(if_);
+                self.visit_expr(then_);
                 self.visit_expr(else_);
             }
-            ExprKind::Pair(l, r) => {
+            ExprKind::Pair { fst, snd } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
                     "Pair", "new", expr.range,
                 ));
-                self.visit_expr(l);
-                self.visit_expr(r);
+                self.visit_expr(fst);
+                self.visit_expr(snd);
             }
-            ExprKind::List(spine) => {
+            ExprKind::List { args } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
                     "List", "nil", expr.range,
                 ));
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
                     "List", "cons", expr.range,
                 ));
-                visit_vec!(spine.iter_mut(), arg => self.visit_expr(arg));
+                visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }
         }
     }

@@ -9,6 +9,8 @@ edition = "2021"
 kind-tree = { path = "../kind-tree" }
 kind-span = { path = "../kind-span" }
 kind-report = { path = "../kind-report" }
-hvm = "0.1.89"
+
+hvm = { path = "../../../HVM/crates/hvm", features = ["derive"] }
+
 fxhash = "0.2.1"
 im = "15.1.0"

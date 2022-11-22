@@ -186,7 +186,7 @@ fn mark_inlined<T: Write + Sized>(
                     write!(
                         fmt,
                         "{}",
-                        colorizer(format!("{} {}", config.chars.trline, marker.2.text))
+                        colorizer(format!("{}{}", config.chars.trline, marker.2.text))
                     )?;
                 } else {
                     write!(fmt, "{}", colorizer(config.chars.vbar.to_string()))?;
@@ -459,7 +459,9 @@ impl Report for Box<dyn Diagnostic> {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            let diff =file.clone();
+            let diff =
+                pathdiff::diff_paths(&file.clone(), PathBuf::from(".").canonicalize().unwrap())
+                    .unwrap_or(file);
             write_code_block(&diff, config, &group, code, fmt)?;
         }
 
