@@ -70,7 +70,7 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
 
             let cons = |numb, next| {
                 Box::new(Term::Ctr {
-                    name: String::from("U120.new"),
+                    name: String::from("String.cons"),
                     args: vec![Box::new(Term::U6O { numb }), next],
                 })
             };

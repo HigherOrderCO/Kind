@@ -144,7 +144,7 @@ impl fmt::Display for Token {
             Token::Num60(n) => write!(f, "{}", n),
             Token::Num120(n) => write!(f, "{}u120", n),
             Token::Float(start, end) => write!(f, "{}.{}", start, end),
-            Token::Hole => write!(f, "-"),
+            Token::Hole => write!(f, "_"),
             Token::Plus => write!(f, "+"),
             Token::Minus => write!(f, "-"),
             Token::Star => write!(f, "*"),

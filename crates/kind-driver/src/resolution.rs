@@ -227,7 +227,7 @@ fn parse_and_store_book_by_path<'a>(
     expand_uses(&mut module, session.diagnostic_sender.clone());
 
     module_to_book(&mut failed, session, module, book);
-
+    
     for idents in state.unbound_top_level.values() {
         failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
     }

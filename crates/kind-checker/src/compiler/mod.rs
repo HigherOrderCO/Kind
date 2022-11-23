@@ -267,8 +267,8 @@ fn codegen_all_expr(
             eval_ctr(quote, TermTag::Hole),
             vec![span_to_num(expr.span), mk_u60(*num)],
         ),
+        Str(str) => codegen_str(str),
         Hlp(_) => mk_lifted_ctr(eval_ctr(quote, TermTag::Hlp), vec![span_to_num(expr.span)]),
-        Str(_) => todo!("Strings in codegen"),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),
     }
 }

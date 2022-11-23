@@ -8,24 +8,6 @@ use crate::errors::{PassError, Sugar};
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-    pub(crate) fn desugar_str(&self, range: Range, input: &str) -> Box<desugared::Expr> {
-        let cons = QualifiedIdent::new_static("String.cons", None, range);
-        input.chars().rfold(
-            desugared::Expr::ctr(
-                range,
-                QualifiedIdent::new_static("String.nil", None, range),
-                vec![],
-            ),
-            |right, chr| {
-                desugared::Expr::ctr(
-                    range,
-                    cons.clone(),
-                    vec![desugared::Expr::num60(range, chr as u64), right],
-                )
-            },
-        )
-    }
-
     pub(crate) fn desugar_literal(
         &mut self,
         range: Range,
@@ -38,7 +20,7 @@ impl<'a> DesugarState<'a> {
             Literal::NumType(kind_tree::NumType::U120) => desugared::Expr::u120(range),
             Literal::Number(kind_tree::Number::U60(num)) => desugared::Expr::num60(range, *num),
             Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
-            Literal::String(string) => self.desugar_str(range, string),
+            Literal::String(string) => desugared::Expr::str(range, string.clone()),
             Literal::Char(cht) => desugared::Expr::num60(range, *cht as u64),
         }
     }
