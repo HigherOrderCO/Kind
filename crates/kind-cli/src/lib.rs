@@ -201,7 +201,7 @@ pub fn run_cli(config: Cli) {
             });
 
             if let Some(res) = res {
-                match driver::execute_file(res) {
+                match driver::execute_file(&res.to_string()) {
                     Ok(res) => println!("{}", res),
                     Err(err) => println!("{}", err),
                 }

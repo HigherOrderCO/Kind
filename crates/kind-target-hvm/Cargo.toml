@@ -10,3 +10,5 @@ kind-span = { path = "../kind-span" }
 kind-tree = { path = "../kind-tree" }
 kind-report = { path = "../kind-report" }
 kind-derive = { path = "../kind-derive" }
+
+hvm = { git = "https://github.com/Kindelia/HVM.git" }

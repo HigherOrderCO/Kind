@@ -78,15 +78,15 @@ impl Diagnostic for TypeError {
                     Subtitle::Phrase(
                         Color::Fst,
                         vec![
-                            Word::White("Expected :".to_string()),
-                            Word::Painted(Color::Fst, detected.to_string()),
+                            Word::White("Got      :".to_string()),
+                            Word::Painted(Color::Fst, expected.to_string()),
                         ],
                     ),
                     Subtitle::Phrase(
                         Color::Snd,
                         vec![
-                            Word::White("Got      :".to_string()),
-                            Word::Painted(Color::Snd, expected.to_string()),
+                            Word::White("Expected :".to_string()),
+                            Word::Painted(Color::Snd, detected.to_string()),
                         ],
                     ),
                 ];

@@ -105,6 +105,10 @@ impl<'a> Lexer<'a> {
                         self.mk_range(start),
                     )
                 }
+                '_' => {
+                    self.accumulate_while(&is_valid_id);
+                    (Token::Hole, self.mk_range(start))
+                }
                 c if is_valid_id_start(*c) => {
                     let str = self.accumulate_while(&is_valid_id);
                     (Lexer::to_keyword(str), self.mk_range(start))

@@ -13,8 +13,7 @@ kind-report = { path = "../kind-report" }
 kind-checker = { path = "../kind-checker" }
 kind-pass = { path = "../kind-pass" }
 kind-target-hvm = { path = "../kind-target-hvm" }
-
-hvm = { path = "../../../HVM/crates/hvm" }
+hvm = { git = "https://github.com/Kindelia/HVM.git" }
 
 strsim = "0.10.0"
 fxhash = "0.2.1"

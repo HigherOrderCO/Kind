@@ -2,18 +2,17 @@ use fxhash::{FxHashSet, FxHashMap};
 
 #[derive(Debug)]
 pub struct Node<T> {
+    pub children: FxHashSet<usize>,
+    pub parents: FxHashSet<usize>,
     pub data: T,
     pub invalidated: bool,
     pub hash: u64,
-    pub children: FxHashSet<usize>,
-    pub parents: FxHashSet<usize>,
     pub root: bool,
     pub failed: bool,
 }
 
 #[derive(Debug)]
 pub struct Graph<T> {
-    // Using a hashmap to make it easier to add or remove node.s
     nodes: FxHashMap<usize, Node<T>>,
     count: usize,
 }
@@ -58,38 +57,7 @@ impl<T> Graph<T> {
         }
     }
 
-    fn remove_recursive(&mut self, node_idx: usize, to_delete: &mut FxHashSet<usize>) {
-        if let Some(node) = self.nodes.remove(&node_idx) {
-            let children = node.children.clone();
-            let parents = node.parents.clone();
-
-            for child_idx in children {
-                if let Some(child) = self.nodes.get_mut(&child_idx) {
-                    child.parents.remove(&node_idx);
-                    if child.parents.is_empty() && !child.root {
-                        to_delete.insert(child_idx);
-                        self.remove_recursive(child_idx, to_delete)
-                    }
-                }
-            }
-
-            for parent in parents {
-                if let Some(parent) = self.nodes.get_mut(&parent) {
-                    parent.children.remove(&node_idx);
-                }
-                self.flood_invalidation(parent);
-            }
-        }
-    }
-
-    pub fn remove(&mut self, node_idx: usize) -> FxHashSet<usize> {
-        let mut fx = Default::default();
-        self.remove_recursive(node_idx, &mut fx);
-        fx.insert(node_idx);
-        fx
-    }
-
-    pub fn disconnect_parent(&mut self, child: usize, parent: usize) -> bool {
+    pub fn disconnect(&mut self, child: usize, parent: usize) -> bool {
         if let Some(parent) = self.nodes.get_mut(&parent) {
             parent.children.remove(&child);
         }

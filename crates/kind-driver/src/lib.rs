@@ -1,3 +1,4 @@
+use checker::eval;
 use errors::DriverError;
 use fxhash::FxHashSet;
 use kind_pass::{desugar, erasure, expand};
@@ -102,9 +103,9 @@ pub fn check_main_entry(session: &mut Session, book: &desugared::Book) -> Option
     }
 }
 
-pub fn execute_file(file: backend::File) -> Result<String, String> {
-    let res = hvm::eval_main_default(file)?;
-    Ok(res.0)
+pub fn execute_file(file: &str) -> Result<String, String> {
+    let res = eval(file, "Main", false)?;
+    Ok(res.to_string())
 }
 
 pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {

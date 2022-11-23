@@ -267,7 +267,7 @@ impl<'a> Parser<'a> {
             },
             _ => {
                 let (range_end, spine) = self.parse_call_tail(id.range, multiline)?;
-                range = range_end;
+                range = range.mix(range_end);
                 ExprKind::Constr {
                     name: id,
                     args: spine,

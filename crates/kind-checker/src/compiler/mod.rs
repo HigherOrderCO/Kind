@@ -9,7 +9,7 @@ use kind_span::Span;
 use kind_tree::desugared::{self, Book, Expr};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
-use hvm::syntax as lang;
+use hvm::{syntax as lang, u60};
 
 mod tags;
 
@@ -68,7 +68,9 @@ fn mk_var(ident: &str) -> Box<Term> {
 }
 
 fn mk_u60(numb: u64) -> Box<Term> {
-    Box::new(Term::U6O { numb })
+    Box::new(Term::U6O {
+        numb: u60::new(numb),
+    })
 }
 
 fn mk_single_ctr(head: String) -> Box<Term> {
@@ -90,7 +92,7 @@ fn mk_ctr_name_from_str(ident: &str) -> Box<Term> {
 
 fn span_to_num(span: Span) -> Box<Term> {
     Box::new(Term::U6O {
-        numb: span.encode().0,
+        numb: u60::new(span.encode().0),
     })
 }
 
@@ -512,7 +514,10 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
 /// Compiles a book into an format that is executed by the
 /// type checker in HVM.
 pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File {
-    let mut file = lang::File { rules: vec![] };
+    let mut file = lang::File {
+        rules: vec![],
+        smaps: vec![],
+    };
 
     let functions_entry = lang::Rule {
         lhs: mk_ctr("Functions".to_owned(), vec![]),
@@ -529,6 +534,15 @@ pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File 
         lhs: mk_ctr("HoleInit".to_owned(), vec![]),
         rhs: mk_u60(book.holes),
     });
+
+    for rule in &file.rules {
+        match &*rule.lhs {
+            Term::Ctr { name, args } => {
+                file.smaps.push((name.clone(), vec![false; args.len()]));
+            }
+            _ => todo!(),
+        }
+    }
 
     file
 }

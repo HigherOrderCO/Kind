@@ -150,7 +150,10 @@ impl<'a> ErasureState<'a> {
                 // TODO: It should unify iff we want functions that are considered
                 // "erased" in the sense that we can just remove them from the runtime and it'll
                 // be fine.
-                (None, Relevance::Irrelevant) => false,
+                (None, Relevance::Irrelevant) => {
+                    self.holes[hole] = Some(Relevance::Irrelevant);
+                    true
+                }
 
                 (None, Relevance::Hole(n)) => {
                     self.holes[hole] = Some(Relevance::Hole(n));
@@ -261,7 +264,14 @@ impl<'a> ErasureState<'a> {
         use kind_tree::desugared::ExprKind::*;
 
         match &expr.data {
-            Typ | NumType(_) | Num(_) | Str(_) | Err => Box::new(expr.clone()),
+            Num(_) | Str(_) => Box::new(expr.clone()),
+            Typ | NumType(_) | Err => {
+                let span = expr.span.to_range().unwrap();
+                if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
+                    self.err_irrelevant(None, span, None)
+                }
+                Box::new(expr.clone())
+            }
             Hole(_) | Hlp(_) => match &expr.span {
                 kind_span::Span::Generated => Box::new(expr.clone()),
                 kind_span::Span::Locatable(span) => {
@@ -281,6 +291,11 @@ impl<'a> ErasureState<'a> {
                 Box::new(expr.clone())
             }
             All(name, typ, body, _erased) => {
+                let span = expr.span.to_range().unwrap_or_else(|| name.range.clone());
+                if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
+                    self.err_irrelevant(None, span, None)
+                }
+
                 let ctx = self.ctx.clone();
 
                 // Relevant inside the context that is it's being used?
@@ -299,6 +314,11 @@ impl<'a> ErasureState<'a> {
                         name.to_string(),
                         (name.range, (None, Relevance::Irrelevant)),
                     );
+
+                    let span = expr.span.to_range().unwrap_or_else(|| name.range.clone());
+                    if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
+                        self.err_irrelevant(None, span, None)
+                    }
                 } else {
                     self.ctx.insert(name.to_string(), (name.range, *on));
                 }
@@ -334,6 +354,10 @@ impl<'a> ErasureState<'a> {
                     .iter()
                     .map(|x| {
                         let on = if x.erased {
+                            let span = expr.span.to_range().unwrap();
+                            if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
+                                self.err_irrelevant(None, span, None)
+                            }
                             (x.data.span.to_range(), Relevance::Irrelevant)
                         } else {
                             on.clone()

@@ -85,7 +85,7 @@ fn test_eval() -> Result<(), Error> {
 
         match check {
             Some(file) if diagnostics.is_empty() => {
-                driver::execute_file(file).map_or_else(|e| e, |f| f)
+                driver::execute_file(&file.to_string()).map_or_else(|e| e, |f| f)
             }
             _ => {
                 let mut res_string = String::new();

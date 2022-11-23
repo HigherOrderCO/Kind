@@ -1,3 +1,5 @@
+use hvm::u60;
+
 use kind_tree::{
     backend::{File, Rule, Term},
     desugared,
@@ -6,6 +8,7 @@ use kind_tree::{
 pub fn compile_book(book: desugared::Book) -> File {
     let mut file = File {
         rules: Default::default(),
+        smaps: Default::default(),
     };
     for (_, entry) in book.entrs {
         compile_entry(&mut file, *entry);
@@ -40,13 +43,15 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
         }),
         Ann(left, _) => compile_term(left),
         Sub(_, _, _, expr) => compile_term(expr),
-        Num(kind_tree::Number::U60(numb)) => Box::new(Term::U6O { numb: *numb }),
+        Num(kind_tree::Number::U60(numb)) => Box::new(Term::U6O {
+            numb: u60::new(*numb),
+        }),
         Num(kind_tree::Number::U120(numb)) => {
             let hi = Box::new(Term::U6O {
-                numb: (numb >> 60) as u64,
+                numb: u60::new((numb >> 60) as u64),
             });
             let lo = Box::new(Term::U6O {
-                numb: (numb & 0xFFFFFFFFFFFFFFF) as u64,
+                numb: u60::new((numb & 0xFFFFFFFFFFFFFFF) as u64),
             });
             Box::new(Term::Ctr {
                 name: String::from("U120.new"),

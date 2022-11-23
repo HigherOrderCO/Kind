@@ -237,27 +237,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
 
 [[package]]
-name = "filetime"
-version = "0.2.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b9663d381d07ae25dc88dbdf27df458faa83a9b25336bcac83d5e452b5fc9d3"
-dependencies = [
- "cfg-if",
- "libc",
- "redox_syscall",
- "windows-sys",
-]
-
-[[package]]
-name = "fsevent-sys"
-version = "4.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76ee7a02da4d231650c7cea31349b889be2f45ddb3ef3032d2ec8185f6313fd2"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "fxhash"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -295,65 +274,17 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.1-beta"
+version = "1.0.4-beta"
+source = "git+https://github.com/Kindelia/HVM.git#169f82733a4cbfe15f3d49d45a8aef02c24de18d"
 dependencies = [
  "clap 3.2.23",
- "hvm-compiler",
- "hvm-derive",
- "hvm-parser",
- "hvm-runtime",
- "hvm-syntax",
-]
-
-[[package]]
-name = "hvm-compiler"
-version = "0.1.0"
-dependencies = [
- "hvm-parser",
- "hvm-runtime",
- "hvm-syntax",
- "itertools",
-]
-
-[[package]]
-name = "hvm-derive"
-version = "0.1.0"
-dependencies = [
- "hvm-parser",
- "hvm-runtime",
- "hvm-syntax",
- "itertools",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "hvm-parser"
-version = "0.1.0"
-dependencies = [
- "highlight_error",
- "hvm-syntax",
-]
-
-[[package]]
-name = "hvm-runtime"
-version = "1.0.1-beta"
-dependencies = [
  "crossbeam",
  "highlight_error",
- "hvm-parser",
- "hvm-syntax",
  "im",
  "instant",
  "itertools",
  "sysinfo",
 ]
-
-[[package]]
-name = "hvm-syntax"
-version = "0.1.0"
 
 [[package]]
 name = "im"
@@ -377,26 +308,6 @@ checksum = "1885e79c1fc4b10f0e172c475f458b7f7b93061064d98c3293e98c5ba0c8b399"
 dependencies = [
  "autocfg",
  "hashbrown",
-]
-
-[[package]]
-name = "inotify"
-version = "0.9.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8069d3ec154eb856955c1c0fbffefbf5f3c40a104ec912d4797314c1801abff"
-dependencies = [
- "bitflags",
- "inotify-sys",
- "libc",
-]
-
-[[package]]
-name = "inotify-sys"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e05c02b5e89bff3b946cedeca278abc628fe811e604f027c45a8aa3cf793d0eb"
-dependencies = [
- "libc",
 ]
 
 [[package]]
@@ -460,8 +371,6 @@ dependencies = [
  "kind-driver",
  "kind-query",
  "kind-report",
- "notify",
- "notify-debouncer-mini",
  "ntest",
  "pretty_assertions",
  "walkdir",
@@ -552,6 +461,7 @@ version = "0.1.0"
 name = "kind-target-hvm"
 version = "0.1.0"
 dependencies = [
+ "hvm",
  "kind-derive",
  "kind-report",
  "kind-span",
@@ -561,6 +471,13 @@ dependencies = [
 [[package]]
 name = "kind-target-kdl"
 version = "0.1.0"
+dependencies = [
+ "hvm",
+ "kind-derive",
+ "kind-report",
+ "kind-span",
+ "kind-tree",
+]
 
 [[package]]
 name = "kind-tree"
@@ -570,26 +487,6 @@ dependencies = [
  "hvm",
  "kind-span",
  "linked-hash-map",
-]
-
-[[package]]
-name = "kqueue"
-version = "1.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c8fc60ba15bf51257aa9807a48a61013db043fcf3a78cb0d916e8e396dcad98"
-dependencies = [
- "kqueue-sys",
- "libc",
-]
-
-[[package]]
-name = "kqueue-sys"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8367585489f01bc55dd27404dcf56b95e6da061a256a666ab23be9ba96a2e587"
-dependencies = [
- "bitflags",
- "libc",
 ]
 
 [[package]]
@@ -630,45 +527,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5de893c32cde5f383baa4c04c5d6dbdd735cfd4a794b0debdb2bb1b421da5ff4"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "mio"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5d732bc30207a6423068df043e3d02e0735b155ad7ce1a6f76fe2baa5b158de"
-dependencies = [
- "libc",
- "log",
- "wasi",
- "windows-sys",
-]
-
-[[package]]
-name = "notify"
-version = "5.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed2c66da08abae1c024c01d635253e402341b4060a12e99b31c7594063bf490a"
-dependencies = [
- "bitflags",
- "crossbeam-channel",
- "filetime",
- "fsevent-sys",
- "inotify",
- "kqueue",
- "libc",
- "mio",
- "walkdir",
- "winapi 0.3.9",
-]
-
-[[package]]
-name = "notify-debouncer-mini"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e23e9fa24f094b143c1eb61f90ac6457de87be6987bc70746e0179f7dbc9007b"
-dependencies = [
- "notify",
 ]
 
 [[package]]
@@ -1070,12 +928,6 @@ dependencies = [
  "winapi 0.3.9",
  "winapi-util",
 ]
-
-[[package]]
-name = "wasi"
-version = "0.11.0+wasi-snapshot-preview1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"

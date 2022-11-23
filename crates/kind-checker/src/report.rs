@@ -71,9 +71,11 @@ fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
             None,
             Range::ghost_range(),
         )),
-        Term::Ctr { name, args: _ } => {
-            Ok(QualifiedIdent::new_static(name, None, Range::ghost_range()))
-        }
+        Term::Ctr { name, args: _ } => Ok(QualifiedIdent::new_static(
+            &name[..name.len() - 1],
+            None,
+            Range::ghost_range(),
+        )),
         _ => Err("Error while matching qualified".to_string()),
     }
 }
