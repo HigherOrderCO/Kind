@@ -7,10 +7,8 @@ use fxhash::FxHashMap;
 use kind_span::{Range, Span};
 use linked_hash_map::LinkedHashMap;
 
-use crate::{
-    symbol::{Ident, QualifiedIdent},
-    Operator,
-};
+use crate::symbol::{Ident, QualifiedIdent};
+pub use crate::{NumType, Number, Operator};
 
 /// Just a vector of expressions. It is called spine because
 /// it is usually in a form like (a b c d e) that can be interpret
