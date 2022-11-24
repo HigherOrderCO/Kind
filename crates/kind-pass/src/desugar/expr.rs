@@ -280,7 +280,7 @@ impl<'a> DesugarState<'a> {
                     typ.range,
                     self.gen_name(expr.range),
                     self.desugar_expr(typ),
-                    self.gen_hole_expr(),
+                    self.gen_hole_expr(typ.range),
                     *erased,
                 ),
             ),

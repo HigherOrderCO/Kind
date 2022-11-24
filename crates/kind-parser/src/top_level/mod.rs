@@ -262,24 +262,12 @@ impl<'a> Parser<'a> {
         self.eat_id("as")?;
         let alias = self.parse_upper_id()?;
 
-        match (origin, alias) {
-            (
-                QualifiedIdent {
-                    aux: Some(_),
-                    range,
-                    ..
-                },
-                _,
-            )
-            | (
-                _,
-                QualifiedIdent {
-                    aux: Some(_),
-                    range,
-                    ..
-                },
-            ) => Err(SyntaxDiagnostic::ImportsCannotHaveAlias(range)),
-            (origin, alias) => Ok((origin.to_string(), alias.to_string())),
+        if origin.get_aux().is_some() {
+            Err(SyntaxDiagnostic::ImportsCannotHaveAlias(origin.range))
+        } else if alias.get_aux().is_some() {
+            Err(SyntaxDiagnostic::ImportsCannotHaveAlias(alias.range))
+        } else {
+            Ok((origin.to_string(), alias.to_string()))
         }
     }
 

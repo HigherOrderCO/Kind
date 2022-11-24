@@ -59,7 +59,7 @@ fn ident_to_path(
     ident: &QualifiedIdent,
     search_on_parent: bool,
 ) -> Result<Option<PathBuf>, Box<dyn Diagnostic>> {
-    let name = ident.root.to_string();
+    let name = ident.to_string();
     let segments = name.as_str().split('.').collect::<Vec<&str>>();
     let mut raw_path = root.to_path_buf();
     raw_path.push(PathBuf::from(segments.join("/")));

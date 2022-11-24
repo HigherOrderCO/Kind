@@ -265,22 +265,13 @@ impl<'a> ErasureState<'a> {
 
         match &expr.data {
             Num(_) | Str(_) => Box::new(expr.clone()),
-            Typ | NumType(_) | Err => {
+            Typ | NumType(_) | Err | Hole(_) | Hlp(_) => {
                 let span = expr.span.to_range().unwrap();
                 if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
                     self.err_irrelevant(None, span, None)
                 }
                 Box::new(expr.clone())
             }
-            Hole(_) | Hlp(_) => match &expr.span {
-                kind_span::Span::Generated => Box::new(expr.clone()),
-                kind_span::Span::Locatable(span) => {
-                    if !self.unify(*span, *on, (None, Relevance::Irrelevant), false) {
-                        self.err_irrelevant(None, *span, None)
-                    }
-                    Box::new(expr.clone())
-                }
-            },
             Var(name) => {
                 let relev = self.ctx.get(name.to_str()).unwrap();
                 let declared_ty = (relev.1).0;

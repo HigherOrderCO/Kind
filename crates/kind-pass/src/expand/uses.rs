@@ -16,15 +16,15 @@ pub struct Expand {
 
 impl Visitor for Expand {
     fn visit_qualified_ident(&mut self, ident: &mut kind_tree::symbol::QualifiedIdent) {
-        if ident.aux.is_none() {
+        if ident.get_aux().is_none() {
             return;
         }
-        let alias = match self.names.get(&ident.root.to_string()) {
+        let alias = match self.names.get(&ident.get_root().to_string()) {
             Some(path) => path,
             None => {
                 self.errors
                     .send(Box::new(PassError::CannotFindAlias(
-                        ident.root.to_string(),
+                        ident.get_root().to_string(),
                         ident.range,
                     )))
                     .unwrap();
@@ -32,10 +32,10 @@ impl Visitor for Expand {
                 return;
             }
         };
-        match &ident.aux {
+        match &ident.get_aux() {
             Some(post) => {
                 ident.change_root(format!("{}.{}", alias, post));
-                ident.aux = None;
+                ident.reset_aux()
             }
             None => ident.change_root(alias.clone()),
         }

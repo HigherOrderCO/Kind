@@ -31,7 +31,7 @@ impl<'a> DesugarState<'a> {
                     if create_var {
                         arguments.push(desugared::Expr::var(self.gen_name(arg.range)))
                     } else {
-                        arguments.push(self.gen_hole_expr())
+                        arguments.push(self.gen_hole_expr(arg.range))
                     }
                 } else {
                     arguments.push(spine_iter.next().unwrap().to_owned())
@@ -93,7 +93,7 @@ impl<'a> DesugarState<'a> {
                         if entry.arguments[i].hidden {
                             // It's not expected that positional arguments require the range so
                             // it's the reason why we are using a terrible "ghost range"
-                            arguments[i] = Some((Range::ghost_range(), self.gen_hole_expr()))
+                            arguments[i] = Some((Range::ghost_range(), self.gen_hole_expr(Range::ghost_range())))
                         }
                     }
                 } else if entry.arguments.len() != args.len() {

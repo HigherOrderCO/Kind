@@ -94,12 +94,12 @@ impl UnboundCollector {
     fn visit_top_level_names(&mut self, toplevel: &mut TopLevel) {
         match toplevel {
             TopLevel::SumType(sum) => {
-                debug_assert!(sum.name.aux.is_none());
+                debug_assert!(sum.name.get_aux().is_none());
                 self.top_level_defs
                     .insert(sum.name.get_root(), sum.name.range);
                 for cons in &sum.constructors {
                     let name_cons = sum.name.add_segment(cons.name.to_str());
-                    debug_assert!(name_cons.aux.is_none());
+                    debug_assert!(name_cons.get_aux().is_none());
                     self.top_level_defs
                         .insert(name_cons.get_root(), name_cons.range);
                 }
@@ -107,8 +107,8 @@ impl UnboundCollector {
             TopLevel::RecordType(rec) => {
                 let name_cons = rec.name.add_segment(rec.constructor.to_str());
 
-                debug_assert!(rec.name.aux.is_none());
-                debug_assert!(name_cons.aux.is_none());
+                debug_assert!(rec.name.get_aux().is_none());
+                debug_assert!(name_cons.get_aux().is_none());
 
                 self.top_level_defs
                     .insert(rec.name.get_root(), rec.name.range);
@@ -117,7 +117,7 @@ impl UnboundCollector {
             }
 
             TopLevel::Entry(entry) => {
-                debug_assert!(entry.name.aux.is_none());
+                debug_assert!(entry.name.get_aux().is_none());
                 self.top_level_defs
                     .insert(entry.name.get_root(), entry.name.range);
             }
@@ -140,7 +140,7 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
-        debug_assert!(ident.aux.is_none());
+        debug_assert!(ident.get_aux().is_none());
         if !self.top_level_defs.contains_key(&ident.get_root()) {
             let entry = self.unbound_top_level.entry(ident.get_root()).or_default();
             entry.insert(ident.clone());

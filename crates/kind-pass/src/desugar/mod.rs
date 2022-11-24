@@ -61,13 +61,13 @@ impl<'a> DesugarState<'a> {
 
     fn gen_name(&mut self, range: Range) -> Ident {
         self.name_count += 1;
-        Ident::new(format!("x{}_", self.name_count), range)
+        Ident::new(format!("_x{}", self.name_count), range)
     }
 
-    fn gen_hole_expr(&mut self) -> Box<desugared::Expr> {
+    fn gen_hole_expr(&mut self, range: Range) -> Box<desugared::Expr> {
         Box::new(desugared::Expr {
             data: desugared::ExprKind::Hole(self.gen_hole()),
-            span: Span::Generated,
+            span: Span::Locatable(range),
         })
     }
 

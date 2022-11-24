@@ -49,8 +49,9 @@ pub struct Ident {
 /// constructions.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct QualifiedIdent {
-    pub root: Symbol,
-    pub aux: Option<Symbol>,
+    root: Symbol,
+    aux: Option<Symbol>,
+    
     pub range: Range,
 
     /// Flag that is useful to avoid unbound errors while
@@ -80,6 +81,16 @@ impl QualifiedIdent {
     #[inline]
     pub fn get_root(&self) -> String {
         self.root.data.clone()
+    }
+
+    #[inline]
+    pub fn get_aux(&self) -> Option<Symbol> {
+        self.aux.clone()
+    }
+
+    #[inline]
+    pub fn reset_aux(&mut self) {
+        self.aux = None
     }
 
     pub fn change_root(&mut self, str: String) {

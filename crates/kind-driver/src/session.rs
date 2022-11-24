@@ -13,6 +13,7 @@ use kind_report::data::Diagnostic;
 pub struct Session {
     pub loaded_paths: Vec<Rc<PathBuf>>,
     pub loaded_sources: Vec<String>,
+    
     pub loaded_paths_map: FxHashMap<PathBuf, usize>,
 
     /// It will be useful in the future
