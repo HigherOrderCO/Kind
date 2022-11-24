@@ -216,6 +216,8 @@ fn parse_and_store_book_by_path<'a>(
     let (mut module, mut failed) =
         kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
 
+    expand_uses(&mut module, session.diagnostic_sender.clone());
+
     let mut state = UnboundCollector::new(session.diagnostic_sender.clone(), false);
     state.visit_module(&mut module);
 
@@ -223,8 +225,6 @@ fn parse_and_store_book_by_path<'a>(
         unbound_variable(session, book, idents);
         failed = true;
     }
-
-    expand_uses(&mut module, session.diagnostic_sender.clone());
 
     module_to_book(&mut failed, session, module, book);
     
