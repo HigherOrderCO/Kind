@@ -305,11 +305,6 @@ impl<'a> ErasureState<'a> {
                         name.to_string(),
                         (name.range, (None, Relevance::Irrelevant)),
                     );
-
-                    let span = expr.span.to_range().unwrap_or_else(|| name.range.clone());
-                    if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
-                        self.err_irrelevant(None, span, None)
-                    }
                 } else {
                     self.ctx.insert(name.to_string(), (name.range, *on));
                 }

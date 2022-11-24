@@ -8,19 +8,40 @@ use crate::errors::{PassError, Sugar};
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
+    pub fn check_implementation(&mut self, name: &str, range: Range, sugar: Sugar) -> bool {
+        if !self.old_book.names.contains_key(&name.to_string()) {
+            self.send_err(PassError::NeedToImplementMethods(range, sugar));
+            false
+        } else {
+            true
+        }
+    }
+
     pub(crate) fn desugar_literal(
         &mut self,
         range: Range,
         literal: &expr::Literal,
     ) -> Box<desugared::Expr> {
         match literal {
+            Literal::Number(kind_tree::Number::U120(num)) => {
+                if !self.check_implementation("U120.new", range, Sugar::U120) {
+                    return desugared::Expr::err(range);
+                }
+                desugared::Expr::num120(range, *num)
+            }
+            Literal::String(string) => {
+                if !self.check_implementation("String.cons", range, Sugar::String)
+                    || !self.check_implementation("String.nil", range, Sugar::String)
+                {
+                    return desugared::Expr::err(range);
+                }
+                desugared::Expr::str(range, string.clone())
+            }
             Literal::Type => desugared::Expr::typ(range),
             Literal::Help(name) => desugared::Expr::hlp(range, name.clone()),
             Literal::NumType(kind_tree::NumType::U60) => desugared::Expr::u60(range),
             Literal::NumType(kind_tree::NumType::U120) => desugared::Expr::u120(range),
             Literal::Number(kind_tree::Number::U60(num)) => desugared::Expr::num60(range, *num),
-            Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
-            Literal::String(string) => desugared::Expr::str(range, string.clone()),
             Literal::Char(cht) => desugared::Expr::num60(range, *cht as u64),
         }
     }
@@ -138,9 +159,7 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         let sigma = QualifiedIdent::new_static("Sigma", None, range);
 
-        let entry = self.old_book.entries.get(sigma.to_string().as_str());
-        if entry.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::Sigma));
+        if !self.check_implementation(sigma.to_str(), range, Sugar::Sigma) {
             return desugared::Expr::err(range);
         }
 
@@ -221,10 +240,7 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         let sigma_new = QualifiedIdent::new_sugared("Sigma", "new", range);
 
-        let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
-
-        if entry.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
+        if !self.check_implementation(sigma_new.to_str(), range, Sugar::Pair) {
             return desugared::Expr::err(range);
         }
 

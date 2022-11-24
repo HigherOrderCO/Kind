@@ -113,6 +113,32 @@ fn lam(name: &Ident, body: Box<Term>) -> Box<Term> {
     })
 }
 
+fn desugar_str(input: &str, span: Span) -> Box<desugared::Expr> {
+    let nil = QualifiedIdent::new_static("String.nil", None, span.to_range().unwrap());
+    let cons = QualifiedIdent::new_static("String.cons", None, span.to_range().unwrap());
+    input.chars().rfold(
+        Box::new(desugared::Expr {
+            data: desugared::ExprKind::Ctr(nil, vec![]),
+            span,
+        }),
+        |right, chr| {
+            Box::new(desugared::Expr {
+                data: desugared::ExprKind::Ctr(
+                    cons.clone(),
+                    vec![
+                        Box::new(desugared::Expr {
+                            data: desugared::ExprKind::Num(kind_tree::Number::U60(chr as u64)),
+                            span,
+                        }),
+                        right,
+                    ],
+                ),
+                span,
+            })
+        },
+    )
+}
+
 fn codegen_str(input: &str) -> Box<Term> {
     input.chars().rfold(
         Box::new(Term::Ctr {
@@ -267,7 +293,7 @@ fn codegen_all_expr(
             eval_ctr(quote, TermTag::Hole),
             vec![span_to_num(expr.span), mk_u60(*num)],
         ),
-        Str(str) => codegen_str(str),
+        Str(str) => codegen_all_expr(lhs_rule, lhs, num, quote, &desugar_str(str, expr.span)),
         Hlp(_) => mk_lifted_ctr(eval_ctr(quote, TermTag::Hlp), vec![span_to_num(expr.span)]),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),
     }

@@ -106,7 +106,7 @@ pub fn derive_match(
     let motive_ident = Ident::new_static("motive", range);
 
     let motive_type = sum.indices.iter().rfold(
-        mk_pi(Ident::new_static("_val", range), res_motive_ty, mk_typ()),
+        mk_pi(Ident::new_static("val_", range), res_motive_ty, mk_typ()),
         |out, arg| {
             mk_pi(
                 arg.name.clone(),
@@ -191,7 +191,7 @@ pub fn derive_match(
         types.push(Argument {
             hidden: false,
             erased: false,
-            name: Ident::new_static(&format!("_{}", cons.name.to_string()), range),
+            name: Ident::new_static(&format!("{}_", cons.name.to_string()), range),
             typ: Some(cons_type),
             range,
         });
@@ -239,11 +239,11 @@ pub fn derive_match(
                     spine_params = sum
                         .parameters
                         .extend(&cons.args)
-                        .map(|x| x.name.with_name(|f| format!("_{}", f)))
+                        .map(|x| x.name.with_name(|f| format!("{}_", f)))
                         .to_vec();
                     spine = cons
                         .args
-                        .map(|x| x.name.with_name(|f| format!("_{}", f)))
+                        .map(|x| x.name.with_name(|f| format!("{}_", f)))
                         .to_vec();
                     args_indices = args
                         .iter()
@@ -261,7 +261,7 @@ pub fn derive_match(
                         let renames = FxHashMap::from_iter(
                             sum.parameters
                                 .extend(&cons.args)
-                                .map(|x| (x.name.to_string(), format!("_{}", x.name.to_string())))
+                                .map(|x| (x.name.to_string(), format!("{}_", x.name.to_string())))
                                 .iter()
                                 .cloned(),
                         );
@@ -280,12 +280,12 @@ pub fn derive_match(
                     .parameters
                     .extend(&sum.indices)
                     .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("_{}", f)))
+                    .map(|x| x.name.with_name(|f| format!("{}_", f)))
                     .to_vec();
                 spine = sum
                     .indices
                     .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("_{}", f)))
+                    .map(|x| x.name.with_name(|f| format!("{}_", f)))
                     .to_vec();
                 args_indices = sum
                     .indices

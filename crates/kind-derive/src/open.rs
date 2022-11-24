@@ -106,7 +106,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
     let spine: Vec<Ident> = rec
         .fields
         .iter()
-        .map(|(name, _, _)| name.with_name(|f| format!("_{}", f)))
+        .map(|(name, _, _)| name.with_name(|f| format!("{}_", f)))
         .collect();
 
     pats.push(Box::new(Pat {
