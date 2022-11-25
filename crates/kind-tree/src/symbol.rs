@@ -51,7 +51,7 @@ pub struct Ident {
 pub struct QualifiedIdent {
     root: Symbol,
     aux: Option<Symbol>,
-    
+
     pub range: Range,
 
     /// Flag that is useful to avoid unbound errors while
@@ -182,6 +182,15 @@ impl Ident {
         old
     }
 
+    pub fn to_qualified_ident(&self) -> QualifiedIdent {
+        QualifiedIdent {
+            root: self.data.clone(),
+            aux: None,
+            range: self.range,
+            generated: false,
+        }
+    }
+
     pub fn decode(num: u64) -> String {
         let mut num = num;
         let mut name = String::new();
@@ -245,7 +254,7 @@ impl Ident {
 
     pub fn generate(data: &str) -> Ident {
         Ident {
-            data: Symbol::new(data.to_string()),
+            data: Symbol::new(data.to_owned()),
             range: Range::ghost_range(),
             generated: true,
         }

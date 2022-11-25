@@ -93,13 +93,14 @@ fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
 fn colorize_code<'a, T: Write + Sized>(
     markers: &mut [&(Point, Point, &Marker)],
     code_line: &'a str,
+    modify: &dyn Fn(&str) -> String,
     fmt: &mut T,
 ) -> std::fmt::Result {
     markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
     for marker in markers {
         if start < marker.0.column {
-            write!(fmt, "{}", &code_line[start..marker.0.column])?;
+            write!(fmt, "{}", modify(&code_line[start..marker.0.column]))?;
             start = marker.0.column;
         }
 
@@ -117,7 +118,7 @@ fn colorize_code<'a, T: Write + Sized>(
     }
 
     if start < code_line.len() {
-        write!(fmt, "{}", &code_line[start..code_line.len()])?;
+        write!(fmt, "{}", modify(&code_line[start..code_line.len()]))?;
     }
     writeln!(fmt)?;
     Ok(())
@@ -164,6 +165,8 @@ fn mark_inlined<T: Write + Sized>(
         }
     }
     writeln!(fmt)?;
+
+    // Pretty print the marker
     for i in 0..inline_markers.len() {
         write!(
             fmt,
@@ -275,6 +278,7 @@ fn write_code_block<'a, T: Write + Sized>(
     }
 
     let code_lines: Vec<&'a str> = group_code.lines().collect();
+
     let mut lines = lines_set
         .iter()
         .filter(|x| **x < code_lines.len())
@@ -285,9 +289,12 @@ fn write_code_block<'a, T: Write + Sized>(
         let line = lines[i];
         let mut prefix = "   ".to_string();
         let mut empty_vec = Vec::new();
+
         let row = markers_by_line.get_mut(line).unwrap_or(&mut empty_vec);
+
         let mut inline_markers: Vec<&(Point, Point, &Marker)> =
             row.iter().filter(|x| x.0.line == x.1.line).collect();
+
         let mut current = None;
 
         for marker in &multi_line_markers {
@@ -315,12 +322,15 @@ fn write_code_block<'a, T: Write + Sized>(
             prefix,
         )?;
 
-        if let Some(marker) = current {
+        let modify: Box<dyn Fn(&str) -> String> = if let Some(marker) = current {
             prefix = format!(" {} ", get_colorizer(&marker.2.color)(config.chars.vbar));
-        }
+            Box::new(|str: &str| get_colorizer(&marker.2.color)(str).to_string())
+        } else {
+            Box::new(|str: &str| str.to_string())
+        };
 
         if !inline_markers.is_empty() {
-            colorize_code(&mut inline_markers, code_lines[*line], fmt)?;
+            colorize_code(&mut inline_markers, code_lines[*line], &modify, fmt)?;
             mark_inlined(&prefix, code_lines[*line], config, &mut inline_markers, fmt)?;
             if markers_by_line.contains_key(&(line + 1)) {
                 writeln!(
@@ -332,7 +342,7 @@ fn write_code_block<'a, T: Write + Sized>(
                 )?;
             }
         } else {
-            writeln!(fmt, "{}", code_lines[*line])?;
+            writeln!(fmt, "{}", modify(code_lines[*line]))?;
         }
 
         if let Some(marker) = current {
@@ -501,12 +511,20 @@ impl Report for Log {
                     file
                 )
             }
+            Log::Compiled(duration) => {
+                writeln!(
+                    fmt,
+                    "  {} All relevant terms compiled. took {:.2}s",
+                    Paint::new(" COMPILED ").bg(yansi::Color::Green).bold(),
+                    duration.as_secs_f32()
+                )
+            }
             Log::Checked(duration) => {
                 writeln!(
                     fmt,
-                    "   {} took {}s",
+                    "   {} All terms checked. took {:.2}s",
                     Paint::new(" CHECKED ").bg(yansi::Color::Green).bold(),
-                    duration.as_secs()
+                    duration.as_secs_f32()
                 )
             }
             Log::Failed(duration) => {

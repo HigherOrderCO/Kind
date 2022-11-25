@@ -86,15 +86,6 @@ pub enum Command {
     /// Compiles a file to HVM (.hvm)
     #[clap(aliases = &["hvm"])]
     ToHVM { file: String },
-
-    /// Watch for file changes and then
-    /// check when some file change.
-    #[clap(aliases = &["w"])]
-    Watch { file: String },
-
-    /// Read eval print loop
-    #[clap(aliases = &["re"])]
-    Repl,
 }
 
 /// Helper structure to use stderr as fmt::Write
@@ -127,6 +118,7 @@ pub fn compile_in_session<T>(
     render_config: RenderConfig,
     root: PathBuf,
     file: String,
+    compiled: bool,
     fun: &mut dyn FnMut(&mut Session) -> Option<T>,
 ) -> Option<T> {
     let (rx, tx) = std::sync::mpsc::channel();
@@ -148,7 +140,15 @@ pub fn compile_in_session<T>(
     let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
 
     if diagnostics.is_empty() && res.is_some() {
-        render_to_stderr(&render_config, &session, &Log::Checked(start.elapsed()));
+        render_to_stderr(
+            &render_config,
+            &session,
+            &if compiled {
+                Log::Compiled(start.elapsed())
+            } else {
+                Log::Checked(start.elapsed())
+            },
+        );
         eprintln!();
         res
     } else {
@@ -175,12 +175,12 @@ pub fn run_cli(config: Cli) {
 
     match config.command {
         Command::Check { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), false, &mut |session| {
                 driver::type_check_book(session, &PathBuf::from(file.clone()))
             });
         }
         Command::ToHVM { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 let book = driver::erase_book(session, &PathBuf::from(file.clone()), &entrypoints)?;
                 Some(driver::compile_book_to_hvm(book))
             })
@@ -190,7 +190,7 @@ pub fn run_cli(config: Cli) {
             });
         }
         Command::Run { file } => {
-            let res = compile_in_session(render_config, root, file.clone(), &mut |session| {
+            let res = compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 let book = driver::erase_book(
                     session,
                     &PathBuf::from(file.clone()),
@@ -208,7 +208,7 @@ pub fn run_cli(config: Cli) {
             }
         }
         Command::Show { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 driver::to_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
@@ -217,7 +217,7 @@ pub fn run_cli(config: Cli) {
             });
         }
         Command::ToKindCore { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 driver::desugar_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
@@ -226,7 +226,7 @@ pub fn run_cli(config: Cli) {
             });
         }
         Command::Erase { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 driver::erase_book(session, &PathBuf::from(file.clone()), &entrypoints)
             })
             .map(|res| {
@@ -235,7 +235,7 @@ pub fn run_cli(config: Cli) {
             });
         }
         Command::GenChecker { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 driver::check_erasure_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
@@ -244,22 +244,25 @@ pub fn run_cli(config: Cli) {
             });
         }
         Command::Eval { file } => {
-            compile_in_session(render_config, root, file.clone(), &mut |session| {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
                 let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
-                driver::check_main_entry(session, &book)?;
+                driver::check_main_desugared_entry(session, &book)?;
                 Some(book)
             })
             .map(|res| println!("{}", driver::eval_in_checker(&res)));
         }
-        Command::Watch { file: _ } => {
-            todo!()
+        Command::ToKDL { file, namespace } => {
+            compile_in_session(render_config, root, file.clone(), true, &mut |session| {
+                driver::compile_book_to_kdl(
+                    &PathBuf::from(file.clone()),
+                    session,
+                    &namespace.clone().unwrap_or("".to_string()),
+                )
+            })
+            .map(|res| {
+                println!("{}", res);
+                res
+            });
         }
-        Command::Repl => {
-            todo!()
-        }
-        Command::ToKDL {
-            file: _,
-            namespace: _,
-        } => todo!(),
     }
 }

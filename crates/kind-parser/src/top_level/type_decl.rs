@@ -1,4 +1,5 @@
 use kind_tree::concrete::{Attribute, Constructor, RecordDecl, SumTypeDecl, Telescope};
+use kind_tree::symbol::Ident;
 
 use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
@@ -6,6 +7,7 @@ use crate::state::Parser;
 
 impl<'a> Parser<'a> {
     pub fn parse_constructor(&mut self) -> Result<Constructor, SyntaxDiagnostic> {
+        let attrs = self.parse_attrs()?;
         let docs = self.parse_docs()?;
         let name = self.parse_any_id()?;
         let args = self.parse_arguments()?;
@@ -20,6 +22,7 @@ impl<'a> Parser<'a> {
 
         Ok(Constructor {
             name,
+            attrs,
             docs,
             args: Telescope::new(args),
             typ,
@@ -70,6 +73,7 @@ impl<'a> Parser<'a> {
         attrs: Vec<Attribute>,
     ) -> Result<RecordDecl, SyntaxDiagnostic> {
         self.eat_id("record")?;
+
         let name = self.parse_upper_id()?;
 
         let parameters = self.parse_arguments()?;
@@ -77,11 +81,17 @@ impl<'a> Parser<'a> {
         let range = self.range();
 
         self.eat_variant(Token::LBrace)?;
-        self.eat_id("constructor")?;
 
-        let constructor = self.parse_id()?;
+        let cons_attrs = self.parse_attrs()?;
 
-        self.check_and_eat(Token::Comma);
+        let constructor = if self.check_actual_id("constructor") {
+            self.eat_id("constructor")?;
+            let res = self.parse_id()?;
+            self.check_and_eat(Token::Comma);
+            res
+        } else {
+            Ident::new("new".to_string(), name.range)
+        };
 
         let mut fields = vec![];
 
@@ -102,6 +112,7 @@ impl<'a> Parser<'a> {
             parameters: Telescope::new(parameters),
             fields,
             attrs,
+            cons_attrs,
         })
     }
 }

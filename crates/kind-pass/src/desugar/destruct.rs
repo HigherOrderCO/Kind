@@ -249,15 +249,16 @@ impl<'a> DesugarState<'a> {
         } else {
             let mut idx: Vec<Ident> = sum.indices.iter().map(|x| x.name.clone()).collect();
             idx.push(Ident::generate("val_"));
-            idx.iter().rfold(self.gen_hole_expr(match_.typ.range), |expr, l| {
-                desugared::Expr::lambda(l.range, l.clone(), expr, false)
-            })
+            idx.iter()
+                .rfold(self.gen_hole_expr(match_.typ.range), |expr, l| {
+                    desugared::Expr::lambda(l.range, l.clone(), expr, false)
+                })
         };
 
         let prefix = [self.desugar_expr(&match_.scrutinizer), motive];
 
         self.mk_desugared_fun(
-            match_.typ.range,
+            range,
             match_id,
             [prefix.as_slice(), lambdas.as_slice()].concat(),
             false,

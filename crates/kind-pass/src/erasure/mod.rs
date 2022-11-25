@@ -16,12 +16,10 @@ use std::sync::mpsc::Sender;
 use fxhash::{FxHashMap, FxHashSet};
 
 use kind_report::data::Diagnostic;
-
 use kind_span::Range;
-use kind_tree::{
-    desugared::{self, Book, Entry, Expr, ExprKind, Rule},
-    symbol::QualifiedIdent,
-};
+use kind_tree::desugared::{Book, Entry, Expr, Rule};
+use kind_tree::symbol::QualifiedIdent;
+use kind_tree::{untyped, Number};
 
 use crate::errors::PassError;
 
@@ -46,7 +44,7 @@ pub fn erase_book(
     book: Book,
     errs: Sender<Box<dyn Diagnostic>>,
     entrypoint: FxHashSet<String>,
-) -> Option<Book> {
+) -> Option<untyped::Book> {
     let mut state = ErasureState {
         errs,
         book: &book,
@@ -56,7 +54,7 @@ pub fn erase_book(
         failed: false,
     };
 
-    let mut new_book = Book {
+    let mut new_book = untyped::Book {
         holes: book.holes,
         ..Default::default()
     };
@@ -82,6 +80,9 @@ pub fn erase_book(
     for (name, (_, relev)) in &state.names {
         if let Some(Relevance::Relevant) = state.normalize(*relev) {
             if let Some(res) = entries.remove(name) {
+                new_book
+                    .names
+                    .insert(name.to_string(), new_book.entrs.len());
                 new_book.entrs.insert(name.to_string(), res);
             }
         }
@@ -99,20 +100,21 @@ impl<'a> ErasureState<'a> {
         local_relevance
     }
 
+    pub fn send_err(&mut self, err: Box<PassError>) {
+        self.errs.send(err).unwrap();
+        self.failed = true;
+    }
     pub fn err_irrelevant(
         &mut self,
         declared_val: Option<Range>,
         used: Range,
         declared_ty: Option<Range>,
     ) {
-        self.errs
-            .send(Box::new(PassError::CannotUseIrrelevant(
-                declared_val,
-                used,
-                declared_ty,
-            )))
-            .unwrap();
-        self.failed = true;
+        self.send_err(Box::new(PassError::CannotUseIrrelevant(
+            declared_val,
+            used,
+            declared_ty,
+        )));
     }
 
     pub fn get_normal(&self, hole: usize, visited: &mut FxHashSet<usize>) -> Option<Relevance> {
@@ -195,7 +197,7 @@ impl<'a> ErasureState<'a> {
         on: (Option<Range>, Relevance),
         name: &QualifiedIdent,
         spine: &Vec<Box<Expr>>,
-    ) -> Vec<Box<Expr>> {
+    ) -> Vec<Box<untyped::Expr>> {
         let fun = match self.names.get(name.to_str()) {
             Some(res) => *res,
             None => self.new_hole(name.range, name.to_string()),
@@ -213,7 +215,7 @@ impl<'a> ErasureState<'a> {
             .zip(erased)
             .map(|(elem, arg)| {
                 let relev = if arg.erased {
-                    (Some(arg.span), Relevance::Irrelevant)
+                    (Some(arg.range), Relevance::Irrelevant)
                 } else {
                     on.clone()
                 };
@@ -224,161 +226,169 @@ impl<'a> ErasureState<'a> {
             .collect()
     }
 
-    pub fn erase_pat(&mut self, on: (Option<Range>, Relevance), pat: &Expr) -> Box<Expr> {
+    pub fn erase_pat(&mut self, on: (Option<Range>, Relevance), pat: &Expr) -> Box<untyped::Expr> {
         use kind_tree::desugared::ExprKind::*;
 
         match &pat.data {
-            Num(_) | Str(_) => Box::new(pat.clone()),
-            Var(name) => {
+            Num {
+                num: Number::U60(n),
+            } => untyped::Expr::num60(pat.range, *n),
+            Num {
+                num: Number::U120(n),
+            } => untyped::Expr::num120(pat.range, *n),
+            Var { name } => {
                 self.ctx.insert(name.to_string(), (name.range, on));
-                Box::new(pat.clone())
+                untyped::Expr::var(name.clone())
             }
-            Fun(name, spine) | Ctr(name, spine) if on.1 == Relevance::Irrelevant => {
-                let range = pat.span.to_range().unwrap_or_else(|| name.range.clone());
+            Fun { name, args } | Ctr { name, args } if on.1 == Relevance::Irrelevant => {
+                let range = pat.range.clone();
                 self.errs
                     .send(Box::new(PassError::CannotPatternMatchOnErased(range)))
                     .unwrap();
                 self.failed = true;
-                self.erase_pat_spine(on, &name, spine);
-                desugared::Expr::err(range)
+                self.erase_pat_spine(on, &name, args);
+                untyped::Expr::err(range)
             }
-            Fun(name, spine) => {
-                let spine = self.erase_pat_spine(on, &name, spine);
-                Box::new(Expr {
-                    span: pat.span.clone(),
-                    data: ExprKind::Fun(name.clone(), spine),
-                })
+            Fun { name, args } => {
+                let args = self.erase_pat_spine(on, &name, args);
+                untyped::Expr::fun(pat.range.clone(), name.clone(), args)
             }
-            Ctr(name, spine) => {
-                let spine = self.erase_pat_spine(on, &name, spine);
-                Box::new(Expr {
-                    span: pat.span.clone(),
-                    data: ExprKind::Ctr(name.clone(), spine),
-                })
+            Ctr { name, args } => {
+                let args = self.erase_pat_spine(on, &name, args);
+                untyped::Expr::ctr(pat.range.clone(), name.clone(), args)
             }
             res => panic!("Internal Error: Not a pattern {:?}", res),
         }
     }
 
-    pub fn erase_expr(&mut self, on: &(Option<Range>, Relevance), expr: &Expr) -> Box<Expr> {
+    pub fn erase_expr(
+        &mut self,
+        on: &(Option<Range>, Relevance),
+        expr: &Expr,
+    ) -> Box<untyped::Expr> {
         use kind_tree::desugared::ExprKind::*;
 
         match &expr.data {
-            Num(_) | Str(_) => Box::new(expr.clone()),
-            Typ | NumType(_) | Err | Hole(_) | Hlp(_) => {
-                let span = expr.span.to_range().unwrap();
-                if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
-                    self.err_irrelevant(None, span, None)
+            Typ | NumType { .. } | Err | Hole { .. } | Hlp(_) => {
+                if !self.unify(expr.range, *on, (None, Relevance::Irrelevant), false) {
+                    self.err_irrelevant(None, expr.range, None)
                 }
-                Box::new(expr.clone())
+                // Used as sentinel value because all of these constructions
+                // should not end in the generated tree.
+                untyped::Expr::err(expr.range)
             }
-            Var(name) => {
+            Num {
+                num: Number::U60(n),
+            } => untyped::Expr::num60(expr.range, *n),
+            Num {
+                num: Number::U120(n),
+            } => untyped::Expr::num120(expr.range, *n),
+            Str { val } => untyped::Expr::str(expr.range, val.clone()),
+            Var { name } => {
                 let relev = self.ctx.get(name.to_str()).unwrap();
                 let declared_ty = (relev.1).0;
                 let declared_val = relev.0;
                 if !self.unify(name.range, *on, relev.1, false) {
                     self.err_irrelevant(Some(declared_val), name.range, declared_ty)
                 }
-                Box::new(expr.clone())
+                untyped::Expr::var(name.clone())
             }
-            All(name, typ, body, _erased) => {
-                let span = expr.span.to_range().unwrap_or_else(|| name.range.clone());
-                if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
-                    self.err_irrelevant(None, span, None)
+            All {
+                param, typ, body, ..
+            } => {
+                if !self.unify(expr.range, *on, (None, Relevance::Irrelevant), false) {
+                    self.err_irrelevant(None, expr.range, None)
                 }
 
                 let ctx = self.ctx.clone();
 
                 // Relevant inside the context that is it's being used?
-                self.ctx.insert(name.to_string(), (name.range, *on));
+                self.ctx.insert(param.to_string(), (param.range, *on));
 
                 self.erase_expr(&(on.0, Relevance::Irrelevant), typ);
                 self.erase_expr(&(on.0, Relevance::Irrelevant), body);
                 self.ctx = ctx;
 
-                Box::new(expr.clone())
+                // Used as sentinel value because "All" should not end in a tree.
+                untyped::Expr::err(expr.range)
             }
-            Lambda(name, body, erased) => {
+            Lambda {
+                param,
+                body,
+                erased,
+            } => {
                 let ctx = self.ctx.clone();
+
                 if *erased {
                     self.ctx.insert(
-                        name.to_string(),
-                        (name.range, (None, Relevance::Irrelevant)),
+                        param.to_string(),
+                        (param.range, (None, Relevance::Irrelevant)),
                     );
                 } else {
-                    self.ctx.insert(name.to_string(), (name.range, *on));
+                    self.ctx.insert(param.to_string(), (param.range, *on));
                 }
+
                 let body = self.erase_expr(on, body);
                 self.ctx = ctx;
 
                 if *erased {
                     body
                 } else {
-                    Box::new(Expr {
-                        span: expr.span,
-                        data: ExprKind::Lambda(name.clone(), body, *erased),
-                    })
+                    untyped::Expr::lambda(expr.range, param.clone(), body, *erased)
                 }
             }
-            Let(name, val, body) => {
+            Let { name, val, next } => {
                 let ctx = self.ctx.clone();
                 self.ctx.insert(name.to_string(), (name.range, *on));
 
                 let val = self.erase_expr(on, val);
-                let body = self.erase_expr(on, body);
+                let next = self.erase_expr(on, next);
 
                 self.ctx = ctx;
 
-                Box::new(Expr {
-                    span: expr.span,
-                    data: ExprKind::Let(name.clone(), val, body),
-                })
+                untyped::Expr::let_(expr.range, name.clone(), val, next)
             }
-            App(head, spine) => {
-                let head = self.erase_expr(on, head);
-                let spine = spine
+            App { fun, args } => {
+                let head = self.erase_expr(on, fun);
+                let spine = args
                     .iter()
                     .map(|x| {
                         let on = if x.erased {
-                            let span = expr.span.to_range().unwrap();
+                            let span = expr.range;
                             if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
                                 self.err_irrelevant(None, span, None)
                             }
-                            (x.data.span.to_range(), Relevance::Irrelevant)
+                            (Some(x.data.range), Relevance::Irrelevant)
                         } else {
                             on.clone()
                         };
-                        desugared::AppBinding {
-                            data: self.erase_expr(&on, &x.data),
-                            erased: x.erased,
-                        }
+                        (x.erased, self.erase_expr(&on, &x.data))
                     })
-                    .filter(|x| !x.erased)
+                    .filter(|x| !x.0)
+                    .map(|x| x.1)
                     .collect();
-                Box::new(Expr {
-                    span: expr.span,
-                    data: ExprKind::App(head, spine),
-                })
-            }
-            Fun(head, spine) => {
-                let args = self.book.entrs.get(head.to_str()).unwrap().args.iter();
 
-                let fun = match self.names.get(head.to_str()) {
+                untyped::Expr::app(expr.range, head, spine)
+            }
+            Fun { name, args } => {
+                let spine = self.book.entrs.get(name.to_str()).unwrap().args.iter();
+
+                let fun = match self.names.get(name.to_str()) {
                     Some(res) => *res,
-                    None => self.new_hole(head.range, head.to_string()),
+                    None => self.new_hole(name.range, name.to_string()),
                 };
 
-                if !self.unify(head.range, *on, fun, true) {
-                    self.err_irrelevant(None, head.range, None)
+                if !self.unify(name.range, *on, fun, true) {
+                    self.err_irrelevant(None, name.range, None)
                 }
 
-                let spine = spine
+                let spine = args
                     .iter()
-                    .zip(args)
+                    .zip(spine)
                     .map(|(expr, arg)| {
                         if arg.erased {
                             (
-                                self.erase_expr(&(Some(arg.span), Relevance::Irrelevant), expr),
+                                self.erase_expr(&(Some(arg.range), Relevance::Irrelevant), expr),
                                 arg,
                             )
                         } else {
@@ -387,30 +397,31 @@ impl<'a> ErasureState<'a> {
                     })
                     .filter(|(_, arg)| !arg.erased);
 
-                Box::new(Expr {
-                    span: expr.span,
-                    data: ExprKind::Fun(head.clone(), spine.map(|(expr, _)| expr).collect()),
-                })
+                untyped::Expr::fun(
+                    expr.range,
+                    name.clone(),
+                    spine.map(|(expr, _)| expr).collect(),
+                )
             }
-            Ctr(head, spine) => {
-                let args = self.book.entrs.get(head.to_str()).unwrap().args.iter();
+            Ctr { name, args } => {
+                let spine = self.book.entrs.get(name.to_str()).unwrap().args.iter();
 
-                let fun = match self.names.get(&head.to_string()) {
+                let fun = match self.names.get(&name.to_string()) {
                     Some(res) => *res,
-                    None => self.new_hole(head.range, head.to_string()),
+                    None => self.new_hole(name.range, name.to_string()),
                 };
 
-                if !self.unify(head.range, *on, fun, true) {
-                    self.err_irrelevant(None, head.range, None)
+                if !self.unify(name.range, *on, fun, true) {
+                    self.err_irrelevant(None, name.range, None)
                 }
 
-                let spine = spine
+                let spine = args
                     .iter()
-                    .zip(args)
+                    .zip(spine)
                     .map(|(expr, arg)| {
                         if arg.erased {
                             (
-                                self.erase_expr(&(Some(arg.span), Relevance::Irrelevant), expr),
+                                self.erase_expr(&(Some(arg.range), Relevance::Irrelevant), expr),
                                 arg,
                             )
                         } else {
@@ -419,21 +430,24 @@ impl<'a> ErasureState<'a> {
                     })
                     .filter(|(_, arg)| !arg.erased);
 
-                Box::new(Expr {
-                    span: expr.span,
-                    data: ExprKind::Ctr(head.clone(), spine.map(|(expr, _)| expr).collect()),
-                })
+                untyped::Expr::ctr(
+                    expr.range,
+                    name.clone(),
+                    spine.map(|(expr, _)| expr).collect(),
+                )
             }
-            Ann(relev, irrel) => {
-                let res = self.erase_expr(on, relev);
-                self.erase_expr(&(None, Relevance::Irrelevant), irrel);
+            Ann { expr, typ } => {
+                let res = self.erase_expr(on, expr);
+                self.erase_expr(&(None, Relevance::Irrelevant), typ);
                 res
             }
-            Sub(_, _, _, expr) => self.erase_expr(on, expr),
-            Binary(op, left, right) => Box::new(Expr {
-                span: expr.span,
-                data: ExprKind::Binary(*op, self.erase_expr(on, left), self.erase_expr(on, right)),
-            }),
+            Sub { expr, .. } => self.erase_expr(on, expr),
+            Binary { op, left, right } => untyped::Expr::binary(
+                expr.range,
+                *op,
+                self.erase_expr(on, left),
+                self.erase_expr(on, right),
+            ),
         }
     }
 
@@ -442,7 +456,7 @@ impl<'a> ErasureState<'a> {
         place: &(Option<Range>, Relevance),
         args: Vec<(Range, bool)>,
         rule: &Rule,
-    ) -> Rule {
+    ) -> untyped::Rule {
         let ctx = self.ctx.clone();
 
         let new_pats: Vec<_> = args
@@ -472,34 +486,35 @@ impl<'a> ErasureState<'a> {
 
         self.ctx = ctx;
 
-        Rule {
+        untyped::Rule {
             name: rule.name.clone(),
             pats: new_pats,
             body,
-            span: rule.span,
+            range: rule.range,
         }
     }
 
-    pub fn erase_entry(&mut self, entry: &Entry) -> Box<Entry> {
+    pub fn erase_entry(&mut self, entry: &Entry) -> Box<untyped::Entry> {
         let place = if let Some(res) = self.names.get(entry.name.to_str()) {
             *res
         } else {
             self.new_hole(entry.name.range, entry.name.to_string())
         };
 
-        let args: Vec<(Range, bool)> = entry.args.iter().map(|x| (x.span, x.erased)).collect();
+        let args: Vec<(Range, bool)> = entry.args.iter().map(|x| (x.range, x.erased)).collect();
+
         let rules = entry
             .rules
             .iter()
             .map(|rule| self.erase_rule(&place, args.clone(), rule))
-            .collect::<Vec<Rule>>();
-        Box::new(Entry {
+            .collect::<Vec<untyped::Rule>>();
+
+        Box::new(untyped::Entry {
             name: entry.name.clone(),
-            args: entry.args.clone(),
-            typ: entry.typ.clone(),
+            args: entry.args.iter().filter(|x| !x.erased).map(|x| (x.name.to_string(), x.range, false)).collect(),
             rules,
             attrs: entry.attrs.clone(),
-            span: entry.span,
+            range: entry.range,
         })
     }
 }

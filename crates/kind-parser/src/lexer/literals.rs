@@ -76,6 +76,14 @@ impl<'a> Lexer<'a> {
             )
         };
         match self.peekable.peek() {
+            Some('n' | 'N') => {
+                self.next_char();
+                if let Ok(res) = u128::from_str_radix(&num.replace('_', ""), base) {
+                    (Token::Nat(res), self.mk_range(num_start))
+                } else {
+                    make_num_err(self)
+                }
+            }
             Some('U' | 'u') => {
                 self.next_char();
                 let type_ = self.accumulate_while(&|x| x.is_ascii_digit());

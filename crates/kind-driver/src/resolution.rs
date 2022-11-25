@@ -227,7 +227,7 @@ fn parse_and_store_book_by_path<'a>(
     }
 
     module_to_book(&mut failed, session, module, book);
-    
+
     for idents in state.unbound_top_level.values() {
         failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
     }
@@ -270,7 +270,11 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
         unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for (_, unbound) in unbound_tops {
-        let res: Vec<Ident> = unbound.iter().map(|x| x.to_ident()).collect();
+        let res: Vec<Ident> = unbound
+            .iter()
+            .filter(|x| !x.generated)
+            .map(|x| x.to_ident())
+            .collect();
         if !res.is_empty() {
             unbound_variable(session, &book, &res);
             failed = true;

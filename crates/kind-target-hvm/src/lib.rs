@@ -2,10 +2,10 @@ use hvm::u60;
 
 use kind_tree::{
     backend::{File, Rule, Term},
-    desugared,
+    untyped,
 };
 
-pub fn compile_book(book: desugared::Book) -> File {
+pub fn compile_book(book: untyped::Book) -> File {
     let mut file = File {
         rules: Default::default(),
         smaps: Default::default(),
@@ -16,37 +16,35 @@ pub fn compile_book(book: desugared::Book) -> File {
     file
 }
 
-pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
-    use desugared::ExprKind::*;
+pub fn compile_term(expr: &untyped::Expr) -> Box<Term> {
+    use untyped::ExprKind::*;
     match &expr.data {
-        Var(name) => Box::new(Term::Var {
+        Var { name } => Box::new(Term::Var {
             name: name.to_string(),
         }),
-        Lambda(binder, body, _erased) => Box::new(Term::Lam {
-            name: binder.to_string(),
+        Lambda { param, body, .. } => Box::new(Term::Lam {
+            name: param.to_string(),
             body: compile_term(body),
         }),
-        App(head, spine) => spine.iter().fold(compile_term(head), |func, arg| {
+        App { fun, args } => args.iter().fold(compile_term(fun), |func, arg| {
             Box::new(Term::App {
                 func,
-                argm: compile_term(&arg.data),
+                argm: compile_term(&arg),
             })
         }),
-        Fun(head, spine) | Ctr(head, spine) => Box::new(Term::Ctr {
-            name: head.to_string(),
-            args: spine.iter().map(|x| compile_term(x)).collect(),
-        }),
-        Let(name, expr, body) => Box::new(Term::Let {
+        Fun { name, args } | Ctr { name, args } => Box::new(Term::Ctr {
             name: name.to_string(),
-            expr: compile_term(expr),
-            body: compile_term(body),
+            args: args.iter().map(|x| compile_term(x)).collect(),
         }),
-        Ann(left, _) => compile_term(left),
-        Sub(_, _, _, expr) => compile_term(expr),
-        Num(kind_tree::Number::U60(numb)) => Box::new(Term::U6O {
+        Let { name, val, next } => Box::new(Term::Let {
+            name: name.to_string(),
+            expr: compile_term(val),
+            body: compile_term(next),
+        }),
+        Num { num: kind_tree::Number::U60(numb) } => Box::new(Term::U6O {
             numb: u60::new(*numb),
         }),
-        Num(kind_tree::Number::U120(numb)) => {
+        Num { num: kind_tree::Number::U120(numb) } => {
             let hi = Box::new(Term::U6O {
                 numb: u60::new((numb >> 60) as u64),
             });
@@ -58,11 +56,11 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
                 args: vec![hi, lo],
             })
         }
-        Binary(op, l, r) => Box::new(Term::Ctr {
+        Binary { op, left, right } => Box::new(Term::Ctr {
             name: op.to_string(),
-            args: vec![compile_term(l), compile_term(r)],
+            args: vec![compile_term(left), compile_term(right)],
         }),
-        Str(str) => {
+        Str { val } => {
             let nil = Box::new(Term::Ctr {
                 name: String::from("String.nil"),
                 args: vec![],
@@ -75,18 +73,13 @@ pub fn compile_term(expr: &desugared::Expr) -> Box<Term> {
                 })
             };
 
-            str.chars().rfold(nil, |rest, chr| cons(chr as u64, rest))
+            val.chars().rfold(nil, |rest, chr| cons(chr as u64, rest))
         }
-        Hole(_) => unreachable!("Internal Error: 'Hole' cannot be a relevant term"),
-        Typ => unreachable!("Internal Error: 'Typ' cannot be a relevant term"),
-        NumType(typ) => unreachable!("Internal Error: '{:?}' cannot be a relevant term", typ),
-        All(_, _, _, _) => unreachable!("Internal Error: 'All' cannot be a relevant term"),
-        Hlp(_) => unreachable!("Internal Error: 'Hlp' cannot be a relevant term"),
-        Err => unreachable!("Internal Error: 'Err' cannot be a relevant term"),
+        Err => unreachable!("Internal Error: 'ERR' cannot be a relevant term"),
     }
 }
 
-fn compile_rule(rule: desugared::Rule) -> Rule {
+fn compile_rule(rule: untyped::Rule) -> Rule {
     Rule {
         lhs: Box::new(Term::Ctr {
             name: rule.name.to_string(),
@@ -96,7 +89,7 @@ fn compile_rule(rule: desugared::Rule) -> Rule {
     }
 }
 
-fn compile_entry(file: &mut File, entry: desugared::Entry) {
+fn compile_entry(file: &mut File, entry: untyped::Entry) {
     for rule in entry.rules {
         file.rules.push(compile_rule(rule))
     }

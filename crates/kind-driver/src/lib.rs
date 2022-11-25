@@ -2,12 +2,15 @@ use checker::eval;
 use errors::DriverError;
 use fxhash::FxHashSet;
 use kind_pass::{desugar, erasure, expand};
-use kind_report::report::FileCache;
+use kind_report::{data::Diagnostic, report::FileCache};
 use kind_span::SyntaxCtxIndex;
 
-use kind_tree::{backend, concrete, desugared};
+use kind_tree::{backend, concrete, desugared, untyped};
 use session::Session;
-use std::path::PathBuf;
+use std::{
+    path::{Path, PathBuf},
+    sync::mpsc::Sender,
+};
 
 use kind_checker as checker;
 
@@ -22,7 +25,7 @@ impl FileCache for Session {
     }
 }
 
-pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
+pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
@@ -61,7 +64,7 @@ pub fn erase_book(
     session: &mut Session,
     path: &PathBuf,
     entrypoint: &[String],
-) -> Option<desugared::Book> {
+) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     erasure::erase_book(
@@ -87,11 +90,47 @@ pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desug
     Some(desugared_book)
 }
 
-pub fn compile_book_to_hvm(book: desugared::Book) -> backend::File {
+pub fn compile_book_to_hvm(book: untyped::Book) -> backend::File {
     kind_target_hvm::compile_book(book)
 }
 
-pub fn check_main_entry(session: &mut Session, book: &desugared::Book) -> Option<()> {
+pub fn compile_book_to_kdl(
+    path: &PathBuf,
+    session: &mut Session,
+    namespace: &str,
+) -> Option<kind_target_kdl::File> {
+    let concrete_book = to_book(session, path)?;
+    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
+
+    let entrypoints = desugared_book
+        .entrs
+        .iter()
+        .filter(|x| x.1.attrs.kdl_run)
+        .map(|x| x.0.clone())
+        .collect::<Vec<_>>();
+
+    let book = erasure::erase_book(
+        desugared_book,
+        session.diagnostic_sender.clone(),
+        FxHashSet::from_iter(entrypoints),
+    )?;
+
+    kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)
+}
+
+pub fn check_main_entry(session: &mut Session, book: &untyped::Book) -> Option<()> {
+    if !book.entrs.contains_key("Main") {
+        session
+            .diagnostic_sender
+            .send(Box::new(DriverError::ThereIsntAMain))
+            .unwrap();
+        None
+    } else {
+        Some(())
+    }
+}
+
+pub fn check_main_desugared_entry(session: &mut Session, book: &desugared::Book) -> Option<()> {
     if !book.entrs.contains_key("Main") {
         session
             .diagnostic_sender
@@ -113,5 +152,5 @@ pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {
 }
 
 pub fn generate_checker(book: &desugared::Book) -> String {
-    checker::gen_checker(book, book.names.keys().cloned().collect())
+    checker::gen_checker(book, book.entrs.keys().cloned().collect())
 }

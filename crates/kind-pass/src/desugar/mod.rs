@@ -9,7 +9,7 @@
 use std::sync::mpsc::Sender;
 
 use kind_report::data::Diagnostic;
-use kind_span::{Range, Span};
+use kind_span::Range;
 use kind_tree::{
     concrete::{self},
     desugared,
@@ -65,10 +65,7 @@ impl<'a> DesugarState<'a> {
     }
 
     fn gen_hole_expr(&mut self, range: Range) -> Box<desugared::Expr> {
-        Box::new(desugared::Expr {
-            data: desugared::ExprKind::Hole(self.gen_hole()),
-            span: Span::Locatable(range),
-        })
+        desugared::Expr::hole(range, self.gen_hole())
     }
 
     fn send_err(&mut self, err: PassError) {

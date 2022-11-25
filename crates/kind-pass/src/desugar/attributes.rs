@@ -1,7 +1,5 @@
-use kind_tree::{
-    concrete::{self, Attribute, AttributeStyle},
-    desugared,
-};
+use kind_tree::concrete::{self, Attribute, AttributeStyle};
+use kind_tree::Attributes;
 
 use crate::errors::PassError;
 
@@ -32,11 +30,8 @@ impl<'a> DesugarState<'a> {
         };
     }
 
-    pub fn desugar_attributes(
-        &mut self,
-        attrs: &[concrete::Attribute],
-    ) -> Vec<desugared::Attribute> {
-        let mut vec = Vec::new();
+    pub fn desugar_attributes(&mut self, attrs: &[concrete::Attribute]) -> Attributes {
+        let mut attributes: Attributes = Default::default();
 
         for attr in attrs {
             match attr.name.to_str() {
@@ -46,23 +41,23 @@ impl<'a> DesugarState<'a> {
                 "inline" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);
-                    vec.push(desugared::Attribute::Inline);
+                    attributes.inlined = true;
                 }
                 "kdl_run" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);
-                    vec.push(desugared::Attribute::KdlRun);
+                    attributes.kdl_run = true;
                 }
                 "kdl_erase" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);
-                    vec.push(desugared::Attribute::KdlErase);
+                    attributes.kdl_erase = true;
                 }
                 "kdl_name" => {
                     self.args_should_be_empty(attr);
                     match &attr.value {
                         Some(AttributeStyle::Ident(_, ident)) => {
-                            vec.push(desugared::Attribute::KdlState(ident.clone()));
+                            attributes.kdl_name = Some(ident.clone());
                         }
                         Some(_) => self.attr_invalid_argument(attr),
                         None => self.attr_expects_a_value(attr),
@@ -72,7 +67,7 @@ impl<'a> DesugarState<'a> {
                     self.args_should_be_empty(attr);
                     match &attr.value {
                         Some(AttributeStyle::Ident(_, ident)) => {
-                            vec.push(desugared::Attribute::KdlState(ident.clone()));
+                            attributes.kdl_state = Some(ident.clone());
                         }
                         Some(_) => self.attr_invalid_argument(attr),
                         None => self.attr_expects_a_value(attr),
@@ -81,6 +76,7 @@ impl<'a> DesugarState<'a> {
                 _ => self.send_err(PassError::AttributeDoesNotExists(attr.range)),
             }
         }
-        vec
+
+        attributes
     }
 }

@@ -1,5 +1,5 @@
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
-use kind_span::{Range, Span, SyntaxCtxIndex};
+use kind_span::{Range, SyntaxCtxIndex};
 use kind_tree::symbol::Ident;
 
 pub enum Sugar {
@@ -32,7 +32,7 @@ pub enum PassError {
     CannotUseIrrelevant(Option<Range>, Range, Option<Range>),
     CannotFindAlias(String, Range),
     NotATypeConstructor(Range, Range),
-    ShouldBeAParameter(Span, Range),
+    ShouldBeAParameter(Option<Range>, Range),
     NoFieldCoverage(Range, Vec<String>),
     CannotPatternMatchOnErased(Range),
     UnboundVariable(Vec<Ident>, Vec<String>),
@@ -427,15 +427,14 @@ impl Diagnostic for PassError {
             PassError::ShouldBeAParameter(error_range, declaration_range) => {
                 let mut positions = vec![];
 
-                match error_range {
-                    Span::Generated => (),
-                    Span::Locatable(error_range) => positions.push(Marker {
+                if let Some(error_range) = error_range {
+                    positions.push(Marker {
                         position: *error_range,
                         color: Color::Fst,
                         text: "This expression is not the parameter".to_string(),
                         no_code: false,
                         main: true,
-                    }),
+                    })
                 }
 
                 positions.push(Marker {

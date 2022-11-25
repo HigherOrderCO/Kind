@@ -17,7 +17,7 @@ impl SyntaxCtxIndex {
 /// A span in the encoded format that is required by
 /// kind2.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct EncodedSpan(pub u64);
+pub struct EncodedRange(pub u64);
 
 /// Describes a position in a source code (syntax context). It's useful
 /// to generate error messages.
@@ -26,13 +26,6 @@ pub struct Range {
     pub start: Pos,
     pub end: Pos,
     pub ctx: SyntaxCtxIndex,
-}
-
-/// Range that can be generated.
-#[derive(Clone, Debug, Copy, Hash, PartialEq, Eq)]
-pub enum Span {
-    Generated,
-    Locatable(Range),
 }
 
 pub trait Locatable {
@@ -47,10 +40,6 @@ impl Range {
 
     pub fn ghost_range() -> Range {
         Range::new(Pos { index: 0 }, Pos { index: 0 }, SyntaxCtxIndex(0))
-    }
-
-    pub fn to_span(self) -> Span {
-        Span::Locatable(self)
     }
 
     /// Joins two ranges. It keeps the syntax context
@@ -75,8 +64,8 @@ impl Range {
     }
 
     #[inline]
-    pub fn encode(&self) -> EncodedSpan {
-        EncodedSpan(
+    pub fn encode(&self) -> EncodedRange {
+        EncodedRange(
             ((self.ctx.0 as u64) << 48)
                 | ((self.start.index as u64) & 0xFFFFFF)
                 | (((self.end.index as u64) & 0xFFFFFF) << 24),
@@ -84,53 +73,7 @@ impl Range {
     }
 }
 
-impl Span {
-    #[inline]
-    pub fn new(range: Range) -> Span {
-        Span::Locatable(range)
-    }
-
-    #[inline]
-    pub fn generate() -> Span {
-        Span::Generated
-    }
-
-    pub fn to_range(&self) -> Option<Range> {
-        match self {
-            Span::Generated => None,
-            Span::Locatable(pos) => Some(pos.clone()),
-        }
-    }
-
-    /// Join two spans and keeps the syntax context of the
-    /// first locatable range. If it's generated then it
-    /// will be ignored and the other span will be the canonical
-    /// position.
-    pub fn mix(&self, other: Span) -> Span {
-        match (self, &other) {
-            (Span::Generated, e) | (e, Span::Generated) => *e,
-            (Span::Locatable(start), Span::Locatable(end)) => Span::Locatable(start.mix(*end)),
-        }
-    }
-
-    /// Set the syntax context of the span.
-    pub fn set_ctx(&mut self, ctx: SyntaxCtxIndex) {
-        match self {
-            Span::Generated => (),
-            Span::Locatable(span) => *span = span.set_ctx(ctx),
-        }
-    }
-
-    // Serialize the span into a single u64.
-    pub fn encode(&self) -> EncodedSpan {
-        match self {
-            Span::Generated => EncodedSpan(0),
-            Span::Locatable(data) => data.encode(),
-        }
-    }
-}
-
-impl EncodedSpan {
+impl EncodedRange {
     /// Transforms a encoded span back into a range.
     pub fn to_range(&self) -> Range {
         Range {
@@ -141,15 +84,6 @@ impl EncodedSpan {
             end: Pos {
                 index: ((self.0 >> 24) & 0xFFFFFF) as u32,
             },
-        }
-    }
-
-    /// Transforms a encoded span back into a span.
-    pub fn to_span(&self) -> Span {
-        if self.0 == 0 {
-            Span::Generated
-        } else {
-            Span::Locatable(self.to_range())
         }
     }
 }

@@ -209,6 +209,7 @@ pub fn derive_match(
             rules: vec![],
             range,
             attrs: Vec::new(),
+            generated_by: Some(sum.name.to_string().clone()),
         };
         return (entry, errs);
     }
@@ -382,6 +383,7 @@ pub fn derive_match(
         rules,
         range,
         attrs: Vec::new(),
+        generated_by: Some(sum.name.to_string().clone()),
     };
 
     (entry, errs)

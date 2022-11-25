@@ -1,5 +1,5 @@
-//! This module describes an unsugared tree that
-//! is used by the type checker and by the targets.
+//! This module describes an unsugared and untyped tree
+//! that is a IR
 
 use std::fmt::{Display, Error, Formatter};
 
@@ -19,21 +19,10 @@ pub use crate::{NumType, Number, Operator};
 pub type Spine = Vec<Box<Expr>>;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub struct AppBinding {
-    pub data: Box<Expr>,
-    pub erased: bool,
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ExprKind {
     /// Name of a variable
-    Var { name: Ident },
-    /// The dependent function space (e.g. (x : Int) -> y)
-    All {
-        param: Ident,
-        typ: Box<Expr>,
-        body: Box<Expr>,
-        erased: bool,
+    Var {
+        name: Ident,
     },
     /// A anonymous function that receives one argument
     Lambda {
@@ -44,48 +33,39 @@ pub enum ExprKind {
     /// Application of a expression to a spine of expressions
     App {
         fun: Box<Expr>,
-        args: Vec<AppBinding>,
+        args: Vec<Box<Expr>>,
     },
     /// Application of a function
-    Fun { name: QualifiedIdent, args: Spine },
+    Fun {
+        name: QualifiedIdent,
+        args: Spine,
+    },
     /// Application of a Construtor
-    Ctr { name: QualifiedIdent, args: Spine },
+    Ctr {
+        name: QualifiedIdent,
+        args: Spine,
+    },
     /// Declaration of a local variable
     Let {
         name: Ident,
         val: Box<Expr>,
         next: Box<Expr>,
     },
-    /// Type ascription (x : y)
-    Ann { expr: Box<Expr>, typ: Box<Expr> },
-    /// Substitution
-    Sub {
-        name: Ident,
-        indx: usize,
-        redx: usize,
-        expr: Box<Expr>,
-    },
-    /// Type Literal
-    Typ,
-    /// Primitive numeric types
-    NumType { typ: crate::NumType },
     /// Primitive numeric values
-    Num { num: crate::Number },
+    Num {
+        num: crate::Number,
+    },
     /// Very special constructor :)
-    Str { val: String },
+    Str {
+        val: String,
+    },
     /// Binary operation (e.g. 2 + 3)
     Binary {
         op: Operator,
         left: Box<Expr>,
         right: Box<Expr>,
     },
-    /// A expression open to unification (e.g. _)
-    Hole { num: u64 },
-    /// Help
-    Hlp(Ident),
-    /// Error node (It's useful as a sentinel value
-    /// to be able to continue compilation even with
-    /// parts of the tree with problems)
+
     Err,
 }
 
@@ -103,33 +83,10 @@ impl Expr {
         })
     }
 
-    pub fn all(
-        range: Range,
-        param: Ident,
-        typ: Box<Expr>,
-        body: Box<Expr>,
-        erased: bool,
-    ) -> Box<Expr> {
+    pub fn str(range: Range, val: String) -> Box<Expr> {
         Box::new(Expr {
             range,
-            data: ExprKind::All {
-                param,
-                typ,
-                body,
-                erased,
-            },
-        })
-    }
-
-    pub fn sub(range: Range, name: Ident, indx: usize, redx: usize, expr: Box<Expr>) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Sub {
-                name,
-                indx,
-                redx,
-                expr,
-            },
+            data: ExprKind::Str { val },
         })
     }
 
@@ -144,38 +101,17 @@ impl Expr {
         })
     }
 
-    pub fn identity_lambda(ident: Ident) -> Box<Expr> {
-        Box::new(Expr {
-            range: ident.range,
-            data: ExprKind::Lambda {
-                param: ident.clone(),
-                body: Self::var(ident),
-                erased: false,
-            },
-        })
-    }
-
-    pub fn unfold_lambda(irrelev: &[bool], idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
-        idents
-            .iter()
-            .rev()
-            .zip(irrelev)
-            .fold(body, |body, (ident, irrelev)| {
-                Expr::lambda(ident.range, ident.clone(), body, *irrelev)
-            })
-    }
-
-    pub fn app(range: Range, fun: Box<Expr>, args: Vec<AppBinding>) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::App { fun, args },
-        })
-    }
-
     pub fn fun(range: Range, name: QualifiedIdent, args: Vec<Box<Expr>>) -> Box<Expr> {
         Box::new(Expr {
             range: range.into(),
             data: ExprKind::Fun { name, args },
+        })
+    }
+
+    pub fn app(range: Range, fun: Box<Expr>, args: Vec<Box<Expr>>) -> Box<Expr> {
+        Box::new(Expr {
+            range: range.into(),
+            data: ExprKind::App { fun, args },
         })
     }
 
@@ -190,38 +126,6 @@ impl Expr {
         Box::new(Expr {
             range,
             data: ExprKind::Let { name, val, next },
-        })
-    }
-
-    pub fn ann(range: Range, expr: Box<Expr>, typ: Box<Expr>) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Ann { expr, typ },
-        })
-    }
-
-    pub fn typ(range: Range) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Typ,
-        })
-    }
-
-    pub fn u60(range: Range) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::NumType {
-                typ: crate::NumType::U60,
-            },
-        })
-    }
-
-    pub fn u120(range: Range) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::NumType {
-                typ: crate::NumType::U120,
-            },
         })
     }
 
@@ -250,31 +154,10 @@ impl Expr {
         })
     }
 
-    pub fn hole(range: Range, num: u64) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Hole { num },
-        })
-    }
-
-    pub fn str(range: Range, val: String) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Str { val },
-        })
-    }
-
-    pub fn hlp(range: Range, hlp: Ident) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Hlp(hlp),
-        })
-    }
-
     pub fn err(range: Range) -> Box<Expr> {
         Box::new(Expr {
-            data: ExprKind::Err,
             range,
+            data: ExprKind::Err,
         })
     }
 }
@@ -312,8 +195,7 @@ pub struct Rule {
 #[derive(Clone, Debug)]
 pub struct Entry {
     pub name: QualifiedIdent,
-    pub args: Vec<Argument>,
-    pub typ: Box<Expr>,
+    pub args: Vec<(String, Range, bool)>,
     pub rules: Vec<Rule>,
     pub attrs: Attributes,
     pub range: Range,
@@ -334,49 +216,13 @@ impl Expr {
             data: ExprKind::Var { name },
         }
     }
-
-    pub fn traverse_pi_types(&self) -> String {
-        match &self.data {
-            ExprKind::All {
-                param,
-                typ,
-                body,
-                erased,
-            } => {
-                let tilde = if *erased { "~" } else { "" };
-                if param.to_string().starts_with('_') {
-                    format!("{}{} -> {}", tilde, typ, body.traverse_pi_types())
-                } else {
-                    let body = body.traverse_pi_types();
-                    format!("({}{} : {}) -> {}", tilde, param, typ, body)
-                }
-            }
-            _ => format!("{}", self),
-        }
-    }
-}
-
-impl Display for AppBinding {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.erased {
-            write!(f, "-({})", self.data)
-        } else {
-            write!(f, "{}", self.data)
-        }
-    }
 }
 
 impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
         match &self.data {
-            Typ => write!(f, "Type"),
-            NumType {
-                typ: crate::NumType::U60,
-            } => write!(f, "U60"),
-            NumType {
-                typ: crate::NumType::U120,
-            } => write!(f, "U120"),
+            Err => write!(f, "ERR"),
             Str { val } => write!(f, "\"{}\"", val),
             Num {
                 num: crate::Number::U60(n),
@@ -384,7 +230,6 @@ impl Display for Expr {
             Num {
                 num: crate::Number::U120(n),
             } => write!(f, "{}u120", n),
-            All { .. } => write!(f, "({})", self.traverse_pi_types()),
             Var { name } => write!(f, "{}", name),
             Lambda {
                 param,
@@ -396,9 +241,6 @@ impl Display for Expr {
                 body,
                 erased: true,
             } => write!(f, "(~{} => {})", param, body),
-            Sub {
-                name, redx, expr, ..
-            } => write!(f, "(## {}/{} {})", name, redx, expr),
             App { fun, args } => write!(
                 f,
                 "({}{})",
@@ -418,11 +260,7 @@ impl Display for Expr {
                 }
             }
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
-            Ann { expr, typ } => write!(f, "({} :: {})", expr, typ),
             Binary { op, left, right } => write!(f, "({} {} {})", op, left, right),
-            Hole { .. } => write!(f, "_"),
-            Hlp(name) => write!(f, "?{}", name),
-            Err => write!(f, "ERR"),
         }
     }
 }
@@ -430,7 +268,9 @@ impl Display for Expr {
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in self.entrs.values() {
-            writeln!(f, "{}\n", entr)?;
+            if !entr.rules.is_empty() {
+                writeln!(f, "{}\n", entr)?;
+            }
         }
         Ok(())
     }
@@ -450,14 +290,6 @@ impl Display for Argument {
 
 impl Display for Entry {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{}", self.name.clone())?;
-
-        for arg in &self.args {
-            write!(f, " {}", arg)?;
-        }
-
-        write!(f, " : {}", &self.typ)?;
-
         for rule in &self.rules {
             write!(f, "\n{}", rule)?
         }

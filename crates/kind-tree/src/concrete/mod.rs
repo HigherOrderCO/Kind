@@ -120,6 +120,7 @@ pub struct Entry {
     pub rules: Vec<Box<Rule>>,
     pub range: Range,
     pub attrs: Vec<Attribute>,
+    pub generated_by: Option<String>,
 }
 
 /// A single cosntructor inside the algebraic data
@@ -128,6 +129,7 @@ pub struct Entry {
 pub struct Constructor {
     pub name: Ident,
     pub docs: Vec<String>,
+    pub attrs: Vec<Attribute>,
     pub args: Telescope<Argument>,
     pub typ: Option<Box<Expr>>,
 }
@@ -153,6 +155,7 @@ pub struct RecordDecl {
     pub parameters: Telescope<Argument>,
     pub fields: Vec<(Ident, Vec<String>, Box<Expr>)>,
     pub attrs: Vec<Attribute>,
+    pub cons_attrs: Vec<Attribute>,
 }
 
 /// All of the structures
@@ -305,7 +308,10 @@ impl Display for Module {
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in self.entries.values() {
-            write!(f, "{}", entr)?;
+            match entr {
+                TopLevel::Entry(entr) if entr.generated_by.is_some() => (),
+                _ => write!(f, "{}", entr)?,
+            }
         }
         Ok(())
     }

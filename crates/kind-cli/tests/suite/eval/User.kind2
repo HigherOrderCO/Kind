@@ -1,13 +1,11 @@
-#derive[open]
-record User {
-    constructor new
-    name : U60
-    ttt : U60
-    e : U60
+type List (t: Type) {
+    cons (x: t) (xs: List t)
+    nil
 }
 
+Teste (n: List U60) : U60
+Teste (List.cons 2 xs) = 2
+
+#kdl_run
 Main : U60
-Main = 
-    let User.new (ttt = e) name .. = User.new 2 4 1
-    let User.new (ttt = f)      .. = User.new 6 7 3
-    e
+Main = Teste List.nil

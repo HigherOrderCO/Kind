@@ -210,6 +210,7 @@ impl<'a> Parser<'a> {
                 rules,
                 attrs,
                 range: start.mix(end),
+                generated_by: None,
             })
         } else {
             let mut rules = Vec::new();
@@ -235,6 +236,7 @@ impl<'a> Parser<'a> {
                 rules,
                 attrs,
                 range: start.mix(end),
+                generated_by: None,
             })
         }
     }

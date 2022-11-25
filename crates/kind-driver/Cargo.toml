@@ -12,7 +12,10 @@ kind-span = { path = "../kind-span" }
 kind-report = { path = "../kind-report" }
 kind-checker = { path = "../kind-checker" }
 kind-pass = { path = "../kind-pass" }
+
 kind-target-hvm = { path = "../kind-target-hvm" }
+kind-target-kdl = { path = "../kind-target-kdl" }
+
 hvm = { git = "https://github.com/Kindelia/HVM.git" }
 
 strsim = "0.10.0"

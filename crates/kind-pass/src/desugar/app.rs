@@ -1,5 +1,5 @@
 use fxhash::FxHashMap;
-use kind_span::{Locatable, Range, Span};
+use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::Expr;
 
 use kind_tree::concrete::{Binding, ExprKind};
@@ -93,7 +93,10 @@ impl<'a> DesugarState<'a> {
                         if entry.arguments[i].hidden {
                             // It's not expected that positional arguments require the range so
                             // it's the reason why we are using a terrible "ghost range"
-                            arguments[i] = Some((Range::ghost_range(), self.gen_hole_expr(Range::ghost_range())))
+                            arguments[i] = Some((
+                                Range::ghost_range(),
+                                self.gen_hole_expr(Range::ghost_range()),
+                            ))
                         }
                     }
                 } else if entry.arguments.len() != args.len() {
@@ -154,7 +157,7 @@ impl<'a> DesugarState<'a> {
                 if arguments.iter().any(|x| x.is_none()) {
                     return Box::new(desugared::Expr {
                         data: desugared::ExprKind::Err,
-                        span: Span::Locatable(range),
+                        range,
                     });
                 }
 
@@ -162,11 +165,17 @@ impl<'a> DesugarState<'a> {
 
                 Box::new(desugared::Expr {
                     data: if entry.is_ctr {
-                        desugared::ExprKind::Ctr(name.clone(), new_spine)
+                        desugared::ExprKind::Ctr {
+                            name: name.clone(),
+                            args: new_spine,
+                        }
                     } else {
-                        desugared::ExprKind::Fun(name.clone(), new_spine)
+                        desugared::ExprKind::Fun {
+                            name: name.clone(),
+                            args: new_spine,
+                        }
                     },
-                    span: Span::Locatable(range),
+                    range,
                 })
             }
             ExprKind::App { fun, args } => {

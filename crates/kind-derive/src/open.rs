@@ -157,6 +157,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         rules,
         range,
         attrs: Vec::new(),
+        generated_by: Some(rec.name.to_string().clone()),
     };
 
     entry

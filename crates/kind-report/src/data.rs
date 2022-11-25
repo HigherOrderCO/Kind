@@ -55,6 +55,7 @@ pub struct DiagnosticFrame {
 pub enum Log {
     Checking(String),
     Checked(Duration),
+    Compiled(Duration),
     Failed(Duration),
 }
 pub trait Diagnostic {

@@ -11,12 +11,27 @@ pub mod concrete;
 /// The desugared AST.
 pub mod desugared;
 
+/// The untyped AST.
+pub mod untyped;
+
 /// Describes symbols (identifiers) on the language. It will
 /// be really useful when we change the Symbol to take a number
 /// instead of a string due to optimizations.
 pub mod symbol;
 
 pub use hvm::syntax as backend;
+use symbol::Ident;
+
+/// Attributes describes some compiler specific aspects
+/// like inlining and derivations.
+#[derive(Clone, Debug, Default)]
+pub struct Attributes {
+    pub inlined: bool,
+    pub kdl_run: bool,
+    pub kdl_erase: bool,
+    pub kdl_name: Option<Ident>,
+    pub kdl_state: Option<Ident>,
+}
 
 /// Enum of binary operators.
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]

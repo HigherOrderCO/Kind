@@ -1,10 +1,10 @@
 //! Transforms a answer from the type checker in
 //! a Expr of the kind-tree package.
 
-use kind_span::{EncodedSpan, Range};
+use kind_span::{EncodedRange, Range};
 use kind_tree::backend::Term;
 use kind_tree::symbol::{Ident, QualifiedIdent};
-use kind_tree::{desugared, Operator};
+use kind_tree::{desugared, Number, Operator};
 
 use crate::errors::TypeError;
 use desugared::Expr;
@@ -24,7 +24,7 @@ macro_rules! match_opt {
 }
 
 fn parse_orig(term: &Term) -> Result<Range, String> {
-    match_opt!(term, Term::U6O { numb } => EncodedSpan(*numb).to_range())
+    match_opt!(term, Term::U6O { numb } => EncodedRange(*numb).to_range())
 }
 
 fn parse_num(term: &Term) -> Result<u64, String> {
@@ -135,17 +135,33 @@ fn parse_all_expr(
                     erased: false,
                 }],
             )),
-            "Kind.Quoted.ctr" => Ok(Expr::ctr(
-                parse_orig(&args[1])?,
-                parse_qualified(&args[0])?,
-                {
-                    let mut res = Vec::new();
-                    for arg in parse_list(&args[2])? {
-                        res.push(parse_all_expr(names.clone(), &arg)?);
+            "Kind.Quoted.ctr" => {
+                let name = parse_qualified(&args[0])?;
+                let orig = parse_orig(&args[1])?;
+                let mut res = Vec::new();
+                for arg in parse_list(&args[2])? {
+                    res.push(parse_all_expr(names.clone(), &arg)?);
+                }
+
+                if name.to_str() == "U120.new" && res.len() == 2 {
+                    match (&res[0].data, &res[1].data) {
+                        (
+                            desugared::ExprKind::Num {
+                                num: Number::U60(hi),
+                            },
+                            desugared::ExprKind::Num {
+                                num: Number::U60(lo),
+                            },
+                        ) => {
+                            let num = (*hi as u128) << 60 | *lo as u128;
+                            Ok(Expr::num120(orig, num))
+                        }
+                        _ => Ok(Expr::ctr(orig, name, res)),
                     }
-                    res
-                },
-            )),
+                } else {
+                    Ok(Expr::ctr(orig, name, res))
+                }
+            }
             "Kind.Quoted.fun" => Ok(Expr::fun(
                 parse_orig(&args[1])?,
                 parse_qualified(&args[0])?,
@@ -224,7 +240,7 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
             let ls = parse_list(&args[0])?;
             let entries = ls.iter().flat_map(|x| transform_entry(x));
             let ctx = Context(entries.collect());
-            let orig = match_opt!(*args[1], Term::U6O { numb } => EncodedSpan(numb).to_range())?;
+            let orig = match_opt!(*args[1], Term::U6O { numb } => EncodedRange(numb).to_range())?;
             match name.as_str() {
                 "Kind.Error.Quoted.unbound_variable" => Ok(TypeError::UnboundVariable(ctx, orig)),
                 "Kind.Error.Quoted.cant_infer_hole" => Ok(TypeError::CantInferHole(ctx, orig)),

@@ -490,8 +490,8 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Hole => {}
             ExprKind::Do { typ, sttm } => {
-                self.visit_qualified_ident(&mut typ.add_segment("pure"));
-                self.visit_qualified_ident(&mut typ.add_segment("bind"));
+                self.visit_qualified_ident(&mut typ.add_segment("pure").to_generated());
+                self.visit_qualified_ident(&mut typ.add_segment("bind").to_generated());
                 self.visit_sttm(sttm)
             }
             ExprKind::If { cond, then_, else_ } => {

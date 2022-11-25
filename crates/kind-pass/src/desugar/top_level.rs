@@ -1,4 +1,4 @@
-use kind_span::{Range, Span};
+use kind_span::Range;
 use kind_tree::concrete::{self, Telescope};
 use kind_tree::desugared::{self, ExprKind};
 use kind_tree::symbol::QualifiedIdent;
@@ -41,7 +41,7 @@ impl<'a> DesugarState<'a> {
             erased: argument.erased,
             name: argument.name.clone(),
             typ,
-            span: argument.range,
+            range: argument.range,
         }
     }
 
@@ -55,9 +55,9 @@ impl<'a> DesugarState<'a> {
         let type_constructor = desugared::Entry {
             name: sum_type.name.clone(),
             args: desugared_params.extend(&desugared_indices).to_vec(),
-            typ: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
+            typ: desugared::Expr::typ(sum_type.name.range),
             rules: Vec::new(),
-            span: Span::Locatable(sum_type.name.range),
+            range: sum_type.name.range,
             attrs: self.desugar_attributes(&sum_type.attrs),
         };
 
@@ -85,16 +85,16 @@ impl<'a> DesugarState<'a> {
                 Some(expr) => {
                     let res = self.desugar_expr(&expr);
                     match &res.data {
-                        ExprKind::Ctr(name, spine)
+                        ExprKind::Ctr { name, args }
                             if name.to_string() == sum_type.name.to_string() =>
                         {
                             for (i, parameter) in sum_type.parameters.iter().enumerate() {
-                                match &spine[i].data {
-                                    ExprKind::Var(name)
+                                match &args[i].data {
+                                    ExprKind::Var { name }
                                         if name.to_string() == parameter.name.to_string() => {}
                                     _ => {
                                         self.send_err(PassError::ShouldBeAParameter(
-                                            spine[i].span,
+                                            Some(args[i].range),
                                             parameter.range,
                                         ));
                                     }
@@ -129,8 +129,8 @@ impl<'a> DesugarState<'a> {
                 .concat(),
                 typ,
                 rules: Vec::new(),
-                attrs: Vec::new(),
-                span: Span::Locatable(cons.name.range),
+                attrs: self.desugar_attributes(&cons.attrs),
+                range: cons.name.range,
             };
 
             self.new_book
@@ -147,9 +147,9 @@ impl<'a> DesugarState<'a> {
         let type_constructor = desugared::Entry {
             name: rec_type.name.clone(),
             args: desugared_params.clone().to_vec(),
-            typ: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
+            typ: desugared::Expr::typ(rec_type.name.range),
             rules: Vec::new(),
-            span: Span::Locatable(rec_type.name.range),
+            range: rec_type.name.range,
             attrs: self.desugar_attributes(&rec_type.attrs),
         };
 
@@ -162,43 +162,32 @@ impl<'a> DesugarState<'a> {
         let args = [irrelevant_params.as_slice()]
             .concat()
             .iter()
-            .map(|x| {
-                Box::new(desugared::Expr {
-                    data: desugared::ExprKind::Var(x.name.clone()),
-                    span: Span::Generated,
-                })
-            })
+            .map(|x| desugared::Expr::var(x.name.clone()))
             .collect::<Vec<Box<desugared::Expr>>>();
 
-        let typ = Box::new(desugared::Expr {
-            data: desugared::ExprKind::Ctr(rec_type.name.clone(), args),
-            span: Span::Generated,
-        });
+        let typ = desugared::Expr::ctr(rec_type.name.range, rec_type.name.clone(), args);
 
         let cons_ident = rec_type.name.add_segment(rec_type.constructor.to_str());
 
+        let fields_args = rec_type
+            .fields
+            .iter()
+            .map(|(ident, _docs, ty)| {
+                desugared::Argument::from_field(
+                    ident,
+                    self.desugar_expr(ty),
+                    ident.range.mix(ty.range),
+                )
+            })
+            .collect::<Vec<desugared::Argument>>();
+
         let data_constructor = desugared::Entry {
             name: cons_ident.clone(),
-            args: [
-                irrelevant_params.as_slice(),
-                rec_type
-                    .fields
-                    .iter()
-                    .map(|(ident, _docs, ty)| {
-                        desugared::Argument::from_field(
-                            ident,
-                            self.desugar_expr(ty),
-                            ident.range.mix(ty.range),
-                        )
-                    })
-                    .collect::<Vec<desugared::Argument>>()
-                    .as_slice(),
-            ]
-            .concat(),
+            args: [irrelevant_params.as_slice(), fields_args.as_slice()].concat(),
             typ,
             rules: Vec::new(),
-            span: Span::Locatable(rec_type.constructor.range),
-            attrs: Vec::new(),
+            range: rec_type.constructor.range,
+            attrs: self.desugar_attributes(&rec_type.cons_attrs),
         };
 
         self.new_book
@@ -329,7 +318,7 @@ impl<'a> DesugarState<'a> {
                 name: rule.name.clone(),
                 pats,
                 body: self.desugar_expr(&rule.body),
-                span: Span::Locatable(rule.range),
+                range: rule.range,
             }
         } else if pats.len() == args.len() - hidden {
             let mut res_pats = Vec::new();
@@ -345,7 +334,7 @@ impl<'a> DesugarState<'a> {
                 name: rule.name.clone(),
                 pats: res_pats,
                 body: self.desugar_expr(&rule.body),
-                span: Span::Locatable(rule.range),
+                range: rule.range,
             }
         } else {
             self.send_err(PassError::RuleWithIncorrectArity(
@@ -359,7 +348,7 @@ impl<'a> DesugarState<'a> {
                 name: rule.name.clone(),
                 pats,
                 body: self.desugar_expr(&rule.body),
-                span: Span::Locatable(rule.range),
+                range: rule.range,
             }
         }
     }
@@ -377,7 +366,7 @@ impl<'a> DesugarState<'a> {
             name: entry.name.clone(),
             args: entry.args.map(|x| self.desugar_argument(x)).to_vec(),
             typ: self.desugar_expr(&entry.typ),
-            span: entry.range.to_span(),
+            range: entry.range,
             attrs: self.desugar_attributes(&entry.attrs),
             rules,
         };

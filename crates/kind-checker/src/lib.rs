@@ -78,7 +78,7 @@ pub fn type_check(
 /// we run the "eval_main" that runs the generated version that both HVM and
 /// and the checker can understand.
 pub fn eval_api(book: &Book) -> Box<Term> {
-    let file = compiler::codegen_book(book, Vec::new());
+    let file = gen_checker(book, Vec::new());
 
     let file = language::syntax::read_file(&file.to_string()).unwrap();
 
