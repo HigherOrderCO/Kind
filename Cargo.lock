@@ -573,6 +573,7 @@ dependencies = [
  "kind-report",
  "kind-span",
  "kind-target-hvm",
+ "kind-target-kdl",
  "kind-tree",
  "strsim",
 ]
@@ -653,6 +654,7 @@ dependencies = [
  "kind-tree",
  "kindelia_lang",
  "linked-hash-map",
+ "tiny-keccak",
 ]
 
 [[package]]
