@@ -17,6 +17,7 @@ pub fn compile_book(
     sender: Sender<Box<dyn Diagnostic>>,
     namespace: &str,
 ) -> Option<compile::File> {
+    // TODO: Inlining
     // TODO: Remove kdl_states (maybe check if they're ever called?)
     // TODO: Don't erase kdl_state functions
     // TODO: Convert to some sort of Kindelia.Contract

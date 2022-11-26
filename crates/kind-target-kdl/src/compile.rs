@@ -11,6 +11,7 @@ pub use kindelia_lang::ast as kdl;
 use crate::errors::KdlError;
 
 pub const KDL_NAME_LEN: usize = 12;
+const U60_MAX: kdl::U120 = kdl::U120(0xFFFFFFFFFFFFFFF);
 
 #[derive(Debug)]
 pub struct File {
@@ -160,33 +161,163 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
             expr
         }
         From::Binary { op, left, right } => {
-            // TODO: Special compilation for U60 ops
+            use kind_tree::Operator as Op;
             let oper = compile_oper(op);
-            let val0 = Box::new(compile_expr(ctx, left));
-            let val1 = Box::new(compile_expr(ctx, right));
-            To::Op2 { oper, val0, val1 }
+            match op {
+                // These operations occupy more bits on overflow
+                // So we truncate them
+                Op::Add | Op::Sub | Op::Mul => {
+                    let val0 = Box::new(compile_expr(ctx, left));
+                    let val1 = Box::new(compile_expr(ctx, right));
+                    let expr = Box::new(To::Op2 { oper, val0, val1 });
+                    let trunc = Box::new(To::Num { numb: U60_MAX });
+                    To::Op2 {
+                        oper: kdl::Oper::And,
+                        val0: expr,
+                        val1: trunc,
+                    }
+                }
+                // These operations need to wrap around every 60 bits
+                // Eg: (<< n 60) = n
+                Op::Shl | Op::Shr => {
+                    let val0 = Box::new(compile_expr(ctx, left));
+                    let right = Box::new(compile_expr(ctx, right));
+                    let sixty = Box::new(To::Num {
+                        numb: kdl::U120(60),
+                    });
+                    let val1 = Box::new(To::Op2 {
+                        oper: kdl::Oper::Mod,
+                        val0: right,
+                        val1: sixty,
+                    });
+                    To::Op2 { oper, val0, val1 }
+                }
+                // Other operations don't overflow
+                // Div, Mod, And, Or, Xor, Eql, Neq, Gtn, Gte, Ltn, Lte
+                _ => {
+                    let val0 = Box::new(compile_expr(ctx, left));
+                    let val1 = Box::new(compile_expr(ctx, right));
+                    To::Op2 { oper, val0, val1 }
+                }
+            }
         }
         From::Ctr { name, args } => {
             let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-            let mut new_args = Vec::new();
-            for arg in args {
-                new_args.push(compile_expr(ctx, &arg));
-            }
-            To::Ctr {
-                name,
-                args: new_args,
-            }
+            let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
+            To::Ctr { name, args }
         }
         From::Fun { name, args } => {
-            // TODO: Special compilation for U60 and U120 ops
-            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-            let mut new_args = Vec::new();
-            for arg in args {
-                new_args.push(compile_expr(ctx, &arg));
-            }
-            To::Fun {
-                name,
-                args: new_args,
+            match name.to_str() {
+                // Special compilation for some numeric functions
+
+                // Add with no boundary check is just a normal add
+                "U60.add_unsafe" => To::Op2 {
+                    oper: kdl::Oper::Add,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                // U60s are already stored in 120 bits
+                "U60.to_u120" => compile_expr(ctx, &args[0]),
+
+                // Truncate to 60 bits
+                "U120.to_u60" => To::Op2 {
+                    oper: kdl::Oper::And,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(To::Num { numb: U60_MAX }),
+                },
+                // Compilation for U120 numeric operations
+                "U120.add" => To::Op2 {
+                    oper: kdl::Oper::Add,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.sub" => To::Op2 {
+                    oper: kdl::Oper::Add,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.mul" => To::Op2 {
+                    oper: kdl::Oper::Mul,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.div" => To::Op2 {
+                    oper: kdl::Oper::Div,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.mod" => To::Op2 {
+                    oper: kdl::Oper::Mod,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.num_equal" => To::Op2 {
+                    oper: kdl::Oper::Eql,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.num_not_equal" => To::Op2 {
+                    oper: kdl::Oper::Neq,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.shift_left" => To::Op2 {
+                    oper: kdl::Oper::Shl,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.shift_right" => To::Op2 {
+                    oper: kdl::Oper::Shr,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.num_less_than" => To::Op2 {
+                    oper: kdl::Oper::Ltn,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.num_less_equal" => To::Op2 {
+                    oper: kdl::Oper::Lte,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.num_greater_than" => To::Op2 {
+                    oper: kdl::Oper::Gtn,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.num_greater_equal" => To::Op2 {
+                    oper: kdl::Oper::Gte,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.bitwise_and" => To::Op2 {
+                    oper: kdl::Oper::And,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.bitwise_or" => To::Op2 {
+                    oper: kdl::Oper::Or,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                "U120.bitwise_xor" => To::Op2 {
+                    oper: kdl::Oper::Xor,
+                    val0: Box::new(compile_expr(ctx, &args[0])),
+                    val1: Box::new(compile_expr(ctx, &args[1])),
+                },
+                // All other functions with normal compilation
+                _ => {
+                    let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
+                    let mut new_args = Vec::new();
+                    for arg in args {
+                        new_args.push(compile_expr(ctx, &arg));
+                    }
+                    To::Fun {
+                        name,
+                        args: new_args,
+                    }
+                }
             }
         }
         From::Lambda {
