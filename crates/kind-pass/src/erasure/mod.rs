@@ -511,7 +511,12 @@ impl<'a> ErasureState<'a> {
 
         Box::new(untyped::Entry {
             name: entry.name.clone(),
-            args: entry.args.iter().filter(|x| !x.erased).map(|x| (x.name.to_string(), x.range, false)).collect(),
+            args: entry
+                .args
+                .iter()
+                .filter(|x| !x.erased)
+                .map(|x| (x.name.to_string(), x.range, false))
+                .collect(),
             rules,
             attrs: entry.attrs.clone(),
             range: entry.range,

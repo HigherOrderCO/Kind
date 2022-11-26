@@ -145,51 +145,51 @@ pub fn err_term() -> kindelia_lang::ast::Term {
 }
 
 pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang::ast::Term {
-    use crate::untyped::ExprKind::*;
-    use kdl::Term as T;
+    use crate::untyped::ExprKind as From;
+    use kdl::Term as To;
     match &expr.data {
-        App { fun, args } => {
+        From::App { fun, args } => {
             let mut expr = compile_expr(ctx, fun);
             for binding in args {
                 let body = compile_expr(ctx, &binding);
-                expr = T::App {
+                expr = To::App {
                     func: Box::new(expr),
                     argm: Box::new(body),
                 };
             }
             expr
         }
-        Binary { op, left, right } => {
+        From::Binary { op, left, right } => {
             // TODO: Special compilation for U60 ops
             let oper = compile_oper(op);
             let val0 = Box::new(compile_expr(ctx, left));
             let val1 = Box::new(compile_expr(ctx, right));
-            T::Op2 { oper, val0, val1 }
+            To::Op2 { oper, val0, val1 }
         }
-        Ctr { name, args } => {
+        From::Ctr { name, args } => {
             let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
             let mut new_args = Vec::new();
             for arg in args {
                 new_args.push(compile_expr(ctx, &arg));
             }
-            T::Ctr {
+            To::Ctr {
                 name,
                 args: new_args,
             }
         }
-        Fun { name, args } => {
+        From::Fun { name, args } => {
             // TODO: Special compilation for U60 and U120 ops
             let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
             let mut new_args = Vec::new();
             for arg in args {
                 new_args.push(compile_expr(ctx, &arg));
             }
-            T::Fun {
+            To::Fun {
                 name,
                 args: new_args,
             }
         }
-        Lambda {
+        From::Lambda {
             param,
             body,
             erased: _,
@@ -197,44 +197,44 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
             let name = kdl::Name::from_str(param.to_str());
             if let Ok(name) = name {
                 let body = Box::new(compile_expr(ctx, &body));
-                T::Lam { name, body }
+                To::Lam { name, body }
             } else {
                 ctx.send_err(Box::new(KdlError::InvalidVarName(param.range)));
                 err_term()
             }
         }
-        Let { name, val, next } => {
+        From::Let { name, val, next } => {
             let res_name = kdl::Name::from_str(name.to_str());
             if let Ok(name) = res_name {
                 let expr = Box::new(compile_expr(ctx, &val));
-                let func = Box::new(T::Lam { name, body: expr });
+                let func = Box::new(To::Lam { name, body: expr });
                 let argm = Box::new(compile_expr(ctx, next));
-                T::App { func, argm }
+                To::App { func, argm }
             } else {
                 ctx.send_err(Box::new(KdlError::InvalidVarName(name.range)));
                 err_term()
             }
         }
-        Num {
+        From::Num {
             num: Number::U60(numb),
-        } => T::Num {
+        } => To::Num {
             numb: kdl::U120(*numb as u128),
         },
-        Num {
+        From::Num {
             num: Number::U120(numb),
-        } => T::Num {
+        } => To::Num {
             numb: kdl::U120(*numb),
         },
-        Var { name } => {
+        From::Var { name } => {
             let res_name = kdl::Name::from_str(name.to_str());
             if let Ok(name) = res_name {
-                T::Var { name }
+                To::Var { name }
             } else {
                 ctx.send_err(Box::new(KdlError::InvalidVarName(name.range)));
                 err_term()
             }
         }
-        Str { val } => {
+        From::Str { val } => {
             let nil = kdl::Term::Ctr {
                 name: ctx.kdl_names.get("String.nil").unwrap().clone(),
                 args: vec![],
@@ -254,7 +254,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
 
             val.chars().rfold(nil, |rest, chr| cons(chr as u128, rest))
         }
-        Err => unreachable!("Should not have errors inside generation"),
+        From::Err => unreachable!("Should not have errors inside generation"),
     }
 }
 
@@ -347,24 +347,24 @@ impl Display for File {
 }
 
 fn compile_oper(oper: &kind_tree::Operator) -> kdl::Oper {
-    use kdl::Oper as T;
-    use kind_tree::Operator as F;
+    use kdl::Oper as To;
+    use kind_tree::Operator as From;
     match oper {
-        F::Add => T::Add,
-        F::Sub => T::Sub,
-        F::Mul => T::Mul,
-        F::Div => T::Div,
-        F::Mod => T::Mod,
-        F::Shl => T::Shl,
-        F::Shr => T::Shr,
-        F::Eql => T::Eql,
-        F::Neq => T::Neq,
-        F::Ltn => T::Ltn,
-        F::Lte => T::Lte,
-        F::Gte => T::Gte,
-        F::Gtn => T::Gtn,
-        F::And => T::And,
-        F::Xor => T::Xor,
-        F::Or => T::Or,
+        From::Add => To::Add,
+        From::Sub => To::Sub,
+        From::Mul => To::Mul,
+        From::Div => To::Div,
+        From::Mod => To::Mod,
+        From::Shl => To::Shl,
+        From::Shr => To::Shr,
+        From::Eql => To::Eql,
+        From::Neq => To::Neq,
+        From::Ltn => To::Ltn,
+        From::Lte => To::Lte,
+        From::Gte => To::Gte,
+        From::Gtn => To::Gtn,
+        From::And => To::And,
+        From::Xor => To::Xor,
+        From::Or => To::Or,
     }
 }
