@@ -14,8 +14,9 @@ pub const KDL_NAME_LEN: usize = 12;
 
 #[derive(Debug)]
 pub struct File {
-    funs: LinkedHashMap<String, kdl::Statement>,
-    runs: Vec<kdl::Statement>,
+    pub ctrs: LinkedHashMap<String, kdl::Statement>,
+    pub funs: LinkedHashMap<String, kdl::Statement>,
+    pub runs: Vec<kdl::Statement>,
 }
 
 pub struct CompileCtx<'a> {
@@ -32,6 +33,7 @@ impl<'a> CompileCtx<'a> {
     pub fn new(book: &'a untyped::Book, sender: Sender<Box<dyn Diagnostic>>) -> CompileCtx<'a> {
         CompileCtx {
             file: File {
+                ctrs: Default::default(),
                 funs: Default::default(),
                 runs: Default::default(),
             },
