@@ -133,7 +133,7 @@ pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang
         let arg = compile_expr(ctx, pat);
         args.push(arg);
     }
-    let lhs = kdl::Term::fun(name, args);
+    let lhs = kdl::Term::ctr(name, args);
     let rhs = compile_expr(ctx, &rule.body);
     let rule = kdl::Rule { lhs, rhs };
     rule
@@ -202,13 +202,10 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
             }
         }
         From::Ctr { name, args } => {
-            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-            let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
-            To::Ctr { name, args }
-        }
-        From::Fun { name, args } => {
             match name.to_str() {
                 // Special compilation for some numeric functions
+                // They have no rules because they're compilation defined,
+                // so they've been initially interpreted as Ctr
 
                 // Add with no boundary check is just a normal add
                 "U60.add_unsafe" => To::Op2 {
@@ -306,19 +303,19 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                // All other functions with normal compilation
+
+                // All other constructors have a normal compilation
                 _ => {
                     let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-                    let mut new_args = Vec::new();
-                    for arg in args {
-                        new_args.push(compile_expr(ctx, &arg));
-                    }
-                    To::Fun {
-                        name,
-                        args: new_args,
-                    }
+                    let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
+                    To::Ctr { name, args }
                 }
             }
+        }
+        From::Fun { name, args } => {
+            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
+            let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
+            To::Fun { name, args }
         }
         From::Lambda {
             param,
@@ -418,13 +415,15 @@ pub fn compile_entry(ctx: &mut CompileCtx, entry: &untyped::Entry) {
         }
 
         if entry.rules.len() == 0 {
+            // Functions with no rules become Ctr
             let sttm = kdl::Statement::Ctr {
                 name,
                 args,
                 sign: None,
             };
-            ctx.file.funs.insert(entry.name.to_string(), sttm);
+            ctx.file.ctrs.insert(entry.name.to_string(), sttm);
         } else {
+            // Functions with rules become Fun
             let rules = entry
                 .rules
                 .iter()

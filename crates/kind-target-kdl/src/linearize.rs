@@ -9,6 +9,8 @@
 //   - results in: `(Foo x0 *) = dup x0.0 x0.1 = x0; (+ x0.0 x0.1)`
 // The algorithm was copied from the hvm
 
+// TODO: This is inserting unneeded `let`s for all linear rule variables
+
 use crate::File;
 use fxhash::FxHashMap;
 use kindelia_lang::ast::{Func, Name, Rule, Statement, Term};
@@ -57,11 +59,17 @@ impl LinearizeCtx {
                         }
                     }
                     Term::Num { .. } => (),
-                    _ => unreachable!(), // Invalid lhs param
+                    _ => unreachable!(
+                        "Invalid left-hand side parameter. Expected Var, Ctr or Num, got {:?}",
+                        arg
+                    ),
                 }
             }
         } else {
-            unreachable!(); // Invalid lhs Term
+            unreachable!(
+                "Invalid left-hand side term. Expected Ctr, got {:?}",
+                rule.lhs
+            );
         }
     }
 }
@@ -106,7 +114,7 @@ pub fn linearize_file(file: File) -> File {
             };
             funs.insert(kind_name, stmt);
         } else {
-            unreachable!();
+            unreachable!("Expected list of Funs, found {:?}", stmt);
         }
     }
     let ctrs = file.ctrs;
@@ -148,7 +156,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                     let name = Name::from_str(&format!("{}.{}", name, used - 1)).unwrap(); // TODO: Think if this errs or not
                     Term::Var { name }
                 } else {
-                    unreachable!(); // Is it? Unbound variable
+                    unreachable!("Unbound variable '{}' in kdl compilation", name.to_string());
                 }
             }
         }
