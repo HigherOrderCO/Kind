@@ -545,9 +545,6 @@ dependencies = [
  "kind-driver",
  "kind-query",
  "kind-report",
- "ntest",
- "pretty_assertions",
- "walkdir",
 ]
 
 [[package]]
@@ -555,6 +552,7 @@ name = "kind-derive"
 version = "0.1.0"
 dependencies = [
  "fxhash",
+ "im",
  "kind-report",
  "kind-span",
  "kind-tree",
@@ -655,6 +653,19 @@ dependencies = [
  "kindelia_lang",
  "linked-hash-map",
  "tiny-keccak",
+]
+
+[[package]]
+name = "kind-tests"
+version = "0.1.0"
+dependencies = [
+ "kind-checker",
+ "kind-driver",
+ "kind-query",
+ "kind-report",
+ "ntest",
+ "pretty_assertions",
+ "walkdir",
 ]
 
 [[package]]
