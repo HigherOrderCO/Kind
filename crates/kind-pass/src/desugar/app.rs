@@ -94,8 +94,8 @@ impl<'a> DesugarState<'a> {
                             // It's not expected that positional arguments require the range so
                             // it's the reason why we are using a terrible "ghost range"
                             arguments[i] = Some((
-                                Range::ghost_range(),
-                                self.gen_hole_expr(Range::ghost_range()),
+                                range,
+                                self.gen_hole_expr(range),
                             ))
                         }
                     }

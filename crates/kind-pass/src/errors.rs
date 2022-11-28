@@ -34,9 +34,7 @@ pub enum PassError {
     NotATypeConstructor(Range, Range),
     ShouldBeAParameter(Option<Range>, Range),
     NoFieldCoverage(Range, Vec<String>),
-    CannotPatternMatchOnErased(Range),
     UnboundVariable(Vec<Ident>, Vec<String>),
-
     AttributeDoesNotExpectEqual(Range),
     AttributeDoesNotExpectArgs(Range),
     InvalidAttributeArgument(Range),
@@ -67,7 +65,6 @@ impl Diagnostic for PassError {
             PassError::NotATypeConstructor(range, _) => Some(range.ctx),
             PassError::ShouldBeAParameter(_, range) => Some(range.ctx),
             PassError::NoFieldCoverage(range, _) => Some(range.ctx),
-            PassError::CannotPatternMatchOnErased(range) => Some(range.ctx),
             PassError::UnboundVariable(ranges, _) => Some(ranges[0].range.ctx),
             PassError::AttributeDoesNotExpectEqual(range) => Some(range.ctx),
             PassError::AttributeDoesNotExpectArgs(range) => Some(range.ctx),
@@ -147,20 +144,6 @@ impl Diagnostic for PassError {
                 code: 200,
                 severity: Severity::Error,
                 title: "Can only destruct record types.".to_string(),
-                subtitles: vec![],
-                hints: vec![],
-                positions: vec![Marker {
-                    position: *place,
-                    color: Color::Fst,
-                    text: "Here!".to_string(),
-                    no_code: false,
-                    main: true,
-                }],
-            },
-            PassError::CannotPatternMatchOnErased(place) => DiagnosticFrame {
-                code: 223,
-                severity: Severity::Error,
-                title: "Cannot pattern match on erased arguments.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {

@@ -1,315 +1,377 @@
-//! Erases everything that is not relevant to the output.
-//! It's a simpler version of what I want to do in order
-//! to finish a stable version of the compiler.
-
-// FIX: Need to make a "constraint map" in order to check
-// if a irrelevant thing is relevant in relation to the
-// function that we are trying to check the irrelevance.
-
-// Not the best algorithm... it should not be trusted for
-// dead code elimination.
-
-// TODO: Cannot pattern match on erased
-
 use std::sync::mpsc::Sender;
 
 use fxhash::{FxHashMap, FxHashSet};
-
 use kind_report::data::Diagnostic;
 use kind_span::Range;
-use kind_tree::desugared::{Book, Entry, Expr, Rule};
-use kind_tree::symbol::QualifiedIdent;
-use kind_tree::{untyped, Number};
+
+use kind_tree::desugared;
+use kind_tree::symbol::{Ident, QualifiedIdent};
+use kind_tree::untyped::{self};
+use kind_tree::Number;
 
 use crate::errors::PassError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Relevance {
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+enum Relevance {
+    Relevant,
+    Irrelevant,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+enum Ambient {
+    Unknown,
     Irrelevant,
     Relevant,
-    Hole(usize),
 }
+
+impl Ambient {
+    pub fn to_relev(&self) -> Relevance {
+        match self {
+            Ambient::Irrelevant => Relevance::Irrelevant,
+            Ambient::Unknown | Ambient::Relevant => Relevance::Relevant,
+        }
+    }
+}
+
+pub struct Edge {
+    name: String,
+    relevance: FxHashMap<Relevance, Vec<Range>>,
+    connections: FxHashMap<usize, Vec<(Range, Ambient)>>,
+}
+
 pub struct ErasureState<'a> {
     errs: Sender<Box<dyn Diagnostic>>,
-    book: &'a Book,
+    book: &'a desugared::Book,
 
-    ctx: im::HashMap<String, (Range, (Option<Range>, Relevance))>,
+    edges: Vec<Edge>,
+    names: FxHashMap<String, (Range, usize)>,
 
-    names: FxHashMap<String, (Option<Range>, Relevance)>,
-    holes: Vec<Option<Relevance>>,
+    ctx: im::HashMap<String, Relevance>,
+
     failed: bool,
 }
 
-pub fn erase_book(
-    book: Book,
+pub fn erase_book<'a>(
+    book: &'a desugared::Book,
     errs: Sender<Box<dyn Diagnostic>>,
-    entrypoint: FxHashSet<String>,
 ) -> Option<untyped::Book> {
     let mut state = ErasureState {
         errs,
-        book: &book,
-        ctx: Default::default(),
+        book,
+        edges: Default::default(),
         names: Default::default(),
-        holes: Default::default(),
-        failed: false,
+        ctx: Default::default(),
+        failed: Default::default(),
     };
 
-    let mut new_book = untyped::Book {
-        holes: book.holes,
-        ..Default::default()
-    };
-
-    let mut entries = FxHashMap::default();
-
-    for name in entrypoint {
-        let count = state.holes.len();
-        state
-            .names
-            .insert(name.to_string(), (None, Relevance::Hole(count)));
-        state.holes.push(Some(Relevance::Relevant));
-    }
-
-    for (name, v) in &book.entrs {
-        entries.insert(name, state.erase_entry(v));
-    }
-
-    if state.failed {
-        return None;
-    }
-
-    for (name, (_, relev)) in &state.names {
-        if let Some(Relevance::Relevant) = state.normalize(*relev) {
-            if let Some(res) = entries.remove(name) {
-                new_book
-                    .names
-                    .insert(name.to_string(), new_book.entrs.len());
-                new_book.entrs.insert(name.to_string(), res);
-            }
-        }
-    }
-
-    Some(new_book)
+    state.erase_book(book)
 }
 
 impl<'a> ErasureState<'a> {
-    pub fn new_hole(&mut self, range: Range, name: String) -> (Option<Range>, Relevance) {
-        let count = self.holes.len();
-        let local_relevance = (Some(range), Relevance::Hole(count));
-        self.names.insert(name, local_relevance);
-        self.holes.push(None);
-        local_relevance
+    fn get_edge_or_create(&mut self, name: &QualifiedIdent) -> usize {
+        if let Some(id) = self.names.get(&name.to_string()) {
+            id.1
+        } else {
+            let id = self.edges.len();
+            self.names.insert(name.to_string(), (name.range, id));
+            self.edges.push(Edge {
+                name: name.to_string(),
+                relevance: Default::default(),
+                connections: Default::default(),
+            });
+            id
+        }
     }
 
-    pub fn send_err(&mut self, err: Box<PassError>) {
-        self.errs.send(err).unwrap();
-        self.failed = true;
-    }
-    pub fn err_irrelevant(
-        &mut self,
-        declared_val: Option<Range>,
-        used: Range,
-        declared_ty: Option<Range>,
-    ) {
-        self.send_err(Box::new(PassError::CannotUseIrrelevant(
-            declared_val,
-            used,
-            declared_ty,
-        )));
+    fn set_relevance(&mut self, id: usize, relevance: Relevance, on: Range) {
+        let edge = self.edges.get_mut(id).unwrap();
+        let entry = edge.relevance.entry(relevance).or_default();
+        entry.push(on)
     }
 
-    pub fn get_normal(&self, hole: usize, visited: &mut FxHashSet<usize>) -> Option<Relevance> {
-        match self.holes[hole] {
-            Some(Relevance::Hole(r)) if !visited.contains(&hole) => {
-                visited.insert(hole);
-                self.get_normal(r, visited)
+    fn connect_with(&mut self, id: usize, name: &QualifiedIdent, ambient: Ambient) {
+        let new_id = self.get_edge_or_create(name);
+        let entry = self.edges[id].connections.entry(new_id).or_default();
+        entry.push((name.range, ambient))
+    }
+
+    pub fn erase_book(&mut self, book: &'a desugared::Book) -> Option<untyped::Book> {
+        let mut vals = FxHashMap::default();
+
+        let mut entrypoints = Vec::new();
+        
+        if let Some(entr) = book.entrs.get("Main") {
+            let id = self.get_edge_or_create(&entr.name);
+            self.set_relevance(id, Relevance::Relevant, entr.name.range);
+            entrypoints.push(id);
+        }
+
+        for entr in book.entrs.values() {
+            if entr.attrs.kdl_run {
+                let id = self.get_edge_or_create(&entr.name);
+                self.set_relevance(id, Relevance::Relevant, entr.name.range);
+                entrypoints.push(id);
             }
-            other => other,
         }
-    }
 
-    pub fn normalize(&self, hole: Relevance) -> Option<Relevance> {
-        match hole {
-            Relevance::Hole(hole) => self.get_normal(hole, &mut Default::default()),
-            other => Some(other),
+        for entr in book.entrs.values() {
+            vals.insert(entr.name.to_string(), self.erase_entry(entr));
         }
-    }
 
-    pub fn unify_loop(
-        &mut self,
-        range: Range,
-        left: (Option<Range>, Relevance),
-        right: (Option<Range>, Relevance),
-        visited: &mut FxHashSet<usize>,
-        relevance_unify: bool,
-    ) -> bool {
-        match (left.1, right.1) {
-            (Relevance::Hole(hole), t) => match (self.holes[hole], t) {
-                (Some(res), _) if !visited.contains(&hole) => {
-                    visited.insert(hole);
-                    self.unify_loop(range, (left.0, res), right, visited, relevance_unify)
-                }
+        let mut visited = FxHashSet::<usize>::default();
 
-                // TODO: It should unify iff we want functions that are considered
-                // "erased" in the sense that we can just remove them from the runtime and it'll
-                // be fine.
-                (None, Relevance::Irrelevant) => {
-                    self.holes[hole] = Some(Relevance::Irrelevant);
-                    true
-                }
-
-                (None, Relevance::Hole(n)) => {
-                    self.holes[hole] = Some(Relevance::Hole(n));
-                    true
-                }
-
-                (_, _) => true,
-            },
-            (Relevance::Relevant, Relevance::Hole(hole)) => match self.holes[hole] {
-                Some(res) if !visited.contains(&hole) => {
-                    visited.insert(hole);
-                    self.unify_loop(range, left, (right.0, res), visited, relevance_unify)
-                }
-                _ => {
-                    self.holes[hole] = Some(Relevance::Relevant);
-                    true
-                }
-            },
-            (Relevance::Irrelevant, Relevance::Hole(_))
-            | (Relevance::Relevant, Relevance::Relevant)
-            | (Relevance::Irrelevant, Relevance::Irrelevant)
-            | (Relevance::Irrelevant, Relevance::Relevant) => true,
-            (Relevance::Relevant, Relevance::Irrelevant) => false,
-        }
-    }
-
-    pub fn unify(
-        &mut self,
-        range: Range,
-        left: (Option<Range>, Relevance),
-        right: (Option<Range>, Relevance),
-        relevance_unify: bool,
-    ) -> bool {
-        self.unify_loop(range, left, right, &mut Default::default(), relevance_unify)
-    }
-
-    pub fn erase_pat_spine(
-        &mut self,
-        on: (Option<Range>, Relevance),
-        name: &QualifiedIdent,
-        spine: &Vec<Box<Expr>>,
-    ) -> Vec<Box<untyped::Expr>> {
-        let fun = match self.names.get(name.to_str()) {
-            Some(res) => *res,
-            None => self.new_hole(name.range, name.to_string()),
+        let mut new_book = untyped::Book {
+            entrs: Default::default(),
+            names: Default::default(),
         };
 
-        if !self.unify(name.range, on, fun, true) {
-            self.err_irrelevant(None, name.range, None)
+        let mut queue = entrypoints.iter().map(|x| (x, Ambient::Relevant)).collect::<Vec<_>>();
+
+        while !queue.is_empty() {
+            let (fst, relev) = queue.pop().unwrap();
+            
+            if visited.contains(&fst) {
+                continue;
+            }
+
+            visited.insert(*fst);
+
+            let edge = &self.edges[*fst];
+
+            if relev != Ambient::Irrelevant {
+                if let Some(res) = edge.relevance.get(&Relevance::Irrelevant) {
+                    self.errs
+                        .send(Box::new(PassError::CannotUseIrrelevant(None, res[0], None)))
+                        .unwrap();
+                }
+            }
+
+
+            let entry = vals.get(&edge.name).cloned().unwrap();
+
+            new_book.names.insert(entry.name.to_string(), new_book.entrs.len());
+
+            new_book.entrs.insert(
+                entry.name.to_string(),
+                entry
+            );
+
+            for (to, relevs) in &edge.connections {
+                for (_, relev) in relevs.iter() {
+                    match relev {
+                        Ambient::Irrelevant => (),
+                        Ambient::Unknown | Ambient::Relevant => {
+                            if !visited.contains(to) {
+                                queue.push((to, *relev));
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        let entry = self.book.entrs.get(name.to_str()).unwrap();
-        let erased = entry.args.iter();
-
-        spine
-            .iter()
-            .zip(erased)
-            .map(|(elem, arg)| {
-                let relev = if arg.erased {
-                    (Some(arg.range), Relevance::Irrelevant)
-                } else {
-                    on.clone()
-                };
-                (self.erase_pat(relev, elem), arg.erased)
-            })
-            .filter(|res| !res.1)
-            .map(|res| res.0)
-            .collect()
+        if self.failed {
+            None
+        } else {
+            Some(new_book)
+        }
     }
 
-    pub fn erase_pat(&mut self, on: (Option<Range>, Relevance), pat: &Expr) -> Box<untyped::Expr> {
-        use kind_tree::desugared::ExprKind::*;
+    fn erase_entry(&mut self, entry: &'a desugared::Entry) -> Box<untyped::Entry> {
+        let id = self.get_edge_or_create(&entry.name);
 
-        match &pat.data {
-            Num {
-                num: Number::U60(n),
-            } => untyped::Expr::num60(pat.range, *n),
-            Num {
-                num: Number::U120(n),
-            } => untyped::Expr::num120(pat.range, *n),
+        let mut args = Vec::new();
+
+        let backup = self.ctx.clone();
+
+        for arg in &entry.args {
+            self.erase_expr(Ambient::Irrelevant, id, &arg.typ);
+            self.ctx.insert(arg.name.to_string(), Relevance::Irrelevant);
+            if !arg.hidden {
+                args.push((arg.name.to_string(), arg.range, false))
+            }
+        }
+
+        self.erase_expr(Ambient::Irrelevant, id, &entry.typ);
+
+        self.ctx = backup;
+
+        let mut rules = Vec::new();
+        
+        for rule in &entry.rules {
+            rules.push(self.erase_rule(entry, id, rule));
+        }
+
+        Box::new(untyped::Entry {
+            name: entry.name.clone(),
+            args,
+            rules,
+            attrs: entry.attrs.clone(),
+            range: entry.range,
+        })
+    }
+
+    fn erase_rule(
+        &mut self,
+        entr: &desugared::Entry,
+        edge: usize,
+        rule: &'a desugared::Rule,
+    ) -> untyped::Rule {
+        let backup = self.ctx.clone();
+
+        let has_relevance = self.edges[edge]
+            .relevance
+            .contains_key(&Relevance::Relevant);
+
+        let relev = |hidden: bool| -> Ambient {
+            if hidden {
+                Ambient::Irrelevant
+            } else if has_relevance {
+                Ambient::Relevant
+            } else {
+                Ambient::Unknown
+            }
+        };
+
+        let pats = rule
+            .pats
+            .iter()
+            .zip(&entr.args)
+            .map(|(pat, arg)| (self.erase_pat(relev(arg.hidden), edge, pat), arg))
+            .filter(|(_, arg)| !arg.erased)
+            .map(|res| res.0)
+            .collect::<Vec<_>>();
+
+        
+        let body = self.erase_expr(relev(false), edge, &rule.body);
+
+        self.ctx = backup;
+
+        untyped::Rule {
+            name: entr.name.clone(),
+            pats,
+            body,
+            range: rule.range,
+        }
+    }
+
+    fn erase_pat(
+        &mut self,
+        relevance: Ambient,
+        edge: usize,
+        expr: &'a desugared::Expr,
+    ) -> Box<untyped::Expr> {
+        let relev = |hidden: bool| -> Ambient {
+            if hidden {
+                Ambient::Irrelevant
+            } else {
+                relevance
+            }
+        };
+
+        use desugared::ExprKind::*;
+        
+        match &expr.data {
             Var { name } => {
-                self.ctx.insert(name.to_string(), (name.range, on));
+                self.ctx.insert(
+                    name.to_string(),
+                    if relevance == Ambient::Irrelevant {
+                        Relevance::Irrelevant
+                    } else {
+                        Relevance::Relevant
+                    },
+                );
+
                 untyped::Expr::var(name.clone())
             }
-            Fun { name, args } | Ctr { name, args } if on.1 == Relevance::Irrelevant => {
-                let range = pat.range.clone();
-                self.errs
-                    .send(Box::new(PassError::CannotPatternMatchOnErased(range)))
-                    .unwrap();
-                self.failed = true;
-                self.erase_pat_spine(on, &name, args);
-                untyped::Expr::err(range)
-            }
+            Hole { num } => untyped::Expr::var(Ident::generate(&format!("_x{}", num))),
             Fun { name, args } => {
-                let args = self.erase_pat_spine(on, &name, args);
-                untyped::Expr::fun(pat.range.clone(), name.clone(), args)
+                self.connect_with(edge, name, relevance);
+
+                // We cannot pattern match on functions in a relevant function.
+                // it would change its behaviour.
+                if relevance == Ambient::Irrelevant {
+                    self.set_relevance(edge, Relevance::Irrelevant, expr.range)
+                }
+
+                let params = self.book.entrs.get(name.to_str()).unwrap();
+
+                let args = args
+                    .iter()
+                    .zip(&params.args)
+                    .map(|(arg, param)| (self.erase_pat(relev(param.hidden), edge, arg), param))
+                    .filter(|(_, param)| !param.hidden)
+                    .map(|x| x.0)
+                    .collect::<Vec<_>>();
+
+                untyped::Expr::fun(expr.range, name.clone(), args)
             }
             Ctr { name, args } => {
-                let args = self.erase_pat_spine(on, &name, args);
-                untyped::Expr::ctr(pat.range.clone(), name.clone(), args)
+                self.connect_with(edge, name, relevance);
+
+                // We cannot pattenr match on functions in a relevant function.
+                // it would change its behaviour.
+                if relevance == Ambient::Irrelevant {
+                    self.set_relevance(edge, Relevance::Irrelevant, expr.range)
+                }
+
+                let params = self.book.entrs.get(name.to_str()).unwrap();
+
+                let args = args
+                    .iter()
+                    .zip(&params.args)
+                    .map(|(arg, param)| (self.erase_pat(relev(param.hidden), edge, arg), param))
+                    .filter(|(_, param)| !param.hidden)
+                    .map(|x| x.0)
+                    .collect::<Vec<_>>();
+
+                untyped::Expr::ctr(expr.range, name.clone(), args)
             }
-            res => panic!("Internal Error: Not a pattern {:?}", res),
+            Num {
+                num: Number::U60(num),
+            } => untyped::Expr::num60(expr.range, *num),
+            Num {
+                num: Number::U120(num),
+            } => untyped::Expr::num120(expr.range, *num),
+            Str { val } => {
+                let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
+                let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
+
+                self.connect_with(edge, &nil, relevance);
+                self.connect_with(edge, &cons, relevance);
+
+                untyped::Expr::str(expr.range, val.clone())
+            }
+            _ => todo!("Cannot be parsed {}", expr),
         }
     }
 
-    pub fn erase_expr(
+    fn erase_expr(
         &mut self,
-        on: &(Option<Range>, Relevance),
-        expr: &Expr,
+        ambient: Ambient,
+        edge: usize,
+        expr: &'a desugared::Expr,
     ) -> Box<untyped::Expr> {
-        use kind_tree::desugared::ExprKind::*;
-
+        use desugared::ExprKind::*;
         match &expr.data {
-            Typ | NumType { .. } | Err | Hole { .. } | Hlp(_) => {
-                if !self.unify(expr.range, *on, (None, Relevance::Irrelevant), false) {
-                    self.err_irrelevant(None, expr.range, None)
-                }
-                // Used as sentinel value because all of these constructions
-                // should not end in the generated tree.
-                untyped::Expr::err(expr.range)
-            }
-            Num {
-                num: Number::U60(n),
-            } => untyped::Expr::num60(expr.range, *n),
-            Num {
-                num: Number::U120(n),
-            } => untyped::Expr::num120(expr.range, *n),
-            Str { val } => untyped::Expr::str(expr.range, val.clone()),
-            Var { name } => {
-                let relev = self.ctx.get(name.to_str()).unwrap();
-                let declared_ty = (relev.1).0;
-                let declared_val = relev.0;
-                if !self.unify(name.range, *on, relev.1, false) {
-                    self.err_irrelevant(Some(declared_val), name.range, declared_ty)
-                }
-                untyped::Expr::var(name.clone())
-            }
             All {
-                param, typ, body, ..
+                param,
+                typ,
+                body,
+                erased: _,
             } => {
-                if !self.unify(expr.range, *on, (None, Relevance::Irrelevant), false) {
-                    self.err_irrelevant(None, expr.range, None)
+                let backup = self.ctx.clone();
+                self.ctx.insert(param.to_string(), Relevance::Irrelevant);
+                
+                if ambient != Ambient::Irrelevant {
+                    self.set_relevance(edge, Relevance::Irrelevant, expr.range);
                 }
 
-                let ctx = self.ctx.clone();
+                self.erase_expr(Ambient::Irrelevant, edge, typ);
+                self.erase_expr(Ambient::Irrelevant, edge, body);
 
-                // Relevant inside the context that is it's being used?
-                self.ctx.insert(param.to_string(), (param.range, *on));
+                self.ctx = backup;
 
-                self.erase_expr(&(on.0, Relevance::Irrelevant), typ);
-                self.erase_expr(&(on.0, Relevance::Irrelevant), body);
-                self.ctx = ctx;
-
-                // Used as sentinel value because "All" should not end in a tree.
                 untyped::Expr::err(expr.range)
             }
             Lambda {
@@ -317,204 +379,131 @@ impl<'a> ErasureState<'a> {
                 body,
                 erased,
             } => {
-                let ctx = self.ctx.clone();
+                let backup = self.ctx.clone();
 
-                if *erased {
-                    self.ctx.insert(
-                        param.to_string(),
-                        (param.range, (None, Relevance::Irrelevant)),
-                    );
+                let relev = if ambient == Ambient::Irrelevant || *erased {
+                    Relevance::Irrelevant
                 } else {
-                    self.ctx.insert(param.to_string(), (param.range, *on));
-                }
+                    Relevance::Relevant
+                };
 
-                let body = self.erase_expr(on, body);
-                self.ctx = ctx;
+                self.ctx.insert(param.to_string(), relev);
 
-                if *erased {
-                    body
-                } else {
-                    untyped::Expr::lambda(expr.range, param.clone(), body, *erased)
-                }
+                let body = self.erase_expr(ambient, edge, body);
+
+                self.ctx = backup;
+
+                untyped::Expr::lambda(expr.range, param.clone(), body, *erased)
             }
             Let { name, val, next } => {
-                let ctx = self.ctx.clone();
-                self.ctx.insert(name.to_string(), (name.range, *on));
+                let backup = self.ctx.clone();
 
-                let val = self.erase_expr(on, val);
-                let next = self.erase_expr(on, next);
+                self.ctx.insert(name.to_string(), ambient.to_relev());
 
-                self.ctx = ctx;
+                let val = self.erase_expr(ambient, edge, val);
+                let next = self.erase_expr(ambient, edge, next);
+
+                self.ctx = backup;
 
                 untyped::Expr::let_(expr.range, name.clone(), val, next)
             }
-            App { fun, args } => {
-                let head = self.erase_expr(on, fun);
-                let spine = args
-                    .iter()
-                    .map(|x| {
-                        let on = if x.erased {
-                            let span = expr.range;
-                            if !self.unify(span, *on, (None, Relevance::Irrelevant), false) {
-                                self.err_irrelevant(None, span, None)
-                            }
-                            (Some(x.data.range), Relevance::Irrelevant)
-                        } else {
-                            on.clone()
-                        };
-                        (x.erased, self.erase_expr(&on, &x.data))
-                    })
-                    .filter(|x| !x.0)
-                    .map(|x| x.1)
-                    .collect();
-
-                untyped::Expr::app(expr.range, head, spine)
-            }
             Fun { name, args } => {
-                let spine = self.book.entrs.get(name.to_str()).unwrap().args.iter();
+                self.connect_with(edge, name, ambient);
 
-                let fun = match self.names.get(name.to_str()) {
-                    Some(res) => *res,
-                    None => self.new_hole(name.range, name.to_string()),
+                let params = &self.book.entrs.get(name.to_str()).unwrap().args;
+
+                let relev = |hidden| {
+                    if hidden {
+                        Ambient::Irrelevant
+                    } else {
+                        ambient
+                    }
                 };
 
-                if !self.unify(name.range, *on, fun, true) {
-                    self.err_irrelevant(None, name.range, None)
-                }
-
-                let spine = args
+                let args = params
                     .iter()
-                    .zip(spine)
-                    .map(|(expr, arg)| {
-                        if arg.erased {
-                            (
-                                self.erase_expr(&(Some(arg.range), Relevance::Irrelevant), expr),
-                                arg,
-                            )
-                        } else {
-                            (self.erase_expr(on, expr), arg)
-                        }
-                    })
-                    .filter(|(_, arg)| !arg.erased);
+                    .zip(args)
+                    .map(|(param, arg)| (param, self.erase_expr(relev(param.erased), edge, arg)))
+                    .filter(|(param, _)| !param.erased)
+                    .map(|res| res.1)
+                    .collect::<Vec<_>>();
 
-                untyped::Expr::fun(
-                    expr.range,
-                    name.clone(),
-                    spine.map(|(expr, _)| expr).collect(),
-                )
+                untyped::Expr::fun(expr.range, name.clone(), args)
             }
             Ctr { name, args } => {
-                let spine = self.book.entrs.get(name.to_str()).unwrap().args.iter();
+                self.connect_with(edge, name, ambient);
 
-                let fun = match self.names.get(&name.to_string()) {
-                    Some(res) => *res,
-                    None => self.new_hole(name.range, name.to_string()),
+                let params = &self.book.entrs.get(name.to_str()).unwrap().args;
+
+                let relev = |hidden| {
+                    if hidden {
+                        Ambient::Irrelevant
+                    } else {
+                        ambient
+                    }
                 };
 
-                if !self.unify(name.range, *on, fun, true) {
-                    self.err_irrelevant(None, name.range, None)
+                let args = params
+                    .iter()
+                    .zip(args)
+                    .map(|(param, arg)| (param, self.erase_expr(relev(param.erased), edge, arg)))
+                    .filter(|(param, _)| !param.erased)
+                    .map(|res| res.1)
+                    .collect::<Vec<_>>();
+
+                untyped::Expr::ctr(expr.range, name.clone(), args)
+            }
+            Var { name } => {
+                let var_rev = self
+                    .ctx
+                    .get(&name.to_string())
+                    .expect(&format!("Uwnraping {}", name.to_string()));
+
+                if *var_rev == Relevance::Irrelevant && ambient != Ambient::Irrelevant {
+                    self.set_relevance(edge, Relevance::Irrelevant, name.range)
                 }
 
-                let spine = args
-                    .iter()
-                    .zip(spine)
-                    .map(|(expr, arg)| {
-                        if arg.erased {
-                            (
-                                self.erase_expr(&(Some(arg.range), Relevance::Irrelevant), expr),
-                                arg,
-                            )
-                        } else {
-                            (self.erase_expr(on, expr), arg)
-                        }
-                    })
-                    .filter(|(_, arg)| !arg.erased);
-
-                untyped::Expr::ctr(
-                    expr.range,
-                    name.clone(),
-                    spine.map(|(expr, _)| expr).collect(),
-                )
+                untyped::Expr::var(name.clone())
             }
             Ann { expr, typ } => {
-                let res = self.erase_expr(on, expr);
-                self.erase_expr(&(None, Relevance::Irrelevant), typ);
-                res
+                let expr = self.erase_expr(ambient, edge, expr);
+                self.erase_expr(Ambient::Irrelevant, edge, typ);
+                expr
             }
-            Sub { expr, .. } => self.erase_expr(on, expr),
-            Binary { op, left, right } => untyped::Expr::binary(
-                expr.range,
-                *op,
-                self.erase_expr(on, left),
-                self.erase_expr(on, right),
-            ),
+            Num {
+                num: Number::U60(num),
+            } => untyped::Expr::num60(expr.range, *num),
+            Num {
+                num: Number::U120(num),
+            } => untyped::Expr::num120(expr.range, *num),
+            Str { val } => {
+                let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
+                let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
+                self.connect_with(edge, &nil, ambient);
+                self.connect_with(edge, &cons, ambient);
+
+                untyped::Expr::str(expr.range, val.clone())
+            }
+            App { fun, args } => {
+                let fun = self.erase_expr(ambient, edge, fun);
+                let mut spine = Vec::new();
+                for arg in args {
+                    spine.push(self.erase_expr(ambient, edge, &arg.data))
+                }
+                untyped::Expr::app(expr.range, fun, spine)
+            }
+            Sub { expr, .. } => self.erase_expr(ambient, edge, expr),
+            Binary { op, left, right } => {
+                let left = self.erase_expr(ambient, edge, left);
+                let right = self.erase_expr(ambient, edge, right);
+                untyped::Expr::binary(expr.range, *op, left, right)
+            }
+            Typ | NumType { typ: _ } | Hole { num: _ } | Hlp(_) | Err => {
+                if ambient != Ambient::Irrelevant && ambient != Ambient::Irrelevant {
+                    self.set_relevance(edge, Relevance::Irrelevant, expr.range);
+                }
+                untyped::Expr::err(expr.range)
+            }
         }
-    }
-
-    pub fn erase_rule(
-        &mut self,
-        place: &(Option<Range>, Relevance),
-        args: Vec<(Range, bool)>,
-        rule: &Rule,
-    ) -> untyped::Rule {
-        let ctx = self.ctx.clone();
-
-        let new_pats: Vec<_> = args
-            .iter()
-            .zip(rule.pats.iter())
-            .map(|((range, erased), expr)| {
-                (
-                    erased,
-                    self.erase_pat(
-                        (
-                            Some(*range),
-                            if *erased {
-                                Relevance::Irrelevant
-                            } else {
-                                place.1.clone()
-                            },
-                        ),
-                        expr,
-                    ),
-                )
-            })
-            .filter(|(erased, _)| !*erased)
-            .map(|res| res.1)
-            .collect();
-
-        let body = self.erase_expr(place, &rule.body);
-
-        self.ctx = ctx;
-
-        untyped::Rule {
-            name: rule.name.clone(),
-            pats: new_pats,
-            body,
-            range: rule.range,
-        }
-    }
-
-    pub fn erase_entry(&mut self, entry: &Entry) -> Box<untyped::Entry> {
-        let place = if let Some(res) = self.names.get(entry.name.to_str()) {
-            *res
-        } else {
-            self.new_hole(entry.name.range, entry.name.to_string())
-        };
-
-        let args: Vec<(Range, bool)> = entry.args.iter().map(|x| (x.range, x.erased)).collect();
-
-        let rules = entry
-            .rules
-            .iter()
-            .map(|rule| self.erase_rule(&place, args.clone(), rule))
-            .collect::<Vec<untyped::Rule>>();
-
-        Box::new(untyped::Entry {
-            name: entry.name.clone(),
-            args: entry.args.iter().filter(|x| !x.erased).map(|x| (x.name.to_string(), x.range, false)).collect(),
-            rules,
-            attrs: entry.attrs.clone(),
-            range: entry.range,
-        })
     }
 }

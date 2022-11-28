@@ -229,7 +229,7 @@ pub fn flatten(book: untyped::Book) -> untyped::Book {
         }
     }
 
-    let book = Book { names, entrs, holes: book.holes };
+    let book = Book { names, entrs };
 
     book
 }

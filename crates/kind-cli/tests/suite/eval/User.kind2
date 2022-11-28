@@ -1,3 +1,8 @@
+
+#kdl_run
+Main : U60
+Main = Teste List.nil
+
 type List (t: Type) {
     cons (x: t) (xs: List t)
     nil
@@ -5,7 +10,3 @@ type List (t: Type) {
 
 Teste (n: List U60) : U60
 Teste (List.cons 2 xs) = 2
-
-#kdl_run
-Main : U60
-Main = Teste List.nil

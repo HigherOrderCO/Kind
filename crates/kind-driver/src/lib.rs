@@ -1,16 +1,12 @@
 use checker::eval;
 use errors::DriverError;
-use fxhash::FxHashSet;
 use kind_pass::{desugar, erasure, expand};
-use kind_report::{data::Diagnostic, report::FileCache};
+use kind_report::{report::FileCache};
 use kind_span::SyntaxCtxIndex;
 
 use kind_tree::{backend, concrete, desugared, untyped};
 use session::Session;
-use std::{
-    path::{Path, PathBuf},
-    sync::mpsc::Sender,
-};
+use std::path::{PathBuf};
 
 use kind_checker as checker;
 
@@ -37,13 +33,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<untyped:
         return None;
     }
 
-    let erased = erasure::erase_book(
-        desugared_book,
-        session.diagnostic_sender.clone(),
-        FxHashSet::from_iter(vec!["Main".to_string()]),
-    )?;
-
-    Some(erased)
+    todo!()
 }
 
 pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> {
@@ -67,11 +57,7 @@ pub fn erase_book(
 ) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    erasure::erase_book(
-        desugared_book,
-        session.diagnostic_sender.clone(),
-        FxHashSet::from_iter(entrypoint.to_owned()),
-    )
+    erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())
 }
 
 pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
@@ -82,11 +68,7 @@ pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Option<desugared::
 pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    erasure::erase_book(
-        desugared_book.clone(),
-        session.diagnostic_sender.clone(),
-        FxHashSet::from_iter(vec!["Main".to_string()]),
-    )?;
+
     Some(desugared_book)
 }
 
@@ -97,24 +79,12 @@ pub fn compile_book_to_hvm(book: untyped::Book) -> backend::File {
 pub fn compile_book_to_kdl(
     path: &PathBuf,
     session: &mut Session,
-    namespace: &str,
+    namespace: &str
 ) -> Option<kind_target_kdl::File> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-
-    let entrypoints = desugared_book
-        .entrs
-        .iter()
-        .filter(|x| x.1.attrs.kdl_run)
-        .map(|x| x.0.clone())
-        .collect::<Vec<_>>();
-
-    let book = erasure::erase_book(
-        desugared_book,
-        session.diagnostic_sender.clone(),
-        FxHashSet::from_iter(entrypoints),
-    )?;
-
+    let book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    println!("{} {}", book.entrs.len(), book.names.len());
     kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)
 }
 

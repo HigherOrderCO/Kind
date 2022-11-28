@@ -70,7 +70,7 @@ pub fn type_check(
 
             succeeded
         }
-        Err(_) => panic!(),
+        Err(res) => panic!("{}", res),
     }
 }
 
