@@ -1,6 +1,6 @@
 use checker::eval;
 use errors::DriverError;
-use kind_pass::{desugar, erasure, expand};
+use kind_pass::{desugar, erasure, expand, inline::inline_book};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
@@ -33,7 +33,10 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<untyped:
         return None;
     }
 
-    todo!()
+    let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    inline_book(&mut book);
+    
+    Some(book)
 }
 
 pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> {
@@ -56,7 +59,10 @@ pub fn erase_book(
 ) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())
+    let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    inline_book(&mut book);
+    Some(book)
+
 }
 
 pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
@@ -82,7 +88,10 @@ pub fn compile_book_to_kdl(
 ) -> Option<kind_target_kdl::File> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    let book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    
+    inline_book(&mut book);
+
     kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)
 }
 

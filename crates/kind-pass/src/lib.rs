@@ -9,3 +9,4 @@ pub mod erasure;
 mod errors;
 pub mod expand;
 pub mod unbound;
+pub mod inline;

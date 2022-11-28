@@ -21,6 +21,8 @@ use kind_tree::{visit_opt, visit_vec};
 
 use crate::errors::PassError;
 
+pub mod subst;
+
 pub struct UnboundCollector {
     pub errors: Sender<Box<dyn Diagnostic>>,
 

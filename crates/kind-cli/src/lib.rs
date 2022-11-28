@@ -149,7 +149,6 @@ pub fn compile_in_session<T>(
                 Log::Checked(start.elapsed())
             },
         );
-        eprintln!();
         res
     } else {
         render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
