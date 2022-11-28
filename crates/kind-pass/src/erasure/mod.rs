@@ -106,7 +106,16 @@ impl<'a> ErasureState<'a> {
             entrypoints.push(id);
         }
 
+        // Kdl specific things.
         for entr in book.entrs.values() {
+            if let Some(name) = &entr.attrs.kdl_state {
+                if book.entrs.contains_key(name.to_str()) {
+                    let id = self.get_edge_or_create(&name.to_qualified_ident());
+                    self.set_relevance(id, Relevance::Relevant, name.range);
+                    entrypoints.push(id);
+                }
+            }
+
             if entr.attrs.kdl_run {
                 let id = self.get_edge_or_create(&entr.name);
                 self.set_relevance(id, Relevance::Relevant, entr.name.range);

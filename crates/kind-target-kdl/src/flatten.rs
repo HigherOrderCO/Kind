@@ -1,7 +1,7 @@
 use fxhash::{FxHashMap, FxHashSet};
 use kind_span::Range;
 use kind_tree::symbol::{Ident, QualifiedIdent};
-use kind_tree::untyped::{self, Entry, Expr, ExprKind, Rule, Book};
+use kind_tree::untyped::{self, Book, Entry, Expr, ExprKind, Rule};
 use linked_hash_map::LinkedHashMap;
 
 use crate::subst::subst;
@@ -94,7 +94,9 @@ fn split_rule(
                             Expr::var(name)
                         }
                         ExprKind::Var { .. } => field.clone(),
-                        _ => panic!("Internal Error: Cannot use this kind of expression during flattening"),
+                        _ => panic!(
+                            "Internal Error: Cannot use this kind of expression during flattening"
+                        ),
                     };
                     new_pat_args.push(arg.clone());
                     old_rule_body_args.push(arg);
@@ -170,7 +172,9 @@ fn split_rule(
 
     assert!(!new_entry_rules.is_empty());
 
-    let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| (format!("x{}", n), Range::ghost_range(), false)).collect();
+    let new_entry_args = (0..new_entry_rules[0].pats.len())
+        .map(|n| (format!("x{}", n), Range::ghost_range(), false))
+        .collect();
 
     let new_entry = Entry {
         name: new_entry_name,
@@ -186,7 +190,7 @@ fn split_rule(
 
 fn flatten_entry(entry: &Entry) -> Vec<Entry> {
     let mut name_count = 0;
-    
+
     let mut skip: FxHashSet<usize> = FxHashSet::default();
     let mut new_entries: Vec<Entry> = Vec::new();
     let mut old_entry_rules: Vec<Rule> = Vec::new();
@@ -195,7 +199,8 @@ fn flatten_entry(entry: &Entry) -> Vec<Entry> {
         if !skip.contains(&i) {
             let rule = &entry.rules[i];
             if must_split(rule) {
-                let (old_rule, split_entries) = split_rule(rule, &entry, i, &mut name_count, &mut skip);
+                let (old_rule, split_entries) =
+                    split_rule(rule, &entry, i, &mut name_count, &mut skip);
                 old_entry_rules.push(old_rule);
                 new_entries.extend(split_entries);
             } else {
@@ -216,7 +221,7 @@ fn flatten_entry(entry: &Entry) -> Vec<Entry> {
     new_entries
 }
 
-pub fn flatten(book: untyped::Book) -> untyped::Book {    
+pub fn flatten(book: untyped::Book) -> untyped::Book {
     let mut book = book;
     let mut names = FxHashMap::default();
     let mut entrs = LinkedHashMap::default();

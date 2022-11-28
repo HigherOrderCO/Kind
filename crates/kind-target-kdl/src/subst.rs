@@ -1,4 +1,4 @@
-use kind_tree::{untyped::Expr, symbol::Ident};
+use kind_tree::{symbol::Ident, untyped::Expr};
 
 pub fn subst(term: &mut Expr, from: &Ident, to: &Expr) {
     use kind_tree::untyped::ExprKind::*;
@@ -24,19 +24,19 @@ pub fn subst(term: &mut Expr, from: &Ident, to: &Expr) {
                 subst(next, from, to);
             }
         }
-        
+
         Binary { op: _, left, right } => {
             subst(left, from, to);
             subst(right, from, to);
         }
 
         Lambda { param, body, .. } if param.to_str() != from.to_str() => subst(body, from, to),
-        
+
         Num { .. } => (),
         Str { .. } => (),
         Var { .. } => (),
         Lambda { .. } => (),
-    
+
         Err => unreachable!("Err should not be used inside the compiledr"),
     }
 }

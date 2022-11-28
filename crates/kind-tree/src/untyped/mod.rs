@@ -268,7 +268,9 @@ impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in self.entrs.values() {
             if !entr.rules.is_empty() {
-                writeln!(f, "{}\n", entr)?;
+                writeln!(f, "{}", entr)?;
+            } else {
+                writeln!(f, "ctr {}", entr.name)?;
             }
         }
         Ok(())

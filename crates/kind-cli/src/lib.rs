@@ -181,7 +181,7 @@ pub fn run_cli(config: Cli) {
         }
         Command::ToHVM { file } => {
             compile_in_session(render_config, root, file.clone(), true, &mut |session| {
-                let book = driver::erase_book(session, &PathBuf::from(file.clone()), &entrypoints)?;
+                let book = driver::erase_book(session, &PathBuf::from(file.clone()))?;
                 Some(driver::compile_book_to_hvm(book))
             })
             .map(|res| {
@@ -194,7 +194,6 @@ pub fn run_cli(config: Cli) {
                 let book = driver::erase_book(
                     session,
                     &PathBuf::from(file.clone()),
-                    &["Main".to_string()],
                 )?;
                 driver::check_main_entry(session, &book)?;
                 Some(driver::compile_book_to_hvm(book))
@@ -227,7 +226,7 @@ pub fn run_cli(config: Cli) {
         }
         Command::Erase { file } => {
             compile_in_session(render_config, root, file.clone(), true, &mut |session| {
-                driver::erase_book(session, &PathBuf::from(file.clone()), &entrypoints)
+                driver::erase_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
                 print!("{}", res);

@@ -1,12 +1,12 @@
 use checker::eval;
 use errors::DriverError;
 use kind_pass::{desugar, erasure, expand};
-use kind_report::{report::FileCache};
+use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
 use kind_tree::{backend, concrete, desugared, untyped};
 use session::Session;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 use kind_checker as checker;
 
@@ -53,7 +53,6 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
 pub fn erase_book(
     session: &mut Session,
     path: &PathBuf,
-    entrypoint: &[String],
 ) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
@@ -84,7 +83,6 @@ pub fn compile_book_to_kdl(
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     let book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
-    println!("{} {}", book.entrs.len(), book.names.len());
     kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)
 }
 

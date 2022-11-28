@@ -2,16 +2,29 @@ use std::sync::mpsc::Sender;
 
 use flatten::flatten;
 use kind_report::data::Diagnostic;
-use kind_tree::{untyped};
+use kind_tree::untyped;
 
 pub use compile::File;
 
 mod compile;
-mod flatten;
-mod subst;
 mod errors;
+mod flatten;
+mod linearize;
+mod subst;
 
-pub fn compile_book(book: untyped::Book, sender: Sender<Box<dyn Diagnostic>>, namespace: &str) -> Option<compile::File> {
+pub fn compile_book(
+    book: untyped::Book,
+    sender: Sender<Box<dyn Diagnostic>>,
+    namespace: &str,
+) -> Option<compile::File> {
+    // TODO: Inlining
+    // TODO: Remove kdl_states (maybe check if they're ever called?)
+    // TODO: Don't erase kdl_state functions
+    // TODO: Convert to some sort of Kindelia.Contract
     let flattened = flatten(book);
-    compile::compile_book(&flattened, sender, namespace)
+
+    
+    let file = compile::compile_book(&flattened, sender, namespace)?;
+    let file = linearize::linearize_file(file);
+    Some(file)
 }
