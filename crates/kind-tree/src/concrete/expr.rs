@@ -84,12 +84,17 @@ pub enum Literal {
     /// The help operator that prints the context
     /// and the goal (e.g. ?)
     Help(Ident),
-    /// The type of 60 bits numberss (e.g. 2 : U60)
-    NumType(crate::NumType),
+    /// The type literal of 60 bit numbers (e.g. 2 : U60)
+    NumTypeU60,
+    NumTypeF60,
     // Char literal
     Char(char),
-    /// A number literal of 60 bits (e.g 32132)
-    Number(crate::Number),
+    /// A 60 bit number literal (e.g 32132)
+    NumU60(u64),
+    // A 120 bit number literal
+    NumU120(u128),
+    // A 60 bit floating point number literal
+    NumF60(u64),
     // A String literal
     String(String),
 }
@@ -310,11 +315,12 @@ impl Display for Literal {
         match self {
             Literal::Help(s) => write!(f, "?{}", s),
             Literal::Type => write!(f, "Type"),
-            Literal::NumType(crate::NumType::U60) => write!(f, "U60"),
-            Literal::NumType(crate::NumType::U120) => write!(f, "U120"),
+            Literal::NumTypeU60 => write!(f, "U60"),
+            Literal::NumTypeF60 => write!(f, "F60"),
             Literal::Char(c) => write!(f, "'{}'", c),
-            Literal::Number(crate::Number::U60(numb)) => write!(f, "{}", numb),
-            Literal::Number(crate::Number::U120(numb)) => write!(f, "{}u120", numb),
+            Literal::NumU60(numb) => write!(f, "{}", numb),
+            Literal::NumF60(_numb) => todo!(),
+            Literal::NumU120(numb) => write!(f, "{}u120", numb),
             Literal::String(str) => {
                 write!(f, "{:?}", str)
             }

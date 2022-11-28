@@ -3,7 +3,7 @@ use kind_tree::untyped::*;
 
 pub struct Subst {
     vars: FxHashMap<String, Box<Expr>>,
-    ctx: im::HashSet<String>
+    ctx: im::HashSet<String>,
 }
 
 pub fn subst_on_expr(expr: &mut Box<Expr>, vars: FxHashMap<String, Box<Expr>>) {
@@ -24,12 +24,11 @@ impl Subst {
         for rule in &mut entry.rules {
             self.subst_rule(rule);
         }
-
     }
 
     pub fn subst_rule(&mut self, rule: &mut Rule) {
         let backup = self.ctx.clone();
-        
+
         for pat in &mut rule.pats {
             self.subst_expr(pat)
         }
@@ -51,7 +50,7 @@ impl Subst {
                     self.subst_pat(arg);
                 }
             }
-            _ => ()
+            _ => (),
         }
     }
 
@@ -66,7 +65,7 @@ impl Subst {
                 if let Some(res) = self.vars.get(name.to_str()) {
                     *expr = res.clone().clone();
                 }
-            },
+            }
             Lambda { param, body, .. } => {
                 let backup = self.ctx.clone();
                 self.ctx.insert(param.to_string());
@@ -95,7 +94,7 @@ impl Subst {
                 self.subst_expr(left);
                 self.subst_expr(right);
             }
-            _ => ()
+            _ => (),
         }
     }
 }

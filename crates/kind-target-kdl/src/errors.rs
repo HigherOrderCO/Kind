@@ -6,6 +6,7 @@ pub enum KdlError {
     ShouldNotHaveArguments(Range),
     ShouldHaveOnlyOneRule(Range),
     NoInitEntry(Range),
+    FloatUsed(Range),
 }
 
 impl Diagnostic for KdlError {
@@ -15,6 +16,7 @@ impl Diagnostic for KdlError {
             KdlError::ShouldNotHaveArguments(range) => Some(range.ctx),
             KdlError::ShouldHaveOnlyOneRule(range) => Some(range.ctx),
             KdlError::NoInitEntry(range) => Some(range.ctx),
+            KdlError::FloatUsed(range) => Some(range.ctx),
         }
     }
 
@@ -65,7 +67,21 @@ impl Diagnostic for KdlError {
             KdlError::NoInitEntry(range) => DiagnosticFrame {
                 code: 604,
                 severity: Severity::Error,
-                title: "This entry have to have a init entry".to_string(),
+                title: "This entry must have a init entry".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            KdlError::FloatUsed(range) => DiagnosticFrame {
+                code: 605,
+                severity: Severity::Error,
+                title: "Found F60 in kindelia program".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {

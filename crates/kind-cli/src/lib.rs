@@ -190,10 +190,7 @@ pub fn run_cli(config: Cli) {
         }
         Command::Run { file } => {
             let res = compile_in_session(render_config, root, file.clone(), true, &mut |session| {
-                let book = driver::erase_book(
-                    session,
-                    &PathBuf::from(file.clone()),
-                )?;
+                let book = driver::erase_book(session, &PathBuf::from(file.clone()))?;
                 driver::check_main_entry(session, &book)?;
                 Some(driver::compile_book_to_hvm(book))
             });

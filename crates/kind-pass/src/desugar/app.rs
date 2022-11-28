@@ -93,10 +93,7 @@ impl<'a> DesugarState<'a> {
                         if entry.arguments[i].hidden {
                             // It's not expected that positional arguments require the range so
                             // it's the reason why we are using a terrible "ghost range"
-                            arguments[i] = Some((
-                                range,
-                                self.gen_hole_expr(range),
-                            ))
+                            arguments[i] = Some((range, self.gen_hole_expr(range)))
                         }
                     }
                 } else if entry.arguments.len() != args.len() {

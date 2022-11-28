@@ -1,7 +1,7 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::*;
 use kind_tree::symbol::{Ident, QualifiedIdent};
-use kind_tree::{NumType, Number, Operator};
+use kind_tree::Operator;
 
 use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
@@ -238,10 +238,10 @@ impl<'a> Parser<'a> {
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit { lit: Literal::Type },
             "U60" => ExprKind::Lit {
-                lit: Literal::NumType(NumType::U60),
+                lit: Literal::NumTypeU60,
             },
-            "U120" => ExprKind::Lit {
-                lit: Literal::NumType(NumType::U120),
+            "F60" => ExprKind::Lit {
+                lit: Literal::NumTypeF60,
             },
             _ => ExprKind::Constr {
                 name: id.clone(),
@@ -260,10 +260,10 @@ impl<'a> Parser<'a> {
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit { lit: Literal::Type },
             "U60" => ExprKind::Lit {
-                lit: Literal::NumType(NumType::U60),
+                lit: Literal::NumTypeU60,
             },
-            "U120" => ExprKind::Lit {
-                lit: Literal::NumType(NumType::U120),
+            "F60" => ExprKind::Lit {
+                lit: Literal::NumTypeF60,
             },
             _ => {
                 let (range_end, spine) = self.parse_call_tail(id.range, multiline)?;
@@ -283,7 +283,7 @@ impl<'a> Parser<'a> {
         Ok(Box::new(Expr {
             range,
             data: ExprKind::Lit {
-                lit: Literal::Number(Number::U60(num)),
+                lit: Literal::NumU60(num),
             },
         }))
     }
@@ -294,7 +294,7 @@ impl<'a> Parser<'a> {
         Ok(Box::new(Expr {
             range,
             data: ExprKind::Lit {
-                lit: Literal::Number(Number::U120(num)),
+                lit: Literal::NumU120(num),
             },
         }))
     }

@@ -32,11 +32,12 @@ pub fn subst(term: &mut Expr, from: &Ident, to: &Expr) {
 
         Lambda { param, body, .. } if param.to_str() != from.to_str() => subst(body, from, to),
 
-        Num { .. } => (),
+        U60 { .. } => (),
+        F60 { .. } => (),
         Str { .. } => (),
         Var { .. } => (),
         Lambda { .. } => (),
 
-        Err => unreachable!("Err should not be used inside the compiledr"),
+        Err => unreachable!("Err should not be used inside the compiler"),
     }
 }

@@ -555,6 +555,7 @@ name = "kind-derive"
 version = "0.1.0"
 dependencies = [
  "fxhash",
+ "im",
  "kind-report",
  "kind-span",
  "kind-tree",

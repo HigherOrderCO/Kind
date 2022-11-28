@@ -2,7 +2,7 @@ use std::{fmt::Display, sync::mpsc::Sender};
 
 use fxhash::FxHashMap;
 use kind_report::data::Diagnostic;
-use kind_tree::{symbol::QualifiedIdent, untyped, Number};
+use kind_tree::{symbol::QualifiedIdent, untyped};
 use linked_hash_map::LinkedHashMap;
 use tiny_keccak::Hasher;
 
@@ -202,10 +202,13 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
             }
         }
         From::Ctr { name, args } => {
+            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
+            let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
+            To::Ctr { name, args }
+        }
+        From::Fun { name, args } => {
             match name.to_str() {
                 // Special compilation for some numeric functions
-                // They have no rules because they're compilation defined,
-                // so they've been initially interpreted as Ctr
 
                 // Add with no boundary check is just a normal add
                 "U60.add_unsafe" => To::Op2 {
@@ -303,19 +306,12 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-
-                // All other constructors have a normal compilation
                 _ => {
                     let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-                    let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
-                    To::Ctr { name, args }
+                    let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
+                    To::Fun { name, args }
                 }
             }
-        }
-        From::Fun { name, args } => {
-            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-            let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
-            To::Fun { name, args }
         }
         From::Lambda {
             param,
@@ -343,16 +339,13 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
                 err_term()
             }
         }
-        From::Num {
-            num: Number::U60(numb),
-        } => To::Num {
+        From::U60 { numb } => To::Num {
             numb: kdl::U120(*numb as u128),
         },
-        From::Num {
-            num: Number::U120(numb),
-        } => To::Num {
-            numb: kdl::U120(*numb),
-        },
+        From::F60 { numb: _ } => {
+            ctx.send_err(Box::new(KdlError::FloatUsed(expr.range)));
+            err_term()
+        }
         From::Var { name } => {
             let res_name = kdl::Name::from_str(name.to_str());
             if let Ok(name) = res_name {
@@ -469,7 +462,7 @@ impl Display for File {
         for ctr in &self.ctrs {
             writeln!(f, "{}", ctr.1)?;
         }
-        
+
         if self.ctrs.len() > 0 && self.funs.len() > 0 {
             writeln!(f)?;
         }

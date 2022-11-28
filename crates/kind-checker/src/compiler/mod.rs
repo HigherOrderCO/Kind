@@ -119,7 +119,7 @@ fn desugar_str(input: &str, range: Range) -> Box<desugared::Expr> {
             desugared::Expr::ctr(
                 range,
                 cons.clone(),
-                vec![desugared::Expr::num60(range, chr as u64), right],
+                vec![desugared::Expr::num_u60(range, chr as u64), right],
             )
         })
 }
@@ -152,25 +152,11 @@ fn codegen_all_expr(
             eval_ctr(quote, TermTag::Typ),
             vec![range_to_num(expr.range)],
         ),
-        NumType {
-            typ: kind_tree::NumType::U60,
-        } => mk_lifted_ctr(
+        NumTypeU60 => mk_lifted_ctr(
             eval_ctr(quote, TermTag::U60),
             vec![range_to_num(expr.range)],
         ),
-        NumType {
-            typ: kind_tree::NumType::U120,
-        } => mk_lifted_ctr(
-            eval_ctr(quote, TermTag::Ctr(0)),
-            vec![
-                mk_ctr_name_from_str("U120"),
-                if lhs {
-                    mk_var("orig")
-                } else {
-                    range_to_num(expr.range)
-                },
-            ],
-        ),
+        NumTypeF60 => todo!(),
         Var { name } => {
             if quote && !lhs {
                 set_origin(name)
@@ -292,28 +278,11 @@ fn codegen_all_expr(
                 codegen_all_expr(lhs_rule, lhs, num, quote, expr),
             ],
         ),
-        Num {
-            num: kind_tree::Number::U60(n),
-        } => mk_lifted_ctr(
+        NumU60 { numb } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Num),
-            vec![range_to_num(expr.range), mk_u60(*n)],
+            vec![range_to_num(expr.range), mk_u60(*numb)],
         ),
-        Num {
-            num: kind_tree::Number::U120(numb),
-        } => {
-            let new = QualifiedIdent::new_static("U120.new", None, expr.range);
-
-            let expr = desugared::Expr::ctr(
-                expr.range,
-                new,
-                vec![
-                    desugared::Expr::num60(expr.range, (numb >> 60) as u64),
-                    desugared::Expr::num60(expr.range, (numb & 0xFFFFFFFFFFFFFFF) as u64),
-                ],
-            );
-
-            codegen_all_expr(lhs_rule, lhs, num, quote, &expr)
-        }
+        NumF60 { numb: _ } => todo!(),
         Binary { op, left, right } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Binary),
             vec![

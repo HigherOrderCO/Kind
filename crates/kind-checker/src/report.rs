@@ -4,7 +4,7 @@
 use kind_span::{EncodedRange, Range};
 use kind_tree::backend::Term;
 use kind_tree::symbol::{Ident, QualifiedIdent};
-use kind_tree::{desugared, Number, Operator};
+use kind_tree::{desugared, Operator};
 
 use crate::errors::TypeError;
 use desugared::Expr;
@@ -142,25 +142,7 @@ fn parse_all_expr(
                 for arg in parse_list(&args[2])? {
                     res.push(parse_all_expr(names.clone(), &arg)?);
                 }
-
-                if name.to_str() == "U120.new" && res.len() == 2 {
-                    match (&res[0].data, &res[1].data) {
-                        (
-                            desugared::ExprKind::Num {
-                                num: Number::U60(hi),
-                            },
-                            desugared::ExprKind::Num {
-                                num: Number::U60(lo),
-                            },
-                        ) => {
-                            let num = (*hi as u128) << 60 | *lo as u128;
-                            Ok(Expr::num120(orig, num))
-                        }
-                        _ => Ok(Expr::ctr(orig, name, res)),
-                    }
-                } else {
-                    Ok(Expr::ctr(orig, name, res))
-                }
+                Ok(Expr::ctr(orig, name, res))
             }
             "Kind.Quoted.fun" => Ok(Expr::fun(
                 parse_orig(&args[1])?,
@@ -174,8 +156,9 @@ fn parse_all_expr(
                 },
             )),
             "Kind.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
-            "Kind.Quoted.u60" => Ok(Expr::u60(parse_orig(&args[0])?)),
-            "Kind.Quoted.num" => Ok(Expr::num60(parse_orig(&args[0])?, parse_num(&args[1])?)), // TODO: do something about u120?
+            "Kind.Quoted.u60" => Ok(Expr::type_u60(parse_orig(&args[0])?)),
+            // TODO: Change quoting to support floats
+            "Kind.Quoted.num" => Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?)),
             "Kind.Quoted.op2" => Ok(Expr::binary(
                 parse_orig(&args[0])?,
                 parse_op(&args[1])?,

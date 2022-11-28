@@ -35,7 +35,7 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<untyped:
 
     let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
     inline_book(&mut book);
-    
+
     Some(book)
 }
 
@@ -53,16 +53,12 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
     Some(concrete_book)
 }
 
-pub fn erase_book(
-    session: &mut Session,
-    path: &PathBuf,
-) -> Option<untyped::Book> {
+pub fn erase_book(session: &mut Session, path: &PathBuf) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
     inline_book(&mut book);
     Some(book)
-
 }
 
 pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
@@ -84,12 +80,12 @@ pub fn compile_book_to_hvm(book: untyped::Book) -> backend::File {
 pub fn compile_book_to_kdl(
     path: &PathBuf,
     session: &mut Session,
-    namespace: &str
+    namespace: &str,
 ) -> Option<kind_target_kdl::File> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
-    
+
     inline_book(&mut book);
 
     kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)

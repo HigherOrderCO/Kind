@@ -7,7 +7,6 @@ use kind_span::Range;
 use kind_tree::desugared;
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::untyped::{self};
-use kind_tree::Number;
 
 use crate::errors::PassError;
 
@@ -99,7 +98,7 @@ impl<'a> ErasureState<'a> {
         let mut vals = FxHashMap::default();
 
         let mut entrypoints = Vec::new();
-        
+
         if let Some(entr) = book.entrs.get("Main") {
             let id = self.get_edge_or_create(&entr.name);
             self.set_relevance(id, Relevance::Relevant, entr.name.range);
@@ -134,11 +133,14 @@ impl<'a> ErasureState<'a> {
             names: Default::default(),
         };
 
-        let mut queue = entrypoints.iter().map(|x| (x, Ambient::Relevant)).collect::<Vec<_>>();
+        let mut queue = entrypoints
+            .iter()
+            .map(|x| (x, Ambient::Relevant))
+            .collect::<Vec<_>>();
 
         while !queue.is_empty() {
             let (fst, relev) = queue.pop().unwrap();
-            
+
             if visited.contains(&fst) {
                 continue;
             }
@@ -155,15 +157,13 @@ impl<'a> ErasureState<'a> {
                 }
             }
 
-
             let entry = vals.get(&edge.name).cloned().unwrap();
 
-            new_book.names.insert(entry.name.to_string(), new_book.entrs.len());
+            new_book
+                .names
+                .insert(entry.name.to_string(), new_book.entrs.len());
 
-            new_book.entrs.insert(
-                entry.name.to_string(),
-                entry
-            );
+            new_book.entrs.insert(entry.name.to_string(), entry);
 
             for (to, relevs) in &edge.connections {
                 for (_, relev) in relevs.iter() {
@@ -206,7 +206,7 @@ impl<'a> ErasureState<'a> {
         self.ctx = backup;
 
         let mut rules = Vec::new();
-        
+
         for rule in &entry.rules {
             rules.push(self.erase_rule(entry, id, rule));
         }
@@ -251,7 +251,6 @@ impl<'a> ErasureState<'a> {
             .map(|res| res.0)
             .collect::<Vec<_>>();
 
-        
         let body = self.erase_expr(relev(false), edge, &rule.body);
 
         self.ctx = backup;
@@ -279,7 +278,7 @@ impl<'a> ErasureState<'a> {
         };
 
         use desugared::ExprKind::*;
-        
+
         match &expr.data {
             Var { name } => {
                 self.ctx.insert(
@@ -336,12 +335,8 @@ impl<'a> ErasureState<'a> {
 
                 untyped::Expr::ctr(expr.range, name.clone(), args)
             }
-            Num {
-                num: Number::U60(num),
-            } => untyped::Expr::num60(expr.range, *num),
-            Num {
-                num: Number::U120(num),
-            } => untyped::Expr::num120(expr.range, *num),
+            NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
+            NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
             Str { val } => {
                 let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
                 let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
@@ -371,7 +366,7 @@ impl<'a> ErasureState<'a> {
             } => {
                 let backup = self.ctx.clone();
                 self.ctx.insert(param.to_string(), Relevance::Irrelevant);
-                
+
                 if ambient != Ambient::Irrelevant {
                     self.set_relevance(edge, Relevance::Irrelevant, expr.range);
                 }
@@ -479,12 +474,8 @@ impl<'a> ErasureState<'a> {
                 self.erase_expr(Ambient::Irrelevant, edge, typ);
                 expr
             }
-            Num {
-                num: Number::U60(num),
-            } => untyped::Expr::num60(expr.range, *num),
-            Num {
-                num: Number::U120(num),
-            } => untyped::Expr::num120(expr.range, *num),
+            NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
+            NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
             Str { val } => {
                 let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
                 let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
@@ -507,7 +498,7 @@ impl<'a> ErasureState<'a> {
                 let right = self.erase_expr(ambient, edge, right);
                 untyped::Expr::binary(expr.range, *op, left, right)
             }
-            Typ | NumType { typ: _ } | Hole { num: _ } | Hlp(_) | Err => {
+            Typ | NumTypeU60 { .. } | NumTypeF60 { .. } | Hole { .. } | Hlp(_) | Err => {
                 if ambient != Ambient::Irrelevant && ambient != Ambient::Irrelevant {
                     self.set_relevance(edge, Relevance::Irrelevant, expr.range);
                 }
