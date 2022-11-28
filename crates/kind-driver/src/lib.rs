@@ -2,15 +2,12 @@ use checker::eval;
 use errors::DriverError;
 use fxhash::FxHashSet;
 use kind_pass::{desugar, erasure, expand};
-use kind_report::{data::Diagnostic, report::FileCache};
+use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
 use kind_tree::{backend, concrete, desugared, untyped};
 use session::Session;
-use std::{
-    path::{Path, PathBuf},
-    sync::mpsc::Sender,
-};
+use std::path::PathBuf;
 
 use kind_checker as checker;
 

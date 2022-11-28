@@ -23,12 +23,7 @@ impl<'a> DesugarState<'a> {
         literal: &expr::Literal,
     ) -> Box<desugared::Expr> {
         match literal {
-            Literal::Number(kind_tree::Number::U120(num)) => {
-                if !self.check_implementation("U120.new", range, Sugar::U120) {
-                    return desugared::Expr::err(range);
-                }
-                desugared::Expr::num120(range, *num)
-            }
+            Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
             Literal::String(string) => {
                 if !self.check_implementation("String.cons", range, Sugar::String)
                     || !self.check_implementation("String.nil", range, Sugar::String)

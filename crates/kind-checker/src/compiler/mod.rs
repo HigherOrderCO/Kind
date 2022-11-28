@@ -99,10 +99,7 @@ fn range_to_num(range: Range) -> Box<Term> {
 fn set_origin(ident: &Ident) -> Box<Term> {
     mk_lifted_ctr(
         "Kind.Term.set_origin".to_owned(),
-        vec![
-            range_to_num(ident.range),
-            mk_var(ident.to_str()),
-        ],
+        vec![range_to_num(ident.range), mk_var(ident.to_str())],
     )
 }
 
@@ -151,10 +148,16 @@ fn codegen_all_expr(
 ) -> Box<Term> {
     use kind_tree::desugared::ExprKind::*;
     match &expr.data {
-        Typ => mk_lifted_ctr(eval_ctr(quote, TermTag::Typ), vec![range_to_num(expr.range)]),
+        Typ => mk_lifted_ctr(
+            eval_ctr(quote, TermTag::Typ),
+            vec![range_to_num(expr.range)],
+        ),
         NumType {
             typ: kind_tree::NumType::U60,
-        } => mk_lifted_ctr(eval_ctr(quote, TermTag::U60), vec![range_to_num(expr.range)]),
+        } => mk_lifted_ctr(
+            eval_ctr(quote, TermTag::U60),
+            vec![range_to_num(expr.range)],
+        ),
         NumType {
             typ: kind_tree::NumType::U120,
         } => mk_lifted_ctr(
@@ -325,7 +328,10 @@ fn codegen_all_expr(
             vec![range_to_num(expr.range), mk_u60(*num)],
         ),
         Str { val } => codegen_all_expr(lhs_rule, lhs, num, quote, &desugar_str(val, expr.range)),
-        Hlp(_) => mk_lifted_ctr(eval_ctr(quote, TermTag::Hlp), vec![range_to_num(expr.range)]),
+        Hlp(_) => mk_lifted_ctr(
+            eval_ctr(quote, TermTag::Hlp),
+            vec![range_to_num(expr.range)],
+        ),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),
     }
 }

@@ -1,4 +1,4 @@
-use kind_report::data::{Diagnostic, DiagnosticFrame, Severity, Marker, Color};
+use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
 pub enum KdlError {
@@ -15,7 +15,6 @@ impl Diagnostic for KdlError {
             KdlError::ShouldNotHaveArguments(range) => Some(range.ctx),
             KdlError::ShouldHaveOnlyOneRule(range) => Some(range.ctx),
             KdlError::NoInitEntry(range) => Some(range.ctx),
-            
         }
     }
 

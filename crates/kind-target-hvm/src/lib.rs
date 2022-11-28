@@ -17,6 +17,7 @@ pub fn compile_book(book: untyped::Book) -> File {
 }
 
 pub fn compile_term(expr: &untyped::Expr) -> Box<Term> {
+    use kind_tree::Number;
     use untyped::ExprKind::*;
     match &expr.data {
         Var { name } => Box::new(Term::Var {
@@ -41,10 +42,14 @@ pub fn compile_term(expr: &untyped::Expr) -> Box<Term> {
             expr: compile_term(val),
             body: compile_term(next),
         }),
-        Num { num: kind_tree::Number::U60(numb) } => Box::new(Term::U6O {
+        Num {
+            num: Number::U60(numb),
+        } => Box::new(Term::U6O {
             numb: u60::new(*numb),
         }),
-        Num { num: kind_tree::Number::U120(numb) } => {
+        Num {
+            num: Number::U120(numb),
+        } => {
             let hi = Box::new(Term::U6O {
                 numb: u60::new((numb >> 60) as u64),
             });
