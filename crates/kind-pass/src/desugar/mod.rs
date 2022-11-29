@@ -29,7 +29,6 @@ pub struct DesugarState<'a> {
     pub old_book: &'a concrete::Book,
     pub new_book: desugared::Book,
     pub name_count: u64,
-    pub holes: u64,
     pub failed: bool,
 }
 
@@ -42,7 +41,6 @@ pub fn desugar_book(
         old_book: book,
         new_book: Default::default(),
         name_count: 0,
-        holes: 0,
         failed: false,
     };
     state.desugar_book(book);
@@ -55,8 +53,8 @@ pub fn desugar_book(
 
 impl<'a> DesugarState<'a> {
     fn gen_hole(&mut self) -> u64 {
-        self.holes += 1;
-        self.holes - 1
+        self.new_book.holes += 1;
+        self.new_book.holes - 1
     }
 
     fn gen_name(&mut self, range: Range) -> Ident {

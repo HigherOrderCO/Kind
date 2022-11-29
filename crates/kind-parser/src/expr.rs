@@ -380,23 +380,10 @@ impl<'a> Parser<'a> {
             let range = self.range();
             self.advance(); // '('
             let mut expr = self.parse_expr(true)?;
-            if self.get().same_variant(&Token::ColonColon) {
-                self.advance(); // ':'
-                let typ = self.parse_expr(false)?;
-                let range = range.mix(self.range());
-
-                self.eat_closing_keyword(Token::RPar, range)?;
-
-                Ok(Box::new(Expr {
-                    data: ExprKind::Ann { val: expr, typ },
-                    range,
-                }))
-            } else {
-                let end = self.range();
-                self.eat_closing_keyword(Token::RPar, range)?;
-                expr.range = range.mix(end);
-                Ok(expr)
-            }
+            let end = self.range();
+            self.eat_closing_keyword(Token::RPar, range)?;
+            expr.range = range.mix(end);
+            Ok(expr)
         }
     }
 
@@ -530,26 +517,43 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_arrow(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxDiagnostic> {
-        let mut typ = self.parse_call(multiline)?;
+        let mut expr = self.parse_call(multiline)?;
+
         while self.check_and_eat(Token::RightArrow) {
             let body = self.parse_expr(false)?;
-            let range = typ.range.mix(body.range);
-            typ = Box::new(Expr {
+            let range = expr.range.mix(body.range);
+            expr = Box::new(Expr {
                 data: ExprKind::All {
                     param: None,
-                    typ,
+                    typ: expr,
                     body,
                     erased: false,
                 },
                 range,
             });
         }
-        Ok(typ)
+
+        Ok(expr)
+    }
+
+    fn parse_ann(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxDiagnostic> {
+        let expr = self.parse_arrow(multiline)?;
+
+        if self.check_and_eat(Token::ColonColon) {
+            let typ = self.parse_arrow(multiline)?;
+            let range = expr.range.mix(typ.range);
+            Ok(Box::new(Expr {
+                data: ExprKind::Ann { val: expr, typ },
+                range,
+            }))
+        } else {
+            Ok(expr)
+        }
     }
 
     fn parse_ask(&mut self) -> Result<Box<Sttm>, SyntaxDiagnostic> {
         let start = self.range();
-        self.advance();
+        self.advance(); // 'ask'
         let name = self.parse_destruct()?;
         self.eat_variant(Token::Eq)?;
         let expr = self.parse_expr(false)?;
@@ -607,9 +611,9 @@ impl<'a> Parser<'a> {
 
     fn parse_sttm(&mut self) -> Result<Box<Sttm>, SyntaxDiagnostic> {
         let start = self.range();
-        if self.check_actual_id("ask") {
+        if self.check_actual(Token::Ask) {
             self.parse_ask()
-        } else if self.check_actual_id("return") {
+        } else if self.check_actual(Token::Return) {
             self.parse_return()
         } else if self.check_actual_id("let") {
             self.parse_monadic_let()
@@ -825,7 +829,7 @@ impl<'a> Parser<'a> {
         } else if self.check_actual(Token::Tilde) {
             self.parse_erased()
         } else {
-            self.parse_arrow(multiline)
+            self.parse_ann(multiline)
         }
     }
 }

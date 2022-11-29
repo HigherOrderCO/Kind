@@ -40,7 +40,7 @@ impl Diagnostic for DriverError {
                         suggestions.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", ")
                     )
                 } else {
-                    "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()
+                    "Take a look at the rules for name searching at https://github.com/Kindelia/Kind2/blob/master/guide/naming.md".to_string()
                 }],
                 positions: idents
                     .iter()
@@ -75,7 +75,7 @@ impl Diagnostic for DriverError {
                 severity: Severity::Error,
                 title: "Defined multiple times for the same name".to_string(),
                 subtitles: vec![],
-                hints: vec!["Rename one of the definitions or remove and look at how names work in Kind at https://kind.kindelia.org/hints/names".to_string()],
+                hints: vec!["Rename one of the definitions or remove and look at how names work in Kind at https://github.com/Kindelia/Kind2/blob/master/guide/naming.md".to_string()],
                 positions: vec![
                     Marker {
                         position: fst.range,

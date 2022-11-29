@@ -1,0 +1,41 @@
+Algebra.Group.new <t: Type> (monoid: (Algebra.Monoid t)) (invert: (_: t) t) (inverse: (Algebra.Laws.Inverse t (Algebra.Monoid.concat _ monoid) invert (Algebra.Monoid.empty _ monoid))) : (Algebra.Group t)
+
+Algebra.Group (t: Type) : Type
+
+Algebra.Monoid.concat <t: Type> (monoid: (Algebra.Monoid t)) : (_: t) (_: t) t
+Algebra.Monoid.concat t (Algebra.Monoid.new t_ sg empty id) = (Algebra.Semigroup.concat _ sg)
+
+
+Algebra.Monoid.new <t: Type> (sg: (Algebra.Semigroup t)) (empty: t) (identity: (Algebra.Laws.Identity t (Algebra.Semigroup.concat _ sg) empty)) : (Algebra.Monoid t)
+
+Algebra.Semigroup (t: Type) : Type
+
+Algebra.Laws.Identity (t: Type) (concat: (_: t) (_: t) t) (empty: t) : Type
+
+Algebra.Monoid (t: Type) : Type
+
+Algebra.Semigroup.concat <t: Type> (semigroup: (Algebra.Semigroup t)) : (_: t) (_: t) t
+Algebra.Semigroup.concat t (Algebra.Semigroup.new t_ magma assoc) = (Algebra.Magma.concat _ magma)
+
+
+Algebra.Semigroup.new <t: Type> (magma: (Algebra.Magma t)) (associativity: (Algebra.Laws.associativity.eta _ (Algebra.Magma.concat _ magma))) : (Algebra.Semigroup t)
+
+Algebra.Magma (t: Type) : Type
+
+Algebra.Laws.associativity.eta <t: Type> (concat: (_: t) (_: t) t) : Type
+Algebra.Laws.associativity.eta t concat = (a: t) (b: t) (c: t) (Equal _ (concat (concat a b) c) (concat a (concat b c)))
+
+
+Equal <t: Type> (a: t) (b: t) : Type
+
+Algebra.Magma.concat <t: Type> (magma: (Algebra.Magma t)) : (_: t) (_: t) t
+Algebra.Magma.concat t (Algebra.Magma.new t_ concat) = concat
+
+
+Algebra.Magma.new <t: Type> (concat: (_: t) (_: t) t) : (Algebra.Magma t)
+
+Algebra.Monoid.empty <t: Type> (monoid: (Algebra.Monoid t)) : t
+Algebra.Monoid.empty t (Algebra.Monoid.new t_ sg empty id) = empty
+
+
+Algebra.Laws.Inverse (t: Type) (concat: (_: t) (_: t) t) (inverse: (_: t) t) (empty: t) : Type

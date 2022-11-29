@@ -41,10 +41,11 @@ fn test_kind2(path: &Path, run: fn(&Path) -> String) -> Result<(), Error> {
 fn test_checker() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/checker"), |path| {
         let (rx, tx) = std::sync::mpsc::channel();
-        let root = PathBuf::from(".");
+        let root = PathBuf::from("./tests/suite/lib").canonicalize().unwrap();
         let mut session = Session::new(root, rx);
 
-        let check = driver::type_check_book(&mut session, &PathBuf::from(path));
+        let entrypoints = vec!["Main".to_string()];
+        let check = driver::type_check_book(&mut session, &PathBuf::from(path), entrypoints);
 
         let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
         let render = RenderConfig::ascii(2);
@@ -72,11 +73,12 @@ fn test_checker() -> Result<(), Error> {
 fn test_eval() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/eval"), |path| {
         let (rx, tx) = std::sync::mpsc::channel();
-        let root = PathBuf::from(".");
+        let root = PathBuf::from("./tests/suite/lib").canonicalize().unwrap();
         let mut session = Session::new(root, rx);
 
-        let check = driver::erase_book(&mut session, &PathBuf::from(path))
-            .map(driver::compile_book_to_hvm);
+        let entrypoints = vec!["Main".to_string()];
+        let check = driver::erase_book(&mut session, &PathBuf::from(path), entrypoints)
+            .map(|x| driver::compile_book_to_hvm(x, false));
 
         let diagnostics = tx.try_iter().collect::<Vec<_>>();
         let render = RenderConfig::ascii(2);

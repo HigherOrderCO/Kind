@@ -44,7 +44,7 @@ pub fn insert_or_report(
         Some(last_range) => {
             channel
                 .send(Box::new(PassError::DuplicatedAttributeArgument(
-                    last_range.clone(),
+                    *last_range,
                     range,
                 )))
                 .unwrap();
@@ -89,7 +89,7 @@ pub fn expand_derive(
             match arg {
                 Ident(range, ident) => match string_to_derive(ident.to_str()) {
                     Some(key) => {
-                        insert_or_report(error_channel.clone(), &mut def, key, range.clone())
+                        insert_or_report(error_channel.clone(), &mut def, key, *range)
                     }
                     _ => {
                         error_channel

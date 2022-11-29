@@ -469,7 +469,7 @@ impl Display for File {
         for ctr in &self.ctrs {
             writeln!(f, "{}", ctr.1)?;
         }
-        
+
         if self.ctrs.len() > 0 && self.funs.len() > 0 {
             writeln!(f)?;
         }

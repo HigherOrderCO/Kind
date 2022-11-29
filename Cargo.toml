@@ -18,6 +18,3 @@ members = [
   # "crates/kind-query",
   # "crates/kind-macros",
 ]
-
-[profile.release]
-debug = true

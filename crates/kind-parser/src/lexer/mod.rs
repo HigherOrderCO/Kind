@@ -50,7 +50,11 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn to_keyword(data: &str) -> Token {
-        Token::LowerId(data.to_string())
+        match data {
+            "return" => Token::Return,
+            "ask" => Token::Ask,
+            _ => Token::LowerId(data.to_string()),
+        }
     }
 
     pub fn get_next_no_error(&mut self, vec: Sender<Box<dyn Diagnostic>>) -> (Token, Range) {

@@ -8,7 +8,7 @@ struct Inlinable {
     body: Box<untyped::Expr>,
 }
 struct InlineState {
-    funs: FxHashMap<String, Inlinable>
+    funs: FxHashMap<String, Inlinable>,
 }
 
 fn inlinable(entry: &untyped::Entry) -> Option<Inlinable> {
@@ -16,14 +16,15 @@ fn inlinable(entry: &untyped::Entry) -> Option<Inlinable> {
         let mut names = Vec::new();
         for pat in &entry.rules[0].pats {
             match &pat.data {
-                untyped::ExprKind::Var { name } => {
-                    names.push(name.to_string())
-                },
-                _ => return None
+                untyped::ExprKind::Var { name } => names.push(name.to_string()),
+                _ => return None,
             }
         }
         // TODO: Check if is recursive
-        Some(Inlinable { names, body: entry.rules[0].body.clone() })
+        Some(Inlinable {
+            names,
+            body: entry.rules[0].body.clone(),
+        })
     } else {
         None
     }
@@ -36,7 +37,7 @@ pub fn inline_book(book: &mut untyped::Book) {
 
     for entr in book.entrs.values() {
         if entr.attrs.inlined {
-            if let Some(inlinable) = inlinable(&entr) {
+            if let Some(inlinable) = inlinable(entr) {
                 funs.insert(entr.name.to_string(), inlinable);
                 to_remove.push(entr.name.to_string());
             }
@@ -73,10 +74,11 @@ impl InlineState {
             }
             Fun { name, args } | Ctr { name, args } => {
                 if let Some(inlinable) = self.funs.get(name.to_str()) {
-                    let subst = FxHashMap::from_iter(inlinable.names.iter().cloned().zip(args.clone()));
+                    let subst =
+                        FxHashMap::from_iter(inlinable.names.iter().cloned().zip(args.clone()));
                     *expr = inlinable.body.clone();
                     subst_on_expr(expr, subst);
-                }else {
+                } else {
                     for arg in args {
                         self.inline_expr(arg);
                     }

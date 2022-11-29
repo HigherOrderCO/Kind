@@ -205,7 +205,7 @@ pub struct Entry {
 #[derive(Clone, Debug, Default)]
 pub struct Book {
     pub entrs: LinkedHashMap<String, Box<Entry>>,
-    pub names: FxHashMap<String, usize>
+    pub names: FxHashMap<String, usize>,
 }
 
 impl Expr {

@@ -19,12 +19,12 @@ impl Visitor for Expand {
         if ident.get_aux().is_none() {
             return;
         }
-        let alias = match self.names.get(&ident.get_root().to_string()) {
+        let alias = match self.names.get(&ident.get_root()) {
             Some(path) => path,
             None => {
                 self.errors
                     .send(Box::new(PassError::CannotFindAlias(
-                        ident.get_root().to_string(),
+                        ident.get_root(),
                         ident.range,
                     )))
                     .unwrap();

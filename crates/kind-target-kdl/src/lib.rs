@@ -20,7 +20,7 @@ pub fn compile_book(
     // TODO: Remove kdl_states (maybe check if they're ever called?)
     // TODO: Convert to some sort of Kindelia.Contract
     let flattened = flatten(book);
-    
+
     let file = compile::compile_book(&flattened, sender, namespace)?;
     let file = linearize::linearize_file(file);
     Some(file)

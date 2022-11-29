@@ -1,0 +1,2 @@
+Maybe.pure <a: Type> (x: a) : Maybe a
+Maybe.pure a x = Maybe.some x

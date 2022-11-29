@@ -100,7 +100,7 @@ impl Diagnostic for SyntaxDiagnostic {
                 severity: Severity::Warning,
                 title: "This entire documentation comment is in a invalid position".to_string(),
                 subtitles: vec![],
-                hints: vec!["Take a look at the rules for doc comments at https://kind.kindelia.org/hints/documentation-strings".to_string()],
+                hints: vec!["Take a look at the rules for doc comments at https://github.com/Kindelia/Kind2/blob/master/guide/doc_strings.md".to_string()],
                 positions: vec![Marker {
                     position: *range,
                     color: Color::For,
