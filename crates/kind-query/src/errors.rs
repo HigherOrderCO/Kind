@@ -36,7 +36,7 @@ impl Diagnostic for DriverError {
                         suggestions.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", ")
                     )
                 } else {
-                    "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()
+                    "Take a look at the rules for name searching at https://github.com/Kindelia/Kind2/blob/master/guide/naming.md".to_string()
                 }],
                 positions: idents
                     .iter()

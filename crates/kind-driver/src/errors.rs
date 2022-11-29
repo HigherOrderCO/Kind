@@ -61,7 +61,7 @@ impl Diagnostic for DriverError {
                     .iter()
                     .map(|path| Subtitle::Phrase(Color::Fst, vec![Word::White(path.display().to_string())]))
                     .collect(),
-                hints: vec!["Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()],
+                hints: vec!["Take a look at the rules for name searching at https://github.com/Kindelia/Kind2/blob/master/guide/naming.md".to_string()],
                 positions: vec![Marker {
                     position: ident.range,
                     color: Color::Fst,
