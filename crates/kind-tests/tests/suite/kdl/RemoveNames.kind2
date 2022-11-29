@@ -1,0 +1,14 @@
+List <a> : Type
+  List.nil <a> : List
+  List.cons <a> (head: a) (tail: List a) : List
+
+/*
+#keep
+Ora.Ora.ora (h: List U60) : List U60
+Ora.Ora.ora (List.cons x xs) =
+  let aaa = 2
+  let bbb = 3
+  let ccc = 4
+  let ddd = (+ ccc bbb)
+  List.cons aaa xs
+*/

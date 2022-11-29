@@ -102,3 +102,38 @@ fn test_eval() -> Result<(), Error> {
     })?;
     Ok(())
 }
+
+
+#[test]
+#[timeout(15000)]
+fn test_kdl() -> Result<(), Error> {
+    test_kind2(Path::new("./tests/suite/kdl"), |path| {
+        let (rx, tx) = std::sync::mpsc::channel();
+        let root = PathBuf::from("./tests/suite/lib").canonicalize().unwrap();
+        let mut session = Session::new(root, rx);
+
+        let entrypoints = vec!["Main".to_string()];
+        let check = driver::compile_book_to_kdl(&PathBuf::from(path), &mut session, "", entrypoints);
+
+        let diagnostics = tx.try_iter().collect::<Vec<_>>();
+        let render = RenderConfig::ascii(2);
+
+        kind_report::check_if_colors_are_supported(true);
+
+        match check {
+            Some(file) if diagnostics.is_empty() => {
+                file.to_string()
+            }
+            _ => {
+                let mut res_string = String::new();
+
+                for diag in diagnostics {
+                    diag.render(&mut session, &render, &mut res_string).unwrap();
+                }
+
+                res_string
+            }
+        }
+    })?;
+    Ok(())
+}

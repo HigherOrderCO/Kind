@@ -44,6 +44,11 @@ impl<'a> DesugarState<'a> {
                     self.attr_without_value(attr);
                     attributes.inlined = true;
                 }
+                "keep" => {
+                    self.args_should_be_empty(attr);
+                    self.attr_without_value(attr);
+                    attributes.keep = true;
+                }
                 "kdl_run" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);

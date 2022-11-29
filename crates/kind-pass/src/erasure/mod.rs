@@ -123,7 +123,7 @@ impl<'a> ErasureState<'a> {
                 }
             }
 
-            if entr.attrs.kdl_run {
+            if entr.attrs.kdl_run || entr.attrs.keep {
                 let id = self.get_edge_or_create(&entr.name);
                 self.set_relevance(id, Relevance::Relevant, entr.name.range);
                 entrypoints.push(id);
