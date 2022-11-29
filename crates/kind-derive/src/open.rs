@@ -42,10 +42,12 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         })
     };
 
-    let name = rec
+    let mut name = rec
         .name
         .add_segment(rec.constructor.to_str())
         .add_segment("open");
+
+    name.range = rec.constructor.range;
 
     let mut types = Telescope::default();
 
@@ -146,7 +148,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         name: name.clone(),
         pats,
         body,
-        range,
+        range: rec.constructor.range,
     })];
 
     let entry = Entry {
@@ -155,7 +157,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         args: types,
         typ: ret_ty,
         rules,
-        range,
+        range: rec.constructor.range,
         attrs: Vec::new(),
         generated_by: Some(rec.name.to_string().clone()),
     };

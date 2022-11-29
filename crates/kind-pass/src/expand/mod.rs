@@ -6,8 +6,10 @@ use std::fmt::Display;
 use std::sync::mpsc::Sender;
 
 use fxhash::FxHashMap;
+use kind_derive::getters::derive_getters;
 use kind_derive::matching::derive_match;
 use kind_derive::open::derive_open;
+use kind_derive::setters::derive_setters;
 use kind_report::data::Diagnostic;
 use kind_span::Locatable;
 use kind_span::Range;
@@ -23,6 +25,8 @@ pub mod uses;
 pub enum Derive {
     Match,
     Open,
+    Getters,
+    Setters
 }
 
 impl Display for Derive {
@@ -30,6 +34,8 @@ impl Display for Derive {
         match self {
             Derive::Match => write!(f, "match"),
             Derive::Open => write!(f, "open"),
+            Derive::Getters => write!(f, "getters"),
+            Derive::Setters => write!(f, "setters"),
         }
     }
 }
@@ -59,6 +65,8 @@ fn string_to_derive(name: &str) -> Option<Derive> {
     match name {
         "match" => Some(Derive::Match),
         "open" => Some(Derive::Open),
+        "getters" => Some(Derive::Getters),
+        "setters" => Some(Derive::Setters),
         _ => None,
     }
 }
@@ -159,6 +167,18 @@ pub fn expand_book(error_channel: Sender<Box<dyn Diagnostic>>, book: &mut Book) 
                                 let res = derive_open(rec.name.range, rec);
                                 let info = res.extract_book_info();
                                 entries.insert(res.name.to_string(), (res, info));
+                            }
+                            Derive::Getters => {
+                                for res in derive_getters(rec.name.range, rec) {
+                                    let info = res.extract_book_info();
+                                    entries.insert(res.name.to_string(), (res, info));
+                                }
+                            }
+                            Derive::Setters => {
+                                for res in derive_setters(rec.name.range, rec) {
+                                    let info = res.extract_book_info();
+                                    entries.insert(res.name.to_string(), (res, info));
+                                }
                             }
                             other => {
                                 error_channel
