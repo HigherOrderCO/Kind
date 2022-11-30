@@ -8,7 +8,7 @@ use tiny_keccak::Hasher;
 
 pub use kindelia_lang::ast as kdl;
 
-use crate::errors::KdlError;
+use crate::{errors::KdlError, GenericCompilationToHVMError};
 
 pub const KDL_NAME_LEN: usize = 12;
 const U60_MAX: kdl::U120 = kdl::U120(0xFFFFFFFFFFFFFFF);
@@ -97,7 +97,7 @@ pub fn compile_book(
     book: &untyped::Book,
     sender: Sender<Box<dyn Diagnostic>>,
     namespace: &str,
-) -> Result<File, ()> {
+) -> Result<File, GenericCompilationToHVMError> {
     let mut ctx = CompileCtx::new(book, sender);
 
     for (name, entry) in &book.entrs {
@@ -120,7 +120,7 @@ pub fn compile_book(
     }
 
     if ctx.failed {
-        return Err(());
+        return Err(GenericCompilationToHVMError);
     }
 
     Ok(ctx.file)

@@ -56,7 +56,7 @@ impl Diagnostic for DriverError {
             DriverError::MultiplePaths(ident, paths) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
-                title: "Multiple definitions for the same name".to_string(),
+                title: "Ambiguous definition location for the same name".to_string(),
                 subtitles: paths
                     .iter()
                     .map(|path| Subtitle::Phrase(Color::Fst, vec![Word::White(path.display().to_string())]))

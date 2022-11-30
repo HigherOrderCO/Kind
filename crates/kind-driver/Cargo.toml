@@ -18,6 +18,7 @@ kind-target-kdl = { path = "../kind-target-kdl" }
 
 hvm = { git = "https://github.com/Kindelia/HVM.git" }
 
+anyhow = "1.0.66"
 strsim = "0.10.0"
 fxhash = "0.2.1"
 dashmap = "5.4.0"

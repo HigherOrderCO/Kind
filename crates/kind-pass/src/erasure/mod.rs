@@ -8,7 +8,7 @@ use kind_tree::desugared;
 use kind_tree::symbol::QualifiedIdent;
 use kind_tree::untyped::{self};
 
-use crate::errors::PassError;
+use crate::errors::{PassError, GenericPassError};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 enum Relevance {
@@ -54,7 +54,7 @@ pub fn erase_book(
     book: &desugared::Book,
     errs: Sender<Box<dyn Diagnostic>>,
     entrypoints: Vec<String>,
-) -> Result<untyped::Book, ()> {
+) -> anyhow::Result<untyped::Book> {
     let mut state = ErasureState {
         errs,
         book,
@@ -99,7 +99,7 @@ impl<'a> ErasureState<'a> {
         &mut self,
         book: &'a desugared::Book,
         named_entrypoints: Vec<String>,
-    ) -> Result<untyped::Book, ()> {
+    ) -> anyhow::Result<untyped::Book> {
         let mut vals = FxHashMap::default();
 
         let mut entrypoints = Vec::new();
@@ -189,7 +189,7 @@ impl<'a> ErasureState<'a> {
         }
 
         if self.failed {
-            Err(())
+            Err(GenericPassError.into())
         } else {
             Ok(new_book)
         }

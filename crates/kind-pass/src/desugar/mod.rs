@@ -16,7 +16,7 @@ use kind_tree::{
     symbol::Ident,
 };
 
-use crate::errors::PassError;
+use crate::errors::{PassError, GenericPassError};
 
 pub mod app;
 pub mod attributes;
@@ -35,7 +35,7 @@ pub struct DesugarState<'a> {
 pub fn desugar_book(
     errors: Sender<Box<dyn Diagnostic>>,
     book: &concrete::Book,
-) -> Result<desugared::Book, ()> {
+) -> anyhow::Result<desugared::Book> {
     let mut state = DesugarState {
         errors,
         old_book: book,
@@ -45,7 +45,7 @@ pub fn desugar_book(
     };
     state.desugar_book(book);
     if state.failed {
-        Err(())
+        Err(GenericPassError.into())
     } else {
         Ok(state.new_book)
     }

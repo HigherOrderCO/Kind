@@ -3,6 +3,7 @@ use std::time::Instant;
 use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
+use driver::resolution::ResolutionError;
 use kind_driver::session::Session;
 use kind_report::data::{Diagnostic, Log};
 use kind_report::report::{FileCache, Report};
@@ -33,7 +34,7 @@ pub struct Cli {
     pub no_color: bool,
 
     /// How much concurrency in HVM
-    #[arg(short, long)]
+    #[arg(long)]
     pub tids: Option<usize>,
     
     /// Prints all of the functions and their evaluation
@@ -129,8 +130,8 @@ pub fn compile_in_session<T>(
     root: PathBuf,
     file: String,
     compiled: bool,
-    fun: &mut dyn FnMut(&mut Session) -> Result<T, ()>,
-) -> Result<T, ()> {
+    fun: &mut dyn FnMut(&mut Session) -> anyhow::Result<T>,
+) -> anyhow::Result<T> {
     let (rx, tx) = std::sync::mpsc::channel();
 
     let mut session = Session::new(root, rx);
@@ -149,7 +150,8 @@ pub fn compile_in_session<T>(
 
     let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
 
-    if diagnostics.is_empty() && res.is_ok() {
+    if diagnostics.is_empty() {
+        
         render_to_stderr(
             &render_config,
             &session,
@@ -159,19 +161,27 @@ pub fn compile_in_session<T>(
                 Log::Checked(start.elapsed())
             },
         );
+
         eprintln!();
-        Ok(res.unwrap())
+
+        res
     } else {
         render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
         eprintln!();
+        
         for diagnostic in diagnostics {
             render_to_stderr(&render_config, &session, &diagnostic)
         }
-        Err(())
+
+        match res {
+            Ok(_) => Err(ResolutionError.into()),
+            Err(res) => Err(res)
+        }
     }
 }
 
-pub fn run_cli(config: Cli) -> Result<(), ()> {
+pub fn run_cli(config: Cli) -> anyhow::Result<()> {
+
     kind_report::check_if_colors_are_supported(config.no_color);
 
     let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2);
@@ -262,6 +272,9 @@ pub fn run_cli(config: Cli) -> Result<(), ()> {
     Ok(())
 }
 
-pub fn main() -> Result<(), ()> {
-    run_cli(Cli::parse())
+pub fn main() {
+    match run_cli(Cli::parse()) {
+        Ok(_) => std::process::exit(0),
+        Err(_) => std::process::exit(1),
+    }
 }

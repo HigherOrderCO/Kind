@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "anyhow"
+version = "1.0.66"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
+
+[[package]]
 name = "arrayvec"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -352,6 +358,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "exitcode"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de853764b47027c2e862a995c34978ffa63c1501f2e15f987ba11bd4f9bba193"
+
+[[package]]
 name = "fixed-hash"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -606,7 +618,9 @@ dependencies = [
 name = "kind-cli"
 version = "0.3.0"
 dependencies = [
+ "anyhow",
  "clap 4.0.29",
+ "exitcode",
  "kind-checker",
  "kind-driver",
  "kind-query",
@@ -628,6 +642,7 @@ dependencies = [
 name = "kind-driver"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dashmap",
  "fxhash",
  "hvm",
@@ -656,6 +671,7 @@ dependencies = [
 name = "kind-pass"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "fxhash",
  "im-rc",
  "kind-derive",

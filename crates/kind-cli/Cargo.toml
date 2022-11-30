@@ -20,3 +20,5 @@ kind-checker = { path = "../kind-checker" }
 kind-query = { path = "../kind-query" }
 
 clap = { version = "4.0.10", features = ["derive"] }
+anyhow = "1.0.66"
+exitcode = "1.1.2"
