@@ -17,13 +17,15 @@ use report::parse_report;
 
 pub const CHECKER: &str = include_str!("checker.hvm");
 
-pub fn eval(file: &str, term: &str, dbug: bool) -> Result<Box<Term>, String> {
+pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<Box<Term>, String> {
     let file = language::syntax::read_file(&format!("{}\nHVM_MAIN_CALL = {}", file, term))?;
     let book = language::rulebook::gen_rulebook(&file);
     let mut prog = runtime::Program::new();
     prog.add_book(&book);
     let size = runtime::default_heap_size();
-    let tids = runtime::default_heap_tids();
+
+    let tids = tids.unwrap_or_else(runtime::default_heap_tids);
+
     let heap = runtime::new_heap(size, tids);
     let tids = runtime::new_tids(tids);
     runtime::link(
@@ -53,10 +55,11 @@ pub fn type_check(
     book: &Book,
     tx: Sender<Box<dyn Diagnostic>>,
     functions_to_check: Vec<String>,
+    tids: Option<usize>
 ) -> bool {
     let file = gen_checker(book, functions_to_check);
 
-    match eval(&file, "Main", false) {
+    match eval(&file, "Main", false, tids) {
         Ok(term) => {
             let errs = parse_report(&term).unwrap_or_else(|_| {
                 panic!(

@@ -54,7 +54,7 @@ pub fn erase_book(
     book: &desugared::Book,
     errs: Sender<Box<dyn Diagnostic>>,
     entrypoints: Vec<String>,
-) -> Option<untyped::Book> {
+) -> Result<untyped::Book, ()> {
     let mut state = ErasureState {
         errs,
         book,
@@ -99,7 +99,7 @@ impl<'a> ErasureState<'a> {
         &mut self,
         book: &'a desugared::Book,
         named_entrypoints: Vec<String>,
-    ) -> Option<untyped::Book> {
+    ) -> Result<untyped::Book, ()> {
         let mut vals = FxHashMap::default();
 
         let mut entrypoints = Vec::new();
@@ -189,9 +189,9 @@ impl<'a> ErasureState<'a> {
         }
 
         if self.failed {
-            None
+            Err(())
         } else {
-            Some(new_book)
+            Ok(new_book)
         }
     }
 

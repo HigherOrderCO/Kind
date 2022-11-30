@@ -25,16 +25,17 @@ pub fn type_check_book(
     session: &mut Session,
     path: &PathBuf,
     entrypoints: Vec<String>,
-) -> Option<untyped::Book> {
+    tids: Option<usize>
+) -> Result<untyped::Book, ()> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
     let all = desugared_book.entrs.iter().map(|x| x.0).cloned().collect();
 
-    let succeeded = checker::type_check(&desugared_book, session.diagnostic_sender.clone(), all);
+    let succeeded = checker::type_check(&desugared_book, session.diagnostic_sender.clone(), all, tids);
 
     if !succeeded {
-        return None;
+        return Err(());
     }
 
     let mut book = erasure::erase_book(
@@ -44,26 +45,26 @@ pub fn type_check_book(
     )?;
     inline_book(&mut book);
 
-    Some(book)
+    Ok(book)
 }
 
-pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> {
+pub fn to_book(session: &mut Session, path: &PathBuf) -> Result<concrete::Book, ()> {
     let mut concrete_book = resolution::parse_and_store_book(session, path)?;
 
     let failed = resolution::check_unbound_top_level(session, &mut concrete_book);
 
     if failed {
-        return None;
+        return Err(());
     }
 
-    Some(concrete_book)
+    Ok(concrete_book)
 }
 
 pub fn erase_book(
     session: &mut Session,
     path: &PathBuf,
     entrypoints: Vec<String>,
-) -> Option<untyped::Book> {
+) -> Result<untyped::Book, ()> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     let mut book = erasure::erase_book(
@@ -72,19 +73,17 @@ pub fn erase_book(
         entrypoints,
     )?;
     inline_book(&mut book);
-    Some(book)
+    Ok(book)
 }
 
-pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
+pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Result<desugared::Book, ()> {
     let concrete_book = to_book(session, path)?;
     desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)
 }
 
-pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desugared::Book> {
+pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Result<desugared::Book, ()> {
     let concrete_book = to_book(session, path)?;
-    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-
-    Some(desugared_book)
+    desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)
 }
 
 pub fn compile_book_to_hvm(book: untyped::Book, trace: bool) -> backend::File {
@@ -96,7 +95,7 @@ pub fn compile_book_to_kdl(
     session: &mut Session,
     namespace: &str,
     entrypoints: Vec<String>,
-) -> Option<kind_target_kdl::File> {
+) -> Result<kind_target_kdl::File, ()> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
     let mut book = erasure::erase_book(
@@ -110,32 +109,32 @@ pub fn compile_book_to_kdl(
     kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)
 }
 
-pub fn check_main_entry(session: &mut Session, book: &untyped::Book) -> Option<()> {
+pub fn check_main_entry(session: &mut Session, book: &untyped::Book) -> Result<(), ()> {
     if !book.entrs.contains_key("Main") {
         session
             .diagnostic_sender
             .send(Box::new(DriverError::ThereIsntAMain))
             .unwrap();
-        None
+    Err(())
     } else {
-        Some(())
+        Ok(())
     }
 }
 
-pub fn check_main_desugared_entry(session: &mut Session, book: &desugared::Book) -> Option<()> {
+pub fn check_main_desugared_entry(session: &mut Session, book: &desugared::Book) -> Result<(), ()> {
     if !book.entrs.contains_key("Main") {
         session
             .diagnostic_sender
             .send(Box::new(DriverError::ThereIsntAMain))
             .unwrap();
-        None
+        Err(())
     } else {
-        Some(())
+        Ok(())
     }
 }
 
-pub fn execute_file(file: &str) -> Result<String, String> {
-    let res = eval(file, "Main", false)?;
+pub fn execute_file(file: &str, tids: Option<usize>) -> Result<String, String> {
+    let res = eval(file, "Main", false, tids)?;
     Ok(res.to_string())
 }
 

@@ -295,6 +295,7 @@ impl<'a> DesugarState<'a> {
             PatKind::U60(n) => desugared::Expr::num_u60(pat.range, *n),
             PatKind::U120(n) => desugared::Expr::num_u120(pat.range, *n),
             PatKind::F60(n) => desugared::Expr::num_f60(pat.range, *n),
+            PatKind::Char(n) => desugared::Expr::num_u60(pat.range, *n as u64),
             PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
             PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
             PatKind::Str(string) => desugared::Expr::str(pat.range, string.to_owned()),

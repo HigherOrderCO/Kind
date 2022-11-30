@@ -35,7 +35,7 @@ pub struct DesugarState<'a> {
 pub fn desugar_book(
     errors: Sender<Box<dyn Diagnostic>>,
     book: &concrete::Book,
-) -> Option<desugared::Book> {
+) -> Result<desugared::Book, ()> {
     let mut state = DesugarState {
         errors,
         old_book: book,
@@ -45,9 +45,9 @@ pub fn desugar_book(
     };
     state.desugar_book(book);
     if state.failed {
-        None
+        Err(())
     } else {
-        Some(state.new_book)
+        Ok(state.new_book)
     }
 }
 

@@ -1,15 +1,13 @@
 #![feature(test)]
 
 extern crate test;
-use std::{fs, path::{PathBuf, Path}};
+use std::{fs, path::{PathBuf}};
 
 use driver::{resolution};
 use kind_driver::session::Session;
 use kind_pass::{expand::{self, uses::expand_uses}, desugar, erasure};
-use kind_tree::concrete;
 use test::Bencher;
 
-use kind_checker as checker;
 use kind_driver as driver;
 
 fn new_session() -> Session {
@@ -18,15 +16,6 @@ fn new_session() -> Session {
     let root = PathBuf::from("./suite/lib").canonicalize().unwrap();
     
     Session::new(root, rx)
-}
-
-fn get_book(session: &mut Session, path: &str) -> Result<concrete::Book, String> {
-    let path = PathBuf::from(path);
-
-    match resolution::parse_and_store_book(session, &path) {
-        Some(res) => Ok(res),
-        None => Err("Cannot parse".to_string())
-    }
 }
 
 fn exp_paths() -> Vec<&'static str> {
@@ -183,30 +172,6 @@ fn bench_exp_pure_to_hvm(b: &mut Bencher) {
     b.iter(move || {
         books.iter().map(move |(_, book)| {
             kind_target_hvm::compile_book(book.to_owned(), false)
-        }).fold(0, |n, _| n + 1)
-    })
-}
-
-
-#[bench]
-fn bench_exp_pure_check_without_the_checker(b: &mut Bencher) {    
-    let mut paths = exp_paths();
-
-    let books: Vec<_> = paths.iter().map(|x| {
-        let mut session = new_session();
-        let mut book = resolution::parse_and_store_book(&mut session, &PathBuf::from(x)).unwrap();
-        let failed = resolution::check_unbound_top_level(&mut session, &mut book);
-        let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
-        assert!(!failed);
-
-        (session, book)
-    }).collect();
-
-    b.iter(move || {
-        books.iter().map(move |(session, book)| {
-            let all = book.entrs.iter().map(|x| x.0).cloned().collect();
-            let succeeded = checker::type_check(book, session.diagnostic_sender.clone(), all);
-            assert!(succeeded)
         }).fold(0, |n, _| n + 1)
     })
 }

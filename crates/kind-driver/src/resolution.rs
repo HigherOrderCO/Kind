@@ -260,12 +260,12 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
         .unwrap();
 }
 
-pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Book> {
+pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Result<Book, ()> {
     let mut book = Book::default();
     if parse_and_store_book_by_path(session, path, &mut book) {
-        None
+        Err(())
     } else {
-        Some(book)
+        Ok(book)
     }
 }
 

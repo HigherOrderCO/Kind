@@ -338,6 +338,7 @@ impl Visitor for UnboundCollector {
             PatKind::U60(_) => (),
             PatKind::U120(_) => (),
             PatKind::F60(_) => (),
+            PatKind::Char(_) => (),
             PatKind::Hole => (),
             PatKind::List(ls) => {
                 for pat in ls {
