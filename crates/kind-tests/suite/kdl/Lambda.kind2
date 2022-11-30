@@ -1,7 +1,9 @@
+#keep
 CoolFn : U60 -> U60 {
   (x: U60) => (* 2 x)
 }
 
+#keep
 CoolFnApp (n: U60) : U60 {
   let lam = (x: U60) => ((CoolFn) x)
   (lam n)

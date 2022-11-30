@@ -10,7 +10,10 @@ fn must_split(rule: &Rule) -> bool {
     for pat in &rule.pats {
         if let ExprKind::Ctr { args, .. } = &pat.data {
             for arg in args {
-                if matches!(arg.data, ExprKind::Ctr { .. } | ExprKind::Num { .. }) {
+                if matches!(
+                    arg.data,
+                    ExprKind::Ctr { .. } | ExprKind::U60 { .. } | ExprKind::F60 { .. }
+                ) {
                     return true;
                 }
             }
@@ -27,19 +30,41 @@ fn matches_together(a: &Rule, b: &Rule) -> (bool, bool) {
             (ExprKind::Ctr { name: an, .. }, ExprKind::Ctr { name: bn, .. }) if an != bn => {
                 return (false, false);
             }
-            (ExprKind::Num { num: a_numb }, ExprKind::Num { num: b_numb }) if a_numb != b_numb => {
+            (ExprKind::U60 { numb: a_numb }, ExprKind::U60 { numb: b_numb })
+                if a_numb != b_numb =>
+            {
                 return (false, false);
             }
-            (ExprKind::Ctr { .. }, ExprKind::Num { .. }) => {
+            (ExprKind::F60 { numb: a_numb }, ExprKind::F60 { numb: b_numb })
+                if a_numb != b_numb =>
+            {
                 return (false, false);
             }
-            (ExprKind::Num { .. }, ExprKind::Ctr { .. }) => {
+            (ExprKind::Ctr { .. }, ExprKind::U60 { .. }) => {
+                return (false, false);
+            }
+            (ExprKind::Ctr { .. }, ExprKind::F60 { .. }) => {
+                return (false, false);
+            }
+            (ExprKind::U60 { .. }, ExprKind::Ctr { .. }) => {
+                return (false, false);
+            }
+            (ExprKind::U60 { .. }, ExprKind::F60 { .. }) => {
+                return (false, false);
+            }
+            (ExprKind::F60 { .. }, ExprKind::U60 { .. }) => {
+                return (false, false);
+            }
+            (ExprKind::F60 { .. }, ExprKind::Ctr { .. }) => {
                 return (false, false);
             }
             (ExprKind::Ctr { .. }, ExprKind::Var { .. }) => {
                 same_shape = false;
             }
-            (ExprKind::Num { .. }, ExprKind::Var { .. }) => {
+            (ExprKind::U60 { .. }, ExprKind::Var { .. }) => {
+                same_shape = false;
+            }
+            (ExprKind::F60 { .. }, ExprKind::Var { .. }) => {
                 same_shape = false;
             }
             _ => {}
@@ -80,7 +105,7 @@ fn split_rule(
                 old_rule_pats.push(pat.clone());
                 old_rule_body_args.push(Expr::var(name.clone()));
             }
-            ExprKind::Num { .. } => {
+            ExprKind::U60 { .. } | ExprKind::F60 { .. } => {
                 old_rule_pats.push(pat.clone());
             }
             ExprKind::Ctr { name, args } => {
@@ -88,7 +113,7 @@ fn split_rule(
 
                 for field in args {
                     let arg = match &field.data {
-                        ExprKind::Ctr { .. } | ExprKind::Num { .. } => {
+                        ExprKind::Ctr { .. } | ExprKind::U60 { .. } | ExprKind::F60 { .. } => {
                             let name = Ident::new(format!(".x{}", var_count), field.range);
                             var_count += 1;
                             Expr::var(name)
@@ -150,9 +175,13 @@ fn split_rule(
                     (ExprKind::Var { .. }, _) => {
                         new_rule_pats.push(other_pat.clone());
                     }
-                    (ExprKind::Num { .. }, ExprKind::Num { .. }) => (),
-                    (ExprKind::Num { .. }, ExprKind::Var { name }) => {
-                        subst(&mut new_rule_body, name, rule_pat);
+                    (ExprKind::U60 { .. }, ExprKind::U60 { .. }) => (),
+                    (ExprKind::F60 { .. }, ExprKind::F60 { .. }) => (),
+                    (ExprKind::U60 { .. }, ExprKind::Var { name }) => {
+                        subst(&mut new_rule_body, &name, rule_pat);
+                    }
+                    (ExprKind::F60 { .. }, ExprKind::Var { name }) => {
+                        subst(&mut new_rule_body, &name, rule_pat);
                     }
                     _ => {
                         panic!("Internal error. Please report."); // not possible since it matches

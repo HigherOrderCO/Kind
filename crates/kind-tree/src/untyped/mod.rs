@@ -7,11 +7,11 @@ use fxhash::FxHashMap;
 use kind_span::Range;
 use linked_hash_map::LinkedHashMap;
 
+pub use crate::Operator;
 use crate::{
     symbol::{Ident, QualifiedIdent},
     Attributes,
 };
-pub use crate::{NumType, Number, Operator};
 
 /// Just a vector of expressions. It is called spine because
 /// it is usually in a form like (a b c d e) that can be interpret
@@ -51,9 +51,13 @@ pub enum ExprKind {
         val: Box<Expr>,
         next: Box<Expr>,
     },
-    /// Primitive numeric values
-    Num {
-        num: crate::Number,
+    /// 60 bit unsigned integer
+    U60 {
+        numb: u64,
+    },
+    /// 60 bit floating point number
+    F60 {
+        numb: u64,
     },
     /// Very special constructor :)
     Str {
@@ -129,21 +133,17 @@ impl Expr {
         })
     }
 
-    pub fn num60(range: Range, num: u64) -> Box<Expr> {
+    pub fn u60(range: Range, numb: u64) -> Box<Expr> {
         Box::new(Expr {
             range,
-            data: ExprKind::Num {
-                num: crate::Number::U60(num),
-            },
+            data: ExprKind::U60 { numb },
         })
     }
 
-    pub fn num120(range: Range, num: u128) -> Box<Expr> {
+    pub fn f60(range: Range, numb: u64) -> Box<Expr> {
         Box::new(Expr {
             range,
-            data: ExprKind::Num {
-                num: crate::Number::U120(num),
-            },
+            data: ExprKind::F60 { numb },
         })
     }
 
@@ -223,12 +223,8 @@ impl Display for Expr {
         match &self.data {
             Err => write!(f, "ERR"),
             Str { val } => write!(f, "\"{}\"", val),
-            Num {
-                num: crate::Number::U60(n),
-            } => write!(f, "{}", n),
-            Num {
-                num: crate::Number::U120(n),
-            } => write!(f, "{}u120", n),
+            U60 { numb } => write!(f, "{}", numb),
+            F60 { numb: _ } => todo!(),
             Var { name } => write!(f, "{}", name),
             Lambda {
                 param,

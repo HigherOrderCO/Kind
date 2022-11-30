@@ -1,0 +1,10 @@
+ctr {List.cons h t}
+
+fun (U120.new hi lo) {
+  (U120.new x0 x1) = (!@x1.0 (!@x0.0 (| (<< x0.0 #60) x1.0) x0) x1)
+}
+
+fun (TestFunc xs) {
+  (TestFunc {List.cons ~ x1}) = (!@x1.0 (!@x2 dup c.0 x2.0 = x2; dup x2.1 x2.2 = c.0; (!@x3 (!@x3.0 (!@~ {List.cons {U120.add x2.0 x3.0} x1.0} #4) x3) {U120.add x2.1 x2.2}) #2) x1)
+}
+

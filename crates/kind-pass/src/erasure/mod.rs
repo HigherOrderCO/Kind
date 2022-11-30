@@ -7,7 +7,6 @@ use kind_span::Range;
 use kind_tree::desugared;
 use kind_tree::symbol::QualifiedIdent;
 use kind_tree::untyped::{self};
-use kind_tree::Number;
 
 use crate::errors::{PassError, GenericPassError};
 
@@ -345,12 +344,8 @@ impl<'a> ErasureState<'a> {
 
                 untyped::Expr::ctr(expr.range, name.clone(), args)
             }
-            Num {
-                num: Number::U60(num),
-            } => untyped::Expr::num60(expr.range, *num),
-            Num {
-                num: Number::U120(num),
-            } => untyped::Expr::num120(expr.range, *num),
+            NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
+            NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
             Str { val } => {
                 let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
                 let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
@@ -488,12 +483,8 @@ impl<'a> ErasureState<'a> {
                 self.erase_expr(Ambient::Irrelevant, edge, typ);
                 expr
             }
-            Num {
-                num: Number::U60(num),
-            } => untyped::Expr::num60(expr.range, *num),
-            Num {
-                num: Number::U120(num),
-            } => untyped::Expr::num120(expr.range, *num),
+            NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
+            NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
             Str { val } => {
                 let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
                 let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
@@ -516,7 +507,7 @@ impl<'a> ErasureState<'a> {
                 let right = self.erase_expr(ambient, edge, right);
                 untyped::Expr::binary(expr.range, *op, left, right)
             }
-            Typ | NumType { typ: _ } | Hole { num: _ } | Hlp(_) | Err => {
+            Typ | NumTypeU60 { .. } | NumTypeF60 { .. } | Hole { .. } | Hlp(_) | Err => {
                 if ambient != Ambient::Irrelevant {
                     self.set_relevance(edge, Relevance::Irrelevant, expr.range);
                 }

@@ -335,8 +335,10 @@ impl Visitor for UnboundCollector {
         match &mut pat.data {
             PatKind::Var(ident) => self.visit_pat_ident(ident),
             PatKind::Str(_) => (),
+            PatKind::U60(_) => (),
+            PatKind::U120(_) => (),
+            PatKind::F60(_) => (),
             PatKind::Char(_) => (),
-            PatKind::Num(_) => (),
             PatKind::Hole => (),
             PatKind::List(ls) => {
                 for pat in ls {

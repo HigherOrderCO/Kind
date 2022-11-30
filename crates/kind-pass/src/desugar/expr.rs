@@ -23,7 +23,6 @@ impl<'a> DesugarState<'a> {
         literal: &expr::Literal,
     ) -> Box<desugared::Expr> {
         match literal {
-            Literal::Number(kind_tree::Number::U120(num)) => desugared::Expr::num120(range, *num),
             Literal::String(string) => {
                 if !self.check_implementation("String.cons", range, Sugar::String)
                     || !self.check_implementation("String.nil", range, Sugar::String)
@@ -34,10 +33,17 @@ impl<'a> DesugarState<'a> {
             }
             Literal::Type => desugared::Expr::typ(range),
             Literal::Help(name) => desugared::Expr::hlp(range, name.clone()),
-            Literal::NumType(kind_tree::NumType::U60) => desugared::Expr::u60(range),
-            Literal::NumType(kind_tree::NumType::U120) => desugared::Expr::u120(range),
-            Literal::Number(kind_tree::Number::U60(num)) => desugared::Expr::num60(range, *num),
-            Literal::Char(cht) => desugared::Expr::num60(range, *cht as u64),
+            Literal::NumTypeU60 => desugared::Expr::type_u60(range),
+            Literal::NumTypeF60 => desugared::Expr::type_f60(range),
+            Literal::NumU60(num) => desugared::Expr::num_u60(range, *num),
+            Literal::NumU120(num) => {
+                if !self.check_implementation("U120.new", range, Sugar::U120) {
+                    return desugared::Expr::err(range);
+                }
+                desugared::Expr::num_u120(range, *num)
+            }
+            Literal::NumF60(num) => desugared::Expr::num_f60(range, *num),
+            Literal::Char(cht) => desugared::Expr::num_u60(range, *cht as u64),
         }
     }
 

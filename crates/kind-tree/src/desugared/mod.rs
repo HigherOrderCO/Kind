@@ -7,11 +7,11 @@ use fxhash::FxHashMap;
 use kind_span::Range;
 use linked_hash_map::LinkedHashMap;
 
+pub use crate::Operator;
 use crate::{
     symbol::{Ident, QualifiedIdent},
     Attributes,
 };
-pub use crate::{NumType, Number, Operator};
 
 /// Just a vector of expressions. It is called spine because
 /// it is usually in a form like (a b c d e) that can be interpret
@@ -67,10 +67,14 @@ pub enum ExprKind {
     },
     /// Type Literal
     Typ,
-    /// Primitive numeric types
-    NumType { typ: crate::NumType },
-    /// Primitive numeric values
-    Num { num: crate::Number },
+    /// 60 bit integer type
+    NumTypeU60,
+    /// 60 bit floating point number type
+    NumTypeF60,
+    /// 60 bit integer
+    NumU60 { numb: u64 },
+    /// 60 bit floating point number
+    NumF60 { numb: u64 },
     /// Very special constructor :)
     Str { val: String },
     /// Binary operation (e.g. 2 + 3)
@@ -207,39 +211,44 @@ impl Expr {
         })
     }
 
-    pub fn u60(range: Range) -> Box<Expr> {
+    pub fn type_u60(range: Range) -> Box<Expr> {
         Box::new(Expr {
             range,
-            data: ExprKind::NumType {
-                typ: crate::NumType::U60,
+            data: ExprKind::NumTypeU60,
+        })
+    }
+
+    pub fn type_f60(range: Range) -> Box<Expr> {
+        Box::new(Expr {
+            range,
+            data: ExprKind::NumTypeF60,
+        })
+    }
+
+    pub fn num_u60(range: Range, numb: u64) -> Box<Expr> {
+        Box::new(Expr {
+            range,
+            data: ExprKind::NumU60 { numb },
+        })
+    }
+
+    pub fn num_u120(range: Range, numb: u128) -> Box<Expr> {
+        let name = QualifiedIdent::new_static("U120.new", None, range);
+        let lo = Expr::num_u60(range, (numb & 0xFFFFFFFFFFFFFFF) as u64);
+        let hi = Expr::num_u60(range, (numb >> 60) as u64);
+        Box::new(Expr {
+            range,
+            data: ExprKind::Ctr {
+                name,
+                args: vec![hi, lo],
             },
         })
     }
 
-    pub fn u120(range: Range) -> Box<Expr> {
+    pub fn num_f60(range: Range, numb: u64) -> Box<Expr> {
         Box::new(Expr {
             range,
-            data: ExprKind::NumType {
-                typ: crate::NumType::U120,
-            },
-        })
-    }
-
-    pub fn num60(range: Range, num: u64) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Num {
-                num: crate::Number::U60(num),
-            },
-        })
-    }
-
-    pub fn num120(range: Range, num: u128) -> Box<Expr> {
-        Box::new(Expr {
-            range,
-            data: ExprKind::Num {
-                num: crate::Number::U120(num),
-            },
+            data: ExprKind::NumF60 { numb },
         })
     }
 
@@ -371,19 +380,11 @@ impl Display for Expr {
         use ExprKind::*;
         match &self.data {
             Typ => write!(f, "Type"),
-            NumType {
-                typ: crate::NumType::U60,
-            } => write!(f, "U60"),
-            NumType {
-                typ: crate::NumType::U120,
-            } => write!(f, "U120"),
+            NumTypeU60 => write!(f, "U60"),
+            NumTypeF60 => write!(f, "F60"),
             Str { val } => write!(f, "\"{}\"", val),
-            Num {
-                num: crate::Number::U60(n),
-            } => write!(f, "{}", n),
-            Num {
-                num: crate::Number::U120(n),
-            } => write!(f, "{}u120", n),
+            NumU60 { numb } => write!(f, "{}", numb),
+            NumF60 { numb: _ } => todo!(),
             All { .. } => write!(f, "({})", self.traverse_pi_types()),
             Var { name } => write!(f, "{}", name),
             Lambda {

@@ -33,7 +33,6 @@ pub fn compile_str(val: &str) -> Box<Term> {
 }
 
 pub fn compile_term(expr: &untyped::Expr) -> Box<Term> {
-    use kind_tree::Number;
     use untyped::ExprKind::*;
     match &expr.data {
         Var { name } => Box::new(Term::Var {
@@ -58,25 +57,10 @@ pub fn compile_term(expr: &untyped::Expr) -> Box<Term> {
             expr: compile_term(val),
             body: compile_term(next),
         }),
-        Num {
-            num: Number::U60(numb),
-        } => Box::new(Term::U6O {
+        U60 { numb } => Box::new(Term::U6O {
             numb: u60::new(*numb),
         }),
-        Num {
-            num: Number::U120(numb),
-        } => {
-            let hi = Box::new(Term::U6O {
-                numb: u60::new((numb >> 60) as u64),
-            });
-            let lo = Box::new(Term::U6O {
-                numb: u60::new((numb & 0xFFFFFFFFFFFFFFF) as u64),
-            });
-            Box::new(Term::Ctr {
-                name: String::from("U120.new"),
-                args: vec![hi, lo],
-            })
-        }
+        F60 { numb: _ } => todo!(),
         Binary { op, left, right } => Box::new(Term::Ctr {
             name: op.to_string(),
             args: vec![compile_term(left), compile_term(right)],

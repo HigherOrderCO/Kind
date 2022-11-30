@@ -1,1 +1,10 @@
-ctr {MyFn.state}
+   ERROR  This entry should only have one rule.
+
+      /--[suite/kdl/NonInlineState.kind2:7:1]
+      |
+    6 |    
+    7 |    MyFn.state : U60
+      |    v---------------
+      |    \Here!
+
+

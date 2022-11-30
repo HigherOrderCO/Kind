@@ -22,6 +22,7 @@ pub enum Sugar {
     Pair,
     BoolIf,
     String,
+    U120,
     Match(String),
     Open(String),
 }
@@ -215,6 +216,7 @@ impl Diagnostic for PassError {
                     Sugar::Pair => "You must implement 'Sigma' and 'Sigma.new' in order to use the sigma notation.".to_string(),
                     Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
                     Sugar::String => "You must implement 'String.cons' in order to use the string notation.".to_string(),
+                    Sugar::U120 => "You must implement 'U120.new' in order to use the u120 notation.".to_string(),
                     Sugar::Match(name) => format!("You must implement '{}.match' in order to use the match notation (or derive match with #derive[match]).", name),
                     Sugar::Open(name) => format!("You must implement '{}.open' in order to use the open notation (or derive open with #derive[open]).", name),
                 }],

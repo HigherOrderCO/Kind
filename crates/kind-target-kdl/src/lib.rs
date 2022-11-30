@@ -34,8 +34,6 @@ pub fn compile_book(
 
     let file = compile::compile_book(&flattened, sender, namespace)?;
 
-    println!("{}", file);
-
     let file = linearize::linearize_file(file);
     Ok(file)
 }
