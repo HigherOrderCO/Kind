@@ -143,7 +143,7 @@ impl<'a> DesugarState<'a> {
                                 if (fill_hidden && arg_decl.hidden) || arguments[i].is_some() {
                                     continue;
                                 }
-                                arguments[i] = Some((v.range, self.desugar_expr(&v)));
+                                arguments[i] = Some((v.range, self.desugar_expr(v)));
                                 break;
                             }
                         }

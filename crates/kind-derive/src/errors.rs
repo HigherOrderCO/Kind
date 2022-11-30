@@ -17,11 +17,11 @@ impl Diagnostic for DeriveError {
             DeriveError::CannotUseNamedVariable(range) => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
-                title: format!("Cannot use named variable on match derivations"),
+                title: "Cannot use named variable on match derivations".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
-                    position: range.clone(),
+                    position: *range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
                     no_code: false,

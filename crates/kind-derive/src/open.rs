@@ -151,7 +151,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         range: rec.constructor.range,
     })];
 
-    let entry = Entry {
+    Entry {
         name,
         docs: Vec::new(),
         args: types,
@@ -159,8 +159,6 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
         rules,
         range: rec.constructor.range,
         attrs: Vec::new(),
-        generated_by: Some(rec.name.to_string().clone()),
-    };
-
-    entry
+        generated_by: Some(rec.name.to_string()),
+    }
 }

@@ -4,6 +4,7 @@
 //! depedencies.
 
 use fxhash::FxHashSet;
+use kind_pass::expand::expand_module;
 use kind_pass::expand::uses::expand_uses;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -64,10 +65,10 @@ fn ident_to_path(
     let mut raw_path = root.to_path_buf();
     raw_path.push(PathBuf::from(segments.join("/")));
 
-    match accumulate_neighbour_paths(&ident, &raw_path) {
+    match accumulate_neighbour_paths(ident, &raw_path) {
         Ok(None) if search_on_parent => {
             raw_path.pop();
-            accumulate_neighbour_paths(&ident, &raw_path)
+            accumulate_neighbour_paths(ident, &raw_path)
         }
         rest => rest,
     }
@@ -110,7 +111,7 @@ fn module_to_book<'a>(
 
                 for cons in &sum.constructors {
                     let mut cons_ident = sum.name.add_segment(cons.name.to_str());
-                    cons_ident.range = cons.name.range.clone();
+                    cons_ident.range = cons.name.range;
                     if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
                         public_names.insert(cons_ident.to_string());
                         book.count
@@ -156,10 +157,10 @@ fn module_to_book<'a>(
     public_names
 }
 
-fn parse_and_store_book_by_identifier<'a>(
+fn parse_and_store_book_by_identifier(
     session: &mut Session,
     ident: &QualifiedIdent,
-    book: &'a mut Book,
+    book: &mut Book,
 ) -> bool {
     if book.entries.contains_key(ident.to_string().as_str()) {
         return false;
@@ -175,10 +176,10 @@ fn parse_and_store_book_by_identifier<'a>(
     }
 }
 
-fn parse_and_store_book_by_path<'a>(
+fn parse_and_store_book_by_path(
     session: &mut Session,
     path: &PathBuf,
-    book: &'a mut Book,
+    book: &mut Book,
 ) -> bool {
     if !path.exists() {
         session
@@ -218,6 +219,8 @@ fn parse_and_store_book_by_path<'a>(
 
     expand_uses(&mut module, session.diagnostic_sender.clone());
 
+    expand_module(session.diagnostic_sender.clone(), &mut module);
+
     let mut state = UnboundCollector::new(session.diagnostic_sender.clone(), false);
     state.visit_module(&mut module);
 
@@ -227,9 +230,12 @@ fn parse_and_store_book_by_path<'a>(
     }
 
     module_to_book(&mut failed, session, module, book);
-
+    
     for idents in state.unbound_top_level.values() {
-        failed |= parse_and_store_book_by_identifier(session, &idents.iter().nth(0).unwrap(), book);
+        let fst = idents.iter().next().unwrap();
+        if !book.names.contains_key(&fst.to_string()) {
+            failed |= parse_and_store_book_by_identifier(session, fst, book);
+        }
     }
 
     failed
@@ -276,7 +282,7 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> bool {
             .map(|x| x.to_ident())
             .collect();
         if !res.is_empty() {
-            unbound_variable(session, &book, &res);
+            unbound_variable(session, book, &res);
             failed = true;
         }
     }

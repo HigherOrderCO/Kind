@@ -1,6 +1,6 @@
 use checker::eval;
 use errors::DriverError;
-use kind_pass::{desugar, erasure, expand, inline::inline_book};
+use kind_pass::{desugar, erasure, inline::inline_book};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
@@ -49,8 +49,6 @@ pub fn type_check_book(
 
 pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> {
     let mut concrete_book = resolution::parse_and_store_book(session, path)?;
-
-    expand::expand_book(session.diagnostic_sender.clone(), &mut concrete_book);
 
     let failed = resolution::check_unbound_top_level(session, &mut concrete_book);
 

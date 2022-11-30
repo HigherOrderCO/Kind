@@ -11,7 +11,7 @@ pub fn compile_book(book: untyped::Book, trace: bool) -> File {
         smaps: Default::default(),
     };
     for (_, entry) in book.entrs {
-        compile_entry(&mut file, *entry, trace);
+        compile_entry(&mut file, entry, trace);
     }
     file
 }
@@ -45,7 +45,7 @@ pub fn compile_term(expr: &untyped::Expr) -> Box<Term> {
         App { fun, args } => args.iter().fold(compile_term(fun), |func, arg| {
             Box::new(Term::App {
                 func,
-                argm: compile_term(&arg),
+                argm: compile_term(arg),
             })
         }),
         Fun { name, args } | Ctr { name, args } => Box::new(Term::Ctr {
@@ -80,11 +80,11 @@ fn compile_rule(name: String, rule: untyped::Rule) -> Rule {
     }
 }
 
-fn compile_entry(file: &mut File, entry: untyped::Entry, trace: bool) {
+fn compile_entry(file: &mut File, entry: Box<untyped::Entry>, trace: bool) {
     if entry.attrs.trace.is_some() || trace {
         let _with_args = entry.attrs.trace.unwrap_or(false);
 
-        let name_trace = format!("{}__trace", entry.name.to_string());
+        let name_trace = format!("{}__trace", entry.name);
         for rule in entry.rules {
             file.rules.push(compile_rule(name_trace.clone(), rule))
         }

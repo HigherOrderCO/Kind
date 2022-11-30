@@ -178,14 +178,14 @@ impl Expr {
 
     pub fn fun(range: Range, name: QualifiedIdent, args: Vec<Box<Expr>>) -> Box<Expr> {
         Box::new(Expr {
-            range: range.into(),
+            range,
             data: ExprKind::Fun { name, args },
         })
     }
 
     pub fn ctr(range: Range, name: QualifiedIdent, args: Vec<Box<Expr>>) -> Box<Expr> {
         Box::new(Expr {
-            range: range.into(),
+            range,
             data: ExprKind::Ctr { name, args },
         })
     }

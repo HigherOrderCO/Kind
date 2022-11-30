@@ -1,6 +1,6 @@
    ERROR  Defined multiple times for the same name
 
-      /--[tests/suite/checker/derive/fail/RepeatedDef.kind2:2:5]
+      /--[suite/checker/derive/fail/RepeatedDef.kind2:2:5]
       |
     1 |    type Nat {
     2 |        zero

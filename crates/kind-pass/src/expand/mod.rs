@@ -13,7 +13,8 @@ use kind_derive::setters::derive_setters;
 use kind_report::data::Diagnostic;
 use kind_span::Locatable;
 use kind_span::Range;
-use kind_tree::concrete::{Attribute, Book, TopLevel};
+use kind_tree::concrete::Module;
+use kind_tree::concrete::{Attribute, TopLevel};
 
 use crate::errors::PassError;
 /// Expands sum type and record definitions to a lot of
@@ -127,12 +128,12 @@ pub fn expand_derive(
     }
 }
 
-pub fn expand_book(error_channel: Sender<Box<dyn Diagnostic>>, book: &mut Book) -> bool {
+pub fn expand_module(error_channel: Sender<Box<dyn Diagnostic>>, module: &mut Module) -> bool {
     let mut failed = false;
 
     let mut entries = FxHashMap::default();
 
-    for entry in book.entries.values() {
+    for entry in &module.entries {
         match entry {
             TopLevel::SumType(sum) => {
                 if let Some(derive) = expand_derive(error_channel.clone(), &sum.attrs) {
@@ -196,10 +197,8 @@ pub fn expand_book(error_channel: Sender<Box<dyn Diagnostic>>, book: &mut Book) 
         }
     }
 
-    for (name, (tl, count)) in entries {
-        book.count.insert(name.clone(), count);
-        book.names.insert(name.clone().to_string(), tl.name.clone());
-        book.entries.insert(name.clone(), TopLevel::Entry(tl));
+    for (_, (tl, _)) in entries {
+        module.entries.push(TopLevel::Entry(tl));
     }
 
     failed

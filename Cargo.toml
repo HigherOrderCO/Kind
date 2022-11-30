@@ -18,3 +18,9 @@ members = [
   # "crates/kind-query",
   # "crates/kind-macros",
 ]
+
+[profile.test.package.hvm]
+opt-level = 3
+
+[profile.bench.package.hvm]
+opt-level = 3

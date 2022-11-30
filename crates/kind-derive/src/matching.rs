@@ -160,7 +160,7 @@ pub fn derive_match(
                     new_args.push(match arg {
                         Binding::Positional(expr) => AppBinding::explicit(expr.clone()),
                         Binding::Named(range, _, expr) => {
-                            errs.push(Box::new(DeriveError::CannotUseNamedVariable(range.clone())));
+                            errs.push(Box::new(DeriveError::CannotUseNamedVariable(*range)));
                             AppBinding::explicit(expr.clone())
                         }
                     });
@@ -191,7 +191,7 @@ pub fn derive_match(
         types.push(Argument {
             hidden: false,
             erased: false,
-            name: Ident::new_static(&format!("{}_", cons.name.to_string()), range),
+            name: Ident::new_static(&format!("{}_", cons.name), range),
             typ: Some(cons_type),
             range,
         });
@@ -209,7 +209,7 @@ pub fn derive_match(
             rules: vec![],
             range,
             attrs: Vec::new(),
-            generated_by: Some(sum.name.to_string().clone()),
+            generated_by: Some(sum.name.to_string()),
         };
         return (entry, errs);
     }
@@ -262,7 +262,7 @@ pub fn derive_match(
                         let renames = FxHashMap::from_iter(
                             sum.parameters
                                 .extend(&cons.args)
-                                .map(|x| (x.name.to_string(), format!("{}_", x.name.to_string())))
+                                .map(|x| (x.name.to_string(), format!("{}_", x.name)))
                                 .iter()
                                 .cloned(),
                         );

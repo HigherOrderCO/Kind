@@ -537,7 +537,7 @@ impl Diagnostic for PassError {
             PassError::AttributeExpectsAValue(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
-                title: format!("This attribute expects a value"),
+                title: "This attribute expects a value".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
@@ -551,7 +551,7 @@ impl Diagnostic for PassError {
             PassError::AttributeDoesNotExists(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
-                title: format!("This attribute does not exists"),
+                title: "This attribute does not exists".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
