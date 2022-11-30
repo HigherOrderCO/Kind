@@ -1,0 +1,13 @@
+   INFO  Inspection.
+
+      * Expected: U60 
+
+
+      /--[tests/suite/checker/derive/Inspection.kind2:3:3]
+      |
+    2 |    Main =
+    3 |      ?
+      |      v
+      |      \Here!
+
+

@@ -117,7 +117,6 @@ impl UnboundCollector {
                 self.top_level_defs
                     .insert(name_cons.get_root(), name_cons.range);
             }
-
             TopLevel::Entry(entry) => {
                 debug_assert!(entry.name.get_aux().is_none());
                 self.top_level_defs
@@ -476,7 +475,7 @@ impl Visitor for UnboundCollector {
                 self.context_vars.pop();
             }
             ExprKind::Match(matcher) => {
-                self.visit_qualified_ident(&mut matcher.typ.add_segment("match"));
+                self.visit_qualified_ident(&mut matcher.typ.add_segment("match").to_generated());
                 self.visit_match(matcher)
             }
             ExprKind::Subst(subst) => {
@@ -499,27 +498,25 @@ impl Visitor for UnboundCollector {
                 self.visit_sttm(sttm)
             }
             ExprKind::If { cond, then_, else_ } => {
-                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "Bool", "if", expr.range,
-                ));
+                let typ = QualifiedIdent::new_static("Bool", None, expr.range);
+                self.visit_qualified_ident(&mut typ.add_segment("if").to_generated());
                 self.visit_expr(cond);
                 self.visit_expr(then_);
                 self.visit_expr(else_);
             }
             ExprKind::Pair { fst, snd } => {
-                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "Pair", "new", expr.range,
-                ));
+                let typ = QualifiedIdent::new_static("Pair", None, expr.range);
+                self.visit_qualified_ident(&mut typ.add_segment("new").to_generated());
                 self.visit_expr(fst);
                 self.visit_expr(snd);
             }
             ExprKind::List { args } => {
-                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "List", "nil", expr.range,
-                ));
-                self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "List", "cons", expr.range,
-                ));
+                let mut typ = QualifiedIdent::new_static("List", None, expr.range);
+
+                self.visit_qualified_ident(&mut typ);
+                self.visit_qualified_ident(&mut typ.add_segment("nil").to_generated());
+                self.visit_qualified_ident(&mut typ.add_segment("cons").to_generated());
+
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }
         }

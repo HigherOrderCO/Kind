@@ -13,4 +13,4 @@ kind-report = { path = "../kind-report" }
 hvm = { git = "https://github.com/Kindelia/HVM.git" }
 
 fxhash = "0.2.1"
-im = "15.1.0"
+im-rc = "15.1.0"

@@ -29,13 +29,16 @@ pub enum Token {
     LowerId(String),
     UpperId(String, Option<String>),
 
+    // Strong keywords because they lead to better
+    // error messages.
+    Return,
+    Ask,
+
     // Keywords
     // Do,
     // If,
     // Else,
     // Match,
-    // Ask,
-    // Return,
     // Let,
     // Type,
     // Record,
@@ -166,9 +169,11 @@ impl fmt::Display for Token {
             Token::Bang => write!(f, "!"),
             Token::HashHash => write!(f, "##"),
             Token::Hash => write!(f, "#"),
-            Token::Comment(_, _) => write!(f, "Comment"),
+            Token::Comment(_, _) => write!(f, "docstring comment"),
             Token::Eof => write!(f, "End of file"),
             Token::Error(_) => write!(f, "ERROR"),
+            Token::Return => write!(f, "return"),
+            Token::Ask => write!(f, "ask"),
         }
     }
 }

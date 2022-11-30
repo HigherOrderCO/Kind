@@ -31,6 +31,8 @@ pub struct Attributes {
     pub kdl_erase: bool,
     pub kdl_name: Option<Ident>,
     pub kdl_state: Option<Ident>,
+    pub trace: Option<bool>, // Some is enabled and some(true) is enabled with arguments
+    pub keep: bool
 }
 
 /// Enum of binary operators.

@@ -5,7 +5,7 @@ use kind_report::data::Diagnostic;
 use kind_span::Range;
 
 use kind_tree::desugared;
-use kind_tree::symbol::{Ident, QualifiedIdent};
+use kind_tree::symbol::QualifiedIdent;
 use kind_tree::untyped::{self};
 
 use crate::errors::PassError;
@@ -45,7 +45,7 @@ pub struct ErasureState<'a> {
     edges: Vec<Edge>,
     names: FxHashMap<String, (Range, usize)>,
 
-    ctx: im::HashMap<String, Relevance>,
+    ctx: im_rc::HashMap<String, Relevance>,
 
     failed: bool,
 }
@@ -53,6 +53,7 @@ pub struct ErasureState<'a> {
 pub fn erase_book<'a>(
     book: &'a desugared::Book,
     errs: Sender<Box<dyn Diagnostic>>,
+    entrypoints: Vec<String>,
 ) -> Option<untyped::Book> {
     let mut state = ErasureState {
         errs,
@@ -63,7 +64,7 @@ pub fn erase_book<'a>(
         failed: Default::default(),
     };
 
-    state.erase_book(book)
+    state.erase_book(book, entrypoints)
 }
 
 impl<'a> ErasureState<'a> {
@@ -94,15 +95,21 @@ impl<'a> ErasureState<'a> {
         entry.push((name.range, ambient))
     }
 
-    pub fn erase_book(&mut self, book: &'a desugared::Book) -> Option<untyped::Book> {
+    pub fn erase_book(
+        &mut self,
+        book: &'a desugared::Book,
+        named_entrypoints: Vec<String>,
+    ) -> Option<untyped::Book> {
         let mut vals = FxHashMap::default();
 
         let mut entrypoints = Vec::new();
 
-        if let Some(entr) = book.entrs.get("Main") {
-            let id = self.get_edge_or_create(&entr.name);
-            self.set_relevance(id, Relevance::Relevant, entr.name.range);
-            entrypoints.push(id);
+        for name in named_entrypoints {
+            if let Some(entr) = book.entrs.get(&name) {
+                let id = self.get_edge_or_create(&entr.name);
+                self.set_relevance(id, Relevance::Relevant, entr.name.range);
+                entrypoints.push(id);
+            }
         }
 
         // Kdl specific things.
@@ -115,7 +122,7 @@ impl<'a> ErasureState<'a> {
                 }
             }
 
-            if entr.attrs.kdl_run {
+            if entr.attrs.kdl_run || entr.attrs.keep {
                 let id = self.get_edge_or_create(&entr.name);
                 self.set_relevance(id, Relevance::Relevant, entr.name.range);
                 entrypoints.push(id);
@@ -141,7 +148,7 @@ impl<'a> ErasureState<'a> {
         while !queue.is_empty() {
             let (fst, relev) = queue.pop().unwrap();
 
-            if visited.contains(&fst) {
+            if visited.contains(fst) {
                 continue;
             }
 
@@ -157,13 +164,15 @@ impl<'a> ErasureState<'a> {
                 }
             }
 
-            let entry = vals.get(&edge.name).cloned().unwrap();
+            let entry = vals.remove(&edge.name).unwrap();
 
             new_book
                 .names
-                .insert(entry.name.to_string(), new_book.entrs.len());
+                .insert(entry.name.to_str().to_string(), new_book.entrs.len());
 
-            new_book.entrs.insert(entry.name.to_string(), entry);
+            new_book
+                .entrs
+                .insert(entry.name.to_str().to_string(), entry);
 
             for (to, relevs) in &edge.connections {
                 for (_, relev) in relevs.iter() {
@@ -196,7 +205,7 @@ impl<'a> ErasureState<'a> {
         for arg in &entry.args {
             self.erase_expr(Ambient::Irrelevant, id, &arg.typ);
             self.ctx.insert(arg.name.to_string(), Relevance::Irrelevant);
-            if !arg.hidden {
+            if !arg.erased {
                 args.push((arg.name.to_string(), arg.range, false))
             }
         }
@@ -246,7 +255,7 @@ impl<'a> ErasureState<'a> {
             .pats
             .iter()
             .zip(&entr.args)
-            .map(|(pat, arg)| (self.erase_pat(relev(arg.hidden), edge, pat), arg))
+            .map(|(pat, arg)| (self.erase_pat(relev(arg.erased), edge, pat), arg))
             .filter(|(_, arg)| !arg.erased)
             .map(|res| res.0)
             .collect::<Vec<_>>();
@@ -292,7 +301,7 @@ impl<'a> ErasureState<'a> {
 
                 untyped::Expr::var(name.clone())
             }
-            Hole { num } => untyped::Expr::var(Ident::generate(&format!("_x{}", num))),
+            Hole { num: _ } => untyped::Expr::err(expr.range),
             Fun { name, args } => {
                 self.connect_with(edge, name, relevance);
 
@@ -307,8 +316,8 @@ impl<'a> ErasureState<'a> {
                 let args = args
                     .iter()
                     .zip(&params.args)
-                    .map(|(arg, param)| (self.erase_pat(relev(param.hidden), edge, arg), param))
-                    .filter(|(_, param)| !param.hidden)
+                    .map(|(arg, param)| (self.erase_pat(relev(param.erased), edge, arg), param))
+                    .filter(|(_, param)| !param.erased)
                     .map(|x| x.0)
                     .collect::<Vec<_>>();
 
@@ -328,8 +337,8 @@ impl<'a> ErasureState<'a> {
                 let args = args
                     .iter()
                     .zip(&params.args)
-                    .map(|(arg, param)| (self.erase_pat(relev(param.hidden), edge, arg), param))
-                    .filter(|(_, param)| !param.hidden)
+                    .map(|(arg, param)| (self.erase_pat(relev(param.erased), edge, arg), param))
+                    .filter(|(_, param)| !param.erased)
                     .map(|x| x.0)
                     .collect::<Vec<_>>();
 
@@ -461,7 +470,7 @@ impl<'a> ErasureState<'a> {
                 let var_rev = self
                     .ctx
                     .get(&name.to_string())
-                    .expect(&format!("Uwnraping {}", name.to_string()));
+                    .expect(&format!("Uwnraping {}", name));
 
                 if *var_rev == Relevance::Irrelevant && ambient != Ambient::Irrelevant {
                     self.set_relevance(edge, Relevance::Irrelevant, name.range)
@@ -499,7 +508,7 @@ impl<'a> ErasureState<'a> {
                 untyped::Expr::binary(expr.range, *op, left, right)
             }
             Typ | NumTypeU60 { .. } | NumTypeF60 { .. } | Hole { .. } | Hlp(_) | Err => {
-                if ambient != Ambient::Irrelevant && ambient != Ambient::Irrelevant {
+                if ambient != Ambient::Irrelevant {
                     self.set_relevance(edge, Relevance::Irrelevant, expr.range);
                 }
                 untyped::Expr::err(expr.range)

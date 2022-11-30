@@ -140,8 +140,8 @@ impl<'a> DesugarState<'a> {
         let bind_ident = typ.add_segment("bind");
         let pure_ident = typ.add_segment("pure");
 
-        let bind = self.old_book.entries.get(bind_ident.to_string().as_str());
-        let pure = self.old_book.entries.get(pure_ident.to_string().as_str());
+        let bind = self.old_book.names.get(bind_ident.to_str());
+        let pure = self.old_book.names.get(pure_ident.to_str());
 
         if bind.is_none() || pure.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::DoNotation));
@@ -186,9 +186,9 @@ impl<'a> DesugarState<'a> {
         let cons_ident = list_ident.add_segment("cons");
         let nil_ident = list_ident.add_segment("nil");
 
-        let list = self.old_book.entries.get(list_ident.to_string().as_str());
-        let nil = self.old_book.entries.get(cons_ident.to_string().as_str());
-        let cons = self.old_book.entries.get(nil_ident.to_string().as_str());
+        let list = self.old_book.names.get(list_ident.to_str());
+        let nil = self.old_book.names.get(cons_ident.to_str());
+        let cons = self.old_book.names.get(nil_ident.to_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
@@ -214,10 +214,7 @@ impl<'a> DesugarState<'a> {
         let boolean = QualifiedIdent::new_static("Bool", None, range);
         let bool_if_ident = boolean.add_segment("if");
 
-        let bool_if = self
-            .old_book
-            .entries
-            .get(bool_if_ident.to_string().as_str());
+        let bool_if = self.old_book.names.get(bool_if_ident.to_str());
 
         if bool_if.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::BoolIf));

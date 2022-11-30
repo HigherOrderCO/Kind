@@ -37,7 +37,7 @@ pub fn inline_book(book: &mut untyped::Book) {
 
     for entr in book.entrs.values() {
         if entr.attrs.inlined {
-            if let Some(inlinable) = inlinable(&entr) {
+            if let Some(inlinable) = inlinable(entr) {
                 funs.insert(entr.name.to_string(), inlinable);
                 to_remove.push(entr.name.to_string());
             }

@@ -1,6 +1,0 @@
-type Eq <t: Type> (a: t) ~ (b: t) {
-    rfl: Eq t a a
-}
-
-Teste : Eq 123u120 124u120
-Teste = Eq.rfl

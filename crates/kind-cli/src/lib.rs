@@ -32,6 +32,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub no_color: bool,
 
+    /// Prints all of the functions and their evaluation
+    #[arg(short, long)]
+    pub trace: bool,
+
     /// Only ascii characters in error messages
     #[arg(short, long)]
     pub ascii: bool,
@@ -149,6 +153,7 @@ pub fn compile_in_session<T>(
                 Log::Checked(start.elapsed())
             },
         );
+        eprintln!();
         res
     } else {
         render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
@@ -175,13 +180,14 @@ pub fn run_cli(config: Cli) {
     match config.command {
         Command::Check { file } => {
             compile_in_session(render_config, root, file.clone(), false, &mut |session| {
-                driver::type_check_book(session, &PathBuf::from(file.clone()))
+                driver::type_check_book(session, &PathBuf::from(file.clone()), entrypoints.clone())
             });
         }
         Command::ToHVM { file } => {
             compile_in_session(render_config, root, file.clone(), true, &mut |session| {
-                let book = driver::erase_book(session, &PathBuf::from(file.clone()))?;
-                Some(driver::compile_book_to_hvm(book))
+                let book =
+                    driver::erase_book(session, &PathBuf::from(file.clone()), entrypoints.clone())?;
+                Some(driver::compile_book_to_hvm(book, config.trace))
             })
             .map(|res| {
                 println!("{}", res);
@@ -190,9 +196,10 @@ pub fn run_cli(config: Cli) {
         }
         Command::Run { file } => {
             let res = compile_in_session(render_config, root, file.clone(), true, &mut |session| {
-                let book = driver::erase_book(session, &PathBuf::from(file.clone()))?;
+                let book =
+                    driver::erase_book(session, &PathBuf::from(file.clone()), entrypoints.clone())?;
                 driver::check_main_entry(session, &book)?;
-                Some(driver::compile_book_to_hvm(book))
+                Some(driver::compile_book_to_hvm(book, config.trace))
             });
 
             if let Some(res) = res {
@@ -222,7 +229,7 @@ pub fn run_cli(config: Cli) {
         }
         Command::Erase { file } => {
             compile_in_session(render_config, root, file.clone(), true, &mut |session| {
-                driver::erase_book(session, &PathBuf::from(file.clone()))
+                driver::erase_book(session, &PathBuf::from(file.clone()), entrypoints.clone())
             })
             .map(|res| {
                 print!("{}", res);
@@ -252,6 +259,7 @@ pub fn run_cli(config: Cli) {
                     &PathBuf::from(file.clone()),
                     session,
                     &namespace.clone().unwrap_or("".to_string()),
+                    entrypoints.clone(),
                 )
             })
             .map(|res| {

@@ -89,7 +89,7 @@ impl Diagnostic for PassError {
                         suggestions.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", ")
                     )
                 } else {
-                    "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()
+                    "Take a look at naming rules at https://github.com/Kindelia/Kind2/blob/master/guide/naming.md".to_string()
                 }],
                 positions: idents
                     .iter()
@@ -324,7 +324,7 @@ impl Diagnostic for PassError {
                 title: "Incorrect arity in the sugar definition".to_string(),
                 subtitles: vec![],
                 hints: vec![format!(
-                    "Take a look at how sugar functions should be implemented at https://kind2.kindelia.com/hints/sugars."
+                    "Take a look at how sugar functions should be implemented at https://github.com/Kindelia/Kind2/blob/master/guide/sugars.md"
                 )],
                 positions: vec![
                     Marker {

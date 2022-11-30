@@ -85,49 +85,49 @@ fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {
 }
 
 fn parse_all_expr(
-    names: im::HashMap<String, String>,
+    names: im_rc::HashMap<String, String>,
     term: &Term,
 ) -> Result<Box<desugared::Expr>, String> {
     match term {
         Term::Ctr { name, args } => match name.as_str() {
-            "Kind.Quoted.all" => Ok(Expr::all(
+            "Kind.Term.Quoted.all" => Ok(Expr::all(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
                 false, // TODO: Fix
             )),
-            "Kind.Quoted.lam" => Ok(Expr::lambda(
+            "Kind.Term.Quoted.lam" => Ok(Expr::lambda(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names, &args[2])?,
                 false, // TODO: Fix
             )),
-            "Kind.Quoted.let" => Ok(Expr::let_(
+            "Kind.Term.Quoted.let" => Ok(Expr::let_(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
             )),
-            "Kind.Quoted.typ" => Ok(Expr::typ(parse_orig(&args[0])?)),
-            "Kind.Quoted.var" => Ok(Expr::var(Ident::new(
+            "Kind.Term.Quoted.typ" => Ok(Expr::typ(parse_orig(&args[0])?)),
+            "Kind.Term.Quoted.var" => Ok(Expr::var(Ident::new(
                 parse_name(&args[1])?,
                 parse_orig(&args[0])?,
             ))),
-            "Kind.Quoted.hol" => Ok(Expr::hole(parse_orig(&args[0])?, parse_num(&args[1])?)),
-            "Kind.Quoted.ann" => Ok(Expr::ann(
+            "Kind.Term.Quoted.hol" => Ok(Expr::hole(parse_orig(&args[0])?, parse_num(&args[1])?)),
+            "Kind.Term.Quoted.ann" => Ok(Expr::ann(
                 parse_orig(&args[0])?,
                 parse_all_expr(names.clone(), &args[1])?,
                 parse_all_expr(names, &args[2])?,
             )),
-            "Kind.Quoted.sub" => Ok(Expr::sub(
+            "Kind.Term.Quoted.sub" => Ok(Expr::sub(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_num(&args[2])? as usize,
                 parse_num(&args[3])? as usize,
                 parse_all_expr(names, &args[4])?,
             )),
-            "Kind.Quoted.app" => Ok(Expr::app(
+            "Kind.Term.Quoted.app" => Ok(Expr::app(
                 parse_orig(&args[0])?,
                 parse_all_expr(names.clone(), &args[1])?,
                 vec![desugared::AppBinding {
@@ -135,7 +135,7 @@ fn parse_all_expr(
                     erased: false,
                 }],
             )),
-            "Kind.Quoted.ctr" => {
+            "Kind.Term.Quoted.ctr" => {
                 let name = parse_qualified(&args[0])?;
                 let orig = parse_orig(&args[1])?;
                 let mut res = Vec::new();
@@ -144,7 +144,7 @@ fn parse_all_expr(
                 }
                 Ok(Expr::ctr(orig, name, res))
             }
-            "Kind.Quoted.fun" => Ok(Expr::fun(
+            "Kind.Term.Quoted.fun" => Ok(Expr::fun(
                 parse_orig(&args[1])?,
                 parse_qualified(&args[0])?,
                 {
@@ -155,11 +155,11 @@ fn parse_all_expr(
                     res
                 },
             )),
-            "Kind.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
-            "Kind.Quoted.u60" => Ok(Expr::type_u60(parse_orig(&args[0])?)),
+            "Kind.Term.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
+            "Kind.Term.Quoted.u60" => Ok(Expr::type_u60(parse_orig(&args[0])?)),
+            "Kind.Term.Quoted.num" => Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?)),
             // TODO: Change quoting to support floats
-            "Kind.Quoted.num" => Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?)),
-            "Kind.Quoted.op2" => Ok(Expr::binary(
+            "Kind.Term.Quoted.op2" => Ok(Expr::binary(
                 parse_orig(&args[0])?,
                 parse_op(&args[1])?,
                 parse_all_expr(names.clone(), &args[2])?,
@@ -232,13 +232,13 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
                 "Kind.Error.Quoted.impossible_case" => Ok(TypeError::ImpossibleCase(
                     ctx,
                     orig,
-                    parse_all_expr(im::HashMap::new(), &args[2])?,
-                    parse_all_expr(im::HashMap::new(), &args[3])?,
+                    parse_all_expr(im_rc::HashMap::new(), &args[2])?,
+                    parse_all_expr(im_rc::HashMap::new(), &args[3])?,
                 )),
                 "Kind.Error.Quoted.inspection" => Ok(TypeError::Inspection(
                     ctx,
                     orig,
-                    parse_all_expr(im::HashMap::new(), &args[2])?,
+                    parse_all_expr(im_rc::HashMap::new(), &args[2])?,
                 )),
                 "Kind.Error.Quoted.too_many_arguments" => {
                     Ok(TypeError::TooManyArguments(ctx, orig))
@@ -246,8 +246,8 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
                 "Kind.Error.Quoted.type_mismatch" => Ok(TypeError::TypeMismatch(
                     ctx,
                     orig,
-                    parse_all_expr(im::HashMap::new(), &args[2])?,
-                    parse_all_expr(im::HashMap::new(), &args[3])?,
+                    parse_all_expr(im_rc::HashMap::new(), &args[2])?,
+                    parse_all_expr(im_rc::HashMap::new(), &args[3])?,
                 )),
                 _ => Err("Unexpected tag on quoted value".to_string()),
             }

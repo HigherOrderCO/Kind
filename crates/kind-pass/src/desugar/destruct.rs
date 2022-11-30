@@ -197,11 +197,11 @@ impl<'a> DesugarState<'a> {
             if let Some((range, _, _)) = cases_args[index] {
                 self.send_err(PassError::DuplicatedNamed(range, case.constructor.range));
             } else {
-                let sum_c = &sum.constructors[index];
+                let sum_constructor = &sum.constructors[index];
 
                 let ordered = self.order_case_arguments(
                     (&case.constructor.range, case.constructor.to_string()),
-                    &sum_c
+                    &sum_constructor
                         .args
                         .iter()
                         .map(|x| (x.name.to_string(), x.hidden))

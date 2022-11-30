@@ -21,7 +21,11 @@ impl FileCache for Session {
     }
 }
 
-pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<untyped::Book> {
+pub fn type_check_book(
+    session: &mut Session,
+    path: &PathBuf,
+    entrypoints: Vec<String>,
+) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
@@ -33,7 +37,11 @@ pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<untyped:
         return None;
     }
 
-    let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    let mut book = erasure::erase_book(
+        &desugared_book,
+        session.diagnostic_sender.clone(),
+        entrypoints,
+    )?;
     inline_book(&mut book);
 
     Some(book)
@@ -53,10 +61,18 @@ pub fn to_book(session: &mut Session, path: &PathBuf) -> Option<concrete::Book> 
     Some(concrete_book)
 }
 
-pub fn erase_book(session: &mut Session, path: &PathBuf) -> Option<untyped::Book> {
+pub fn erase_book(
+    session: &mut Session,
+    path: &PathBuf,
+    entrypoints: Vec<String>,
+) -> Option<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    let mut book = erasure::erase_book(
+        &desugared_book,
+        session.diagnostic_sender.clone(),
+        entrypoints,
+    )?;
     inline_book(&mut book);
     Some(book)
 }
@@ -73,18 +89,23 @@ pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Option<desug
     Some(desugared_book)
 }
 
-pub fn compile_book_to_hvm(book: untyped::Book) -> backend::File {
-    kind_target_hvm::compile_book(book)
+pub fn compile_book_to_hvm(book: untyped::Book, trace: bool) -> backend::File {
+    kind_target_hvm::compile_book(book, trace)
 }
 
 pub fn compile_book_to_kdl(
     path: &PathBuf,
     session: &mut Session,
     namespace: &str,
+    entrypoints: Vec<String>,
 ) -> Option<kind_target_kdl::File> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
-    let mut book = erasure::erase_book(&desugared_book, session.diagnostic_sender.clone())?;
+    let mut book = erasure::erase_book(
+        &desugared_book,
+        session.diagnostic_sender.clone(),
+        entrypoints,
+    )?;
 
     inline_book(&mut book);
 

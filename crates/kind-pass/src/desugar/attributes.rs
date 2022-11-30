@@ -1,3 +1,4 @@
+use kind_span::Locatable;
 use kind_tree::concrete::{self, Attribute, AttributeStyle};
 use kind_tree::Attributes;
 
@@ -43,6 +44,11 @@ impl<'a> DesugarState<'a> {
                     self.attr_without_value(attr);
                     attributes.inlined = true;
                 }
+                "keep" => {
+                    self.args_should_be_empty(attr);
+                    self.attr_without_value(attr);
+                    attributes.keep = true;
+                }
                 "kdl_run" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);
@@ -71,6 +77,23 @@ impl<'a> DesugarState<'a> {
                         }
                         Some(_) => self.attr_invalid_argument(attr),
                         None => self.attr_expects_a_value(attr),
+                    }
+                }
+                "trace" => {
+                    self.args_should_be_empty(attr);
+                    match &attr.value {
+                        Some(AttributeStyle::Ident(_, id)) if id.to_string() == "true" => {
+                            attributes.trace = Some(true);
+                        }
+                        Some(AttributeStyle::Ident(_, id)) if id.to_string() == "false" => {
+                            attributes.trace = Some(false);
+                        }
+                        Some(other) => {
+                            self.send_err(PassError::InvalidAttributeArgument(other.locate()))
+                        }
+                        None => {
+                            attributes.trace = Some(false);
+                        }
                     }
                 }
                 _ => self.send_err(PassError::AttributeDoesNotExists(attr.range)),
