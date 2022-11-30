@@ -126,7 +126,7 @@ pub fn compile_book(
     Ok(ctx.file)
 }
 
-pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang::ast::Rule {
+pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kdl::Rule {
     let name = *ctx.kdl_names.get(rule.name.to_str()).unwrap();
     let mut args = Vec::new();
     for pat in &rule.pats {
@@ -139,13 +139,13 @@ pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang
     kdl::Rule { lhs, rhs }
 }
 
-pub fn err_term() -> kindelia_lang::ast::Term {
-    kindelia_lang::ast::Term::Num {
-        numb: kindelia_lang::ast::U120::new(99999).unwrap(),
+pub fn err_term() -> kdl::Term {
+    kdl::Term::Num {
+        numb: kdl::U120::new(99999).unwrap(),
     }
 }
 
-pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang::ast::Term {
+pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
     use crate::untyped::ExprKind as From;
     use kdl::Term as To;
     match &expr.data {
@@ -202,13 +202,24 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
             }
         }
         From::Ctr { name, args } => {
+            // Convert U120 numbers into the native kindelia representation
+            // Only possible if both U60s are U60 terms
+            if name.to_str() == "U120.new" {
+                if let (From::U60 { numb: hi }, From::U60 { numb: lo }) =
+                    (&args[0].data, &args[1].data)
+                {
+                    let numb = kdl::U120(((*hi as u128) << 60) | (*lo as u128));
+                    return To::Num { numb };
+                }
+            }
             let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
             let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
             To::Ctr { name, args }
         }
         From::Fun { name, args } => {
             match name.to_str() {
-                // Special compilation for some numeric functions
+                // Special inline compilation for
+                // some numeric function applications
 
                 // Add with no boundary check is just a normal add
                 "U60.add_unsafe" => To::Op2 {
@@ -395,66 +406,112 @@ pub fn compile_entry(ctx: &mut CompileCtx, entry: &untyped::Entry) {
             ctx.file.runs.push(statement);
         }
     } else {
-        let name = ctx.kdl_names.get(entry.name.to_str()).cloned().unwrap();
-
-        let mut args = Vec::new();
-
-        for (name, range, _strictness) in &entry.args {
-            if let Ok(name) = kdl::Name::from_str(name) {
-                args.push(name)
-            } else {
-                ctx.send_err(Box::new(KdlError::InvalidVarName(*range)));
-            }
-        }
-
-        if entry.rules.is_empty() {
-            // Functions with no rules become Ctr
-            let sttm = kdl::Statement::Ctr {
-                name,
-                args,
-                sign: None,
-            };
-            ctx.file.ctrs.insert(entry.name.to_string(), sttm);
-        } else {
-            // Functions with rules become Fun
-            let rules = entry
-                .rules
-                .iter()
-                .map(|rule| compile_rule(ctx, rule))
-                .collect::<Vec<_>>();
-            let func = kdl::Func { rules };
-
-            let init = if let Some(state_name) = &entry.attrs.kdl_state {
-                let init_entry = ctx.book.entrs.get(state_name.to_str());
-                if let Some(entry) = init_entry {
-                    if !entry.args.is_empty() {
-                        ctx.send_err(Box::new(KdlError::ShouldNotHaveArguments(entry.range)));
-                        None
-                    } else if entry.rules.len() != 1 {
-                        ctx.send_err(Box::new(KdlError::ShouldHaveOnlyOneRule(entry.range)));
-                        None
-                    } else {
-                        ctx.kdl_states.push(state_name.to_string());
-                        Some(compile_expr(ctx, &entry.rules[0].body))
-                    }
-                } else {
-                    ctx.send_err(Box::new(KdlError::NoInitEntry(state_name.range)));
-                    None
-                }
-            } else {
-                None
-            };
-
-            let sttm = kdl::Statement::Fun {
-                name,
-                args,
-                func,
-                init,
-                sign: None,
-            };
-            ctx.file.funs.insert(entry.name.to_string(), sttm);
+        match entry.name.to_str() {
+            "U120.new" => compile_u120_new(ctx, entry),
+            _ => compile_common_function(ctx, entry),
         }
     }
+}
+
+fn compile_common_function(ctx: &mut CompileCtx, entry: &untyped::Entry) {
+    let name = ctx.kdl_names.get(entry.name.to_str()).cloned().unwrap();
+
+    let mut args = Vec::new();
+    for (name, range, _strictness) in &entry.args {
+        if let Ok(name) = kdl::Name::from_str(name) {
+            args.push(name)
+        } else {
+            ctx.send_err(Box::new(KdlError::InvalidVarName(*range)));
+        }
+    }
+
+    if entry.rules.is_empty() {
+        // Functions with no rules become Ctr
+        let sttm = kdl::Statement::Ctr {
+            name,
+            args,
+            sign: None,
+        };
+        ctx.file.ctrs.insert(entry.name.to_string(), sttm);
+    } else {
+        // Functions with rules become Fun
+        let rules = entry
+            .rules
+            .iter()
+            .map(|rule| compile_rule(ctx, rule))
+            .collect::<Vec<_>>();
+        let func = kdl::Func { rules };
+
+        let init = if let Some(state_name) = &entry.attrs.kdl_state {
+            let init_entry = ctx.book.entrs.get(state_name.to_str());
+            if let Some(entry) = init_entry {
+                if !entry.args.is_empty() {
+                    ctx.send_err(Box::new(KdlError::ShouldNotHaveArguments(entry.range)));
+                    None
+                } else if entry.rules.len() != 1 {
+                    ctx.send_err(Box::new(KdlError::ShouldHaveOnlyOneRule(entry.range)));
+                    None
+                } else {
+                    ctx.kdl_states.push(state_name.to_string());
+                    Some(compile_expr(ctx, &entry.rules[0].body))
+                }
+            } else {
+                ctx.send_err(Box::new(KdlError::NoInitEntry(state_name.range)));
+                None
+            }
+        } else {
+            None
+        };
+
+        let sttm = kdl::Statement::Fun {
+            name,
+            args,
+            func,
+            init,
+            sign: None,
+        };
+        ctx.file.funs.insert(entry.name.to_string(), sttm);
+    }
+}
+
+fn compile_u120_new(ctx: &mut CompileCtx, entry: &untyped::Entry) {
+    // U120.new hi lo = (hi << 60) | lo
+    let hi_name = kdl::Name::from_str("hi").unwrap();
+    let lo_name = kdl::Name::from_str("lo").unwrap();
+    let hi_var = kdl::Term::Var {
+        name: hi_name.clone(),
+    };
+    let lo_var = kdl::Term::Var {
+        name: lo_name.clone(),
+    };
+    let name = ctx.kdl_names.get(entry.name.to_str()).cloned().unwrap();
+    let args = vec![hi_name, lo_name];
+    let rules = vec![kdl::Rule {
+        lhs: kdl::Term::Fun {
+            name: name.clone(),
+            args: vec![hi_var.clone(), lo_var.clone()],
+        },
+        rhs: kdl::Term::Op2 {
+            oper: kdl::Oper::Or,
+            val0: Box::new(kdl::Term::Op2 {
+                oper: kdl::Oper::Shl,
+                val0: Box::new(hi_var),
+                val1: Box::new(kdl::Term::Num {
+                    numb: kdl::U120(60),
+                }),
+            }),
+            val1: Box::new(lo_var),
+        },
+    }];
+    let func = kdl::Func { rules };
+    let sttm = kdl::Statement::Fun {
+        name,
+        args,
+        func,
+        init: None,
+        sign: None,
+    };
+    ctx.file.funs.insert(entry.name.to_string(), sttm);
 }
 
 impl Display for File {
