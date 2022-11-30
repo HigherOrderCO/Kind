@@ -1,0 +1,8 @@
+fun (CoolFnApp n) {
+  (CoolFnApp x0) = (!@x0.0 (!@x1 (!@x1.0 (!x1.0 x0.0) x1) @x2 (!@x2.0 (!(CoolFn) x2.0) x2)) x0)
+}
+
+fun (CoolFn ) {
+  (CoolFn) = @x0 (!@x0.0 (& (* #2 x0.0) #1152921504606846975) x0)
+}
+
