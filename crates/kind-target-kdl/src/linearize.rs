@@ -41,7 +41,7 @@ impl LinearizeCtx {
     // for every variable found in the style described before with
     // the fresh function. Also checks if rule's left side is valid.
     fn create_param_names(&mut self, rule: &Rule) {
-        if let Term::Ctr { name: _, args } = &rule.lhs {
+        if let Term::Fun { name: _, args } = &rule.lhs {
             for arg in args {
                 match arg {
                     Term::Var { name } => {
@@ -237,7 +237,9 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                 args: new_args,
             }
         }
-        Term::Num { numb } => Term::Num { numb: *numb },
+        Term::Num { numb } => {
+            Term::Num { numb: *numb }
+        }
         Term::Op2 { oper, val0, val1 } => {
             let val0 = linearize_term(ctx, val0, lhs);
             let val1 = linearize_term(ctx, val1, lhs);
@@ -273,8 +275,8 @@ pub fn dup_var(ctx: &mut LinearizeCtx, name: &Name, expr: Box<Term>, body: Box<T
             // if used once just make a let (lambda then app)
             1 => {
                 let name = Name::from_str(&format!("{}.0", name)).unwrap(); // TODO: handle err
-                let func = Box::new(Term::Lam { name, body: expr });
-                let term = Term::App { func, argm: body };
+                let func = Box::new(Term::Lam { name, body });
+                let term = Term::App { func, argm: expr };
                 Box::new(term)
             }
             // if used more than once, duplicate

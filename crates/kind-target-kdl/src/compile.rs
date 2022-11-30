@@ -133,7 +133,7 @@ pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang
         let arg = compile_expr(ctx, pat);
         args.push(arg);
     }
-    let lhs = kdl::Term::ctr(name, args);
+    let lhs = kdl::Term::fun(name, args);
     let rhs = compile_expr(ctx, &rule.body);
     let rule = kdl::Rule { lhs, rhs };
     rule
@@ -330,9 +330,9 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
         From::Let { name, val, next } => {
             let res_name = kdl::Name::from_str(name.to_str());
             if let Ok(name) = res_name {
-                let expr = Box::new(compile_expr(ctx, &val));
+                let expr = Box::new(compile_expr(ctx, next));
                 let func = Box::new(To::Lam { name, body: expr });
-                let argm = Box::new(compile_expr(ctx, next));
+                let argm = Box::new(compile_expr(ctx, &val));
                 To::App { func, argm }
             } else {
                 ctx.send_err(Box::new(KdlError::InvalidVarName(name.range)));
