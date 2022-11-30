@@ -29,7 +29,7 @@ fn is_valid_id(chr: char) -> bool {
 }
 
 fn is_valid_upper_start(chr: char) -> bool {
-    matches!(chr, 'A'..='Z')
+    chr.is_ascii_uppercase()
 }
 
 fn is_valid_id_start(chr: char) -> bool {

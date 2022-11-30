@@ -46,13 +46,13 @@ impl LinearizeCtx {
                 match arg {
                     Term::Var { name } => {
                         let new_name = self.create_name();
-                        self.name_table.insert(name.clone(), new_name);
+                        self.name_table.insert(*name, new_name);
                     }
                     Term::Ctr { name: _, args } => {
                         for arg in args {
                             if let Term::Var { name } = arg {
                                 let new_name = self.create_name();
-                                self.name_table.insert(name.clone(), new_name);
+                                self.name_table.insert(*name, new_name);
                             } else {
                                 unreachable!(); // We expect a flat rule
                             }
@@ -128,7 +128,7 @@ pub fn linearize_rule(rule: Rule) -> Rule {
     let lhs = linearize_term(&mut ctx, &rule.lhs, true);
     let vals: Vec<Name> = ctx.name_table.values().map(Name::clone).collect();
     for val in vals {
-        let expr = Box::new(Term::Var { name: val.clone() });
+        let expr = Box::new(Term::Var { name: val });
         rhs = dup_var(&mut ctx, &val, expr, rhs);
     }
     Rule {
@@ -141,7 +141,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
     let term = match term {
         Term::Var { name } => {
             if lhs {
-                let mut name = ctx.name_table.get(name).unwrap_or(name).clone();
+                let mut name = *ctx.name_table.get(name).unwrap_or(name);
                 rename_erased(ctx, &mut name);
                 Term::Var { name }
             } else {
@@ -150,7 +150,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                 if let Some(name) = ctx.name_table.get(name) {
                     let used = *ctx
                         .uses
-                        .entry(name.clone())
+                        .entry(*name)
                         .and_modify(|x| *x += 1)
                         .or_insert(1);
                     let name = Name::from_str(&format!("{}.{}", name, used - 1)).unwrap(); // TODO: Think if this errs or not
@@ -171,16 +171,16 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
             let expr = linearize_term(ctx, expr, lhs);
             let got_0 = ctx.name_table.remove(nam0);
             let got_1 = ctx.name_table.remove(nam0);
-            ctx.name_table.insert(nam0.clone(), new_nam0.clone());
-            ctx.name_table.insert(nam1.clone(), new_nam1.clone());
+            ctx.name_table.insert(*nam0, new_nam0);
+            ctx.name_table.insert(*nam1, new_nam1);
             let body = linearize_term(ctx, body, lhs);
             ctx.name_table.remove(nam0);
             if let Some(x) = got_0 {
-                ctx.name_table.insert(nam0.clone(), x);
+                ctx.name_table.insert(*nam0, x);
             }
             ctx.name_table.remove(nam1);
             if let Some(x) = got_1 {
-                ctx.name_table.insert(nam1.clone(), x);
+                ctx.name_table.insert(*nam1, x);
             }
             let nam0 = Name::from_str(&format!("{}{}", new_nam0, ".0")).unwrap();
             let nam1 = Name::from_str(&format!("{}{}", new_nam1, ".0")).unwrap();
@@ -194,14 +194,14 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
         Term::Lam { name, body } => {
             let mut new_name = ctx.create_name();
             let got_name = ctx.name_table.remove(name);
-            ctx.name_table.insert(name.clone(), new_name.clone());
+            ctx.name_table.insert(*name, new_name);
             let body = linearize_term(ctx, body, lhs);
             ctx.name_table.remove(name);
             if let Some(x) = got_name {
-                ctx.name_table.insert(name.clone(), x);
+                ctx.name_table.insert(*name, x);
             }
             let expr = Box::new(Term::Var {
-                name: new_name.clone(),
+                name: new_name,
             });
             let body = dup_var(ctx, &new_name, expr, body);
             rename_erased(ctx, &mut new_name);
@@ -222,7 +222,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                 new_args.push(*arg);
             }
             Term::Ctr {
-                name: name.clone(),
+                name: *name,
                 args: new_args,
             }
         }
@@ -233,7 +233,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                 new_args.push(*arg);
             }
             Term::Fun {
-                name: name.clone(),
+                name: *name,
                 args: new_args,
             }
         }

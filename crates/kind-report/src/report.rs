@@ -90,9 +90,9 @@ fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
 
 // TODO: Remove common indentation.
 // TODO: Prioritize inline marcations.
-fn colorize_code<'a, T: Write + Sized>(
+fn colorize_code<T: Write + Sized>(
     markers: &mut [&(Point, Point, &Marker)],
-    code_line: &'a str,
+    code_line: &str,
     modify: &dyn Fn(&str) -> String,
     fmt: &mut T,
 ) -> std::fmt::Result {

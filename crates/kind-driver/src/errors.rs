@@ -105,7 +105,7 @@ impl Diagnostic for DriverError {
             DriverError::ThereIsntAMain => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
-                title: format!("Cannot find 'Main' function to run the file."),
+                title: "Cannot find 'Main' function to run the file.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![],

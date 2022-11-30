@@ -145,14 +145,14 @@ fn split_rule(
 
                         let new_ctr = Expr::ctr(name.range, name.clone(), new_ctr_args);
 
-                        subst(&mut new_rule_body, &opat_name, &new_ctr);
+                        subst(&mut new_rule_body, opat_name, &new_ctr);
                     }
                     (ExprKind::Var { .. }, _) => {
                         new_rule_pats.push(other_pat.clone());
                     }
                     (ExprKind::Num { .. }, ExprKind::Num { .. }) => (),
                     (ExprKind::Num { .. }, ExprKind::Var { name }) => {
-                        subst(&mut new_rule_body, &name, rule_pat);
+                        subst(&mut new_rule_body, name, rule_pat);
                     }
                     _ => {
                         panic!("Internal error. Please report."); // not possible since it matches
@@ -200,7 +200,7 @@ fn flatten_entry(entry: &Entry) -> Vec<Entry> {
             let rule = &entry.rules[i];
             if must_split(rule) {
                 let (old_rule, split_entries) =
-                    split_rule(rule, &entry, i, &mut name_count, &mut skip);
+                    split_rule(rule, entry, i, &mut name_count, &mut skip);
                 old_entry_rules.push(old_rule);
                 new_entries.extend(split_entries);
             } else {
@@ -234,7 +234,5 @@ pub fn flatten(book: untyped::Book) -> untyped::Book {
         }
     }
 
-    let book = Book { names, entrs };
-
-    book
+    Book { names, entrs }
 }

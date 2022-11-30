@@ -1,6 +1,6 @@
    ERROR  Required functions are not implemented for this type.
 
-      /--[tests/suite/eval/NoMatch.kind2:3:5]
+      /--[suite/eval/NoMatch.kind2:3:5]
       |
       |  / 
     3 |  |     match NoMatch NoMatch.pudding {

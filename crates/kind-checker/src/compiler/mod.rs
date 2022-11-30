@@ -525,14 +525,14 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
             vec_preppend![
                 mk_ctr_name(&entry.name),
                 mk_var("orig");
-                base_vars.clone()
+                base_vars
             ],
         ),
         rhs: mk_ctr(
             TermTag::HoasF(entry.name.to_string()).to_string(),
             vec_preppend![
                 mk_var("orig");
-                base_vars.clone()
+                base_vars
             ],
         ),
     });
@@ -543,7 +543,7 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
             vec_preppend![
                 mk_ctr_name(&entry.name),
                 mk_var("orig");
-                base_vars.clone()
+                base_vars
             ],
         ),
         rhs: mk_ctr(
@@ -584,7 +584,7 @@ pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File 
 
     let functions_entry = lang::Rule {
         lhs: mk_ctr("Functions".to_owned(), vec![]),
-        rhs: codegen_vec(functions_to_check.iter().map(|x| mk_ctr_name_from_str(&x))),
+        rhs: codegen_vec(functions_to_check.iter().map(|x| mk_ctr_name_from_str(x))),
     };
 
     for entry in book.entrs.values() {

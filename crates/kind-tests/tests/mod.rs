@@ -37,11 +37,11 @@ fn test_kind2(path: &Path, run: fn(&Path) -> String) -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_checker() -> Result<(), Error> {
-    test_kind2(Path::new("./tests/suite/checker"), |path| {
+    test_kind2(Path::new("./suite/checker"), |path| {
         let (rx, tx) = std::sync::mpsc::channel();
-        let root = PathBuf::from("./tests/suite/lib").canonicalize().unwrap();
+        let root = PathBuf::from("./suite/lib").canonicalize().unwrap();
         let mut session = Session::new(root, rx);
 
         let entrypoints = vec!["Main".to_string()];
@@ -71,9 +71,9 @@ fn test_checker() -> Result<(), Error> {
 #[test]
 #[timeout(15000)]
 fn test_eval() -> Result<(), Error> {
-    test_kind2(Path::new("./tests/suite/eval"), |path| {
+    test_kind2(Path::new("./suite/eval"), |path| {
         let (rx, tx) = std::sync::mpsc::channel();
-        let root = PathBuf::from("./tests/suite/lib").canonicalize().unwrap();
+        let root = PathBuf::from("./suite/lib").canonicalize().unwrap();
         let mut session = Session::new(root, rx);
 
         let entrypoints = vec!["Main".to_string()];
@@ -107,9 +107,9 @@ fn test_eval() -> Result<(), Error> {
 #[test]
 #[timeout(15000)]
 fn test_kdl() -> Result<(), Error> {
-    test_kind2(Path::new("./tests/suite/kdl"), |path| {
+    test_kind2(Path::new("./suite/kdl"), |path| {
         let (rx, tx) = std::sync::mpsc::channel();
-        let root = PathBuf::from("./tests/suite/lib").canonicalize().unwrap();
+        let root = PathBuf::from("./suite/lib").canonicalize().unwrap();
         let mut session = Session::new(root, rx);
 
         let entrypoints = vec!["Main".to_string()];
@@ -123,7 +123,7 @@ fn test_kdl() -> Result<(), Error> {
         match check {
             Some(file) if diagnostics.is_empty() => {
                 file.to_string()
-            }
+            },
             _ => {
                 let mut res_string = String::new();
 

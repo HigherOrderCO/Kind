@@ -25,7 +25,7 @@ enum Ambient {
 }
 
 impl Ambient {
-    pub fn to_relev(&self) -> Relevance {
+    pub fn as_relevance(&self) -> Relevance {
         match self {
             Ambient::Irrelevant => Relevance::Irrelevant,
             Ambient::Unknown | Ambient::Relevant => Relevance::Relevant,
@@ -51,8 +51,8 @@ pub struct ErasureState<'a> {
     failed: bool,
 }
 
-pub fn erase_book<'a>(
-    book: &'a desugared::Book,
+pub fn erase_book(
+    book: &desugared::Book,
     errs: Sender<Box<dyn Diagnostic>>,
     entrypoints: Vec<String>,
 ) -> Option<untyped::Book> {
@@ -416,7 +416,7 @@ impl<'a> ErasureState<'a> {
             Let { name, val, next } => {
                 let backup = self.ctx.clone();
 
-                self.ctx.insert(name.to_string(), ambient.to_relev());
+                self.ctx.insert(name.to_string(), ambient.as_relevance());
 
                 let val = self.erase_expr(ambient, edge, val);
                 let next = self.erase_expr(ambient, edge, next);
@@ -475,7 +475,7 @@ impl<'a> ErasureState<'a> {
                 let var_rev = self
                     .ctx
                     .get(&name.to_string())
-                    .expect(&format!("Uwnraping {}", name));
+                    .unwrap();
 
                 if *var_rev == Relevance::Irrelevant && ambient != Ambient::Irrelevant {
                     self.set_relevance(edge, Relevance::Irrelevant, name.range)

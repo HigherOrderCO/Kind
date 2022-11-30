@@ -65,8 +65,8 @@ fn encode_base64_u8(num: u8) -> char {
 
 fn u128_to_kdl_name(mut num: u128) -> String {
     let mut encoded = [0 as char; 12];
-    for i in 0..12 {
-        encoded[i] = encode_base64_u8((num & 0x3f) as u8);
+    for item in &mut encoded {
+        *item = encode_base64_u8((num & 0x3f) as u8);
         num >>= 6;
     }
     encoded.into_iter().collect()
@@ -127,7 +127,7 @@ pub fn compile_book(
 }
 
 pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang::ast::Rule {
-    let name = ctx.kdl_names.get(rule.name.to_str()).unwrap().clone();
+    let name = *ctx.kdl_names.get(rule.name.to_str()).unwrap();
     let mut args = Vec::new();
     for pat in &rule.pats {
         let arg = compile_expr(ctx, pat);
@@ -135,8 +135,8 @@ pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang
     }
     let lhs = kdl::Term::ctr(name, args);
     let rhs = compile_expr(ctx, &rule.body);
-    let rule = kdl::Rule { lhs, rhs };
-    rule
+
+    kdl::Rule { lhs, rhs }
 }
 
 pub fn err_term() -> kindelia_lang::ast::Term {
@@ -152,7 +152,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
         From::App { fun, args } => {
             let mut expr = compile_expr(ctx, fun);
             for binding in args {
-                let body = compile_expr(ctx, &binding);
+                let body = compile_expr(ctx, binding);
                 expr = To::App {
                     func: Box::new(expr),
                     argm: Box::new(body),
@@ -306,14 +306,14 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
 
                 // All other constructors have a normal compilation
                 _ => {
-                    let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-                    let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
+                    let name = *ctx.kdl_names.get(name.to_str()).unwrap();
+                    let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
                     To::Ctr { name, args }
                 }
             }
         }
         From::Fun { name, args } => {
-            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
+            let name = *ctx.kdl_names.get(name.to_str()).unwrap();
             let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
             To::Fun { name, args }
         }
@@ -324,7 +324,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
         } => {
             let name = kdl::Name::from_str(param.to_str());
             if let Ok(name) = name {
-                let body = Box::new(compile_expr(ctx, &body));
+                let body = Box::new(compile_expr(ctx, body));
                 To::Lam { name, body }
             } else {
                 ctx.send_err(Box::new(KdlError::InvalidVarName(param.range)));
@@ -334,7 +334,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
         From::Let { name, val, next } => {
             let res_name = kdl::Name::from_str(name.to_str());
             if let Ok(name) = res_name {
-                let expr = Box::new(compile_expr(ctx, &val));
+                let expr = Box::new(compile_expr(ctx, val));
                 let func = Box::new(To::Lam { name, body: expr });
                 let argm = Box::new(compile_expr(ctx, next));
                 To::App { func, argm }
@@ -364,14 +364,14 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kindelia_lang
         }
         From::Str { val } => {
             let nil = kdl::Term::Ctr {
-                name: ctx.kdl_names.get("String.nil").unwrap().clone(),
+                name: *ctx.kdl_names.get("String.nil").unwrap(),
                 args: vec![],
             };
 
-            let cons_name = ctx.kdl_names.get("String.cons").unwrap().clone();
+            let cons_name = *ctx.kdl_names.get("String.cons").unwrap();
 
             let cons = |numb: u128, next| kdl::Term::Ctr {
-                name: cons_name.clone(),
+                name: cons_name,
                 args: vec![
                     kdl::Term::Num {
                         numb: kdl::U120::new(numb).unwrap(),
@@ -414,7 +414,7 @@ pub fn compile_entry(ctx: &mut CompileCtx, entry: &untyped::Entry) {
             }
         }
 
-        if entry.rules.len() == 0 {
+        if entry.rules.is_empty() {
             // Functions with no rules become Ctr
             let sttm = kdl::Statement::Ctr {
                 name,
@@ -470,7 +470,7 @@ impl Display for File {
             writeln!(f, "{}", ctr.1)?;
         }
 
-        if self.ctrs.len() > 0 && self.funs.len() > 0 {
+        if !self.ctrs.is_empty() && !self.funs.is_empty() {
             writeln!(f)?;
         }
 

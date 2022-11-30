@@ -4,7 +4,7 @@
       * Expected : (Eq _ 123u120 124u120) 
 
 
-      /--[tests/suite/checker/derive/fail/WrongU120Eq.kind2:12:9]
+      /--[suite/checker/derive/fail/WrongU120Eq.kind2:12:9]
       |
    11 |    Teste : Eq 123u120 124u120
    12 |    Teste = Eq.rfl

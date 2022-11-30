@@ -353,11 +353,10 @@ impl Display for SttmKind {
                 write!(f, "{};\n{}", expr, next)
             }
             SttmKind::Return(ret) => {
-                write!(f, "return {}\n", ret)
+                writeln!(f, "return {}", ret)
             }
-
             SttmKind::RetExpr(ret) => {
-                write!(f, "{}\n", ret)
+                writeln!(f, "{}", ret)
             }
         }
     }

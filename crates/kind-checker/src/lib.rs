@@ -56,12 +56,14 @@ pub fn type_check(
 ) -> bool {
     let file = gen_checker(book, functions_to_check);
 
-    match eval(&file.to_string(), "Main", false) {
+    match eval(&file, "Main", false) {
         Ok(term) => {
-            let errs = parse_report(&term).expect(&format!(
-                "Internal Error: Cannot parse the report message from the type checker: {}",
-                term
-            ));
+            let errs = parse_report(&term).unwrap_or_else(|_| {
+                panic!(
+                    "Internal Error: Cannot parse the report message from the type checker: {}",
+                    term
+                )
+            });
             let succeeded = errs.is_empty();
 
             for err in errs {
@@ -80,7 +82,7 @@ pub fn type_check(
 pub fn eval_api(book: &Book) -> Box<Term> {
     let file = gen_checker(book, Vec::new());
 
-    let file = language::syntax::read_file(&file.to_string()).unwrap();
+    let file = language::syntax::read_file(&file).unwrap();
 
     let book = language::rulebook::gen_rulebook(&file);
 

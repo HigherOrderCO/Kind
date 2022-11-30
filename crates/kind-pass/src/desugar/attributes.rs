@@ -20,13 +20,13 @@ impl<'a> DesugarState<'a> {
     }
 
     fn attr_invalid_argument(&mut self, attr: &Attribute) {
-        if !attr.value.is_some() {
+        if attr.value.is_none() {
             self.send_err(PassError::InvalidAttributeArgument(attr.range))
         };
     }
 
     fn attr_expects_a_value(&mut self, attr: &Attribute) {
-        if !attr.value.is_some() {
+        if attr.value.is_none() {
             self.send_err(PassError::AttributeExpectsAValue(attr.range))
         };
     }
