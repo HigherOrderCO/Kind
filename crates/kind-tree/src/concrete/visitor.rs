@@ -280,6 +280,7 @@ pub fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
     match &mut pat.data {
         PatKind::Var(ident) => ctx.visit_pat_ident(ident),
         PatKind::Str(_) => (),
+        PatKind::Char(_) => (),
         PatKind::Num(_) => (),
         PatKind::Hole => (),
         PatKind::List(ls) => {

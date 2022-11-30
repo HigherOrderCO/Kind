@@ -79,6 +79,7 @@ impl<'a> Visitor for Subst<'a> {
             PatKind::Var(ident) => self.visit_pat_ident(ident),
             PatKind::Str(_) => (),
             PatKind::Num(_) => (),
+            PatKind::Char(_) => (),
             PatKind::Hole => (),
             PatKind::List(ls) => {
                 for pat in ls {

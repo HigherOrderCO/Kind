@@ -97,7 +97,7 @@ pub fn compile_book(
     book: &untyped::Book,
     sender: Sender<Box<dyn Diagnostic>>,
     namespace: &str,
-) -> Option<File> {
+) -> Result<File, ()> {
     let mut ctx = CompileCtx::new(book, sender);
 
     for (name, entry) in &book.entrs {
@@ -120,10 +120,10 @@ pub fn compile_book(
     }
 
     if ctx.failed {
-        return None;
+        return Err(());
     }
 
-    Some(ctx.file)
+    Ok(ctx.file)
 }
 
 pub fn compile_rule(ctx: &mut CompileCtx, rule: &untyped::Rule) -> kindelia_lang::ast::Rule {

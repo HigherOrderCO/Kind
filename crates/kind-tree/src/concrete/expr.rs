@@ -1,15 +1,14 @@
 //! This module describes a abstract syntax tree
 //! that is almost like a concrete tree. It helps when it
-//! we have to statically analyse the tree with better
-//! error messages.
+//! we have to statically analyse the tree in order to generate
+//! better error messages.
 
 use super::pat::PatIdent;
 use crate::symbol::{Ident, QualifiedIdent};
 use crate::Operator;
+
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
-
-pub struct ConsIdent(pub Ident);
 
 /// A binding express the positional or named argument of
 /// a constructor or function.
@@ -22,6 +21,7 @@ pub enum Binding {
 /// Vector of bindings
 pub type Spine = Vec<Binding>;
 
+/// A binding that is used inside applications.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct AppBinding {
     pub data: Box<Expr>,
@@ -45,11 +45,10 @@ pub enum CaseBinding {
     Renamed(Ident, Ident),
 }
 
-/// A match case with a constructor that will matches the
-/// strutinizer, bindings to the names of each of arguments
-/// of the telescope of the constructor and a right-hand side
-/// value. The ignore_rest flag useful to just fill all of the
-/// case bindings that are not used with a default name.
+/// A match case with a constructor that will match the
+/// strutinizer, bindings to the names of each arguments and 
+/// a right-hand side value. The ignore_rest flag useful to just 
+/// fill all of the case bindings that are not used with a default name.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Case {
     pub constructor: Ident,

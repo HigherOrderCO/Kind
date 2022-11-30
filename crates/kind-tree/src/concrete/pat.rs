@@ -27,6 +27,8 @@ pub enum PatKind {
     List(Vec<Pat>),
     /// Str
     Str(String),
+    ///
+    Char(char),
     /// Wildcard
     Hole,
 }
@@ -58,6 +60,7 @@ impl Display for Pat {
                     .join(" ")
             ),
             Str(str) => write!(f, "\"{}\"", str),
+            Char(chr) => write!(f, "\'{}\'", chr),
             Num(crate::Number::U60(num)) => write!(f, "{}", num),
             Num(crate::Number::U120(num)) => write!(f, "{}u120", num),
             Pair(fst, snd) => write!(f, "({}, {})", fst, snd),

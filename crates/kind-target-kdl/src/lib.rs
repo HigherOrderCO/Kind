@@ -16,7 +16,7 @@ pub fn compile_book(
     book: untyped::Book,
     sender: Sender<Box<dyn Diagnostic>>,
     namespace: &str,
-) -> Option<compile::File> {
+) -> Result<compile::File, ()> {
     // TODO: Remove kdl_states (maybe check if they're ever called?)
     // TODO: Convert to some sort of Kindelia.Contract
     let flattened = flatten(book);
@@ -26,5 +26,5 @@ pub fn compile_book(
     println!("{}", file);
 
     let file = linearize::linearize_file(file);
-    Some(file)
+    Ok(file)
 }
