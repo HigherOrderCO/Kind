@@ -245,7 +245,6 @@ impl<'a> DesugarState<'a> {
         use concrete::pat::PatKind;
         match &pat.data {
             PatKind::App(head, spine) => {
-                // TODO: Fix lol
                 let entry = self
                     .old_book
                     .count

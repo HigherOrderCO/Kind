@@ -5,6 +5,7 @@ use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
 use kind_tree::{backend, concrete, desugared, untyped};
+use resolution::ResolutionError;
 use session::Session;
 use std::path::PathBuf;
 
@@ -25,17 +26,22 @@ pub fn type_check_book(
     session: &mut Session,
     path: &PathBuf,
     entrypoints: Vec<String>,
-    tids: Option<usize>
-) -> Result<untyped::Book, ()> {
+    tids: Option<usize>,
+) -> anyhow::Result<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
     let all = desugared_book.entrs.iter().map(|x| x.0).cloned().collect();
 
-    let succeeded = checker::type_check(&desugared_book, session.diagnostic_sender.clone(), all, tids);
+    let succeeded = checker::type_check(
+        &desugared_book,
+        session.diagnostic_sender.clone(),
+        all,
+        tids,
+    );
 
     if !succeeded {
-        return Err(());
+        return Err(ResolutionError.into());
     }
 
     let mut book = erasure::erase_book(
@@ -48,14 +54,10 @@ pub fn type_check_book(
     Ok(book)
 }
 
-pub fn to_book(session: &mut Session, path: &PathBuf) -> Result<concrete::Book, ()> {
+pub fn to_book(session: &mut Session, path: &PathBuf) -> anyhow::Result<concrete::Book> {
     let mut concrete_book = resolution::parse_and_store_book(session, path)?;
 
-    let failed = resolution::check_unbound_top_level(session, &mut concrete_book);
-
-    if failed {
-        return Err(());
-    }
+    resolution::check_unbound_top_level(session, &mut concrete_book)?;
 
     Ok(concrete_book)
 }
@@ -64,24 +66,29 @@ pub fn erase_book(
     session: &mut Session,
     path: &PathBuf,
     entrypoints: Vec<String>,
-) -> Result<untyped::Book, ()> {
+) -> anyhow::Result<untyped::Book> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
+
     let mut book = erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
         entrypoints,
     )?;
+
     inline_book(&mut book);
     Ok(book)
 }
 
-pub fn desugar_book(session: &mut Session, path: &PathBuf) -> Result<desugared::Book, ()> {
+pub fn desugar_book(session: &mut Session, path: &PathBuf) -> anyhow::Result<desugared::Book> {
     let concrete_book = to_book(session, path)?;
     desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)
 }
 
-pub fn check_erasure_book(session: &mut Session, path: &PathBuf) -> Result<desugared::Book, ()> {
+pub fn check_erasure_book(
+    session: &mut Session,
+    path: &PathBuf,
+) -> anyhow::Result<desugared::Book> {
     let concrete_book = to_book(session, path)?;
     desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)
 }
@@ -95,9 +102,10 @@ pub fn compile_book_to_kdl(
     session: &mut Session,
     namespace: &str,
     entrypoints: Vec<String>,
-) -> Result<kind_target_kdl::File, ()> {
+) -> anyhow::Result<kind_target_kdl::File> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
+
     let mut book = erasure::erase_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
@@ -106,28 +114,29 @@ pub fn compile_book_to_kdl(
 
     inline_book(&mut book);
 
-    kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)
+    let res = kind_target_kdl::compile_book(book, session.diagnostic_sender.clone(), namespace)?;
+
+    Ok(res)
 }
 
-pub fn check_main_entry(session: &mut Session, book: &untyped::Book) -> Result<(), ()> {
+pub fn check_main_entry(session: &mut Session, book: &untyped::Book) -> anyhow::Result<()> {
     if !book.entrs.contains_key("Main") {
-        session
-            .diagnostic_sender
-            .send(Box::new(DriverError::ThereIsntAMain))
-            .unwrap();
-    Err(())
+        let err = Box::new(DriverError::ThereIsntAMain);
+        session.diagnostic_sender.send(err).unwrap();
+        Err(ResolutionError.into())
     } else {
         Ok(())
     }
 }
 
-pub fn check_main_desugared_entry(session: &mut Session, book: &desugared::Book) -> Result<(), ()> {
+pub fn check_main_desugared_entry(
+    session: &mut Session,
+    book: &desugared::Book,
+) -> anyhow::Result<()> {
     if !book.entrs.contains_key("Main") {
-        session
-            .diagnostic_sender
-            .send(Box::new(DriverError::ThereIsntAMain))
-            .unwrap();
-        Err(())
+        let err = Box::new(DriverError::ThereIsntAMain);
+        session.diagnostic_sender.send(err).unwrap();
+        Err(ResolutionError.into())
     } else {
         Ok(())
     }

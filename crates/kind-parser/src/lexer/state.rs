@@ -96,8 +96,8 @@ impl<'a> Lexer<'a> {
         Some(str)
     }
 
-    #[inline]
     /// Useful as entrypoint
+    #[inline]
     pub fn lex_next(&mut self) -> (Token, Range) {
         self.lex_token()
     }

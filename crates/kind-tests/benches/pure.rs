@@ -97,8 +97,8 @@ fn bench_exp_pure_check_unbound(b: &mut Bencher) {
 
     b.iter(|| {
         books.iter_mut().map(|(session, book)| {
-            let failed = resolution::check_unbound_top_level(session, book);
-            assert!(!failed)
+            let result = resolution::check_unbound_top_level(session, book);
+            assert!(result.is_ok());
         }).fold(0, |n, _| n + 1)
     })
 }
@@ -110,8 +110,8 @@ fn bench_exp_pure_desugar(b: &mut Bencher) {
     let mut books: Vec<_> = paths.iter().map(|x| {
         let mut session = new_session();
         let mut book = resolution::parse_and_store_book(&mut session, &PathBuf::from(x)).unwrap();
-        let failed = resolution::check_unbound_top_level(&mut session, &mut book);
-        assert!(!failed);
+        let result = resolution::check_unbound_top_level(&mut session, &mut book);
+        assert!(result.is_ok());
         (session, book)
     }).collect();
 
@@ -130,9 +130,9 @@ fn bench_exp_pure_erase(b: &mut Bencher) {
     let books: Vec<_> = paths.iter().map(|x| {
         let mut session = new_session();
         let mut book = resolution::parse_and_store_book(&mut session, &PathBuf::from(x)).unwrap();
-        let failed = resolution::check_unbound_top_level(&mut session, &mut book);
+        let result = resolution::check_unbound_top_level(&mut session, &mut book);
         let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
-        assert!(!failed);
+        assert!(result.is_ok());
 
         (session, book)
     }).collect();
@@ -156,9 +156,9 @@ fn bench_exp_pure_to_hvm(b: &mut Bencher) {
     let books: Vec<_> = paths.iter().map(|x| {
         let mut session = new_session();
         let mut book = resolution::parse_and_store_book(&mut session, &PathBuf::from(x)).unwrap();
-        let failed = resolution::check_unbound_top_level(&mut session, &mut book);
+        let result = resolution::check_unbound_top_level(&mut session, &mut book);
         let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
-        assert!(!failed);
+        assert!(result.is_ok());
 
         let book = erasure::erase_book(
             &book,

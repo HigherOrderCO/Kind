@@ -1,6 +1,19 @@
+use std::{fmt::Display, error::Error};
+
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::{Range, SyntaxCtxIndex};
 use kind_tree::symbol::Ident;
+
+#[derive(Debug)]
+pub struct GenericPassError;
+
+impl Display for GenericPassError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "generic pass error")
+    }
+}
+
+impl Error for GenericPassError { }
 
 pub enum Sugar {
     DoNotation,

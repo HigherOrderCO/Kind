@@ -1,11 +1,8 @@
 use fxhash::FxHashMap;
 use kind_tree::concrete::expr::Expr;
 use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
-/// Parses all of the top level structures
-/// like Book, Entry, Rule and Argument.
-use kind_tree::concrete::{
-    Argument, Attribute, Entry, ExprKind, Module, Rule, Telescope, TopLevel,
-};
+
+use kind_tree::concrete::*;
 use kind_tree::symbol::QualifiedIdent;
 
 use crate::errors::SyntaxDiagnostic;
@@ -85,6 +82,7 @@ impl<'a> Parser<'a> {
     fn parse_rule(&mut self, name: String) -> Result<Box<Rule>, SyntaxDiagnostic> {
         let start = self.range();
         let ident;
+
         if let Token::UpperId(name_id, ext) = self.get() {
             let qual = QualifiedIdent::new_static(name_id.as_str(), ext.clone(), start);
             if qual.to_string() == name {
@@ -95,6 +93,7 @@ impl<'a> Parser<'a> {
         } else {
             return self.fail(vec![]);
         }
+        
         let mut pats = Vec::new();
         while !self.get().same_variant(&Token::Eq) && !self.get().same_variant(&Token::Eof) {
             pats.push(self.parse_pat()?);
