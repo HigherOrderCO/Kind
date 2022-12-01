@@ -461,8 +461,8 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.5-beta"
-source = "git+https://github.com/Kindelia/HVM.git#0b191cdb5f8997a7e9c257d709c522e06d331b73"
+version = "1.0.7-beta"
+source = "git+https://github.com/Kindelia/HVM.git?rev=5599e0c8504bee976b7870b51f0c2d4b57e3bf82#5599e0c8504bee976b7870b51f0c2d4b57e3bf82"
 dependencies = [
  "clap 3.2.23",
  "crossbeam",
@@ -1372,9 +1372,9 @@ checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 
 [[package]]
 name = "syn"
-version = "1.0.104"
+version = "1.0.105"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ae548ec36cf198c0ef7710d3c230987c2d6d7bd98ad6edc0274462724c585ce"
+checksum = "60b9b43d45702de4c839cb9b51d9f529c5dd26a4aff255b42b1ebc03e88ee908"
 dependencies = [
  "proc-macro2",
  "quote",
