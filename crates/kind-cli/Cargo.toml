@@ -1,6 +1,6 @@
 [package]
 name = "kind-cli"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "A pure functional functional language that uses the HVM."
 repository = "https://github.com/Kindelia/Kind2"

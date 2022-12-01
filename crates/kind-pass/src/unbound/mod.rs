@@ -334,7 +334,11 @@ impl Visitor for UnboundCollector {
     fn visit_pat(&mut self, pat: &mut Pat) {
         match &mut pat.data {
             PatKind::Var(ident) => self.visit_pat_ident(ident),
-            PatKind::Str(_) => (),
+            PatKind::Str(_) => {
+                let string = &mut QualifiedIdent::new_static("String", None, pat.range);
+                self.visit_qualified_ident(&mut string.add_segment("cons").to_generated());
+                self.visit_qualified_ident(&mut string.add_segment("nil").to_generated());
+            }
             PatKind::U60(_) => (),
             PatKind::U120(_) => (),
             PatKind::F60(_) => (),
@@ -393,6 +397,19 @@ impl Visitor for UnboundCollector {
         }
     }
 
+    fn visit_literal(&mut self, range: Range, lit: &mut kind_tree::concrete::Literal) {
+        use kind_tree::concrete::Literal::*;
+
+        match lit {
+            String(_) => {
+                let string = &mut QualifiedIdent::new_static("String", None, range);
+                self.visit_qualified_ident(&mut string.add_segment("cons").to_generated());
+                self.visit_qualified_ident(&mut string.add_segment("nil").to_generated());
+            }
+            _ => (),
+        }
+    }
+
     fn visit_expr(&mut self, expr: &mut Expr) {
         match &mut expr.data {
             ExprKind::Var { name } => self.visit_ident(name),
@@ -439,7 +456,7 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(val);
                 self.visit_expr(typ);
             }
-            ExprKind::Lit { lit } => self.visit_literal(lit),
+            ExprKind::Lit { lit } => self.visit_literal(expr.range, lit),
             ExprKind::Binary { op: _, fst, snd } => {
                 self.visit_expr(fst);
                 self.visit_expr(snd);

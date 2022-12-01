@@ -182,7 +182,7 @@ impl<'a> Visitor for Subst<'a> {
                 self.visit_expr(val);
                 self.visit_expr(typ);
             }
-            ExprKind::Lit { lit } => self.visit_literal(lit),
+            ExprKind::Lit { lit } => self.visit_literal(expr.range, lit),
             ExprKind::Binary { op: _, fst, snd } => {
                 self.visit_expr(fst);
                 self.visit_expr(snd);
