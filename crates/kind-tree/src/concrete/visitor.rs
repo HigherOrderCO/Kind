@@ -56,8 +56,8 @@ pub trait Visitor: Sized {
         walk_syntax_ctx(self, synt);
     }
 
-    fn visit_literal(&mut self, lit: &mut Literal) {
-        walk_literal(self, lit);
+    fn visit_literal(&mut self, range: Range, lit: &mut Literal) {
+        walk_literal(self, range, lit);
     }
 
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
@@ -145,7 +145,7 @@ pub fn walk_range<T: Visitor>(_: &mut T, _: &mut Range) {}
 
 pub fn walk_syntax_ctx<T: Visitor>(_: &mut T, _: &mut SyntaxCtxIndex) {}
 
-pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
+pub fn walk_literal<T: Visitor>( _: &mut T, _: Range, _: &mut Literal) {}
 
 pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
     ctx.visit_ident(&mut cons.name);
@@ -463,7 +463,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             ctx.visit_expr(typ);
         }
         ExprKind::Lit { lit } => {
-            ctx.visit_literal(lit);
+            ctx.visit_literal(expr.range, lit);
         }
         ExprKind::Binary { op: _, fst, snd } => {
             ctx.visit_expr(fst);
