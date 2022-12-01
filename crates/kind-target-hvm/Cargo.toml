@@ -11,4 +11,4 @@ kind-tree = { path = "../kind-tree" }
 kind-report = { path = "../kind-report" }
 kind-derive = { path = "../kind-derive" }
 
-hvm = { git = "https://github.com/Kindelia/HVM.git", rev="5599e0c8504bee976b7870b51f0c2d4b57e3bf82" }
+hvm = { git = "https://github.com/Kindelia/HVM.git", rev="bd744430430a3ebeb69918572ed0be0a8dacb86a" }
