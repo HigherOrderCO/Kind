@@ -7,5 +7,7 @@ Nat.count_layers (n: Nat) (m: U60) : U60
 Nat.count_layers (Nat.succ n) m = Nat.count_layers n (+ m 1)
 Nat.count_layers n     m = (+ m 1)
 
-Main : Nat -> U60
-Main = x => Nat.count_layers (Nat.succ x) 0
+Assert (num: U60) : Type
+
+Beq_nat_refl (n: Nat) : Assert (Nat.count_layers n 0)
+Beq_nat_refl (Nat.succ n) = ?
