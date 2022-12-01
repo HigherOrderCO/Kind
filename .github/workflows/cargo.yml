@@ -7,7 +7,7 @@ jobs:
   cargo_check:
     name: 👁️‍🗨️ Cargo Check
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]
@@ -26,7 +26,7 @@ jobs:
   cargo_test:
     name: 🧪 Cargo Test
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]
