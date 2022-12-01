@@ -161,6 +161,7 @@ impl<'a> ErasureState<'a> {
                     self.errs
                         .send(Box::new(PassError::CannotUseIrrelevant(None, res[0], None)))
                         .unwrap();
+                    self.failed = true;
                 }
             }
 
