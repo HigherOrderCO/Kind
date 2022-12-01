@@ -4,6 +4,7 @@
 
 use self::tags::EvalTag;
 use self::tags::{operator_to_constructor, TermTag};
+
 use hvm::syntax::Term;
 use kind_span::Range;
 use kind_tree::desugared::{self, Book, Expr};

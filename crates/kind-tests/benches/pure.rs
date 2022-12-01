@@ -175,3 +175,27 @@ fn bench_exp_pure_to_hvm(b: &mut Bencher) {
         }).fold(0, |n, _| n + 1)
     })
 }
+
+
+
+#[bench]
+fn bench_exp_pure_gen_checker(b: &mut Bencher) {    
+
+    let paths = exp_paths();
+
+    let books: Vec<_> = paths.iter().map(|x| {
+        let mut session = new_session();
+        let mut book = resolution::parse_and_store_book(&mut session, &PathBuf::from(x)).unwrap();
+        let result = resolution::check_unbound_top_level(&mut session, &mut book);
+        let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
+        assert!(result.is_ok());
+
+        (session, book)
+    }).collect();
+
+    b.iter(move || {
+        books.iter().map(move |(_, book)| {
+            kind_checker::gen_checker(book, book.names.keys().cloned().collect())
+        }).fold(0, |n, _| n + 1)
+    })
+}
