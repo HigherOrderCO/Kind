@@ -280,7 +280,7 @@ fn codegen_all_expr(
             ],
         ),
         NumU60 { numb } => mk_lifted_ctr(
-            eval_ctr(quote, TermTag::Num),
+            eval_ctr(quote, TermTag::NUMU60),
             vec![range_to_num(expr.range), mk_u60(*numb)],
         ),
         NumF60 { numb: _ } => todo!(),

@@ -308,9 +308,9 @@ impl<'a> ErasureState<'a> {
 
                 // We cannot pattern match on functions in a relevant function.
                 // it would change its behaviour.
-                if relevance == Ambient::Irrelevant {
-                    self.set_relevance(edge, Relevance::Irrelevant, expr.range)
-                }
+                // if relevance == Ambient::Irrelevant {
+                //     self.set_relevance(edge, Relevance::Irrelevant, expr.range)
+                // }
 
                 let params = self.book.entrs.get(name.to_str()).unwrap();
 
@@ -329,9 +329,9 @@ impl<'a> ErasureState<'a> {
 
                 // We cannot pattenr match on functions in a relevant function.
                 // it would change its behaviour.
-                if relevance == Ambient::Irrelevant {
-                    self.set_relevance(edge, Relevance::Irrelevant, expr.range)
-                }
+                // if relevance == Ambient::Irrelevant {
+                //     self.set_relevance(edge, Relevance::Irrelevant, expr.range)
+                // }
 
                 let params = self.book.entrs.get(name.to_str()).unwrap();
 

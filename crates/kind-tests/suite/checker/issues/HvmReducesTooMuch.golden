@@ -1,0 +1,15 @@
+   INFO  Inspection.
+
+      * Expected: (Assert (Nat.count_layers n 1)) 
+
+      * Context: 
+      *   n : Nat 
+
+      /--[suite/checker/issues/HvmReducesTooMuch.kind2:13:29]
+      |
+   12 |    Beq_nat_refl (n: Nat) : Assert (Nat.count_layers n 0)
+   13 |    Beq_nat_refl (Nat.succ n) = ?
+      |                                v
+      |                                \Here!
+
+

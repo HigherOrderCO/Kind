@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-hvm = { git = "https://github.com/Kindelia/HVM.git" }
+hvm = { git = "https://github.com/Kindelia/HVM.git", rev="5599e0c8504bee976b7870b51f0c2d4b57e3bf82" }
 
 kind-span = {path = "../kind-span"}
 linked-hash-map = "0.5.6"

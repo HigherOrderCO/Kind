@@ -10,7 +10,7 @@ kind-tree = { path = "../kind-tree" }
 kind-span = { path = "../kind-span" }
 kind-report = { path = "../kind-report" }
 
-hvm = { git = "https://github.com/Kindelia/HVM.git" }
+hvm = { git = "https://github.com/Kindelia/HVM.git", rev="5599e0c8504bee976b7870b51f0c2d4b57e3bf82" }
 
 fxhash = "0.2.1"
 im-rc = "15.1.0"
