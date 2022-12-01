@@ -25,7 +25,7 @@ map a b Nil              f = Nil
 map a b (Cons head tail) f = Cons (f head) (map tail f)
 ```
 
-Side-effective programs are written via monadic monads, resembling [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/):
+Side-effective programs are written via monads, resembling [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/):
 
 ```javascript
 // Prints the double of every number up to a limit
@@ -57,6 +57,13 @@ First, install [Rust](https://www.rust-lang.org/tools/install) first, then enter
 ```
 cargo install kind2
 ```
+
+### Warning:
+New versions probably are not in `cargo`, so you can install the current version of kind2 by following these instructions:
+
+1. Install Rust Nightly Toolchain
+2. Clone the repository
+3. `cargo install --path crates/kind-cli --force`
 
 Then, use any of the commands below:
 
