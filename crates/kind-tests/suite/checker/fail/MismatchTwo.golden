@@ -1,0 +1,16 @@
+   ERROR  Type mismatch
+
+      * Got      : Type 
+      * Expected : U60 
+
+      * Context: 
+      *   a : U60 
+
+      /--[suite/checker/fail/MismatchTwo.kind2:2:10]
+      |
+    1 |    Main (a: U60): U60
+    2 |    Main a = Type
+      |             v---
+      |             \Here!
+
+

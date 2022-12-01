@@ -1,0 +1,12 @@
+Main : Maybe U60
+Main =
+    do Maybe {
+        Maybe.some 3
+        Maybe.pure 2
+        ask res  = Maybe.pure 2
+        ask res2 = Maybe.pure 3
+        match Maybe (Maybe.some 4) {
+            some val => Maybe.pure (+ 1000 (+ val (+ res res2)))
+            none     => Maybe.none
+        }
+    }

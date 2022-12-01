@@ -1,1 +1,0 @@
-Unable to match term Fun { name: Ident("InlineFn"), args: [App { func: Lam { name: Ident("x"), body: Var { name: Ident("x") } }, argm: Num { numb: 1 } }] } to any of the function's rules

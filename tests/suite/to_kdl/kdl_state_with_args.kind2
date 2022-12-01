@@ -1,7 +1,0 @@
-#kdl_state = MyFn.state
-MyFn : U60 {
-  1
-}
-
-MyFn.state (a: U60): U60
-MyFn.state a = a

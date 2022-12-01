@@ -1,0 +1,24 @@
+   ERROR  Repeated named variable
+
+      /--[suite/checker/derive/fail/Repeated.kind2:12:19]
+      |
+   11 |        let User.new (ttt = e) e .. = User.new 2 4 1
+   12 |        let User.new (ttt = f)  ttt = User.new 6 7 3
+      |                      v--       v--
+      |                      |         \Second occurence
+      |                      \First occurence
+   13 |        e
+
+
+   ERROR  The case is not covering all the values inside of it!
+
+      /--[suite/checker/derive/fail/Repeated.kind2:12:9]
+      |
+   11 |        let User.new (ttt = e) e .. = User.new 2 4 1
+   12 |        let User.new (ttt = f)  ttt = User.new 6 7 3
+      |            v-------
+      |            \This is the incomplete case
+   13 |        e
+
+      Hint: Need variables for 'e', 'name'
+

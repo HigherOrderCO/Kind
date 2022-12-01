@@ -1,0 +1,21 @@
+   ERROR  Type mismatch
+
+      * Got      : ((x_1 : Type) -> (x_2 : Type) -> Type) 
+      * Expected : ((x_1 : t) -> (x_2 : t) -> t) 
+
+      * Context: 
+      *   t     : Type 
+      *   t_    : Type 
+      *   t_    = t 
+      *   magma : (Algebra.Magma Type) 
+      *   assoc : ((a : _) -> (b : _) -> (c : _) -> (Equal _ (((Algebra.Magma.concat _ magma) (((Algebra.Magma.concat _ magma) a) b)) c) (((Algebra.Magma.concat _ magma) a) (((Algebra.Magma.concat _ magma) b) c)))) 
+
+      /--[suite/checker/fail/MismatchOne.kind2:32:69]
+      |
+   31 |    Algebra.Semigroup.concat <t> (semigroup: (Algebra.Semigroup t)) : (t -> t -> t)
+   32 |    Algebra.Semigroup.concat t (Algebra.Semigroup.new t_ magma assoc) = (Algebra.Magma.concat magma)
+      |                                                                        v---------------------------
+      |                                                                        \Here!
+   33 |    
+
+

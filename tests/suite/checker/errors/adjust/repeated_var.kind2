@@ -1,6 +1,0 @@
-List <a> : Type
-  List.nil <a> : List a
-  List.cons <a> (head: a) (tail: List a) : List a
-
-Main (x: List U60) (x: List U60) : List U60
-Main (List.cons x (List.cons y (List.cons z a))) (List.cons b (List.cons c (List.cons d x))) = List.nil

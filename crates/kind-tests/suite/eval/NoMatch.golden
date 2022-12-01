@@ -1,0 +1,13 @@
+   ERROR  Required functions are not implemented for this type.
+
+      /--[suite/eval/NoMatch.kind2:3:5]
+      |
+      |  / 
+    3 |  |     match NoMatch NoMatch.pudding {
+    4 |  |         pudding => 2
+    5 |  |     }
+      :  |  
+      :  \ You cannot use this expression! 
+
+      Hint: You must implement 'NoMatch.match' in order to use the match notation (or derive match with #derive[match]).
+

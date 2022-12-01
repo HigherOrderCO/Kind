@@ -1,7 +1,0 @@
-Main : Maybe U60
-Main =
-  do Maybe {
-    ask a = Maybe.pure 2
-    ask b = Maybe.pure 3
-    (Maybe.some (+ a b))
-  }

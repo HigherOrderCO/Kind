@@ -1,1 +1,0 @@
-Found invalid term "Fun { name: Ident("A"), args: [Ctr { name: Ident("B.new"), args: [Num { numb: 1 }] }, Num { numb: 1 }] }" in rule pattern matching for entry "A".

@@ -1,2 +1,0 @@
-// Automatically derived from Maybe/_.type
-Maybe.some <t: Type> (value: t) : (Maybe t)

@@ -1,0 +1,15 @@
+[package]
+name = "kind-report"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kind-span = { path = "../kind-span" }
+
+unicode-width = "0.1.10"
+yansi = "0.5.1"
+pathdiff = "0.2.1"
+fxhash = "0.2.1"
+termsize = "0.1"
