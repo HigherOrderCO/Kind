@@ -3,6 +3,21 @@
 version = 3
 
 [[package]]
+name = "addr2line"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9ecd88a8c8378ca913a680cd98f0f13ac67383d35993f86c90a70e3f137816b"
+dependencies = [
+ "gimli",
+]
+
+[[package]]
+name = "adler"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
+
+[[package]]
 name = "anyhow"
 version = "1.0.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -39,6 +54,21 @@ name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
+
+[[package]]
+name = "backtrace"
+version = "0.3.66"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cab84319d616cfb654d03394f38ab7e6f0919e181b1b57e1fd15e7fb4077d9a7"
+dependencies = [
+ "addr2line",
+ "cc",
+ "cfg-if",
+ "libc",
+ "miniz_oxide",
+ "object",
+ "rustc-demangle",
+]
 
 [[package]]
 name = "bit-vec"
@@ -418,6 +448,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "gimli"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22030e2c5a68ec659fde1e949a745124b48e6fa8b045b7ed5bd1fe4ccc5c4e5d"
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -461,9 +497,25 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.7-beta"
-source = "git+https://github.com/Kindelia/HVM.git?rev=5599e0c8504bee976b7870b51f0c2d4b57e3bf82#5599e0c8504bee976b7870b51f0c2d4b57e3bf82"
+version = "1.0.9-beta"
+source = "git+https://github.com/Kindelia/HVM.git?rev=bd744430430a3ebeb69918572ed0be0a8dacb86a#bd744430430a3ebeb69918572ed0be0a8dacb86a"
 dependencies = [
+ "backtrace",
+ "clap 3.2.23",
+ "crossbeam",
+ "highlight_error",
+ "im",
+ "instant",
+ "itertools",
+ "sysinfo",
+]
+
+[[package]]
+name = "hvm"
+version = "1.0.9-beta"
+source = "git+https://github.com/Kindelia/HVM.git#bd744430430a3ebeb69918572ed0be0a8dacb86a"
+dependencies = [
+ "backtrace",
  "clap 3.2.23",
  "crossbeam",
  "highlight_error",
@@ -607,7 +659,7 @@ name = "kind-checker"
 version = "0.1.0"
 dependencies = [
  "fxhash",
- "hvm",
+ "hvm 1.0.9-beta (git+https://github.com/Kindelia/HVM.git)",
  "im-rc",
  "kind-report",
  "kind-span",
@@ -616,7 +668,7 @@ dependencies = [
 
 [[package]]
 name = "kind-cli"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "clap 4.0.29",
@@ -645,7 +697,7 @@ dependencies = [
  "anyhow",
  "dashmap",
  "fxhash",
- "hvm",
+ "hvm 1.0.9-beta (git+https://github.com/Kindelia/HVM.git)",
  "kind-checker",
  "kind-parser",
  "kind-pass",
@@ -716,7 +768,7 @@ version = "0.1.0"
 name = "kind-target-hvm"
 version = "0.1.0"
 dependencies = [
- "hvm",
+ "hvm 1.0.9-beta (git+https://github.com/Kindelia/HVM.git?rev=bd744430430a3ebeb69918572ed0be0a8dacb86a)",
  "kind-derive",
  "kind-report",
  "kind-span",
@@ -760,7 +812,7 @@ name = "kind-tree"
 version = "0.1.0"
 dependencies = [
  "fxhash",
- "hvm",
+ "hvm 1.0.9-beta (git+https://github.com/Kindelia/HVM.git)",
  "kind-span",
  "linked-hash-map",
 ]
@@ -827,12 +879,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "memchr"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+
+[[package]]
 name = "memoffset"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5de893c32cde5f383baa4c04c5d6dbdd735cfd4a794b0debdb2bb1b421da5ff4"
 dependencies = [
  "autocfg 1.1.0",
+]
+
+[[package]]
+name = "miniz_oxide"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96590ba8f175222643a85693f33d26e9c8a015f599c216509b1a6894af675d34"
+dependencies = [
+ "adler",
 ]
 
 [[package]]
@@ -900,6 +967,15 @@ name = "numtoa"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8f8bdf33df195859076e54ab11ee78a1b208382d3a26ec40d142ffc1ecc49ef"
+
+[[package]]
+name = "object"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21158b2c33aa6d4561f1c0a6ea283ca92bc54802a93b263e910746d679a7eb53"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "once_cell"
@@ -1255,6 +1331,12 @@ checksum = "8440d8acb4fd3d277125b4bd01a6f38aee8d814b3b5fc09b3f2b825d37d3fe8f"
 dependencies = [
  "redox_syscall",
 ]
+
+[[package]]
+name = "rustc-demangle"
+version = "0.1.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ef03e0a2b150c7a90d01faf6254c9c48a41e95fb2a8c2ac1c6f0d2b9aefc342"
 
 [[package]]
 name = "rustc-hex"
