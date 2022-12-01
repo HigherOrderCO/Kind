@@ -8,7 +8,7 @@ license = "MIT"
 keywords = ["functional", "language", "type-theory", "proof-assistant"]
 
 [[bin]]
-name = "kind"
+name = "kind2"
 path = "src/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
