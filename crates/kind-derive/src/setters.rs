@@ -7,6 +7,7 @@ use kind_tree::concrete::pat::{Pat, PatIdent};
 use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
 use kind_tree::symbol::{Ident, QualifiedIdent};
+use kind_tree::telescope::Telescope;
 
 pub fn derive_setters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
     let mk_var = |name: Ident| -> Box<Expr> {

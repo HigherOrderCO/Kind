@@ -1,5 +1,6 @@
-use kind_tree::concrete::{Attribute, Constructor, RecordDecl, SumTypeDecl, Telescope};
+use kind_tree::concrete::{Attribute, Constructor, RecordDecl, SumTypeDecl};
 use kind_tree::symbol::Ident;
+use kind_tree::telescope::Telescope;
 
 use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;

@@ -149,7 +149,7 @@ pub fn walk_literal<T: Visitor>( _: &mut T, _: Range, _: &mut Literal) {}
 
 pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
     ctx.visit_ident(&mut cons.name);
-    visit_vec!(&mut cons.args.0, arg => ctx.visit_argument(arg));
+    visit_vec!(cons.args.get_vec(), arg => ctx.visit_argument(arg));
     visit_opt!(&mut cons.typ, arg => ctx.visit_expr(arg))
 }
 
@@ -238,7 +238,7 @@ pub fn walk_argument<T: Visitor>(ctx: &mut T, argument: &mut Argument) {
 
 pub fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
     ctx.visit_qualified_ident(&mut entry.name);
-    for arg in &mut entry.args.0 {
+    for arg in entry.args.iter_mut() {
         ctx.visit_argument(arg)
     }
     ctx.visit_expr(&mut entry.typ);
@@ -317,14 +317,14 @@ pub fn walk_top_level<T: Visitor>(ctx: &mut T, toplevel: &mut TopLevel) {
         super::TopLevel::SumType(sum) => {
             ctx.visit_qualified_ident(&mut sum.name);
             visit_vec!(&mut sum.attrs, arg => ctx.visit_attr(arg));
-            visit_vec!(&mut sum.parameters.0, arg => ctx.visit_argument(arg));
-            visit_vec!(&mut sum.indices.0, arg => ctx.visit_argument(arg));
+            visit_vec!(sum.parameters.get_vec(), arg => ctx.visit_argument(arg));
+            visit_vec!(sum.indices.get_vec(), arg => ctx.visit_argument(arg));
             visit_vec!(&mut sum.constructors, arg => ctx.visit_constructor(arg));
         }
         super::TopLevel::RecordType(rec) => {
             ctx.visit_qualified_ident(&mut rec.name);
             visit_vec!(&mut rec.attrs, arg => ctx.visit_attr(arg));
-            visit_vec!(&mut rec.parameters.0, arg => ctx.visit_argument(arg));
+            visit_vec!(rec.parameters.get_vec(), arg => ctx.visit_argument(arg));
             visit_vec!(&mut rec.fields, (name, _docs, typ) => {
                 ctx.visit_ident(name);
                 ctx.visit_expr(typ);

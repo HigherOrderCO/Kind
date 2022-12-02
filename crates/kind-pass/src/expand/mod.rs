@@ -13,21 +13,30 @@ use kind_derive::setters::derive_setters;
 use kind_report::data::Diagnostic;
 use kind_span::Locatable;
 use kind_span::Range;
+use kind_tree::concrete::Entry;
+use kind_tree::concrete::EntryMeta;
 use kind_tree::concrete::Module;
+use kind_tree::concrete::RecordDecl;
+use kind_tree::concrete::SumTypeDecl;
 use kind_tree::concrete::{Attribute, TopLevel};
 
 use crate::errors::PassError;
+
 /// Expands sum type and record definitions to a lot of
 /// helper definitions like eliminators and replace qualified identifiers
 /// by their module names.
 pub mod uses;
 
+type Derivations = FxHashMap<Derive, Range>;
+type Channel = Sender<Box<dyn Diagnostic>>;
+
+/// Tags for each one of the possible derivations.
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Derive {
     Match,
     Open,
     Getters,
-    Setters
+    Setters,
 }
 
 impl Display for Derive {
@@ -41,24 +50,12 @@ impl Display for Derive {
     }
 }
 
-pub fn insert_or_report(
-    channel: Sender<Box<dyn Diagnostic>>,
-    hashmap: &mut FxHashMap<Derive, Range>,
-    key: Derive,
-    range: Range,
-) {
-    match hashmap.get(&key) {
-        Some(last_range) => {
-            channel
-                .send(Box::new(PassError::DuplicatedAttributeArgument(
-                    *last_range,
-                    range,
-                )))
-                .unwrap();
-        }
-        None => {
-            hashmap.insert(key, range);
-        }
+pub fn insert_or_report(channel: Channel, hashmap: &mut Derivations, key: Derive, range: Range) {
+    if let Some(last_range) = hashmap.get(&key) {
+        let err = Box::new(PassError::DuplicatedAttributeArgument(*last_range, range));
+        channel.send(err).unwrap();
+    } else {
+        hashmap.insert(key, range);
     }
 }
 
@@ -72,12 +69,11 @@ fn string_to_derive(name: &str) -> Option<Derive> {
     }
 }
 
-pub fn expand_derive(
-    error_channel: Sender<Box<dyn Diagnostic>>,
-    attrs: &[Attribute],
-) -> Option<FxHashMap<Derive, Range>> {
+pub fn expand_derive(error_channel: Channel, attrs: &[Attribute]) -> Option<Derivations> {
+    use kind_tree::concrete::AttributeStyle::*;
+
     let mut failed = false;
-    let mut def = FxHashMap::default();
+    let mut defs = FxHashMap::default();
 
     for attr in attrs {
         if attr.name.to_str() != "derive" {
@@ -85,36 +81,21 @@ pub fn expand_derive(
         }
 
         if let Some(attr) = &attr.value {
-            error_channel
-                .send(Box::new(PassError::AttributeDoesNotExpectEqual(
-                    attr.locate(),
-                )))
-                .unwrap();
+            let err = Box::new(PassError::AttributeDoesNotExpectEqual(attr.locate()));
+            error_channel.send(err).unwrap();
             failed = true;
         }
 
-        use kind_tree::concrete::AttributeStyle::*;
         for arg in &attr.args {
             match arg {
-                Ident(range, ident) => match string_to_derive(ident.to_str()) {
-                    Some(key) => {
-                        insert_or_report(error_channel.clone(), &mut def, key, *range)
-                    }
-                    _ => {
-                        error_channel
-                            .send(Box::new(PassError::InvalidAttributeArgument(
-                                ident.locate(),
-                            )))
-                            .unwrap();
-                        failed = true;
-                    }
-                },
+                Ident(range, ident) if string_to_derive(ident.to_str()).is_some() => {
+                    // Duplicates work but it's something negligible
+                    let key = string_to_derive(ident.to_str()).unwrap();
+                    insert_or_report(error_channel.clone(), &mut defs, key, *range)
+                }
                 other => {
-                    error_channel
-                        .send(Box::new(PassError::InvalidAttributeArgument(
-                            other.locate(),
-                        )))
-                        .unwrap();
+                    let err = Box::new(PassError::InvalidAttributeArgument(other.locate()));
+                    error_channel.send(err).unwrap();
                     failed = true;
                 }
             }
@@ -124,11 +105,81 @@ pub fn expand_derive(
     if failed {
         None
     } else {
-        Some(def)
+        Some(defs)
     }
 }
 
-pub fn expand_module(error_channel: Sender<Box<dyn Diagnostic>>, module: &mut Module) -> bool {
+pub fn expand_sum_type(
+    error_channel: Channel,
+    entries: &mut FxHashMap<String, (Entry, EntryMeta)>,
+    sum: &SumTypeDecl,
+    derivations: Derivations,
+) -> bool {
+    let mut failed = false;
+
+    for (key, val) in derivations {
+        match key {
+            Derive::Match => {
+                let (res, errs) = derive_match(sum.name.range, sum);
+                let info = res.extract_book_info();
+                entries.insert(res.name.to_string(), (res, info));
+                for err in errs {
+                    error_channel.send(err).unwrap();
+                    failed = true;
+                }
+            }
+            other => {
+                error_channel
+                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
+                    .unwrap();
+                failed = true;
+            }
+        }
+    }
+
+    failed
+}
+
+pub fn expand_record_type(
+    error_channel: Channel,
+    entries: &mut FxHashMap<String, (Entry, EntryMeta)>,
+    rec: &RecordDecl,
+    derivations: Derivations,
+) -> bool {
+    let mut failed = false;
+
+    for (key, val) in derivations {
+        match key {
+            Derive::Open => {
+                let res = derive_open(rec.name.range, rec);
+                let info = res.extract_book_info();
+                entries.insert(res.name.to_string(), (res, info));
+            }
+            Derive::Getters => {
+                for res in derive_getters(rec.name.range, rec) {
+                    let info = res.extract_book_info();
+                    entries.insert(res.name.to_string(), (res, info));
+                }
+            }
+            Derive::Setters => {
+                for res in derive_setters(rec.name.range, rec) {
+                    let info = res.extract_book_info();
+                    entries.insert(res.name.to_string(), (res, info));
+                }
+            }
+            other => {
+                error_channel
+                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
+                    .unwrap();
+                failed = true;
+            }
+        }
+    }
+
+    failed
+}
+
+pub fn expand_module(error_channel: Channel, module: &mut Module) -> bool {
     let mut failed = false;
 
     let mut entries = FxHashMap::default();
@@ -137,58 +188,14 @@ pub fn expand_module(error_channel: Sender<Box<dyn Diagnostic>>, module: &mut Mo
         match entry {
             TopLevel::SumType(sum) => {
                 if let Some(derive) = expand_derive(error_channel.clone(), &sum.attrs) {
-                    for (key, val) in derive {
-                        match key {
-                            Derive::Match => {
-                                let (res, errs) = derive_match(sum.name.range, sum);
-                                let info = res.extract_book_info();
-                                entries.insert(res.name.to_string(), (res, info));
-                                for err in errs {
-                                    error_channel.send(err).unwrap();
-                                    failed = true;
-                                }
-                            }
-                            other => {
-                                error_channel
-                                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
-                                    .unwrap();
-                                failed = true;
-                            }
-                        }
-                    }
+                    failed |= expand_sum_type(error_channel.clone(), &mut entries, sum, derive)
                 } else {
                     failed = true;
                 }
             }
             TopLevel::RecordType(rec) => {
                 if let Some(derive) = expand_derive(error_channel.clone(), &rec.attrs) {
-                    for (key, val) in derive {
-                        match key {
-                            Derive::Open => {
-                                let res = derive_open(rec.name.range, rec);
-                                let info = res.extract_book_info();
-                                entries.insert(res.name.to_string(), (res, info));
-                            }
-                            Derive::Getters => {
-                                for res in derive_getters(rec.name.range, rec) {
-                                    let info = res.extract_book_info();
-                                    entries.insert(res.name.to_string(), (res, info));
-                                }
-                            }
-                            Derive::Setters => {
-                                for res in derive_setters(rec.name.range, rec) {
-                                    let info = res.extract_book_info();
-                                    entries.insert(res.name.to_string(), (res, info));
-                                }
-                            }
-                            other => {
-                                error_channel
-                                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
-                                    .unwrap();
-                                failed = true;
-                            }
-                        }
-                    }
+                    failed |= expand_record_type(error_channel.clone(), &mut entries, rec, derive)
                 } else {
                     failed = true;
                 }

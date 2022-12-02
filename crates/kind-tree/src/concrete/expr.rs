@@ -35,6 +35,13 @@ impl AppBinding {
             erased: false,
         }
     }
+
+    pub fn from_ident(data: Ident) -> AppBinding {
+        AppBinding {
+            data: Expr::var(data),
+            erased: false,
+        }
+    }
 }
 
 /// A case binding is a field or a rename of some field
@@ -46,8 +53,8 @@ pub enum CaseBinding {
 }
 
 /// A match case with a constructor that will match the
-/// strutinizer, bindings to the names of each arguments and 
-/// a right-hand side value. The ignore_rest flag useful to just 
+/// strutinizer, bindings to the names of each arguments and
+/// a right-hand side value. The ignore_rest flag useful to just
 /// fill all of the case bindings that are not used with a default name.
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Case {
@@ -203,59 +210,78 @@ pub struct Expr {
     pub range: Range,
 }
 
-impl Display for Operator {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        use Operator::*;
-
-        match self {
-            Add => write!(f, "+"),
-            Sub => write!(f, "-"),
-            Mul => write!(f, "*"),
-            Div => write!(f, "/"),
-            Mod => write!(f, "%"),
-            And => write!(f, "&"),
-            Or => write!(f, "|"),
-            Xor => write!(f, "^"),
-            Shl => write!(f, "<<"),
-            Shr => write!(f, ">>"),
-            Ltn => write!(f, "<"),
-            Lte => write!(f, "<="),
-            Eql => write!(f, "=="),
-            Gte => write!(f, ">="),
-            Gtn => write!(f, ">"),
-            Neq => write!(f, "!="),
-        }
-    }
-}
-
 impl Expr {
-    pub fn traverse_pi_types(&self) -> String {
-        match &self.data {
-            ExprKind::All {
+    pub fn var(name: Ident) -> Box<Expr> {
+        Box::new(Expr {
+            range: name.range.clone(),
+            data: ExprKind::Var { name },
+        })
+    }
+
+    pub fn cons(name: QualifiedIdent, args: Spine, range: Range) -> Box<Expr> {
+        Box::new(Expr {
+            range,
+            data: ExprKind::Constr { name, args },
+        })
+    }
+
+    pub fn all(
+        param: Ident,
+        typ: Box<Expr>,
+        body: Box<Expr>,
+        erased: bool,
+        range: Range,
+    ) -> Box<Expr> {
+        Box::new(Expr {
+            range,
+            data: ExprKind::All {
+                param: Some(param),
+                typ,
+                body,
+                erased,
+            },
+        })
+    }
+
+    pub fn lambda(
+        param: Ident,
+        typ: Option<Box<Expr>>,
+        body: Box<Expr>,
+        erased: bool,
+        range: Range,
+    ) -> Box<Expr> {
+        Box::new(Expr {
+            data: ExprKind::Lambda {
                 param,
                 typ,
                 body,
                 erased,
-            } => {
-                let tilde = if *erased { "~" } else { "" };
-                match param {
-                    None => format!("{}{} -> {}", tilde, typ, body.traverse_pi_types()),
-                    Some(binder) => format!(
-                        "{}({} : {}) -> {}",
-                        tilde,
-                        binder,
-                        typ,
-                        body.traverse_pi_types()
-                    ),
-                }
-            }
-            ExprKind::Sigma { param, fst, snd } => match param {
-                None => format!("{} -> {}", fst, snd.traverse_pi_types()),
-                Some(binder) => format!("[{} : {}] -> {}", binder, fst, snd.traverse_pi_types()),
             },
-            _ => format!("{}", self),
-        }
+            range,
+        })
     }
+
+    pub fn typ(range: Range) -> Box<Expr> {
+        Box::new(Expr {
+            data: ExprKind::Lit { lit: Literal::Type },
+            range,
+        })
+    }
+
+    pub fn app(fun: Box<Expr>, args: Vec<AppBinding>, range: Range) -> Box<Expr> {
+        Box::new(Expr {
+            data: ExprKind::App { fun, args },
+            range,
+        })
+    }
+
+    pub fn hole(range: Range) -> Box<Expr> {
+        Box::new(Expr {
+            data: ExprKind::Hole,
+            range,
+        })
+    }
+
 }
 
 impl Locatable for Binding {
@@ -305,6 +331,36 @@ impl Locatable for Destruct {
         match self {
             Destruct::Destruct(range, _, _, _) => *range,
             Destruct::Ident(i) => i.locate(),
+        }
+    }
+}
+
+impl Expr {
+    pub fn traverse_pi_types(&self) -> String {
+        match &self.data {
+            ExprKind::All {
+                param,
+                typ,
+                body,
+                erased,
+            } => {
+                let tilde = if *erased { "~" } else { "" };
+                match param {
+                    None => format!("{}{} -> {}", tilde, typ, body.traverse_pi_types()),
+                    Some(binder) => format!(
+                        "{}({} : {}) -> {}",
+                        tilde,
+                        binder,
+                        typ,
+                        body.traverse_pi_types()
+                    ),
+                }
+            }
+            ExprKind::Sigma { param, fst, snd } => match param {
+                None => format!("{} -> {}", fst, snd.traverse_pi_types()),
+                Some(binder) => format!("[{} : {}] -> {}", binder, fst, snd.traverse_pi_types()),
+            },
+            _ => format!("{}", self),
         }
     }
 }
@@ -430,7 +486,7 @@ impl Display for Binding {
 impl Display for AppBinding {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         if self.erased {
-            write!(f, "-({})", self.data)
+            write!(f, "~({})", self.data)
         } else {
             write!(f, "{}", self.data)
         }
@@ -471,7 +527,7 @@ impl Display for Expr {
                 typ: None,
                 body,
                 erased: true,
-            } => write!(f, "(-({}) => {})", param, body),
+            } => write!(f, "(~({}) => {})", param, body),
             Lambda {
                 param,
                 typ: Some(typ),
