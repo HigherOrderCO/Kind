@@ -1,0 +1,10 @@
+   ERROR  This irrelevant parameter should not be used in a relevant position.
+
+      /--[suite/erasure/fail/ErrInType.kind2:2:8]
+      |
+    1 |    Main : Type
+    2 |    Main = Type
+      |           v---
+      |           \It's in relevant position!
+
+
