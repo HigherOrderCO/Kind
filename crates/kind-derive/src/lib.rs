@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 //! Utility to derive functions from their definitions.
 
 pub mod errors;

@@ -14,10 +14,15 @@ pub mod desugared;
 /// The untyped AST.
 pub mod untyped;
 
+/// Telescope (Iterated sigma type representation)
+pub mod telescope;
+
 /// Describes symbols (identifiers) on the language. It will
 /// be really useful when we change the Symbol to take a number
 /// instead of a string due to optimizations.
 pub mod symbol;
+
+use std::fmt::{Formatter, Display, Error};
 
 pub use hvm::syntax as backend;
 use symbol::Ident;
@@ -54,4 +59,29 @@ pub enum Operator {
     Gte,
     Gtn,
     Neq,
+}
+
+impl Display for Operator {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        use Operator::*;
+
+        match self {
+            Add => write!(f, "+"),
+            Sub => write!(f, "-"),
+            Mul => write!(f, "*"),
+            Div => write!(f, "/"),
+            Mod => write!(f, "%"),
+            And => write!(f, "&"),
+            Or => write!(f, "|"),
+            Xor => write!(f, "^"),
+            Shl => write!(f, "<<"),
+            Shr => write!(f, ">>"),
+            Ltn => write!(f, "<"),
+            Lte => write!(f, "<="),
+            Eql => write!(f, "=="),
+            Gte => write!(f, ">="),
+            Gtn => write!(f, ">"),
+            Neq => write!(f, "!="),
+        }
+    }
 }

@@ -5,6 +5,8 @@
 use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::{Ident, QualifiedIdent};
+use crate::telescope::Telescope;
+
 use expr::Expr;
 use fxhash::FxHashMap;
 use kind_span::{Locatable, Range};
@@ -17,48 +19,6 @@ pub mod pat;
 pub mod visitor;
 
 pub use expr::*;
-
-/// A sequence of arguments that depends on the previous sequence
-/// it's similar to a iterated sigma type.
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub struct Telescope<T>(Vec<T>);
-
-impl<T> Default for Telescope<T> {
-    fn default() -> Self {
-        Self(Default::default())
-    }
-}
-
-impl<T> Telescope<T> {
-    pub fn new(vec: Vec<T>) -> Telescope<T> {
-        Telescope(vec)
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn push(&mut self, el: T) {
-        self.0.push(el)
-    }
-
-    pub fn as_slice(&self) -> &[T] {
-        self.0.as_slice()
-    }
-
-    pub fn to_vec(self) -> Vec<T> {
-        self.0
-    }
-}
-
-impl<T> Telescope<T>
-where
-    T: Clone,
-{
-    pub fn drop(self, num: usize) -> Telescope<T> {
-        Telescope(self.0[num..].to_vec())
-    }
-}
 
 /// A value of a attribute
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -207,9 +167,14 @@ pub struct EntryMeta {
 /// by joining a bunch of books that are already resolved.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
-    pub names: LinkedHashMap<String, QualifiedIdent>, // Ordered hashset
-    pub entries: FxHashMap<String, TopLevel>,         // Probably deterministic order everytime
-    pub count: FxHashMap<String, EntryMeta>, // Stores some important information in order to desugarize
+    // Ordered hashset
+    pub names: LinkedHashMap<String, QualifiedIdent>,
+    
+    // Probably deterministic order everytime
+    pub entries: FxHashMap<String, TopLevel>,
+
+    // Stores some important information in order to desugarize 
+    pub count: FxHashMap<String, EntryMeta>, 
 }
 
 impl Book {
@@ -234,7 +199,7 @@ impl Display for Constructor {
             writeln!(f, "  /// {}", doc)?;
         }
         write!(f, "{}", self.name)?;
-        for arg in &self.args.0 {
+        for arg in self.args.iter() {
             write!(f, " {}", arg)?;
         }
         if let Some(res) = &self.typ {
@@ -255,13 +220,13 @@ impl Display for TopLevel {
                     writeln!(f, "{}", attr)?;
                 }
                 write!(f, "type {}", sum.name)?;
-                for arg in &sum.parameters.0 {
+                for arg in sum.parameters.iter() {
                     write!(f, " {}", arg)?;
                 }
                 if !sum.indices.is_empty() {
                     write!(f, " ~")?;
                 }
-                for arg in &sum.indices.0 {
+                for arg in sum.indices.iter() {
                     write!(f, " {}", arg)?;
                 }
                 writeln!(f, " {{")?;
@@ -278,7 +243,7 @@ impl Display for TopLevel {
                     writeln!(f, "{}", attr)?;
                 }
                 write!(f, "record {}", rec.name)?;
-                for arg in &rec.parameters.0 {
+                for arg in rec.parameters.iter() {
                     write!(f, " {}", arg)?;
                 }
                 writeln!(f, " {{")?;
@@ -344,7 +309,7 @@ impl Display for Entry {
 
         write!(f, "{}", self.name.clone())?;
 
-        for arg in &self.args.0 {
+        for arg in self.args.iter() {
             write!(f, " {}", arg)?;
         }
 
@@ -415,49 +380,11 @@ impl Locatable for AttributeStyle {
     }
 }
 
-impl<A> Telescope<A> {
-    pub fn extend(&self, other: &Telescope<A>) -> Telescope<A>
-    where
-        A: Clone,
-    {
-        Telescope([self.0.as_slice(), other.0.as_slice()].concat())
-    }
-
-    pub fn map<B, F>(&self, f: F) -> Telescope<B>
-    where
-        F: FnMut(&A) -> B,
-    {
-        Telescope(self.0.iter().map(f).collect())
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn iter(&self) -> std::slice::Iter<A> {
-        self.0.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<A> {
-        self.0.iter_mut()
-    }
-}
-
-impl<A> IntoIterator for Telescope<A> {
-    type Item = A;
-
-    type IntoIter = std::vec::IntoIter<A>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
-
 impl Telescope<Argument> {
     pub fn count_implicits(&self) -> (usize, usize) {
         let mut hiddens = 0;
         let mut erased = 0;
-        for arg in &self.0 {
+        for arg in self.iter() {
             if arg.hidden {
                 hiddens += 1;
             }
@@ -504,20 +431,20 @@ impl Constructor {
         let mut hiddens = 0;
         let mut erased = 0;
 
-        hiddens += def.parameters.0.len();
-        erased += def.parameters.0.len();
+        hiddens += def.parameters.len();
+        erased += def.parameters.len();
 
         arguments = arguments.extend(&def.parameters.map(|x| x.to_implicit()));
 
         // It tries to use all of the indices if no type
         // is specified.
         if self.typ.is_none() {
-            hiddens += def.indices.0.len();
-            erased += def.indices.0.len();
+            hiddens += def.indices.len();
+            erased += def.indices.len();
             arguments = arguments.extend(&def.indices.map(|x| x.to_implicit()));
         }
 
-        for arg in &self.args.0 {
+        for arg in self.args.iter() {
             if arg.erased {
                 erased += 1;
             }
@@ -541,7 +468,7 @@ impl Constructor {
 
 impl RecordDecl {
     pub fn fields_to_arguments(&self) -> Telescope<Argument> {
-        Telescope(
+        Telescope::new(
             self.fields
                 .iter()
                 .map(|(name, _docs, typ)| {
@@ -593,7 +520,7 @@ impl RecordDecl {
             })
             .collect();
 
-        arguments = arguments.extend(&Telescope(field_args));
+        arguments = arguments.extend(&Telescope::new(field_args));
 
         EntryMeta {
             hiddens,
@@ -648,13 +575,5 @@ impl Argument {
             typ: self.typ.clone(),
             range: self.range,
         }
-    }
-}
-
-impl<A> std::ops::Index<usize> for Telescope<A> {
-    type Output = A;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
     }
 }

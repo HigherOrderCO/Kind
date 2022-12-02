@@ -1,7 +1,8 @@
 use kind_span::Range;
-use kind_tree::concrete::{self, Telescope};
+use kind_tree::concrete::{self};
 use kind_tree::desugared::{self, ExprKind};
 use kind_tree::symbol::QualifiedIdent;
+use kind_tree::telescope::Telescope;
 
 use crate::errors::{PassError, Sugar};
 

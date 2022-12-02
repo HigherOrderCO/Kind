@@ -357,7 +357,7 @@ impl Expr {
                     format!("{}{} -> {}", tilde, typ, body.traverse_pi_types())
                 } else {
                     let body = body.traverse_pi_types();
-                    format!("({}{} : {}) -> {}", tilde, param, typ, body)
+                    format!("{}({} : {}) -> {}", tilde, param, typ, body)
                 }
             }
             _ => format!("{}", self),
@@ -368,7 +368,7 @@ impl Expr {
 impl Display for AppBinding {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.erased {
-            write!(f, "-({})", self.data)
+            write!(f, "~({})", self.data)
         } else {
             write!(f, "{}", self.data)
         }

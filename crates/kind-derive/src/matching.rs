@@ -6,115 +6,74 @@ use kind_report::data::Diagnostic;
 use kind_span::Range;
 
 use kind_tree::concrete::expr::Expr;
-use kind_tree::concrete::pat::{Pat, PatIdent};
+use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
-use kind_tree::symbol::{Ident, QualifiedIdent};
+use kind_tree::symbol::Ident;
+use kind_tree::telescope::Telescope;
 
 use crate::errors::DeriveError;
 use crate::subst::substitute_in_expr;
 
+type Errs = Vec<Box<dyn Diagnostic>>;
+
+pub fn to_app_binding(errs: &mut Errs, binding: &Binding) -> AppBinding {
+    match binding {
+        Binding::Positional(expr) => AppBinding {
+            erased: false,
+            data: expr.clone(),
+        },
+        Binding::Named(_, name, expr) => {
+            errs.push(Box::new(DeriveError::CannotUseNamedVariable(name.range)));
+            AppBinding::explicit(expr.clone())
+        }
+    }
+}
+
 /// Derives an eliminator from a sum type declaration.
-pub fn derive_match(
-    range: Range,
-    sum: &SumTypeDecl,
-) -> (concrete::Entry, Vec<Box<dyn Diagnostic>>) {
-    let mut errs: Vec<Box<dyn Diagnostic>> = Vec::new();
+pub fn derive_match(range: Range, sum: &SumTypeDecl) -> (concrete::Entry, Errs) {
+    let mut errs: Errs = Vec::new();
 
-    let mk_var = |name: Ident| -> Box<Expr> {
-        Box::new(Expr {
-            data: ExprKind::Var { name },
-            range,
-        })
-    };
+    let new_entry_name = sum.name.add_segment("match");
 
-    let mk_cons = |name: QualifiedIdent, args: Vec<Binding>| -> Box<Expr> {
-        Box::new(Expr {
-            data: ExprKind::Constr { name, args },
-            range,
-        })
-    };
+    let all_arguments = sum.parameters.extend(&sum.indices);
 
-    let mk_app = |fun: Box<Expr>, args: Vec<AppBinding>, range: Range| -> Box<Expr> {
-        Box::new(Expr {
-            data: ExprKind::App { fun, args },
-            range,
-        })
-    };
+    // Parameters and indices
 
-    let mk_pi = |name: Ident, typ: Box<Expr>, body: Box<Expr>| -> Box<Expr> {
-        Box::new(Expr {
-            data: ExprKind::All {
-                param: Some(name),
-                typ,
-                body,
-                erased: false,
-            },
-            range,
-        })
-    };
+    let mut types = all_arguments.map(|x| x.to_implicit());
 
-    let mk_typ = || -> Box<Expr> {
-        Box::new(Expr {
-            data: ExprKind::Lit { lit: Literal::Type },
-            range,
-        })
-    };
-
-    let name = sum.name.add_segment("match");
-
-    let mut types = Telescope::default();
-
-    for arg in sum.parameters.iter() {
-        types.push(arg.to_implicit())
-    }
-
-    for arg in sum.indices.iter() {
-        types.push(arg.to_implicit())
-    }
-
-    // The type
-
-    let all_args = sum.parameters.extend(&sum.indices);
-    let res_motive_ty = mk_cons(
-        sum.name.clone(),
-        all_args
-            .iter()
-            .cloned()
-            .map(|x| Binding::Positional(mk_var(x.name)))
-            .collect(),
-    );
-
-    let indice_names: Vec<AppBinding> = sum
-        .indices
+    let all_bindings = all_arguments
         .iter()
-        .map(|x| AppBinding::explicit(mk_var(x.name.clone())))
+        .cloned()
+        .map(|x| Binding::Positional(Expr::var(x.name)))
         .collect();
 
-    // Sccrutinzies
+    let current_return_type = Expr::cons(sum.name.clone(), all_bindings, range);
 
     types.push(Argument {
         hidden: false,
         erased: false,
         name: Ident::generate("scrutinizer"),
-        typ: Some(res_motive_ty.clone()),
+        typ: Some(current_return_type.clone()),
         range,
     });
 
-    // Motive with indices
+    // Motive
 
     let motive_ident = Ident::new_static("motive", range);
 
-    let motive_type = sum.indices.iter().rfold(
-        mk_pi(Ident::new_static("val_", range), res_motive_ty, mk_typ()),
-        |out, arg| {
-            mk_pi(
-                arg.name.clone(),
-                arg.typ.clone().unwrap_or_else(mk_typ),
-                out,
-            )
-        },
+    let motive_return = Expr::all(
+        Ident::new_static("val_", range),
+        current_return_type,
+        Expr::typ(range),
+        false,
+        range,
     );
+
+    let motive_type = sum.indices.iter().rfold(motive_return, |out, arg| {
+        let typ = arg.typ.clone().unwrap_or_else(|| Expr::typ(range));
+        Expr::all(arg.name.clone(), typ, out, false, range)
+    });
 
     types.push(Argument {
         hidden: false,
@@ -124,39 +83,47 @@ pub fn derive_match(
         range,
     });
 
+    // Constructors
+
+    let indice_names: Vec<AppBinding> = sum
+        .indices
+        .iter()
+        .map(|x| AppBinding::explicit(Expr::var(x.name.clone())))
+        .collect();
+
+    // Parameter binding telescope
+
     let params = sum
         .parameters
-        .map(|x| Binding::Positional(mk_var(x.name.clone())));
+        .map(|x| Binding::Positional(Expr::var(x.name.clone())));
+
     let indices = sum
         .indices
-        .map(|x| Binding::Positional(mk_var(x.name.clone())));
+        .map(|x| Binding::Positional(Expr::var(x.name.clone())));
 
-    // Constructors type
+    // Types
+
     for cons in &sum.constructors {
-        let vars: Vec<Binding> = cons
+        // Constructor arguments bindings
+        let vars = cons
             .args
-            .iter()
-            .map(|x| Binding::Positional(mk_var(x.name.clone())))
-            .collect();
+            .map(|x| Binding::Positional(Expr::var(x.name.clone())));
 
-        let cons_inst = mk_cons(
-            sum.name.add_segment(cons.name.to_str()),
-            [
-                params.as_slice(),
-                if cons.typ.is_none() {
-                    indices.as_slice()
-                } else {
-                    &[]
-                },
-                vars.as_slice(),
-            ]
-            .concat(),
-        );
+        let constructor_name = sum.name.add_segment(cons.name.to_str());
 
-        let mut indices_of_cons = match cons.typ.clone().map(|x| x.data) {
-            Some(ExprKind::Constr { name: _, args }) => {
+        let default = &Telescope::default();
+        let indices = &indices;
+
+        let partial_indices = if cons.typ.is_none() { indices } else { default };
+
+        let args = params.extend(partial_indices).extend(&vars);
+
+        let instantation_of_the_cons = Expr::cons(constructor_name.clone(), args.to_vec(), range);
+
+        let mut cons_indices = if let Some(res) = &cons.typ {
+            if let ExprKind::Constr { args, .. } = &res.data {
                 let mut new_args = Vec::with_capacity(args.len());
-                for arg in &args[sum.parameters.len()..].to_vec() {
+                for arg in &args[sum.parameters.len()..] {
                     new_args.push(match arg {
                         Binding::Positional(expr) => AppBinding::explicit(expr.clone()),
                         Binding::Named(range, _, expr) => {
@@ -166,13 +133,20 @@ pub fn derive_match(
                     });
                 }
                 new_args
+            } else if let ExprKind::All { .. } = &res.data {
+                errs.push(Box::new(DeriveError::CannotUseAll(res.range)));
+                [indice_names.as_slice()].concat()
+            } else {
+                errs.push(Box::new(DeriveError::InvalidReturnType(res.range)));
+                [indice_names.as_slice()].concat()
             }
-            _ => [indice_names.as_slice()].concat(),
+        } else {
+            [indice_names.as_slice()].concat()
         };
 
-        indices_of_cons.push(AppBinding::explicit(cons_inst));
+        cons_indices.push(AppBinding::explicit(instantation_of_the_cons));
 
-        let cons_tipo = mk_app(mk_var(motive_ident.clone()), indices_of_cons, range);
+        let cons_tipo = Expr::app(Expr::var(motive_ident.clone()), cons_indices, range);
 
         let args = if cons.typ.is_some() {
             cons.args.clone()
@@ -181,133 +155,109 @@ pub fn derive_match(
         };
 
         let cons_type = args.iter().rfold(cons_tipo, |out, arg| {
-            mk_pi(
+            Expr::all(
                 arg.name.clone(),
-                arg.typ.clone().unwrap_or_else(mk_typ),
+                arg.typ.clone().unwrap_or_else(|| Expr::typ(range)),
                 out,
+                arg.erased,
+                range,
             )
         });
 
-        types.push(Argument {
-            hidden: false,
-            erased: false,
-            name: Ident::new_static(&format!("{}_", cons.name), range),
-            typ: Some(cons_type),
+        types.push(Argument::new_explicit(
+            Ident::new_static(&format!("{}_", cons.name), range),
+            cons_type,
             range,
-        });
+        ));
     }
 
-    if !errs.is_empty() {
-        let entry = Entry {
-            name,
+    let make_incomplete_entry = || {
+        let typ = Box::new(Expr {
+            data: ExprKind::Hole,
+            range,
+        });
+
+        Entry {
+            name: new_entry_name.clone(),
             docs: Vec::new(),
-            args: types,
-            typ: Box::new(Expr {
-                data: ExprKind::Hole,
-                range,
-            }),
+            args: types.clone(),
+            typ,
             rules: vec![],
             range,
             attrs: Vec::new(),
             generated_by: Some(sum.name.to_string()),
-        };
-        return (entry, errs);
+        }
+    };
+
+    if !errs.is_empty() {
+        return (make_incomplete_entry(), errs);
     }
 
-    let mut res: Vec<AppBinding> = [indice_names.as_slice()].concat();
-    res.push(AppBinding::explicit(mk_var(Ident::generate("scrutinizer"))));
-    let ret_ty = mk_app(mk_var(motive_ident.clone()), res, range);
+    let scrutinizer_ident = Expr::var(Ident::generate("scrutinizer"));
+
+    let mut return_args = indice_names.clone();
+    return_args.push(AppBinding::explicit(scrutinizer_ident));
+
+    let return_type = Expr::app(Expr::var(motive_ident.clone()), return_args, range);
+
+    // Rules
 
     let mut rules = Vec::new();
 
     for cons in &sum.constructors {
-        let cons_ident = sum.name.add_segment(cons.name.to_str());
-        let mut pats: Vec<Box<Pat>> = Vec::new();
+        let constructor_name = sum.name.add_segment(cons.name.to_str());
 
-        let irrelev: Vec<bool>;
-        let spine_params: Vec<Ident>;
-        let spine: Vec<Ident>;
+        let params = sum.parameters.map(|x| x.name.add_underscore());
 
-        let mut args_indices: Vec<AppBinding>;
+        let mut indices_and_args: Telescope<AppBinding>;
 
-        match &cons.typ {
-            Some(expr) => match &**expr {
-                Expr {
-                    data: ExprKind::Constr { args, .. },
-                    ..
-                } => {
-                    irrelev = cons.args.map(|x| x.erased).to_vec();
-                    spine_params = sum
-                        .parameters
+        let args = if let Some(res) = &cons.typ {
+            if let ExprKind::Constr { args, .. } = &res.data {
+                indices_and_args =
+                    Telescope::new(args.clone()).map(|x| to_app_binding(&mut errs, x));
+
+                let mut indices = indices_and_args.to_vec()[sum.parameters.len()..].to_vec();
+
+                let renames = FxHashMap::from_iter(
+                    sum.parameters
                         .extend(&cons.args)
-                        .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                        .to_vec();
-                    spine = cons
-                        .args
-                        .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                        .to_vec();
-                    args_indices = args
+                        .map(|x| (x.name.to_string(), format!("{}_", x.name)))
                         .iter()
-                        .map(|x| match x {
-                            Binding::Positional(expr) => AppBinding {
-                                erased: false,
-                                data: expr.clone(),
-                            },
-                            Binding::Named(_, _, _) => unreachable!(),
-                        })
-                        .collect::<Vec<AppBinding>>();
-                    args_indices = {
-                        let mut indices = args_indices[sum.parameters.len()..].to_vec();
+                        .cloned(),
+                );
 
-                        let renames = FxHashMap::from_iter(
-                            sum.parameters
-                                .extend(&cons.args)
-                                .map(|x| (x.name.to_string(), format!("{}_", x.name)))
-                                .iter()
-                                .cloned(),
-                        );
-
-                        for indice in &mut indices {
-                            substitute_in_expr(&mut indice.data, &renames)
-                        }
-                        indices
-                    };
+                for indice in &mut indices {
+                    substitute_in_expr(&mut indice.data, &renames)
                 }
-                _ => unreachable!(),
-            },
-            None => {
-                irrelev = sum.indices.extend(&cons.args).map(|x| x.erased).to_vec();
-                spine_params = sum
-                    .parameters
-                    .extend(&sum.indices)
-                    .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                    .to_vec();
-                spine = sum
-                    .indices
-                    .extend(&cons.args)
-                    .map(|x| x.name.with_name(|f| format!("{}_", f)))
-                    .to_vec();
-                args_indices = sum
-                    .indices
-                    .clone()
-                    .map(|x| AppBinding {
-                        data: mk_var(x.name.clone()),
-                        erased: false,
-                    })
-                    .to_vec();
+
+                indices_and_args = Telescope::new(indices);
+
+                cons.args.clone()
+            } else {
+                unreachable!(
+                    "Internal Error: I guess you're using something that is not a constructor!"
+                )
             }
-        }
+        } else {
+            indices_and_args = sum.indices.map(|x| AppBinding::from_ident(x.name.clone()));
+            sum.indices.extend(&cons.args)
+        };
+
+        let irrelevances = args.map(|x| x.erased).to_vec();
+        let spine = args.map(|x| x.name.add_underscore());
+
+        let params_and_spine = params.extend(&spine);
+        let mut pats = Vec::new();
 
         pats.push(Box::new(Pat {
-            data: concrete::pat::PatKind::App(
-                cons_ident.clone(),
-                spine_params
+            data: PatKind::App(
+                constructor_name.clone(),
+                params_and_spine
                     .iter()
                     .cloned()
                     .map(|x| {
                         Box::new(Pat {
-                            data: concrete::pat::PatKind::Var(PatIdent(x)),
+                            data: PatKind::Var(PatIdent(x)),
                             range,
                         })
                     })
@@ -317,55 +267,52 @@ pub fn derive_match(
         }));
 
         pats.push(Box::new(Pat {
-            data: concrete::pat::PatKind::Var(PatIdent(Ident::generate("motive"))),
+            data: PatKind::Var(PatIdent(Ident::generate("motive"))),
             range,
         }));
 
-        for cons2 in &sum.constructors {
+        for cons in &sum.constructors {
             pats.push(Box::new(Pat {
-                data: concrete::pat::PatKind::Var(PatIdent(cons2.name.clone())),
+                data: PatKind::Var(PatIdent(cons.name.clone())),
                 range,
             }));
         }
 
-        let mut args = args_indices.clone();
+        let mut args = indices_and_args.clone();
 
-        args.push(AppBinding {
-            data: Box::new(Expr {
-                data: ExprKind::Constr {
-                    name: cons_ident.clone(),
-                    args: spine_params
-                        .iter()
-                        .cloned()
-                        .map(|x| Binding::Positional(mk_var(x)))
-                        .collect(),
-                },
-                range,
-            }),
-            erased: false,
-        });
+        args.push(AppBinding::explicit(Expr::cons(
+            constructor_name.clone(),
+            params_and_spine
+                .map(|x| Binding::Positional(Expr::var(x.clone())))
+                .to_vec(),
+            range,
+        )));
+
+        let body_typ = Expr::app(Expr::var(motive_ident.clone()), args.to_vec(), range);
+
+        let body_val = Expr::app(
+            Expr::var(cons.name.clone()),
+            spine
+                .iter()
+                .zip(irrelevances)
+                .map(|(arg, erased)| AppBinding {
+                    data: Expr::var(arg.clone()),
+                    erased,
+                })
+                .collect(),
+            cons.name.range,
+        );
 
         let body = Box::new(Expr {
             data: ExprKind::Ann {
-                val: mk_app(
-                    mk_var(cons.name.clone()),
-                    spine
-                        .iter()
-                        .zip(irrelev)
-                        .map(|(arg, erased)| AppBinding {
-                            data: mk_var(arg.clone()),
-                            erased,
-                        })
-                        .collect(),
-                    cons.name.range,
-                ),
-                typ: mk_app(mk_var(motive_ident.clone()), args, range),
+                val: body_val,
+                typ: body_typ,
             },
             range,
         });
 
         let rule = Box::new(Rule {
-            name: name.clone(),
+            name: new_entry_name.clone(),
             pats,
             body,
             range: cons.name.range,
@@ -373,13 +320,12 @@ pub fn derive_match(
 
         rules.push(rule)
     }
-    // Rules
 
     let entry = Entry {
-        name,
+        name: new_entry_name,
         docs: Vec::new(),
         args: types,
-        typ: ret_ty,
+        typ: return_type,
         rules,
         range,
         attrs: Vec::new(),

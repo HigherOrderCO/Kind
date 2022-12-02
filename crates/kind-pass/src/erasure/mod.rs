@@ -407,7 +407,11 @@ impl<'a> ErasureState<'a> {
 
                 self.ctx = backup;
 
-                untyped::Expr::lambda(expr.range, param.clone(), body, *erased)
+                if *erased {
+                    body
+                } else {
+                    untyped::Expr::lambda(expr.range, param.clone(), body, *erased)
+                }
             }
             Let { name, val, next } => {
                 let backup = self.ctx.clone();
@@ -497,9 +501,21 @@ impl<'a> ErasureState<'a> {
             App { fun, args } => {
                 let fun = self.erase_expr(ambient, edge, fun);
                 let mut spine = Vec::new();
+
                 for arg in args {
-                    spine.push(self.erase_expr(ambient, edge, &arg.data))
+                    let ambient = if arg.erased {
+                        Ambient::Irrelevant
+                    } else {
+                        ambient
+                    };
+
+                    let res = self.erase_expr(ambient, edge, &arg.data);
+
+                    if !arg.erased {
+                        spine.push(res)
+                    }
                 }
+
                 untyped::Expr::app(expr.range, fun, spine)
             }
             Sub { expr, .. } => self.erase_expr(ambient, edge, expr),

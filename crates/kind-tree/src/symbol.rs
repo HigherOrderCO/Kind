@@ -171,6 +171,12 @@ impl Ident {
         new
     }
 
+    pub fn add_underscore(&self) -> Ident {
+        let mut new = self.clone();
+        new.data = Symbol::new(format!("{}_", new.data.data));
+        new
+    }
+
     #[inline]
     pub fn to_str(&self) -> &str {
         &self.data.data

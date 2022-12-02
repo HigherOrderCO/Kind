@@ -125,6 +125,8 @@ fn desugar_str(input: &str, range: Range) -> Box<desugared::Expr> {
         })
 }
 
+// Codegen
+
 fn codegen_str(input: &str) -> Box<Term> {
     input.chars().rfold(
         Box::new(Term::Ctr {

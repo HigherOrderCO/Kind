@@ -4,6 +4,7 @@ use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 
 use kind_tree::concrete::*;
 use kind_tree::symbol::QualifiedIdent;
+use kind_tree::telescope::Telescope;
 
 use crate::errors::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
