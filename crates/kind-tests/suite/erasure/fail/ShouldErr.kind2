@@ -1,0 +1,8 @@
+Kek <a: U60> : U60
+Kek a = a
+
+Main : U60
+Main = (Kuk) ~(20)
+
+Kuk : ~(a : U60) -> U60
+Kuk = ~x => Kek 3

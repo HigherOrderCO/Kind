@@ -258,8 +258,10 @@ impl Visitor for UnboundCollector {
             TopLevel::RecordType(entr) => {
                 let inside_vars = self.context_vars.clone();
                 visit_vec!(entr.parameters.iter_mut(), arg => self.visit_argument(arg));
-                visit_vec!(entr.fields.iter_mut(), (_, _, typ) => {
+
+                visit_vec!(entr.fields.iter_mut(), (name, _, typ) => {
                     self.visit_expr(typ);
+                    self.context_vars.push((name.range, name.to_string()))
                 });
 
                 self.context_vars = inside_vars;

@@ -1,0 +1,11 @@
+   ERROR  This irrelevant parameter should not be used in a relevant position.
+
+      /--[suite/erasure/fail/ShouldErr.kind2:2:9]
+      |
+    1 |    Kek <a: U60> : U60
+    2 |    Kek a = a
+      |            v
+      |            \It's in relevant position!
+    3 |    
+
+
