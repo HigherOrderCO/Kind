@@ -1,6 +1,6 @@
    ERROR  Data constructors cannot return function types.
 
-      /--[suite/checker/issues/MatchDerivationWithAll.kind2:3:10]
+      /--[suite/issues/checker/MatchDerivationWithAll.kind2:3:10]
       |
     2 |    type WithCtx (a: Type) { 
     3 |        new: U60 -> (WithCtx a)
@@ -12,7 +12,7 @@
 
    ERROR  This is not the type that is being declared.
 
-      /--[suite/checker/issues/MatchDerivationWithAll.kind2:2:6]
+      /--[suite/issues/checker/MatchDerivationWithAll.kind2:2:6]
       |
     2 |    type WithCtx (a: Type) { 
       |         v------

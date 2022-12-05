@@ -288,6 +288,17 @@ impl<'a> Parser<'a> {
         }))
     }
 
+    fn parse_nat(&mut self, num: u128) -> Result<Box<Expr>, SyntaxDiagnostic> {
+        let range = self.range();
+        self.advance();
+        Ok(Box::new(Expr {
+            range,
+            data: ExprKind::Lit {
+                lit: Literal::Nat(num),
+            },
+        }))
+    }
+
     fn parse_num120(&mut self, num: u128) -> Result<Box<Expr>, SyntaxDiagnostic> {
         let range = self.range();
         self.advance();
@@ -426,6 +437,7 @@ impl<'a> Parser<'a> {
             Token::UpperId(_, _) => self.parse_single_upper(),
             Token::LowerId(_) => self.parse_var(),
             Token::Num60(num) => self.parse_num60(num),
+            Token::Nat(num) => self.parse_nat(num),
             Token::Num120(num) => self.parse_num120(num),
             Token::Char(chr) => self.parse_char(chr),
             Token::Str(str) => self.parse_str(str),

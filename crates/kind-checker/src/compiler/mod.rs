@@ -91,16 +91,20 @@ fn mk_ctr_name_from_str(ident: &str) -> Box<Term> {
     mk_single_ctr(format!("{}.", ident))
 }
 
-fn range_to_num(range: Range) -> Box<Term> {
-    Box::new(Term::U6O {
-        numb: u60::new(range.encode().0),
-    })
+fn range_to_num(lhs: bool, range: Range) -> Box<Term> {
+    if lhs {
+        mk_var("orig")
+    } else {
+        Box::new(Term::U6O {
+            numb: u60::new(range.encode().0),
+        })
+    }
 }
 
 fn set_origin(ident: &Ident) -> Box<Term> {
     mk_lifted_ctr(
         "Kind.Term.set_origin".to_owned(),
-        vec![range_to_num(ident.range), mk_var(ident.to_str())],
+        vec![range_to_num(false, ident.range), mk_var(ident.to_str())],
     )
 }
 
@@ -153,11 +157,11 @@ fn codegen_all_expr(
     match &expr.data {
         Typ => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Typ),
-            vec![range_to_num(expr.range)],
+            vec![range_to_num(lhs, expr.range)],
         ),
         NumTypeU60 => mk_lifted_ctr(
             eval_ctr(quote, TermTag::U60),
-            vec![range_to_num(expr.range)],
+            vec![range_to_num(lhs, expr.range)],
         ),
         NumTypeF60 => todo!(),
         Var { name } => {
@@ -168,7 +172,7 @@ fn codegen_all_expr(
                 mk_lifted_ctr(
                     eval_ctr(quote, TermTag::Var),
                     vec![
-                        range_to_num(expr.range),
+                        range_to_num(lhs, expr.range),
                         mk_u60(name.encode()),
                         mk_u60((*num - 1) as u64),
                     ],
@@ -185,7 +189,7 @@ fn codegen_all_expr(
         } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::All),
             vec![
-                range_to_num(expr.range),
+                range_to_num(lhs, expr.range),
                 mk_u60(param.encode()),
                 codegen_all_expr(lhs_rule, lhs, num, quote, typ),
                 lam(param, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
@@ -198,7 +202,7 @@ fn codegen_all_expr(
         } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Lambda),
             vec![
-                range_to_num(expr.range),
+                range_to_num(lhs, expr.range),
                 mk_u60(param.encode()),
                 lam(param, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
             ],
@@ -209,7 +213,7 @@ fn codegen_all_expr(
                 mk_lifted_ctr(
                     eval_ctr(quote, TermTag::App),
                     vec![
-                        range_to_num(expr.range),
+                        range_to_num(lhs, expr.range),
                         left,
                         codegen_all_expr(lhs_rule, lhs, num, quote, &right.data),
                     ],
@@ -220,7 +224,7 @@ fn codegen_all_expr(
             eval_ctr(quote, TermTag::Ctr(args.len())),
             vec_preppend![
                 mk_ctr_name(name),
-                if lhs { mk_var("orig") } else { range_to_num(expr.range) };
+                range_to_num(lhs, expr.range);
                 args.iter().cloned().map(|x| codegen_all_expr(lhs_rule, lhs, num, quote, &x)).collect::<Vec<Box<Term>>>()
             ],
         ),
@@ -235,7 +239,7 @@ fn codegen_all_expr(
                     eval_ctr(quote, TermTag::Fun(new_spine.len())),
                     vec_preppend![
                         mk_ctr_name(name),
-                        range_to_num(expr.range);
+                        range_to_num(lhs, expr.range);
                         new_spine
                     ],
                 )
@@ -243,7 +247,7 @@ fn codegen_all_expr(
                 mk_ctr(
                     TermTag::HoasF(name.to_string()).to_string(),
                     vec_preppend![
-                        range_to_num(expr.range);
+                        range_to_num(lhs, expr.range);
                         new_spine
                     ],
                 )
@@ -252,7 +256,7 @@ fn codegen_all_expr(
         Let { name, val, next } => mk_ctr(
             eval_ctr(quote, TermTag::Let),
             vec![
-                range_to_num(expr.range),
+                range_to_num(lhs, expr.range),
                 mk_u60(name.encode()),
                 codegen_all_expr(lhs_rule, lhs, num, quote, val),
                 lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, next)),
@@ -261,7 +265,7 @@ fn codegen_all_expr(
         Ann { expr, typ } => mk_ctr(
             eval_ctr(quote, TermTag::Ann),
             vec![
-                range_to_num(expr.range),
+                range_to_num(lhs, expr.range),
                 codegen_all_expr(lhs_rule, lhs, num, quote, expr),
                 codegen_all_expr(lhs_rule, lhs, num, quote, typ),
             ],
@@ -274,7 +278,7 @@ fn codegen_all_expr(
         } => mk_ctr(
             eval_ctr(quote, TermTag::Sub),
             vec![
-                range_to_num(expr.range),
+                range_to_num(lhs, expr.range),
                 mk_u60(name.encode()),
                 mk_u60(*indx as u64),
                 mk_u60(*redx as u64),
@@ -283,13 +287,13 @@ fn codegen_all_expr(
         ),
         NumU60 { numb } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::NUMU60),
-            vec![range_to_num(expr.range), mk_u60(*numb)],
+            vec![range_to_num(lhs, expr.range), mk_u60(*numb)],
         ),
         NumF60 { numb: _ } => todo!(),
         Binary { op, left, right } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Binary),
             vec![
-                range_to_num(expr.range),
+                range_to_num(lhs, expr.range),
                 mk_single_ctr(operator_to_constructor(*op).to_owned()),
                 codegen_all_expr(lhs_rule, lhs, num, quote, left),
                 codegen_all_expr(lhs_rule, lhs, num, quote, right),
@@ -297,12 +301,12 @@ fn codegen_all_expr(
         ),
         Hole { num } => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Hole),
-            vec![range_to_num(expr.range), mk_u60(*num)],
+            vec![range_to_num(lhs, expr.range), mk_u60(*num)],
         ),
         Str { val } => codegen_all_expr(lhs_rule, lhs, num, quote, &desugar_str(val, expr.range)),
         Hlp(_) => mk_lifted_ctr(
             eval_ctr(quote, TermTag::Hlp),
-            vec![range_to_num(expr.range)],
+            vec![range_to_num(lhs, expr.range)],
         ),
         Err => panic!("Internal Error: Was not expecting an ERR node inside the HVM checker"),
     }
@@ -322,7 +326,7 @@ fn codegen_type(args: &[desugared::Argument], typ: &desugared::Expr) -> Box<lang
         mk_lifted_ctr(
             eval_ctr(true, TermTag::All),
             vec![
-                range_to_num(arg.range),
+                range_to_num(false, arg.range),
                 mk_u60(arg.name.encode()),
                 codegen_expr(true, &arg.typ),
                 lam(&arg.name, codegen_type(&args[1..], typ)),
@@ -335,9 +339,9 @@ fn codegen_type(args: &[desugared::Argument], typ: &desugared::Expr) -> Box<lang
 
 fn codegen_vec<T>(exprs: T) -> Box<Term>
 where
-    T: Iterator<Item = Box<Term>>,
+    T: DoubleEndedIterator<Item = Box<Term>>,
 {
-    exprs.fold(mk_ctr("List.nil".to_string(), vec![]), |left, right| {
+    exprs.rfold(mk_ctr("List.nil".to_string(), vec![]), |left, right| {
         mk_ctr("List.cons".to_string(), vec![right, left])
     })
 }
@@ -452,7 +456,7 @@ fn codegen_entry_rules(
                 format!("QT{}", index),
                 vec_preppend![
                     mk_ctr_name(&entry.name),
-                    range_to_num(entry.range);
+                    range_to_num(false, entry.range);
                     args
                 ],
             )],

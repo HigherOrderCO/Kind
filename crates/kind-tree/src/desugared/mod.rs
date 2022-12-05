@@ -375,6 +375,21 @@ impl Display for AppBinding {
     }
 }
 
+pub fn try_desugar_to_nat(name: &QualifiedIdent, spine: &[Box<Expr>], acc: u128) -> Option<u128> {
+    match name.to_str() {
+        "Nat.zero" if spine.len() == 0 => {
+            Some(acc)
+        }
+        "Nat.succ" if spine.len() == 1 => {
+            match &spine[0].data {
+                ExprKind::Ctr { name, args } => try_desugar_to_nat(name, args, acc + 1),
+                _ => None
+            }
+        }
+        _ => None
+    }
+}
+
 impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
@@ -407,15 +422,19 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Fun { name, args } | Ctr { name, args } => {
-                if args.is_empty() {
-                    write!(f, "{}", name)
+                if let Some(res) = try_desugar_to_nat(name, args, 0) {
+                    write!(f, "{res}n")
                 } else {
-                    write!(
-                        f,
-                        "({}{})",
-                        name,
-                        args.iter().map(|x| format!(" {}", x)).collect::<String>()
-                    )
+                    if args.is_empty() {
+                        write!(f, "{}", name)
+                    } else {
+                        write!(
+                            f,
+                            "({}{})",
+                            name,
+                            args.iter().map(|x| format!(" {}", x)).collect::<String>()
+                        )
+                    }
                 }
             }
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
