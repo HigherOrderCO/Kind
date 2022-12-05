@@ -36,6 +36,19 @@ impl<'a> DesugarState<'a> {
             Literal::NumTypeU60 => desugared::Expr::type_u60(range),
             Literal::NumTypeF60 => desugared::Expr::type_f60(range),
             Literal::NumU60(num) => desugared::Expr::num_u60(range, *num),
+            Literal::Nat(num) => {
+                let list_ident = QualifiedIdent::new_static("Nat", None, range);
+                let cons_ident = list_ident.add_segment("succ");
+                let nil_ident = list_ident.add_segment("zero");
+                
+                let mut res = self.mk_desugared_ctr(range, nil_ident, Vec::new(), false);
+
+                for _ in 0..*num {
+                    res = self.mk_desugared_ctr(range, cons_ident.clone(), vec![res], false)
+                }
+                
+                res
+            },
             Literal::NumU120(num) => {
                 if !self.check_implementation("U120.new", range, Sugar::U120) {
                     return desugared::Expr::err(range);

@@ -72,9 +72,34 @@ fn test_checker() -> Result<(), Error> {
 }
 
 #[test]
+#[timeout(30000)]
+fn test_checker_issues() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/issues/checker"), |path, session| {
+        let entrypoints = vec!["Main".to_string()];
+        let check = driver::type_check_book(session, path, entrypoints, Some(1));
+        check.map(|_| "Ok!".to_string()).ok()
+    })?;
+    Ok(())
+}
+
+#[test]
 #[timeout(15000)]
 fn test_eval() -> Result<(), Error> {
     test_kind2(Path::new("./suite/eval"), |path, session| {
+        let entrypoints = vec!["Main".to_string()];
+        let check = driver::erase_book(session, path, entrypoints)
+            .map(|file| driver::compile_book_to_hvm(file, false))
+            .map(|file| driver::execute_file(&file.to_string(), Some(1)).map_or_else(|e| e, |f| f));
+
+        check.ok()
+    })?;
+    Ok(())
+}
+
+#[test]
+#[timeout(15000)]
+fn test_eval_issues() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/issues/eval"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints)
             .map(|file| driver::compile_book_to_hvm(file, false))
