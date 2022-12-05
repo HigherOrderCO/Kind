@@ -11,11 +11,13 @@ impl<'a> Lexer<'a> {
     /// Single line comments
     pub fn lex_comment(&mut self, start: usize) -> (Token, Range) {
         self.next_char();
+
         let mut is_doc = false;
         if let Some('/') = self.peekable.peek() {
             self.next_char();
             is_doc = true;
         }
+        
         let cmt = self.accumulate_while(&|x| x != '\n');
         (
             Token::Comment(is_doc, cmt.to_string()),
