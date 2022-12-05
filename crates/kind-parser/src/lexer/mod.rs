@@ -57,8 +57,9 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn get_next_no_error(&mut self, vec: Sender<Box<dyn Diagnostic>>) -> (Token, Range) {
+    pub fn get_next_no_error(&mut self, vec: Sender<Box<dyn Diagnostic>>) -> (bool, Token, Range) {
         loop {
+            let is_break = self.is_linebreak();
             let (token, span) = self.lex_token();
             match token {
                 Token::Error(x) => {
@@ -68,11 +69,11 @@ impl<'a> Lexer<'a> {
                 Token::Comment(false, _) => continue,
                 _ => (),
             }
-            return (token, span);
+            return (is_break, token, span);
         }
     }
 
-    pub fn lex_token(&mut self) -> (Token, Range) {
+    fn lex_token(&mut self) -> (Token, Range) {
         let start = self.span();
         match self.peekable.peek() {
             None => (Token::Eof, self.mk_range(start)),

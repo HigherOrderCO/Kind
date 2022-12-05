@@ -33,9 +33,12 @@ impl<'a> Parser<'a> {
     pub fn new(mut lexer: Lexer<'a>, sender: Sender<Box<dyn Diagnostic>>) -> Parser<'a> {
         let mut queue = VecDeque::with_capacity(3);
         let mut breaks = VecDeque::with_capacity(3);
+
         for _ in 0..3 {
-            breaks.push_back(lexer.is_linebreak());
-            queue.push_back(lexer.get_next_no_error(sender.clone()));
+            let (is_break, token, range) = lexer.get_next_no_error(sender.clone());
+
+            breaks.push_back(is_break);
+            queue.push_back((token, range));
         }
         Parser {
             lexer,
@@ -50,9 +53,12 @@ impl<'a> Parser<'a> {
     pub fn advance(&mut self) -> (Token, Range) {
         let cur = self.queue.pop_front().unwrap();
         self.breaks.pop_front();
-        self.breaks.push_back(self.lexer.is_linebreak());
-        self.queue
-            .push_back(self.lexer.get_next_no_error(self.dignostic_channel.clone()));
+
+        let (is_break, token, range) = self.lexer.get_next_no_error(self.dignostic_channel.clone());
+
+        self.breaks.push_back(is_break);
+        self.queue.push_back((token, range));
+
         self.eaten += 1;
         cur
     }
