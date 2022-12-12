@@ -136,13 +136,13 @@ impl<'a> DesugarState<'a> {
         self.desugar_destruct(
             next.range,
             binding,
-            res_val,
+            res_val.clone(),
             &|this| this.desugar_expr(next),
             &|this, name| {
                 desugared::Expr::let_(
                     range,
                     name.clone(),
-                    this.desugar_expr(val),
+                    res_val.clone(),
                     this.desugar_expr(next),
                 )
             },
