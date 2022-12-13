@@ -40,7 +40,7 @@ impl<'a> Parser<'a> {
             Token::Star => Some(Operator::Mul),
             Token::Slash => Some(Operator::Div),
             Token::Percent => Some(Operator::Mod),
-            Token::Ampersand => Some(Operator::Add),
+            Token::Ampersand => Some(Operator::And),
             Token::Bar => Some(Operator::Or),
             Token::Hat => Some(Operator::Xor),
             Token::GreaterGreater => Some(Operator::Shr),
