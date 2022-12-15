@@ -124,13 +124,13 @@ impl<'a> DesugarState<'a> {
                 self.desugar_destruct(
                     next.range,
                     destruct,
-                    res_val,
+                    res_val.clone(),
                     &|this| this.desugar_sttm(bind_ident, pure_ident, next),
                     &|this, ident| {
                         desugared::Expr::let_(
                             destruct.locate(),
                             ident.clone(),
-                            this.desugar_expr(val),
+                            res_val.clone(),
                             this.desugar_sttm(bind_ident, pure_ident, next),
                         )
                     },
