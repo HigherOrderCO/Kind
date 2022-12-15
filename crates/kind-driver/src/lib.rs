@@ -147,7 +147,7 @@ pub fn execute_file(file: &str, tids: Option<usize>) -> Result<String, String> {
     Ok(res.to_string())
 }
 
-pub fn eval_in_checker(book: &desugared::Book) -> Box<backend::Term> {
+pub fn eval_in_checker(book: &desugared::Book) -> String {
     checker::eval_api(book)
 }
 

@@ -84,7 +84,7 @@ pub fn type_check(
 /// Runs the type checker but instead of running the check all function
 /// we run the "eval_main" that runs the generated version that both HVM and
 /// and the checker can understand.
-pub fn eval_api(book: &Book) -> Box<Term> {
+pub fn eval_api(book: &Book) -> String {
 
     let file = gen_checker(book, Vec::new());
 
@@ -110,7 +110,7 @@ pub fn eval_api(book: &Book) -> Box<Term> {
     runtime::normalize(&heap, &prog, &tids, host, false);
 
     // Reads it back to a string
-    let term = language::readback::as_term(&heap, &prog, host);
+    let term = language::readback::as_string(&heap, &prog, &tids, host).unwrap();
 
     // Frees used memory
     runtime::collect(&heap, &prog.aris, tids[0], runtime::load_ptr(&heap, host));
