@@ -241,7 +241,8 @@ impl<'a> DesugarState<'a> {
         }
 
         if !unbound.is_empty() {
-            self.send_err(PassError::NoCoverage(range, unbound))
+            self.send_err(PassError::NoCoverage(range, unbound));
+            return desugared::Expr::err(range);
         }
 
         let motive = if let Some(res) = &match_.motive {
