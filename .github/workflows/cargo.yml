@@ -42,6 +42,29 @@ jobs:
         with:
           command: test
 
+  wikind_test:
+    name: ⚗️ Wikind Test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - run: |
+         chmod +x ./tests/test_wikind.sh
+         ./tests/test_wikind.sh
+      - shell: bash
+
   # cargo_fmt:
   #   name: 💅 Cargo Fmt
   #   continue-on-error: true
