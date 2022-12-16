@@ -33,6 +33,15 @@ impl<'a> Parser<'a> {
             data: PatKind::U60(num),
         }))
     }
+    
+    fn parse_pat_char(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
+        let start = self.range();
+        let num = eat_single!(self, Token::Char(n) => *n)?;
+        Ok(Box::new(Pat {
+            range: start,
+            data: PatKind::Char(num),
+        }))
+    }
 
     fn parse_pat_u120(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
@@ -135,6 +144,8 @@ impl<'a> Parser<'a> {
             self.parse_pat_u60()
         } else if self.get().is_num120() {
             self.parse_pat_u120()
+        } else if self.get().is_char() {
+            self.parse_pat_char()
         } else if self.check_actual(Token::LPar) {
             self.parse_pat_group()
         } else if self.get().is_lower_id() {

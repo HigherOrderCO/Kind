@@ -114,6 +114,10 @@ impl Token {
         matches!(self, Token::Num120(_))
     }
 
+    pub fn is_char(&self) -> bool {
+        matches!(self, Token::Char(_))
+    }
+
     pub fn is_eof(&self) -> bool {
         matches!(self, Token::Eof)
     }
