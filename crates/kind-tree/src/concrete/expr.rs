@@ -69,7 +69,7 @@ pub struct Case {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Match {
     pub typ: QualifiedIdent,
-    pub scrutinizer: Box<Expr>,
+    pub scrutineer: Box<Expr>,
     pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
 }
@@ -203,6 +203,12 @@ pub enum ExprKind {
     /// A match block that will be translated
     /// into an eliminator of a datatype.
     Match(Box<Match>),
+    /// Adds all of the variables inside the context
+    Open {
+        type_name: QualifiedIdent,
+        var_name: Ident,
+        next: Box<Expr>
+    }
 }
 
 /// Describes a single expression inside Kind2.
@@ -456,7 +462,7 @@ impl Display for Case {
 
 impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "match {} {}", self.typ, self.scrutinizer)?;
+        write!(f, "match {} {}", self.typ, self.scrutineer)?;
 
         match &self.motive {
             None => Ok(()),
@@ -547,6 +553,7 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
+            Open { type_name, var_name, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
             If { cond, then_, else_ } => {
                 write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
             }

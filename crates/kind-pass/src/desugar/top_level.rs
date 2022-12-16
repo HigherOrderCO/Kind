@@ -248,7 +248,7 @@ impl<'a> DesugarState<'a> {
             PatKind::App(head, spine) => {
                 let entry = self
                     .old_book
-                    .count
+                    .meta
                     .get(head.to_string().as_str())
                     .expect("Internal Error: Cannot find definition");
 

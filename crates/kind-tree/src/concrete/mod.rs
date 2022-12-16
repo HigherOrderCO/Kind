@@ -169,17 +169,17 @@ pub struct EntryMeta {
 pub struct Book {
     // Ordered hashset
     pub names: LinkedHashMap<String, QualifiedIdent>,
-    
+
     // Probably deterministic order everytime
     pub entries: FxHashMap<String, TopLevel>,
 
-    // Stores some important information in order to desugarize 
-    pub count: FxHashMap<String, EntryMeta>, 
+    // Stores some important information in order to desugarize
+    pub meta: FxHashMap<String, EntryMeta>,
 }
 
 impl Book {
     pub fn get_count_garanteed(&self, name: &str) -> &EntryMeta {
-        self.count
+        self.meta
             .get(name)
             .unwrap_or_else(|| panic!("Internal Error: Garanteed count {:?} failed", name))
     }

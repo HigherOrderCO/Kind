@@ -1,0 +1,11 @@
+   ERROR  Cannot find the definition 'owo'.
+
+      /--[suite/checker/fail/Unbound.kind2:2:7]
+      |
+    1 |    Tew : U60
+    2 |    Tew = owo
+      |          v--
+      |          \Here!
+
+      Hint: Take a look at the rules for name searching at https://github.com/Kindelia/Kind2/blob/master/guide/naming.md
+

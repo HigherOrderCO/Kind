@@ -594,6 +594,21 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_open(&mut self) -> Result<Box<Expr>, SyntaxDiagnostic> {
+
+        let start = self.range();
+        self.advance(); // 'open'
+        let type_name = self.parse_upper_id()?;
+        let var_name = self.parse_id()?;
+        let next = self.parse_expr(false)?;
+        let end = next.range;
+
+        Ok(Box::new(Expr {
+            data: ExprKind::Open { type_name, var_name, next },
+            range: start.mix(end),
+        }))
+    }
+
     fn parse_monadic_let(&mut self) -> Result<Box<Sttm>, SyntaxDiagnostic> {
         let start = self.range();
         self.advance(); // 'let'
@@ -706,7 +721,7 @@ impl<'a> Parser<'a> {
 
         let typ = self.parse_upper_id()?;
 
-        let scrutinizer = self.parse_expr(false)?;
+        let scrutineer = self.parse_expr(false)?;
 
         self.eat_variant(Token::LBrace)?;
 
@@ -739,7 +754,7 @@ impl<'a> Parser<'a> {
 
         let match_ = Box::new(Match {
             typ,
-            scrutinizer,
+            scrutineer,
             cases,
             motive,
         });
@@ -828,6 +843,8 @@ impl<'a> Parser<'a> {
             self.parse_let()
         } else if self.check_actual_id("if") {
             self.parse_if()
+        } else if self.check_actual_id("open") {
+            self.parse_open()
         } else if self.check_actual(Token::Dollar) {
             self.parse_sigma_pair()
         } else if self.is_lambda() {

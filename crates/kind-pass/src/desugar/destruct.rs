@@ -67,10 +67,10 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         match binding {
             Destruct::Destruct(_, typ, case, jump_rest) => {
-                let count = self.old_book.count.get(&typ.to_string()).unwrap();
+                let meta = self.old_book.meta.get(&typ.to_string()).unwrap();
                 let open_id = typ.add_segment("open");
 
-                let rec = count
+                let rec = meta
                     .is_record_cons_of
                     .clone()
                     .and_then(|name| self.old_book.entries.get(&name.to_string()));
@@ -82,7 +82,7 @@ impl<'a> DesugarState<'a> {
                     return desugared::Expr::err(typ.range);
                 };
 
-                if self.old_book.count.get(&open_id.to_string()).is_none() {
+                if self.old_book.meta.get(&open_id.to_string()).is_none() {
                     self.send_err(PassError::NeedToImplementMethods(
                         binding.locate(),
                         Sugar::Open(typ.to_string()),
@@ -111,7 +111,7 @@ impl<'a> DesugarState<'a> {
                     }
                 }
 
-                let mut irrelev = count.arguments.map(|x| x.erased).to_vec();
+                let mut irrelev = meta.arguments.map(|x| x.erased).to_vec();
                 irrelev = irrelev[record.parameters.len()..].to_vec();
 
                 let spine = vec![
@@ -256,7 +256,7 @@ impl<'a> DesugarState<'a> {
                 })
         };
 
-        let prefix = [self.desugar_expr(&match_.scrutinizer), motive];
+        let prefix = [self.desugar_expr(&match_.scrutineer), motive];
 
         self.mk_desugared_fun(
             range,
