@@ -56,6 +56,7 @@ pub enum Log {
     Checking(String),
     Checked(Duration),
     Compiled(Duration),
+    Rewrites(u64),
     Failed(Duration),
 }
 pub trait Diagnostic {

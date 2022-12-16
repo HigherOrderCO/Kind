@@ -1,5 +1,5 @@
 use checker::eval;
-use errors::DriverError;
+use errors::{DriverError, GenericDriverError};
 use kind_pass::{desugar, erasure, inline::inline_book};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
@@ -7,7 +7,7 @@ use kind_span::SyntaxCtxIndex;
 use kind_tree::{backend, concrete, desugared, untyped};
 use resolution::ResolutionError;
 use session::Session;
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 use kind_checker as checker;
 
@@ -27,20 +27,20 @@ pub fn type_check_book(
     path: &PathBuf,
     entrypoints: Vec<String>,
     tids: Option<usize>,
-) -> anyhow::Result<untyped::Book> {
+) -> anyhow::Result<(untyped::Book, u64)> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
 
     let all = desugared_book.entrs.iter().map(|x| x.0).cloned().collect();
 
-    let succeeded = checker::type_check(
+    let result = checker::type_check(
         &desugared_book,
         session.diagnostic_sender.clone(),
         all,
         tids,
     );
 
-    if !succeeded {
+    if result.is_none() {
         return Err(ResolutionError.into());
     }
 
@@ -51,7 +51,7 @@ pub fn type_check_book(
     )?;
     inline_book(&mut book);
 
-    Ok(book)
+    Ok((book, result.unwrap()))
 }
 
 pub fn to_book(session: &mut Session, path: &PathBuf) -> anyhow::Result<concrete::Book> {
@@ -142,12 +142,16 @@ pub fn check_main_desugared_entry(
     }
 }
 
-pub fn execute_file(file: &str, tids: Option<usize>) -> Result<String, String> {
-    let res = eval(file, "Main", false, tids)?;
-    Ok(res.to_string())
+pub fn execute_file(file: &str, tids: Option<usize>) -> anyhow::Result<(String, u64)> {
+    match eval(file, "Main", false, tids) {
+        Ok((res, rewrites)) => {
+            Ok((res.to_string(), rewrites))
+        },
+        Err(_) => anyhow::Result::Err(GenericDriverError.into()),
+    }
 }
 
-pub fn eval_in_checker(book: &desugared::Book) -> String {
+pub fn eval_in_checker(book: &desugared::Book) -> (String, u64) {
     checker::eval_api(book)
 }
 

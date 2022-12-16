@@ -1,10 +1,21 @@
 //! Errors created by the driver. All of them
 //! are related with paths and unbounded variables.
 
-use std::path::PathBuf;
+use std::{path::PathBuf, fmt::Display, error::Error};
 
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word};
 use kind_tree::symbol::{Ident, QualifiedIdent};
+
+#[derive(Debug)]
+pub struct GenericDriverError;
+
+impl Display for GenericDriverError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "driver pass error")
+    }
+}
+
+impl Error for GenericDriverError { }
 
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
