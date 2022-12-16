@@ -10,7 +10,9 @@ impl<'a> Parser<'a> {
     pub fn parse_constructor(&mut self) -> Result<Constructor, SyntaxDiagnostic> {
         let attrs = self.parse_attrs()?;
         let docs = self.parse_docs()?;
+        
         let name = self.parse_any_id()?;
+
         let args = self.parse_arguments()?;
 
         let typ = if self.check_and_eat(Token::Colon) {

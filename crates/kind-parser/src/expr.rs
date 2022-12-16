@@ -123,7 +123,13 @@ impl<'a> Parser<'a> {
 
     pub fn parse_any_id(&mut self) -> Result<Ident, SyntaxDiagnostic> {
         let range = self.range();
-        let id = eat_single!(self, Token::LowerId(x) | Token::UpperId(x, None) => x.clone())?;
+
+        let id = self.eat(|x| match x {
+            Token::LowerId(x) | Token::UpperId(x, None) => Some(x.clone()),
+            Token::Num60(name) => Some(name.to_string()),
+            _ => None,
+        })?;
+    
         let ident = Ident::new_static(&id, range);
         Ok(ident)
     }
