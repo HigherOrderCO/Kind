@@ -483,7 +483,7 @@ impl Visitor for UnboundCollector {
             } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_static(
                     "Sigma", None, expr.range,
-                ));
+                ).to_generated());
                 self.visit_expr(fst);
                 self.visit_expr(snd);
             }
@@ -494,7 +494,7 @@ impl Visitor for UnboundCollector {
             } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_static(
                     "Sigma", None, expr.range,
-                ));
+                ).to_generated());
                 self.visit_expr(fst);
                 self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(snd);

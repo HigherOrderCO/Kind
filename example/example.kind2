@@ -2,8 +2,8 @@
 // ---
 
 U60.to_nat (x: U60) : Nat
-U60.to_nat #0 = Nat.zero
-U60.to_nat n  = (Nat.succ (U60.to_nat (- n #1)))
+U60.to_nat 0 = Nat.zero
+U60.to_nat n  = (Nat.succ (U60.to_nat (- n 1)))
 
 // Empty
 // -----
@@ -19,9 +19,10 @@ Unit.new : Unit
 // Bool
 // ----
 
-Bool : Type
-Bool.true : Bool
-Bool.false : Bool
+type Bool {
+  true : Bool
+  false : Bool
+}
 
 Bool.not (a: Bool) : Bool
 Bool.not Bool.true  = Bool.false
@@ -42,14 +43,15 @@ Bool.not_not_theorem Bool.true  = (Equal.refl Bool Bool.true)
 Bool.not_not_theorem Bool.false = (Equal.refl Bool Bool.false)
 
 Bool.true_not_false (e: (Equal Bool Bool.true Bool.false)) : Empty
-Bool.true_not_false e = (Equal.rewrite e @x (Bool.if Type x Unit Empty) Unit.new)
+Bool.true_not_false e = (Equal.rewrite e (x => (Bool.if Type x Unit Empty)) Unit.new)
 
 // Nat
 // ---
 
-Nat : Type
-Nat.zero : Nat
-Nat.succ (pred: Nat) : Nat
+type Nat {
+  zero : Nat
+  succ (pred: Nat) : Nat
+}
 
 Nat.double (x: Nat) : Nat
 Nat.double (Nat.succ x) = (Nat.succ (Nat.succ (Nat.double x)))
@@ -61,22 +63,22 @@ Nat.add Nat.zero     b = b
 
 Nat.comm.a (a: Nat) : (Equal Nat a (Nat.add a Nat.zero))
 Nat.comm.a Nat.zero     = Equal.refl
-Nat.comm.a (Nat.succ a) = (Equal.apply @x(Nat.succ x) (Nat.comm.a a))
+Nat.comm.a (Nat.succ a) = (Equal.apply (x => (Nat.succ x)) (Nat.comm.a a))
 
 Nat.comm.b (a: Nat) (b: Nat): (Equal Nat (Nat.add a (Nat.succ b)) (Nat.succ (Nat.add a b)))
 Nat.comm.b Nat.zero     b = Equal.refl
-Nat.comm.b (Nat.succ a) b = (Equal.apply @x(Nat.succ x) (Nat.comm.b a b))
+Nat.comm.b (Nat.succ a) b = (Equal.apply (x => (Nat.succ x)) (Nat.comm.b a b))
 
 Nat.comm (a: Nat) (b: Nat) : (Equal Nat (Nat.add a b) (Nat.add b a))
 Nat.comm Nat.zero     b = (Nat.comm.a b)
 Nat.comm (Nat.succ a) b =
-  let e0 = (Equal.apply @x(Nat.succ x) (Nat.comm a b))
+  let e0 = (Equal.apply (x => (Nat.succ x)) (Nat.comm a b))
   let e1 = (Equal.mirror (Nat.comm.b b a))
   (Equal.chain e0 e1)
 
 Nat.to_u60 (n: Nat) : U60
-Nat.to_u60 Nat.zero     = #0
-Nat.to_u60 (Nat.succ n) = (+ #1 (Nat.to_u60 n))
+Nat.to_u60 Nat.zero     = 0
+Nat.to_u60 (Nat.succ n) = (+ 1 (Nat.to_u60 n))
   
 Nat.mul (a: Nat) (b: Nat) : Nat
 Nat.mul (Nat.succ a) b = (Nat.add (Nat.mul a b) b) // (a + 1) * b = a*b + b
@@ -86,7 +88,7 @@ Nat.mul.comm.a (x: Nat): (Equal (Nat.mul x Nat.zero) Nat.zero)
 Nat.mul.comm.a Nat.zero = Equal.refl
 Nat.mul.comm.a (Nat.succ x) =
   let e0 = (Nat.mul.comm.a x)
-  let e1 = (Equal.apply @y(Nat.add y Nat.zero) e0)
+  let e1 = (Equal.apply (y => (Nat.add y Nat.zero)) e0)
   e1
 
 // List
@@ -103,7 +105,7 @@ List.negate (List.nil Bool)       = (List.nil Bool)
 List.tail <a> (xs: (List a)) : (List a)
 List.tail a (List.cons t x xs) = xs
 
-List.map <a> <b> (x: (List a)) (f: (x: a) b) : (List b)
+List.map <a> <b> (x: (List a)) (f: (x: a) -> b) : (List b)
 List.map a b (List.nil t)       f = List.nil
 List.map a b (List.cons t x xs) f = (List.cons (f x) (List.map xs f))
 
@@ -142,18 +144,18 @@ Equal.apply <t> <u> <a: t> <b: t> (f: t -> t) (e: (Equal t a b)) : (Equal t (f a
 Equal.apply t u a b f (Equal.refl v k) = (Equal.refl v (f k))
 
 Equal.rewrite <t> <a: t> <b: t> (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
-Equal.rewrite t a b (Equal.refl u k) p x = x :: (p k)
+Equal.rewrite t a b (Equal.refl u k) p x = (x :: (p k))
 
 Equal.chain <t> <a: t> <b: t> <c: t> (e0: (Equal t a b)) (e1: (Equal t b c)) : (Equal t a c)
-Equal.chain t a b c e0 (Equal.refl u x) = e0 :: (Equal t a x)
+Equal.chain t a b c e0 (Equal.refl u x) = (e0 :: (Equal t a x))
 
 // Monad
 // -----
 
 Monad (f: Type -> Type) : Type
 Monad.new (f: Type -> Type)
-  (pure: (a: Type) (x: a) (f a))
-  (bind: (a: Type) (b: Type) (x: (f a)) (y: a -> (f b)) (f b))
+  (pure: (a: Type) -> (x: a) -> (f a))
+  (bind: (a: Type) -> (b: Type) -> (x: (f a)) -> (y: a -> (f b)) -> (f b))
   : (Monad f)
 
 // Variadic
@@ -167,14 +169,10 @@ Variadic r (Nat.succ n) = r -> (Variadic r n)
 // --------
 
 SNat : Type
-SNat = (p: Type) ((SNat) -> p) -> p -> p
+SNat = (p: Type) -> ((SNat) -> p) -> p -> p
 
 SZ : SNat
-SZ = @p @s @z z
- 
-
-//SS : SNat -> SNat
-//SS = @n @p @s @z (s n)
+SZ = p => s => z => z
 
 
 
