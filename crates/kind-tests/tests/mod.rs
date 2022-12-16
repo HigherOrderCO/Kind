@@ -1,3 +1,5 @@
+#![feature(result_flattening)]
+
 use kind_driver::session::Session;
 use kind_report::data::Diagnostic;
 use kind_report::report::Report;
@@ -89,9 +91,10 @@ fn test_eval() -> Result<(), Error> {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints)
             .map(|file| driver::compile_book_to_hvm(file, false))
-            .map(|file| driver::execute_file(&file.to_string(), Some(1)).map_or_else(|e| e, |f| f));
+            .map(|file| driver::execute_file(&file.to_string(), Some(1)))
+            .flatten();
 
-        check.ok()
+        check.ok().map(|x| x.0)
     })?;
     Ok(())
 }
@@ -103,9 +106,10 @@ fn test_eval_issues() -> Result<(), Error> {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints)
             .map(|file| driver::compile_book_to_hvm(file, false))
-            .map(|file| driver::execute_file(&file.to_string(), Some(1)).map_or_else(|e| e, |f| f));
+            .map(|file| driver::execute_file(&file.to_string(), Some(1)))
+            .flatten();
 
-        check.ok()
+        check.ok().map(|x| x.0)
     })?;
     Ok(())
 }

@@ -9,7 +9,7 @@ pub mod report;
 
 use std::sync::mpsc::Sender;
 
-use hvm::language;
+use hvm::{language, get_cost};
 use hvm::{runtime, syntax::Term};
 use kind_report::data::Diagnostic;
 use kind_tree::desugared::Book;
@@ -17,7 +17,7 @@ use report::parse_report;
 
 pub const CHECKER: &str = include_str!("checker.hvm");
 
-pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<Box<Term>, String> {
+pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<(Box<Term>, u64), String> {
 
     let file = language::syntax::read_file(&format!("{}\nHVM_MAIN_CALL = {}", file, term))?;
 
@@ -30,17 +30,20 @@ pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<B
 
     let heap = runtime::new_heap(size, tids);
     let tids = runtime::new_tids(tids);
+
     runtime::link(
         &heap,
         0,
         runtime::Fun(*book.name_to_id.get("HVM_MAIN_CALL").unwrap(), 0),
     );
+
     let host = 0;
     runtime::normalize(&heap, &prog, &tids, host, dbug);
     let code = language::readback::as_term(&heap, &prog, host);
     runtime::collect(&heap, &prog.aris, tids[0], runtime::load_ptr(&heap, host));
     runtime::free(&heap, 0, 0, 1);
-    Ok(code)
+    Ok((code, get_cost(&heap)))
+
 }
 
 /// Generates the checker in a string format that can be
@@ -58,24 +61,29 @@ pub fn type_check(
     tx: Sender<Box<dyn Diagnostic>>,
     functions_to_check: Vec<String>,
     tids: Option<usize>
-) -> bool {
+) -> Option<u64> {
     let file = gen_checker(book, functions_to_check);
 
     match eval(&file, "Main", false, tids) {
-        Ok(term) => {
+        Ok((term, rewrites)) => {
             let errs = parse_report(&term).unwrap_or_else(|_| {
                 panic!(
                     "Internal Error: Cannot parse the report message from the type checker: {}",
                     term
                 )
             });
+
             let succeeded = errs.is_empty();
 
             for err in errs {
                 tx.send(Box::new(err)).unwrap()
             }
 
-            succeeded
+            if succeeded {
+                Some(rewrites)
+            } else {
+                None
+            }
         }
         Err(res) => panic!("{}", res),
     }
@@ -84,7 +92,7 @@ pub fn type_check(
 /// Runs the type checker but instead of running the check all function
 /// we run the "eval_main" that runs the generated version that both HVM and
 /// and the checker can understand.
-pub fn eval_api(book: &Book) -> String {
+pub fn eval_api(book: &Book) -> (String, u64) {
 
     let file = gen_checker(book, Vec::new());
 
@@ -116,5 +124,5 @@ pub fn eval_api(book: &Book) -> String {
     runtime::collect(&heap, &prog.aris, tids[0], runtime::load_ptr(&heap, host));
     runtime::free(&heap, 0, 0, 1);
 
-    term
+    (term, get_cost(&heap))
 }
