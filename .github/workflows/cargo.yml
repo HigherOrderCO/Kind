@@ -60,6 +60,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
+      - uses: actions/checkout@v2
       - run: |
          chmod +x ./tests/test_wikind.sh
          ./tests/test_wikind.sh
