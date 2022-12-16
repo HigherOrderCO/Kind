@@ -1,0 +1,10 @@
+#derive[open]
+record Pudim {
+    owo : U60
+    uwu : U60
+}
+
+Main : U60
+Main =
+    let Pudim.new owo uwu .. = Pudim.new (uwu = 300) (owo = 200)
+    (+ owo uwu)

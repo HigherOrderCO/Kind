@@ -21,6 +21,9 @@ use kind_tree::symbol::{Ident, QualifiedIdent};
 
 use crate::{errors::DriverError, session::Session};
 
+/// The extension of kind2 files.
+const EXT: &str = "kind2";
+
 #[derive(Debug)]
 pub struct ResolutionError;
 
@@ -31,9 +34,6 @@ impl fmt::Display for ResolutionError {
 }
 
 impl Error for ResolutionError {}
-
-/// The extension of kind2 files.
-const EXT: &str = "kind2";
 
 /// Tries to accumulate on a buffer all of the
 /// paths that exists (so we can just throw an
@@ -77,6 +77,7 @@ fn ident_to_path(
     let name = ident.to_string();
     let segments = name.as_str().split('.').collect::<Vec<&str>>();
     let mut raw_path = root.to_path_buf();
+
     raw_path.push(PathBuf::from(segments.join("/")));
 
     match accumulate_neighbour_paths(ident, &raw_path) {
@@ -130,25 +131,25 @@ fn module_to_book<'a>(
                     if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
                         let cons_name = cons_ident.to_string();
                         public_names.insert(cons_name.clone());
-                        book.count.insert(cons_name, cons.extract_book_info(&sum));
+                        book.meta.insert(cons_name, cons.extract_book_info(&sum));
                     }
                 }
 
                 if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
-                    book.count.insert(name.clone(), sum.extract_book_info());
+                    book.meta.insert(name.clone(), sum.extract_book_info());
                     book.entries.insert(name, TopLevel::SumType(sum));
                 }
             }
             TopLevel::RecordType(rec) => {
                 let name = rec.name.to_string();
                 public_names.insert(name.clone());
-                book.count.insert(name.clone(), rec.extract_book_info());
+                book.meta.insert(name.clone(), rec.extract_book_info());
 
                 try_to_insert_new_name(failed, session, rec.name.clone(), book);
 
                 let cons_ident = rec.name.add_segment(rec.constructor.to_str());
                 public_names.insert(cons_ident.to_string());
-                book.count.insert(
+                book.meta.insert(
                     cons_ident.to_string(),
                     rec.extract_book_info_of_constructor(),
                 );
@@ -162,7 +163,7 @@ fn module_to_book<'a>(
 
                 try_to_insert_new_name(failed, session, entr.name.clone(), book);
                 public_names.insert(name.clone());
-                book.count.insert(name.clone(), entr.extract_book_info());
+                book.meta.insert(name.clone(), entr.extract_book_info());
                 book.entries.insert(name, TopLevel::Entry(entr));
             }
         }
@@ -221,6 +222,7 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
 
     let ctx_id = session.book_counter;
     session.add_path(Rc::new(fs::canonicalize(path).unwrap()), input.clone());
+
     let tx = session.diagnostic_sender.clone();
 
     let (mut module, mut failed) = kind_parser::parse_book(tx.clone(), ctx_id, &input);
@@ -230,11 +232,6 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
 
     let mut state = UnboundCollector::new(tx.clone(), false);
     state.visit_module(&mut module);
-
-    for idents in state.unbound.values() {
-        unbound_variable(session, book, idents);
-        failed = true;
-    }
 
     module_to_book(&mut failed, session, module, book);
 
@@ -278,7 +275,7 @@ pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> anyhow::Re
 pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> anyhow::Result<()> {
     let mut failed = false;
 
-    let (_, unbound_tops) =
+    let (unbound_names, unbound_tops) =
         unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
 
     for unbound in unbound_tops.values() {
@@ -292,6 +289,11 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> anyhow
             unbound_variable(session, book, &res);
             failed = true;
         }
+    }
+
+    for unbound in unbound_names.values() {
+        unbound_variable(session, book, &unbound);
+        failed = true;
     }
 
     if failed {

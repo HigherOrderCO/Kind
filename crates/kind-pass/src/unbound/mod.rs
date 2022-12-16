@@ -33,6 +33,8 @@ pub struct UnboundCollector {
     pub top_level_defs: FxHashMap<String, Range>,
     pub unbound_top_level: FxHashMap<String, FxHashSet<QualifiedIdent>>,
 
+    pub record_defs: FxHashMap<String, Vec<String>>,
+
     pub unbound: FxHashMap<String, Vec<Ident>>,
     pub emit_errs: bool,
 }
@@ -48,6 +50,7 @@ impl UnboundCollector {
             top_level_defs: Default::default(),
             unbound_top_level: Default::default(),
             unbound: Default::default(),
+            record_defs: Default::default(),
             emit_errs,
         }
     }
@@ -112,8 +115,11 @@ impl UnboundCollector {
                 debug_assert!(rec.name.get_aux().is_none());
                 debug_assert!(name_cons.get_aux().is_none());
 
+                self.record_defs.insert(rec.name.to_string(), rec.fields.iter().map(|x| x.0.to_string()).collect());
+
                 self.top_level_defs
                     .insert(rec.name.get_root(), rec.name.range);
+
                 self.top_level_defs
                     .insert(name_cons.get_root(), name_cons.range);
             }
@@ -382,7 +388,7 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
-        self.visit_expr(&mut matcher.scrutinizer);
+        self.visit_expr(&mut matcher.scrutineer);
         for case in &mut matcher.cases {
             self.visit_case(case);
         }
@@ -539,6 +545,23 @@ impl Visitor for UnboundCollector {
 
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }
+            ExprKind::Open { type_name, var_name, next } => {
+                self.visit_qualified_ident(type_name);
+
+                if let Some(fields) = self.record_defs.get(type_name.to_str()) {
+                    for field in fields {
+                        self.context_vars.push((var_name.range, format!("{}.{}", var_name, field)))
+                    }
+                }
+
+                self.visit_expr(next);
+
+                if let Some(fields) = self.record_defs.get(type_name.to_str()) {
+                    for _ in fields {
+                        self.context_vars.pop();
+                    }
+                }
+            },
         }
     }
 }

@@ -1,5 +1,5 @@
 use kind_span::{Locatable, Range};
-use kind_tree::concrete::{self, expr, Literal};
+use kind_tree::concrete::{self, expr, Literal, TopLevel};
 use kind_tree::desugared;
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
@@ -243,6 +243,45 @@ impl<'a> DesugarState<'a> {
         self.mk_desugared_fun(range, bool_if_ident, spine, false)
     }
 
+    pub(crate) fn desugar_open(
+        &mut self,
+        range: Range,
+        type_name: &QualifiedIdent,
+        var_name: &Ident,
+        next: &expr::Expr
+    ) -> Box<desugared::Expr> {
+        let rec = self.old_book.entries.get(type_name.to_str());
+
+        let record = if let Some(TopLevel::RecordType(record)) = rec {
+            record
+        } else {
+            self.send_err(PassError::LetDestructOnlyForRecord(type_name.range));
+            return desugared::Expr::err(type_name.range);
+        };
+
+        let open_id = type_name.add_segment(record.constructor.to_str()).add_segment("open");
+
+        if self.old_book.meta.get(&open_id.to_string()).is_none() {
+            self.send_err(PassError::NeedToImplementMethods(
+                range,
+                Sugar::Open(type_name.to_string()),
+            ));
+            return desugared::Expr::err(range);
+        }
+
+        let field_names : Vec<_> = record.fields.iter().map(|x| var_name.add_segment(x.0.to_str())).collect();
+
+        let irrelev = vec![false; field_names.len()];
+
+
+        let spine = vec![
+            desugared::Expr::var(var_name.clone()),
+            desugared::Expr::unfold_lambda(&irrelev, &field_names, self.desugar_expr(next))
+        ];
+
+        self.mk_desugared_fun(range, open_id, spine, false)
+    }
+
     pub(crate) fn desugar_pair(
         &mut self,
         range: Range,
@@ -325,6 +364,7 @@ impl<'a> DesugarState<'a> {
             Pair { fst, snd } => self.desugar_pair(expr.range, fst, snd),
             Match(matcher) => self.desugar_match(expr.range, matcher),
             Subst(sub) => self.desugar_sub(expr.range, sub),
+            Open { type_name, var_name, next } => self.desugar_open(expr.range, type_name, var_name, &next)
         }
     }
 }

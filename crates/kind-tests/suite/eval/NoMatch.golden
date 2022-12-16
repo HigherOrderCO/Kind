@@ -9,5 +9,5 @@
       :  |  
       :  \ You cannot use this expression! 
 
-      Hint: You must implement 'NoMatch.match' in order to use the match notation (or derive match with #derive[match]).
+      Hint: You must implement 'match' in order to use the match notation (or derive match with #derive[match]).
 

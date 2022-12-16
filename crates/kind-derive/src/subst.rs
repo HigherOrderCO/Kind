@@ -119,7 +119,7 @@ impl<'a> Visitor for Subst<'a> {
     }
 
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
-        self.visit_expr(&mut matcher.scrutinizer);
+        self.visit_expr(&mut matcher.scrutineer);
         for case in &mut matcher.cases {
             self.visit_case(case);
         }
@@ -264,6 +264,11 @@ impl<'a> Visitor for Subst<'a> {
                     "List", "cons", expr.range,
                 ));
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
+            }
+            ExprKind::Open { type_name, var_name, next } => {
+                self.visit_qualified_ident(type_name);
+                self.visit_ident(var_name);
+                self.visit_expr(next);
             }
         }
     }
