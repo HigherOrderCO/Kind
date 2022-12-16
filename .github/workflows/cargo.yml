@@ -63,10 +63,10 @@ jobs:
           command: build
 
       - name: Run wikind
-      - run: |
+        run: |
          chmod +x ./tests/test_wikind.sh
          ./tests/test_wikind.sh
-      - shell: bash
+        shell: bash
 
   # cargo_fmt:
   #   name: 💅 Cargo Fmt
