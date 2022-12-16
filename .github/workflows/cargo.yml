@@ -56,11 +56,13 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
+
       - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         with:
           command: build
-      - uses: actions/checkout@v2
+
+      - name: Run wikind
       - run: |
          chmod +x ./tests/test_wikind.sh
          ./tests/test_wikind.sh
