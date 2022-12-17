@@ -753,7 +753,7 @@ impl<'a> Parser<'a> {
         let motive = if self.check_and_eat(Token::Colon) {
             let expr = self.parse_expr(false)?;
             end = expr.range;
-            Some(self.parse_expr(false)?)
+            Some(expr)
         } else {
             None
         };
