@@ -232,7 +232,7 @@
 (Kind.Term.eval_op orig (Kind.Operator.mul) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (* a.num b.num))
 (Kind.Term.eval_op orig (Kind.Operator.div) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (/ a.num b.num))
 (Kind.Term.eval_op orig (Kind.Operator.mod) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (% a.num b.num))
-(Kind.Term.eval_op orig (Kind.Operator.and) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (+ a.num b.num))
+(Kind.Term.eval_op orig (Kind.Operator.and) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (& a.num b.num))
 (Kind.Term.eval_op orig (Kind.Operator.or) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (| a.num b.num))
 (Kind.Term.eval_op orig (Kind.Operator.xor) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (^ a.num b.num))
 (Kind.Term.eval_op orig (Kind.Operator.shl) (Kind.Term.u60 a.orig a.num) (Kind.Term.u60 b.orig b.num)) = (Kind.Term.u60 0 (<< a.num b.num))
