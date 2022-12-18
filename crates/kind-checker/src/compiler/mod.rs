@@ -421,7 +421,7 @@ fn codegen_rule(file: &mut lang::File, rule: &desugared::Rule) {
                 ],
             ),
             rhs: mk_ctr(
-                "HVM.put".to_owned(),
+                "HVM.print".to_owned(),
                 vec![
                     mk_ctr("Kind.Term.show".to_owned(), vec![mk_var("log")]),
                     mk_var("ret"),
