@@ -53,6 +53,7 @@ impl<'a> Lexer<'a> {
         match data {
             "return" => Token::Return,
             "ask" => Token::Ask,
+            "with" => Token::With,
             _ => Token::LowerId(data.to_string()),
         }
     }

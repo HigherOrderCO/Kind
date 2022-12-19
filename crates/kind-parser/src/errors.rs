@@ -28,6 +28,7 @@ pub enum SyntaxDiagnostic {
     NotAClauseOfDef(Range, Range),
     Unclosed(Range),
     IgnoreRestShouldBeOnTheEnd(Range),
+    MatchScrutineeShouldBeAName(Range),
     UnusedDocString(Range),
     CannotUseUse(Range),
     ImportsCannotHaveAlias(Range),
@@ -62,6 +63,7 @@ impl Diagnostic for SyntaxDiagnostic {
             SyntaxDiagnostic::CannotUseUse(range) => Some(range.ctx),
             SyntaxDiagnostic::ImportsCannotHaveAlias(range) => Some(range.ctx),
             SyntaxDiagnostic::InvalidNumberType(_, range) => Some(range.ctx),
+            SyntaxDiagnostic::MatchScrutineeShouldBeAName(range) => Some(range.ctx),
         }
     }
 
@@ -310,6 +312,20 @@ impl Diagnostic for SyntaxDiagnostic {
                 title: format!("The {} number type is invalid", type_),
                 subtitles: vec![],
                 hints: vec![],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            SyntaxDiagnostic::MatchScrutineeShouldBeAName(range) => DiagnosticFrame {
+                code: 18,
+                severity: Severity::Error,
+                title: "Match scrutinee should be a identifier!".to_string(),
+                subtitles: vec![],
+                hints: vec!["Use the '=' inside the scrutinee! More details on <website>".to_string()],
                 positions: vec![Marker {
                     position: *range,
                     color: Color::Fst,

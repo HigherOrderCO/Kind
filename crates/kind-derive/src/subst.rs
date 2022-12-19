@@ -119,7 +119,16 @@ impl<'a> Visitor for Subst<'a> {
     }
 
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
-        self.visit_expr(&mut matcher.scrutineer);
+        self.visit_ident(&mut matcher.scrutinee);
+
+        if let Some(res) = &mut matcher.value {
+            self.visit_expr(res);
+        }
+
+        for name in &mut matcher.with_vars {
+            self.visit_ident(name)
+        }
+
         for case in &mut matcher.cases {
             self.visit_case(case);
         }

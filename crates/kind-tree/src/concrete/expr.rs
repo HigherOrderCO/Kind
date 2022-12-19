@@ -69,7 +69,9 @@ pub struct Case {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Match {
     pub typ: QualifiedIdent,
-    pub scrutineer: Box<Expr>,
+    pub scrutinee: Ident,
+    pub value: Option<Box<Expr>>,
+    pub with_vars: Vec<Ident>,
     pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
 }
@@ -462,7 +464,7 @@ impl Display for Case {
 
 impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "match {} {}", self.typ, self.scrutineer)?;
+        write!(f, "match {} {}", self.typ, self.scrutinee)?;
 
         match &self.motive {
             None => Ok(()),

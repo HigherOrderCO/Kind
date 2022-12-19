@@ -12,7 +12,7 @@ use fxhash::{FxHashMap, FxHashSet};
 use kind_report::data::Diagnostic;
 use kind_span::Range;
 
-use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct, Expr, ExprKind, SttmKind};
+use kind_tree::concrete::expr::{Binding, CaseBinding, Destruct, Expr, ExprKind, SttmKind};
 use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 use kind_tree::concrete::visitor::Visitor;
 use kind_tree::concrete::{Argument, Book, Entry, Module, Rule, TopLevel};
@@ -34,6 +34,7 @@ pub struct UnboundCollector {
     pub unbound_top_level: FxHashMap<String, FxHashSet<QualifiedIdent>>,
 
     pub record_defs: FxHashMap<String, Vec<String>>,
+    pub type_defs: FxHashMap<String, FxHashMap<String, Vec<String>>>,
 
     pub unbound: FxHashMap<String, Vec<Ident>>,
     pub emit_errs: bool,
@@ -51,6 +52,7 @@ impl UnboundCollector {
             unbound_top_level: Default::default(),
             unbound: Default::default(),
             record_defs: Default::default(),
+            type_defs: Default::default(),
             emit_errs,
         }
     }
@@ -102,6 +104,10 @@ impl UnboundCollector {
                 debug_assert!(sum.name.get_aux().is_none());
                 self.top_level_defs
                     .insert(sum.name.get_root(), sum.name.range);
+
+                let res = sum.constructors.iter().map(|x| (x.name.to_string(), x.args.map(|x| x.name.to_string()).to_vec()));
+                self.type_defs.insert(sum.name.to_string(), res.collect());
+
                 for cons in &sum.constructors {
                     let name_cons = sum.name.add_segment(cons.name.to_str());
                     debug_assert!(name_cons.get_aux().is_none());
@@ -303,10 +309,19 @@ impl Visitor for UnboundCollector {
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);
                 for bind in bindings {
+                    println!("{}", bind);
                     self.visit_case_binding(bind)
                 }
             }
             Destruct::Ident(ident) => self.context_vars.push((ident.range, ident.to_string())),
+        }
+    }
+
+    fn visit_case_binding(&mut self, case_binding: &mut CaseBinding) {
+        match case_binding {
+            CaseBinding::Field(ident) | CaseBinding::Renamed(_, ident) => {
+                self.context_vars.push((ident.range, ident.to_string()))
+            }
         }
     }
 
@@ -370,31 +385,58 @@ impl Visitor for UnboundCollector {
         }
     }
 
-    fn visit_case_binding(&mut self, case_binding: &mut CaseBinding) {
-        match case_binding {
-            CaseBinding::Field(ident) | CaseBinding::Renamed(_, ident) => {
-                self.context_vars.push((ident.range, ident.to_string()))
-            }
-        }
-    }
-
-    fn visit_case(&mut self, case: &mut Case) {
-        let vars = self.context_vars.clone();
-        for binding in &mut case.bindings {
-            self.visit_case_binding(binding);
-        }
-        self.visit_expr(&mut case.value);
-        self.context_vars = vars;
-    }
-
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
-        self.visit_expr(&mut matcher.scrutineer);
-        for case in &mut matcher.cases {
-            self.visit_case(case);
+        for name in &mut matcher.with_vars {
+            self.visit_ident(name)
         }
+
+        if let Some(opt) = &mut matcher.value {
+            self.visit_expr(opt);
+            self.context_vars.push((matcher.scrutinee.range, matcher.scrutinee.to_string()))
+        } else {
+            self.visit_ident(&mut matcher.scrutinee);
+        }
+
+        for case in &mut matcher.cases {
+            let vars = self.context_vars.clone();
+            let mut bound = FxHashSet::default();
+
+            for binding in &mut case.bindings {
+                match binding {
+                    CaseBinding::Field(ident) | CaseBinding::Renamed(ident, _) => {
+                        bound.insert(ident.to_string());
+                    }
+                }
+
+                match binding {
+                    CaseBinding::Field(ident) | CaseBinding::Renamed(_, ident) => {
+                        self.context_vars.push((ident.range, ident.to_string()));
+                    }
+                }
+            }
+
+            let typ_meta = self.type_defs.get(matcher.typ.to_str());
+
+            if let Some(fields) = typ_meta.and_then(|x| x.get(case.constructor.to_str())) {
+                for field in fields {
+                    if !bound.contains(field) {
+                        let ident = format!("{}.{}", matcher.scrutinee.to_str(), field);
+                        self.context_vars.push((case.constructor.range, ident));
+                    }
+                }
+            }
+
+            self.visit_expr(&mut case.value);
+            self.context_vars = vars;
+        }
+
         match &mut matcher.motive {
             Some(x) => self.visit_expr(x),
             None => (),
+        }
+
+        if matcher.value.is_some() {
+            self.context_vars.pop();
         }
     }
 

@@ -18,7 +18,6 @@ use report::parse_report;
 pub const CHECKER: &str = include_str!("checker.hvm");
 
 pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<(Box<Term>, u64), String> {
-
     let file = language::syntax::read_file(&format!("{}\nHVM_MAIN_CALL = {}", file, term))?;
 
     let book = language::rulebook::gen_rulebook(&file);

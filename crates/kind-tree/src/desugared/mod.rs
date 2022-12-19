@@ -169,6 +169,17 @@ impl Expr {
             })
     }
 
+
+    pub fn unfold_all(irrelev: &[bool], idents: &[(Ident, Box<Expr>)], body: Box<Expr>) -> Box<Expr> {
+        idents
+            .iter()
+            .rev()
+            .zip(irrelev)
+            .fold(body, |body, ((ident, typ), irrelev)| {
+                Expr::all(ident.range, ident.clone(), typ.clone(), body, *irrelev)
+            })
+    }
+
     pub fn app(range: Range, fun: Box<Expr>, args: Vec<AppBinding>) -> Box<Expr> {
         Box::new(Expr {
             range,

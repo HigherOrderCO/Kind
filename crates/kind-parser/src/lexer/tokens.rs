@@ -33,6 +33,7 @@ pub enum Token {
     // error messages.
     Return,
     Ask,
+    With,
 
     // Keywords
     // Do,
@@ -177,6 +178,7 @@ impl fmt::Display for Token {
             Token::Comment(false, comment) => write!(f, "comment '{comment}'"),
             Token::Eof => write!(f, "End of file"),
             Token::Error(_) => write!(f, "ERROR"),
+            Token::With => write!(f, "with"),
             Token::Return => write!(f, "return"),
             Token::Ask => write!(f, "ask"),
         }

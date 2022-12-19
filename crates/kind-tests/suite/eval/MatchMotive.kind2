@@ -13,7 +13,7 @@ MotiveGen Maybe.none     = Str
 
 Main : U60
 Main =
-    match Maybe (Maybe.some 2) {
-        some val => 2
-        none     => Str.nil
+    match Maybe t = Maybe.some 3 {
+        some => t.val
+        none => Str.nil
     } : (x => MotiveGen x)

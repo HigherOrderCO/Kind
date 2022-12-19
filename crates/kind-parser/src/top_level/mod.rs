@@ -24,7 +24,7 @@ impl<'a> Parser<'a> {
             || self.peek(1).same_variant(&Token::LBrace) // '{'
             || self.peek(1).same_variant(&Token::Less)   // '<'
             || self.peek(1).same_variant(&Token::Minus)  // '-'
-            || self.peek(1).same_variant(&Token::Plus) // '+'
+            || self.peek(1).same_variant(&Token::Plus)   // '+'
     }
 
     fn is_top_level_entry(&self) -> bool {
@@ -94,7 +94,7 @@ impl<'a> Parser<'a> {
         } else {
             return self.fail(vec![]);
         }
-        
+
         let mut pats = Vec::new();
         while !self.get().same_variant(&Token::Eq) && !self.get().same_variant(&Token::Eof) {
             pats.push(self.parse_pat()?);

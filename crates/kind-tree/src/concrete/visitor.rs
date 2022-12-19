@@ -215,7 +215,16 @@ pub fn walk_case<T: Visitor>(ctx: &mut T, case: &mut Case) {
 
 pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
     ctx.visit_qualified_ident(&mut matcher.typ);
-    ctx.visit_expr(&mut matcher.scrutineer);
+
+    ctx.visit_ident(&mut matcher.scrutinee);
+
+    if let Some(opt) = &mut matcher.value {
+        ctx.visit_expr(opt);
+    }
+
+    for name in &mut matcher.with_vars {
+        ctx.visit_ident(name)
+    }
 
     match &mut matcher.motive {
         Some(expr) => ctx.visit_expr(expr),
