@@ -385,8 +385,13 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
+        self.visit_qualified_ident(&mut matcher.typ);
+        
         for name in &mut matcher.with_vars {
-            self.visit_ident(name)
+            self.visit_ident(&mut name.0);
+            if let Some(res) = &mut name.1 {
+                self.visit_expr(res)
+            }
         }
 
         if let Some(opt) = &mut matcher.value {

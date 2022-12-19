@@ -16,7 +16,10 @@ impl<'a> DesugarState<'a> {
         cases: &[CaseBinding],
         jump_rest: Option<Range>,
     ) -> Vec<(String, Option<(Range, Ident)>)> {
-        let mut ordered_fields = fields.iter().map(|x| (x.0.clone(), None)).collect::<Vec<_>>();
+        let mut ordered_fields = fields
+            .iter()
+            .map(|x| (x.0.clone(), None))
+            .collect::<Vec<_>>();
         let mut names = FxHashMap::default();
 
         for (i, field) in fields.iter().enumerate() {
@@ -219,7 +222,8 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg.1 {
                         arguments.push(name)
                     } else {
-                        let id = Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
+                        let id =
+                            Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
                         arguments.push(id);
                     }
                 }
@@ -230,6 +234,12 @@ impl<'a> DesugarState<'a> {
         let mut unbound = Vec::new();
         let mut lambdas = Vec::new();
 
+        let names = matcher
+            .with_vars
+            .iter()
+            .map(|x| x.0.clone())
+            .collect::<Vec<_>>();
+
         for (i, case_arg) in cases_args.iter().enumerate() {
             let case = &sum.constructors[i];
             if let Some((_, arguments, val)) = &case_arg {
@@ -238,7 +248,7 @@ impl<'a> DesugarState<'a> {
                 let expr = self.desugar_expr(val);
 
                 let irrelev = matcher.with_vars.iter().map(|_| false).collect::<Vec<_>>();
-                let expr = desugared::Expr::unfold_lambda(&irrelev, &matcher.with_vars, expr);
+                let expr = desugared::Expr::unfold_lambda(&irrelev, &names, expr);
 
                 let expr = desugared::Expr::unfold_lambda(&case, arguments, expr);
 
@@ -263,7 +273,18 @@ impl<'a> DesugarState<'a> {
 
         let irrelev = matcher.with_vars.iter().map(|_| false).collect::<Vec<_>>();
 
-        let binds = matcher.with_vars.iter().map(|x| (x.clone(), self.gen_hole_expr(range))).collect::<Vec<_>>();
+        let binds = matcher
+            .with_vars
+            .iter()
+            .map(|x| {
+                (
+                    x.0.clone(),
+                    x.1.clone().map(|x| self.desugar_expr(&x))
+                        .unwrap_or_else(|| self.gen_hole_expr(range)),
+                )
+            })
+            .collect::<Vec<_>>();
+
         let motive = desugared::Expr::unfold_all(&irrelev, &binds, motive);
 
         let prefix = [
@@ -286,7 +307,7 @@ impl<'a> DesugarState<'a> {
                     .with_vars
                     .iter()
                     .map(|x| desugared::AppBinding {
-                        data: desugared::Expr::var(x.clone()),
+                        data: desugared::Expr::var(x.0.clone()),
                         erased: false,
                     })
                     .collect(),

@@ -471,6 +471,20 @@ impl<'a> Parser<'a> {
             Ok(Binding::Positional(self.parse_atom()?))
         }
     }
+    
+    fn parse_typed_ident(&mut self) -> Result<(Ident, Option<Box<Expr>>), SyntaxDiagnostic> {
+        let start = self.range();
+        if self.check_and_eat(Token::LPar) {
+            let name = self.parse_id()?;
+            self.eat_variant(Token::Colon)?;
+            let atom = self.parse_expr(true)?;
+            self.eat_closing_keyword(Token::RPar, start)?;
+            Ok((name, Some(atom)))
+        } else {
+            let name = self.parse_id()?;
+            Ok((name, None))
+        }
+    }
 
     fn parse_app_binding(&mut self) -> Result<AppBinding, SyntaxDiagnostic> {
         self.ignore_docs();
@@ -747,10 +761,10 @@ impl<'a> Parser<'a> {
             None
         };
 
-        let mut with_vars : Vec<Ident> = Vec::new();
+        let mut with_vars = Vec::new();
 
         if self.check_and_eat(Token::With) {
-            while let Some(name) = self.try_single(&|x| x.parse_id())? {
+            while let Some(name) = self.try_single(&|x| x.parse_typed_ident())? {
                 with_vars.push(name)
             }
         };
