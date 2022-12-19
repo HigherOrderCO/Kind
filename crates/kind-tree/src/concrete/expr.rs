@@ -556,7 +556,8 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
-            Open { type_name, var_name, motive, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
+            Open { type_name, var_name, motive: Some(motive), next } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
+            Open { type_name, var_name, motive: None, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
             If { cond, then_, else_ } => {
                 write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
             }
