@@ -1,6 +1,6 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::{self, expr, Literal, TopLevel};
-use kind_tree::desugared;
+use kind_tree::desugared::{self};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
 use crate::errors::{PassError, Sugar};
@@ -248,6 +248,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         type_name: &QualifiedIdent,
         var_name: &Ident,
+        motive: &Option<Box<expr::Expr>>,
         next: &expr::Expr
     ) -> Box<desugared::Expr> {
         let rec = self.old_book.entries.get(type_name.to_str());
@@ -273,9 +274,11 @@ impl<'a> DesugarState<'a> {
 
         let irrelev = vec![false; field_names.len()];
 
+        let motive = motive.as_ref().map(|x| self.desugar_expr(x)).unwrap_or_else(|| self.gen_hole_expr(range));
 
         let spine = vec![
             desugared::Expr::var(var_name.clone()),
+            desugared::Expr::lambda(range, var_name.clone(), motive, false),
             desugared::Expr::unfold_lambda(&irrelev, &field_names, self.desugar_expr(next))
         ];
 
@@ -364,7 +367,7 @@ impl<'a> DesugarState<'a> {
             Pair { fst, snd } => self.desugar_pair(expr.range, fst, snd),
             Match(matcher) => self.desugar_match(expr.range, matcher),
             Subst(sub) => self.desugar_sub(expr.range, sub),
-            Open { type_name, var_name, next } => self.desugar_open(expr.range, type_name, var_name, &next)
+            Open { type_name, var_name, motive, next } => self.desugar_open(expr.range, type_name, var_name, motive, &next)
         }
     }
 }

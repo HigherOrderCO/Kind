@@ -1,5 +1,5 @@
 Main : U60
 Main =
-    match NoMatch NoMatch.pudding {
+    match NoMatch t = NoMatch.pudding {
         pudding => 2
     }

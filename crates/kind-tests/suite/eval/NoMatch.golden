@@ -3,7 +3,7 @@
       /--[suite/eval/NoMatch.kind2:3:5]
       |
       |  / 
-    3 |  |     match NoMatch NoMatch.pudding {
+    3 |  |     match NoMatch t = NoMatch.pudding {
     4 |  |         pudding => 2
     5 |  |     }
       :  |  

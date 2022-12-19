@@ -111,8 +111,8 @@ pub struct SumTypeDecl {
 pub struct RecordDecl {
     pub name: QualifiedIdent,
     pub docs: Vec<String>,
-    pub constructor: Ident,
     pub parameters: Telescope<Argument>,
+    pub constructor: Ident,
     pub fields: Vec<(Ident, Vec<String>, Box<Expr>)>,
     pub attrs: Vec<Attribute>,
     pub cons_attrs: Vec<Attribute>,

@@ -69,7 +69,9 @@ pub struct Case {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Match {
     pub typ: QualifiedIdent,
-    pub scrutineer: Box<Expr>,
+    pub scrutinee: Ident,
+    pub value: Option<Box<Expr>>,
+    pub with_vars: Vec<Ident>,
     pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
 }
@@ -207,6 +209,7 @@ pub enum ExprKind {
     Open {
         type_name: QualifiedIdent,
         var_name: Ident,
+        motive: Option<Box<Expr>>,
         next: Box<Expr>
     }
 }
@@ -462,7 +465,7 @@ impl Display for Case {
 
 impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "match {} {}", self.typ, self.scrutineer)?;
+        write!(f, "match {} {}", self.typ, self.scrutinee)?;
 
         match &self.motive {
             None => Ok(()),
@@ -553,7 +556,8 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
-            Open { type_name, var_name, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
+            Open { type_name, var_name, motive: Some(motive), next } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
+            Open { type_name, var_name, motive: None, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
             If { cond, then_, else_ } => {
                 write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
             }

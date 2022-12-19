@@ -15,8 +15,8 @@ impl<'a> DesugarState<'a> {
         fields: &[(String, bool)],
         cases: &[CaseBinding],
         jump_rest: Option<Range>,
-    ) -> Vec<Option<(Range, Ident)>> {
-        let mut ordered_fields = vec![None; fields.len()];
+    ) -> Vec<(String, Option<(Range, Ident)>)> {
+        let mut ordered_fields = fields.iter().map(|x| (x.0.clone(), None)).collect::<Vec<_>>();
         let mut names = FxHashMap::default();
 
         for (i, field) in fields.iter().enumerate() {
@@ -30,10 +30,10 @@ impl<'a> DesugarState<'a> {
             };
 
             if let Some((idx, _)) = names.get(name.to_str()) {
-                if let Some((range, _)) = ordered_fields[*idx] {
+                if let (_, Some((range, _))) = ordered_fields[*idx] {
                     self.send_err(PassError::DuplicatedNamed(range, name.range));
                 } else {
-                    ordered_fields[*idx] = Some((name.locate(), alias.clone()))
+                    ordered_fields[*idx] = (name.to_string(), Some((name.locate(), alias.clone())))
                 }
             } else {
                 self.send_err(PassError::CannotFindField(
@@ -46,7 +46,7 @@ impl<'a> DesugarState<'a> {
 
         let names: Vec<String> = names
             .iter()
-            .filter(|(_, (idx, hidden))| ordered_fields[*idx].is_none() && !hidden)
+            .filter(|(_, (idx, hidden))| ordered_fields[*idx].1.is_none() && !hidden)
             .map(|(name, _)| name.clone())
             .collect();
 
@@ -104,7 +104,7 @@ impl<'a> DesugarState<'a> {
                 let mut arguments = Vec::new();
 
                 for arg in ordered_fields {
-                    if let Some((_, name)) = arg {
+                    if let (_, Some((_, name))) = arg {
                         arguments.push(name)
                     } else {
                         arguments.push(self.gen_name(jump_rest.unwrap_or(typ.range)))
@@ -114,8 +114,11 @@ impl<'a> DesugarState<'a> {
                 let mut irrelev = meta.arguments.map(|x| x.erased).to_vec();
                 irrelev = irrelev[record.parameters.len()..].to_vec();
 
+                let motive = self.gen_hole_expr(range);
+
                 let spine = vec![
                     val,
+                    desugared::Expr::lambda(range, Ident::generate("self"), motive, false),
                     desugared::Expr::unfold_lambda(&irrelev, &arguments, next(self)),
                 ];
 
@@ -152,16 +155,16 @@ impl<'a> DesugarState<'a> {
     pub(crate) fn desugar_match(
         &mut self,
         range: Range,
-        match_: &expr::Match,
+        matcher: &expr::Match,
     ) -> Box<desugared::Expr> {
-        let entry = self.old_book.entries.get(&match_.typ.to_string()).unwrap();
+        let entry = self.old_book.entries.get(&matcher.typ.to_string()).unwrap();
 
-        let match_id = match_.typ.add_segment("match");
+        let match_id = matcher.typ.add_segment("match");
 
         if self.old_book.entries.get(&match_id.to_string()).is_none() {
             self.send_err(PassError::NeedToImplementMethods(
                 range,
-                Sugar::Match(match_.typ.to_string()),
+                Sugar::Match(matcher.typ.to_string()),
             ));
             return desugared::Expr::err(range);
         }
@@ -169,8 +172,8 @@ impl<'a> DesugarState<'a> {
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
         } else {
-            self.send_err(PassError::LetDestructOnlyForSum(match_.typ.range));
-            return desugared::Expr::err(match_.typ.range);
+            self.send_err(PassError::LetDestructOnlyForSum(matcher.typ.range));
+            return desugared::Expr::err(matcher.typ.range);
         };
 
         let mut cases_args = Vec::new();
@@ -181,14 +184,14 @@ impl<'a> DesugarState<'a> {
             cases_args.push(None)
         }
 
-        for case in &match_.cases {
+        for case in &matcher.cases {
             let index = match positions.get(case.constructor.to_str()) {
                 Some(pos) => *pos,
                 None => {
                     self.send_err(PassError::CannotFindConstructor(
                         case.constructor.range,
-                        match_.typ.range,
-                        match_.typ.to_string(),
+                        matcher.typ.range,
+                        matcher.typ.to_string(),
                     ));
                     continue;
                 }
@@ -207,16 +210,17 @@ impl<'a> DesugarState<'a> {
                         .map(|x| (x.name.to_string(), x.hidden))
                         .collect::<Vec<(String, bool)>>(),
                     &case.bindings,
-                    case.ignore_rest,
+                    Some(range),
                 );
 
                 let mut arguments = Vec::new();
 
                 for arg in ordered {
-                    if let Some((_, name)) = arg {
+                    if let Some((_, name)) = arg.1 {
                         arguments.push(name)
                     } else {
-                        arguments.push(self.gen_name(case.ignore_rest.unwrap_or(match_.typ.range)));
+                        let id = Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
+                        arguments.push(id);
                     }
                 }
                 cases_args[index] = Some((case.constructor.range, arguments, &case.value));
@@ -230,11 +234,15 @@ impl<'a> DesugarState<'a> {
             let case = &sum.constructors[i];
             if let Some((_, arguments, val)) = &case_arg {
                 let case: Vec<bool> = case.args.iter().map(|x| x.erased).rev().collect();
-                lambdas.push(desugared::Expr::unfold_lambda(
-                    &case,
-                    arguments,
-                    self.desugar_expr(val),
-                ))
+
+                let expr = self.desugar_expr(val);
+
+                let irrelev = matcher.with_vars.iter().map(|_| false).collect::<Vec<_>>();
+                let expr = desugared::Expr::unfold_lambda(&irrelev, &matcher.with_vars, expr);
+
+                let expr = desugared::Expr::unfold_lambda(&case, arguments, expr);
+
+                lambdas.push(expr)
             } else {
                 unbound.push(case.name.to_string())
             }
@@ -245,24 +253,46 @@ impl<'a> DesugarState<'a> {
             return desugared::Expr::err(range);
         }
 
-        let motive = if let Some(res) = &match_.motive {
+        let motive = if let Some(res) = &matcher.motive {
             self.desugar_expr(res)
         } else {
-            let mut idx: Vec<Ident> = sum.indices.iter().map(|x| x.name.clone()).collect();
-            idx.push(Ident::generate("val_"));
-            idx.iter()
-                .rfold(self.gen_hole_expr(match_.typ.range), |expr, l| {
-                    desugared::Expr::lambda(l.range, l.clone(), expr, false)
-                })
+            self.gen_hole_expr(matcher.typ.range)
         };
 
-        let prefix = [self.desugar_expr(&match_.scrutineer), motive];
+        let desugared_value = matcher.value.as_ref().map(|f| self.desugar_expr(&f));
 
-        self.mk_desugared_fun(
+        let irrelev = matcher.with_vars.iter().map(|_| false).collect::<Vec<_>>();
+
+        let binds = matcher.with_vars.iter().map(|x| (x.clone(), self.gen_hole_expr(range))).collect::<Vec<_>>();
+        let motive = desugared::Expr::unfold_all(&irrelev, &binds, motive);
+
+        let prefix = [
+            desugared_value.unwrap_or_else(|| desugared::Expr::var(matcher.scrutinee.clone())),
+            desugared::Expr::lambda(motive.range, matcher.scrutinee.clone(), motive, false),
+        ];
+
+        let call = self.mk_desugared_fun(
             range,
             match_id,
             [prefix.as_slice(), lambdas.as_slice()].concat(),
             false,
-        )
+        );
+
+        if !matcher.with_vars.is_empty() {
+            desugared::Expr::app(
+                range,
+                call,
+                matcher
+                    .with_vars
+                    .iter()
+                    .map(|x| desugared::AppBinding {
+                        data: desugared::Expr::var(x.clone()),
+                        erased: false,
+                    })
+                    .collect(),
+            )
+        } else {
+            call
+        }
     }
 }

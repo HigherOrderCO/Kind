@@ -53,7 +53,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> (concrete::Entry, Errs) 
     types.push(Argument {
         hidden: false,
         erased: false,
-        name: Ident::generate("scrutineer"),
+        name: Ident::generate("scrutinee"),
         typ: Some(current_return_type.clone()),
         range,
     });
@@ -193,10 +193,10 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> (concrete::Entry, Errs) 
         return (make_incomplete_entry(), errs);
     }
 
-    let scrutineer_ident = Expr::var(Ident::generate("scrutineer"));
+    let scrutinee_ident = Expr::var(Ident::generate("scrutinee"));
 
     let mut return_args = indice_names.clone();
-    return_args.push(AppBinding::explicit(scrutineer_ident));
+    return_args.push(AppBinding::explicit(scrutinee_ident));
 
     let return_type = Expr::app(Expr::var(motive_ident.clone()), return_args, range);
 

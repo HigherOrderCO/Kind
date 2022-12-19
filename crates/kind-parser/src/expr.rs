@@ -1,5 +1,5 @@
 use kind_span::{Locatable, Range};
-use kind_tree::concrete::expr::*;
+use kind_tree::concrete::expr::{*};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::Operator;
 
@@ -609,8 +609,13 @@ impl<'a> Parser<'a> {
         let next = self.parse_expr(false)?;
         let end = next.range;
 
+        let motive = self.try_single(&|this| {
+            this.eat_variant(Token::Colon)?;
+            this.parse_expr(false)
+        })?;
+
         Ok(Box::new(Expr {
-            data: ExprKind::Open { type_name, var_name, next },
+            data: ExprKind::Open { type_name, var_name, motive, next },
             range: start.mix(end),
         }))
     }
@@ -727,7 +732,28 @@ impl<'a> Parser<'a> {
 
         let typ = self.parse_upper_id()?;
 
-        let scrutineer = self.parse_expr(false)?;
+        let expr_scrutinee = self.parse_expr(false)?;
+
+        let scrutinee = match expr_scrutinee.data {
+            ExprKind::Var { name } => {
+                name
+            },
+            _ => return Err(SyntaxDiagnostic::MatchScrutineeShouldBeAName(expr_scrutinee.range))
+        };
+
+        let value = if self.check_and_eat(Token::Eq) {
+            Some(self.parse_expr(false)?)
+        } else {
+            None
+        };
+
+        let mut with_vars : Vec<Ident> = Vec::new();
+
+        if self.check_and_eat(Token::With) {
+            while let Some(name) = self.try_single(&|x| x.parse_id())? {
+                with_vars.push(name)
+            }
+        };
 
         self.eat_variant(Token::LBrace)?;
 
@@ -760,7 +786,9 @@ impl<'a> Parser<'a> {
 
         let match_ = Box::new(Match {
             typ,
-            scrutineer,
+            scrutinee,
+            with_vars,
+            value,
             cases,
             motive,
         });

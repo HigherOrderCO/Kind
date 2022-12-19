@@ -48,7 +48,7 @@ pub fn derive_getters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
     types.push(Argument {
         hidden: false,
         erased: false,
-        name: Ident::generate("scrutineer"),
+        name: Ident::generate("scrutinee"),
         typ: Some(res_motive_ty),
         range,
     });

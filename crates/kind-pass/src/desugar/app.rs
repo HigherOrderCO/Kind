@@ -44,6 +44,8 @@ impl<'a> DesugarState<'a> {
                 range,
                 spine.len(),
             ));
+        } else {
+            return Some(spine)
         }
 
         Some(arguments)

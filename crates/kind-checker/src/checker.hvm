@@ -23,7 +23,7 @@
 (List.pure x) = [x]
 (String.flatten []) = ""
 (String.flatten (List.cons head tail)) = (String.concat head (String.flatten tail))
-(Kind.Term.show.sugar.string term) = (Maybe.bind (Kind.Term.show.sugar.string.go term) λres let quot = "'"; (Maybe.pure (Kind.Printer.text [quot, res, quot])))
+(Kind.Term.show.sugar.string term) = (Maybe.bind (Kind.Term.show.sugar.string.go term) λres let quot = (String.cons 34 ""); (Maybe.pure (Kind.Printer.text [quot, res, quot])))
 (Kind.Term.show.sugar.string.go (Kind.Term.ct0 (String.nil.) orig)) = (Maybe.some "")
 (Kind.Term.show.sugar.string.go (Kind.Term.ct2 (String.cons.) orig (Kind.Term.u60 orig1 x0) x1)) = (Maybe.bind (Kind.Term.show.sugar.string.go x1) λtail (Maybe.pure (String.cons x0 tail)))
 (Kind.Term.show.sugar.string.go other) = (Maybe.none)

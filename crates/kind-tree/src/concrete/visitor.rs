@@ -215,7 +215,16 @@ pub fn walk_case<T: Visitor>(ctx: &mut T, case: &mut Case) {
 
 pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
     ctx.visit_qualified_ident(&mut matcher.typ);
-    ctx.visit_expr(&mut matcher.scrutineer);
+
+    ctx.visit_ident(&mut matcher.scrutinee);
+
+    if let Some(opt) = &mut matcher.value {
+        ctx.visit_expr(opt);
+    }
+
+    for name in &mut matcher.with_vars {
+        ctx.visit_ident(name)
+    }
 
     match &mut matcher.motive {
         Some(expr) => ctx.visit_expr(expr),
@@ -469,10 +478,13 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             ctx.visit_expr(fst);
             ctx.visit_expr(snd);
         }
-        ExprKind::Open { type_name, var_name, next } => {
+        ExprKind::Open { type_name, var_name, motive, next } => {
             ctx.visit_qualified_ident(type_name);
             ctx.visit_ident(var_name);
             ctx.visit_expr(next);
+            if let Some(res) = motive {
+                ctx.visit_expr(res);
+            }
         },
         ExprKind::Hole => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),
