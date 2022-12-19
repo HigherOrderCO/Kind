@@ -71,7 +71,7 @@ pub struct Match {
     pub typ: QualifiedIdent,
     pub scrutinee: Ident,
     pub value: Option<Box<Expr>>,
-    pub with_vars: Vec<Ident>,
+    pub with_vars: Vec<(Ident, Option<Box<Expr>>)>,
     pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
 }

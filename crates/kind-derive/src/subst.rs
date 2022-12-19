@@ -125,8 +125,13 @@ impl<'a> Visitor for Subst<'a> {
             self.visit_expr(res);
         }
 
-        for name in &mut matcher.with_vars {
-            self.visit_ident(name)
+        for (name, expr) in &mut matcher.with_vars {
+            self.visit_ident(name);
+            self.context_vars.push((name.range, name.to_string()));
+            if let Some(expr) = expr {
+                self.visit_expr(expr);
+            }
+            self.context_vars.pop();
         }
 
         for case in &mut matcher.cases {

@@ -222,8 +222,11 @@ pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
         ctx.visit_expr(opt);
     }
 
-    for name in &mut matcher.with_vars {
-        ctx.visit_ident(name)
+    for (name, expr) in &mut matcher.with_vars {
+        ctx.visit_ident(name);
+        if let Some(expr) = expr {
+            ctx.visit_expr(expr);
+        }
     }
 
     match &mut matcher.motive {
