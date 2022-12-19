@@ -506,7 +506,7 @@ impl Report for Log {
             Log::Checking(file) => {
                 writeln!(
                     fmt,
-                    "     {} {}",
+                    "  {} {}",
                     Paint::new(" CHECKING ").bg(yansi::Color::Green).bold(),
                     file
                 )
@@ -514,7 +514,7 @@ impl Report for Log {
             Log::Compiled(duration) => {
                 writeln!(
                     fmt,
-                    "     {} All relevant terms compiled. took {:.2}s",
+                    "  {} All relevant terms compiled. took {:.2}s",
                     Paint::new(" COMPILED ").bg(yansi::Color::Green).bold(),
                     duration.as_secs_f32()
                 )
@@ -522,7 +522,7 @@ impl Report for Log {
             Log::Checked(duration) => {
                 writeln!(
                     fmt,
-                    "      {} All terms checked. took {:.2}s",
+                    "   {} All terms checked. took {:.2}s",
                     Paint::new(" CHECKED ").bg(yansi::Color::Green).bold(),
                     duration.as_secs_f32()
                 )
@@ -530,7 +530,7 @@ impl Report for Log {
             Log::Failed(duration) => {
                 writeln!(
                     fmt,
-                    "       {} Took {}s",
+                    "    {} Took {}s",
                     Paint::new(" FAILED ").bg(yansi::Color::Red).bold(),
                     duration.as_secs()
                 )
@@ -538,8 +538,8 @@ impl Report for Log {
             Log::Rewrites(u64) => {
                 writeln!(
                     fmt,
-                    "    {} Rewrites: {}",
-                    Paint::new(" EVALUATED ").bg(yansi::Color::Green).bold(),
+                    "     {} Rewrites: {}",
+                    Paint::new(" STATS ").bg(yansi::Color::Green).bold(),
                     u64
                 )
             }

@@ -478,10 +478,13 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             ctx.visit_expr(fst);
             ctx.visit_expr(snd);
         }
-        ExprKind::Open { type_name, var_name, next } => {
+        ExprKind::Open { type_name, var_name, motive, next } => {
             ctx.visit_qualified_ident(type_name);
             ctx.visit_ident(var_name);
             ctx.visit_expr(next);
+            if let Some(res) = motive {
+                ctx.visit_expr(res);
+            }
         },
         ExprKind::Hole => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),

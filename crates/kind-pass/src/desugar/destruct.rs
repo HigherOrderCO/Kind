@@ -114,8 +114,11 @@ impl<'a> DesugarState<'a> {
                 let mut irrelev = meta.arguments.map(|x| x.erased).to_vec();
                 irrelev = irrelev[record.parameters.len()..].to_vec();
 
+                let motive = self.gen_hole_expr(range);
+
                 let spine = vec![
                     val,
+                    desugared::Expr::lambda(range, Ident::generate("self"), motive, false),
                     desugared::Expr::unfold_lambda(&irrelev, &arguments, next(self)),
                 ];
 

@@ -609,8 +609,13 @@ impl<'a> Parser<'a> {
         let next = self.parse_expr(false)?;
         let end = next.range;
 
+        let motive = self.try_single(&|this| {
+            this.eat_variant(Token::Colon)?;
+            this.parse_expr(false)
+        })?;
+
         Ok(Box::new(Expr {
-            data: ExprKind::Open { type_name, var_name, next },
+            data: ExprKind::Open { type_name, var_name, motive, next },
             range: start.mix(end),
         }))
     }

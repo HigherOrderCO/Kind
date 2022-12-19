@@ -587,9 +587,13 @@ impl Visitor for UnboundCollector {
 
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }
-            ExprKind::Open { type_name, var_name, next } => {
+            ExprKind::Open { type_name, var_name, motive, next } => {
                 self.visit_qualified_ident(type_name);
 
+                if let Some(motive) = motive {
+                    self.visit_expr(motive)
+                }
+                
                 if let Some(fields) = self.record_defs.get(type_name.to_str()) {
                     for field in fields {
                         self.context_vars.push((var_name.range, format!("{}.{}", var_name, field)))
