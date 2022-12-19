@@ -1,4 +1,4 @@
-#derive[open]
+#derive[match]
 record Pudim {
     owo : U60
     uwu : U60

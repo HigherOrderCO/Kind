@@ -1,0 +1,16 @@
+#derive[match]
+type Maybe (t: Type) {
+    some (val: t)
+    none
+}
+
+Main : U60
+Main =
+    let t = Maybe.some 3
+    let e = 4
+    let f = 10
+    match Maybe t with e f {
+        some val => (+ val (+ e f))
+        none     => (* e f)
+    }
+

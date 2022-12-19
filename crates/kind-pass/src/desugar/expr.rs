@@ -260,12 +260,12 @@ impl<'a> DesugarState<'a> {
             return desugared::Expr::err(type_name.range);
         };
 
-        let open_id = type_name.add_segment(record.constructor.to_str()).add_segment("open");
+        let open_id = type_name.add_segment(record.constructor.to_str()).add_segment("match");
 
         if self.old_book.meta.get(&open_id.to_string()).is_none() {
             self.send_err(PassError::NeedToImplementMethods(
                 range,
-                Sugar::Open(type_name.to_string()),
+                Sugar::Match(type_name.to_string()),
             ));
             return desugared::Expr::err(range);
         }

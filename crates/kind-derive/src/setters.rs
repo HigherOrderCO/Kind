@@ -1,4 +1,4 @@
-//! Module to derive a "open" function for records.
+//! Module to derive setters for record types
 
 use kind_span::Range;
 

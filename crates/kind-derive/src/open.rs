@@ -1,4 +1,4 @@
-//! Module to derive a "open" function for records.
+//! Module to derive getters function for records.
 
 use kind_span::Range;
 
@@ -8,7 +8,7 @@ use kind_tree::telescope::Telescope;
 
 use crate::matching::derive_match;
 
-pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
+pub fn derive_match_rec(range: Range, rec: &RecordDecl) -> concrete::Entry {
     let cons = Constructor {
         name: rec.constructor.clone(),
         docs: vec![],
@@ -32,7 +32,7 @@ pub fn derive_open(range: Range, rec: &RecordDecl) -> concrete::Entry {
     entry.name = rec
     .name
     .add_segment(rec.constructor.to_str())
-    .add_segment("open");
+    .add_segment("match");
 
     for rule in &mut entry.rules {
         rule.name = entry.name.clone();

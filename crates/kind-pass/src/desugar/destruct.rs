@@ -68,7 +68,7 @@ impl<'a> DesugarState<'a> {
         match binding {
             Destruct::Destruct(_, typ, case, jump_rest) => {
                 let meta = self.old_book.meta.get(&typ.to_string()).unwrap();
-                let open_id = typ.add_segment("open");
+                let open_id = typ.add_segment("match");
 
                 let rec = meta
                     .is_record_cons_of
@@ -85,7 +85,7 @@ impl<'a> DesugarState<'a> {
                 if self.old_book.meta.get(&open_id.to_string()).is_none() {
                     self.send_err(PassError::NeedToImplementMethods(
                         binding.locate(),
-                        Sugar::Open(typ.to_string()),
+                        Sugar::Match(typ.to_string()),
                     ));
                     return desugared::Expr::err(range);
                 }

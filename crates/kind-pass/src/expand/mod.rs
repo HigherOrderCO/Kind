@@ -8,7 +8,7 @@ use std::sync::mpsc::Sender;
 use fxhash::FxHashMap;
 use kind_derive::getters::derive_getters;
 use kind_derive::matching::derive_match;
-use kind_derive::open::derive_open;
+use kind_derive::open::derive_match_rec;
 use kind_derive::setters::derive_setters;
 use kind_report::data::Diagnostic;
 use kind_span::Locatable;
@@ -34,7 +34,6 @@ type Channel = Sender<Box<dyn Diagnostic>>;
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Derive {
     Match,
-    Open,
     Getters,
     Setters,
 }
@@ -43,7 +42,6 @@ impl Display for Derive {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Derive::Match => write!(f, "match"),
-            Derive::Open => write!(f, "open"),
             Derive::Getters => write!(f, "getters"),
             Derive::Setters => write!(f, "setters"),
         }
@@ -62,7 +60,6 @@ pub fn insert_or_report(channel: Channel, hashmap: &mut Derivations, key: Derive
 fn string_to_derive(name: &str) -> Option<Derive> {
     match name {
         "match" => Some(Derive::Match),
-        "open" => Some(Derive::Open),
         "getters" => Some(Derive::Getters),
         "setters" => Some(Derive::Setters),
         _ => None,
@@ -141,17 +138,15 @@ pub fn expand_sum_type(
 }
 
 pub fn expand_record_type(
-    error_channel: Channel,
+    _error_channel: Channel,
     entries: &mut FxHashMap<String, (Entry, EntryMeta)>,
     rec: &RecordDecl,
     derivations: Derivations,
-) -> bool {
-    let mut failed = false;
-
-    for (key, val) in derivations {
+) {
+    for (key, _) in derivations {
         match key {
-            Derive::Open => {
-                let res = derive_open(rec.name.range, rec);
+            Derive::Match => {
+                let res = derive_match_rec(rec.name.range, rec);
                 let info = res.extract_book_info();
                 entries.insert(res.name.to_string(), (res, info));
             }
@@ -167,16 +162,8 @@ pub fn expand_record_type(
                     entries.insert(res.name.to_string(), (res, info));
                 }
             }
-            other => {
-                error_channel
-                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
-                    .unwrap();
-                failed = true;
-            }
         }
     }
-
-    failed
 }
 
 pub fn expand_module(error_channel: Channel, module: &mut Module) -> bool {
@@ -195,7 +182,7 @@ pub fn expand_module(error_channel: Channel, module: &mut Module) -> bool {
             }
             TopLevel::RecordType(rec) => {
                 if let Some(derive) = expand_derive(error_channel.clone(), &rec.attrs) {
-                    failed |= expand_record_type(error_channel.clone(), &mut entries, rec, derive)
+                    expand_record_type(error_channel.clone(), &mut entries, rec, derive)
                 } else {
                     failed = true;
                 }
