@@ -309,7 +309,6 @@ impl Visitor for UnboundCollector {
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);
                 for bind in bindings {
-                    println!("{}", bind);
                     self.visit_case_binding(bind)
                 }
             }

@@ -8,5 +8,5 @@
       :  |  
       :  \ You cannot use this expression! 
 
-      Hint: You must implement 'open' in order to use the open notation (or derive open with #derive[open]).
+      Hint: You must implement 'match' in order to use the match notation (or derive match with #derive[match]).
 

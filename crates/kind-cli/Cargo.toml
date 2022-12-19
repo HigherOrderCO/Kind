@@ -1,6 +1,6 @@
 [package]
-name = "kind-cli"
-version = "0.3.3"
+name = "kind2"
+version = "0.3.4"
 edition = "2021"
 description = "A pure functional functional language that uses the HVM."
 repository = "https://github.com/Kindelia/Kind2"
@@ -21,4 +21,3 @@ kind-query = { path = "../kind-query" }
 
 clap = { version = "4.0.10", features = ["derive"] }
 anyhow = "1.0.66"
-exitcode = "1.1.2"

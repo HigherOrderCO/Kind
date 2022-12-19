@@ -33,7 +33,7 @@ impl<'a> Visitor for Subst<'a> {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
                 self.visit_qualified_ident(
-                    &mut QualifiedIdent::add_segment(ty, "open").to_generated(),
+                    &mut QualifiedIdent::add_segment(ty, "match").to_generated(),
                 );
                 self.visit_range(range);
                 self.visit_qualified_ident(ty);

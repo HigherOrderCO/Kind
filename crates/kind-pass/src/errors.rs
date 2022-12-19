@@ -24,7 +24,6 @@ pub enum Sugar {
     String,
     U120,
     Match(String),
-    Open(String),
 }
 
 /// Describes all of the possible errors inside each
@@ -218,7 +217,6 @@ impl Diagnostic for PassError {
                     Sugar::String => "You must implement 'String.cons' in order to use the string notation.".to_string(),
                     Sugar::U120 => "You must implement 'U120.new' in order to use the u120 notation.".to_string(),
                     Sugar::Match(_) => format!("You must implement 'match' in order to use the match notation (or derive match with #derive[match])."),
-                    Sugar::Open(_) => format!("You must implement 'open' in order to use the open notation (or derive open with #derive[open])."),
                 }],
                 positions: vec![Marker {
                     position: *expr_place,
