@@ -1,5 +1,5 @@
 use checker::eval;
-use errors::{DriverError, GenericDriverError};
+use diagnostic::{DriverDiagnostic, GenericDriverError};
 use kind_pass::{desugar, erasure, inline::inline_book};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
@@ -11,7 +11,7 @@ use std::{path::PathBuf};
 
 use kind_checker as checker;
 
-pub mod errors;
+pub mod diagnostic;
 pub mod resolution;
 pub mod session;
 
@@ -121,7 +121,7 @@ pub fn compile_book_to_kdl(
 
 pub fn check_main_entry(session: &mut Session, book: &untyped::Book) -> anyhow::Result<()> {
     if !book.entrs.contains_key("Main") {
-        let err = Box::new(DriverError::ThereIsntAMain);
+        let err = Box::new(DriverDiagnostic::ThereIsntAMain);
         session.diagnostic_sender.send(err).unwrap();
         Err(ResolutionError.into())
     } else {
@@ -134,7 +134,7 @@ pub fn check_main_desugared_entry(
     book: &desugared::Book,
 ) -> anyhow::Result<()> {
     if !book.entrs.contains_key("Main") {
-        let err = Box::new(DriverError::ThereIsntAMain);
+        let err = Box::new(DriverDiagnostic::ThereIsntAMain);
         session.diagnostic_sender.send(err).unwrap();
         Err(ResolutionError.into())
     } else {

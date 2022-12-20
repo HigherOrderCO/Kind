@@ -12,7 +12,7 @@ use kind_tree::concrete::{self};
 use kind_tree::symbol::Ident;
 use kind_tree::telescope::Telescope;
 
-use crate::errors::DeriveError;
+use crate::diagnostic::DeriveDiagnostic;
 use crate::subst::substitute_in_expr;
 
 type Errs = Vec<Box<dyn Diagnostic>>;
@@ -24,7 +24,7 @@ pub fn to_app_binding(errs: &mut Errs, binding: &Binding) -> AppBinding {
             data: expr.clone(),
         },
         Binding::Named(_, name, expr) => {
-            errs.push(Box::new(DeriveError::CannotUseNamedVariable(name.range)));
+            errs.push(Box::new(DeriveDiagnostic::CannotUseNamedVariable(name.range)));
             AppBinding::explicit(expr.clone())
         }
     }
@@ -127,17 +127,17 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> (concrete::Entry, Errs) 
                     new_args.push(match arg {
                         Binding::Positional(expr) => AppBinding::explicit(expr.clone()),
                         Binding::Named(range, _, expr) => {
-                            errs.push(Box::new(DeriveError::CannotUseNamedVariable(*range)));
+                            errs.push(Box::new(DeriveDiagnostic::CannotUseNamedVariable(*range)));
                             AppBinding::explicit(expr.clone())
                         }
                     });
                 }
                 new_args
             } else if let ExprKind::All { .. } = &res.data {
-                errs.push(Box::new(DeriveError::CannotUseAll(res.range)));
+                errs.push(Box::new(DeriveDiagnostic::CannotUseAll(res.range)));
                 [indice_names.as_slice()].concat()
             } else {
-                errs.push(Box::new(DeriveError::InvalidReturnType(res.range)));
+                errs.push(Box::new(DeriveDiagnostic::InvalidReturnType(res.range)));
                 [indice_names.as_slice()].concat()
             }
         } else {

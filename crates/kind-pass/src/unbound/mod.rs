@@ -19,7 +19,7 @@ use kind_tree::concrete::{Argument, Book, Entry, Module, Rule, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::{visit_opt, visit_vec};
 
-use crate::errors::PassError;
+use crate::diagnostic::PassDiagnostic;
 
 pub mod subst;
 
@@ -71,7 +71,7 @@ pub fn collect_module_info(
 
     for idents in state.unbound.values() {
         diagnostic_sender
-            .send(Box::new(PassError::UnboundVariable(
+            .send(Box::new(PassDiagnostic::UnboundVariable(
                 idents.to_vec(),
                 vec![],
             )))
@@ -165,7 +165,7 @@ impl Visitor for UnboundCollector {
         if let Some(fst) = self.context_vars.iter().find(|x| x.1 == name) {
             if self.emit_errs {
                 self.errors
-                    .send(Box::new(PassError::RepeatedVariable(fst.0, ident.0.range)))
+                    .send(Box::new(PassDiagnostic::RepeatedVariable(fst.0, ident.0.range)))
                     .unwrap()
             }
         } else {
@@ -187,7 +187,7 @@ impl Visitor for UnboundCollector {
         if let Some(fst) = res {
             if self.emit_errs {
                 self.errors
-                    .send(Box::new(PassError::RepeatedVariable(
+                    .send(Box::new(PassDiagnostic::RepeatedVariable(
                         fst.0,
                         argument.name.range,
                     )))

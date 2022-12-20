@@ -3,14 +3,14 @@ use kind_tree::concrete::{self, expr, Literal, TopLevel};
 use kind_tree::desugared::{self};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
-use crate::errors::{PassError, Sugar};
+use crate::diagnostic::{PassDiagnostic, Sugar};
 
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
     pub fn check_implementation(&mut self, name: &str, range: Range, sugar: Sugar) -> bool {
         if !self.old_book.names.contains_key(&name.to_string()) {
-            self.send_err(PassError::NeedToImplementMethods(range, sugar));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(range, sugar));
             false
         } else {
             true
@@ -157,7 +157,7 @@ impl<'a> DesugarState<'a> {
         let pure = self.old_book.names.get(pure_ident.to_str());
 
         if bind.is_none() || pure.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::DoNotation));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::DoNotation));
             return desugared::Expr::err(range);
         }
 
@@ -204,7 +204,7 @@ impl<'a> DesugarState<'a> {
         let cons = self.old_book.names.get(nil_ident.to_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::List));
             return desugared::Expr::err(range);
         }
 
@@ -230,7 +230,7 @@ impl<'a> DesugarState<'a> {
         let bool_if = self.old_book.names.get(bool_if_ident.to_str());
 
         if bool_if.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::BoolIf));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::BoolIf));
             return desugared::Expr::err(range);
         }
 
@@ -256,14 +256,14 @@ impl<'a> DesugarState<'a> {
         let record = if let Some(TopLevel::RecordType(record)) = rec {
             record
         } else {
-            self.send_err(PassError::LetDestructOnlyForRecord(type_name.range));
+            self.send_err(PassDiagnostic::LetDestructOnlyForRecord(type_name.range));
             return desugared::Expr::err(type_name.range);
         };
 
         let open_id = type_name.add_segment(record.constructor.to_str()).add_segment("match");
 
         if self.old_book.meta.get(&open_id.to_string()).is_none() {
-            self.send_err(PassError::NeedToImplementMethods(
+            self.send_err(PassDiagnostic::NeedToImplementMethods(
                 range,
                 Sugar::Match(type_name.to_string()),
             ));

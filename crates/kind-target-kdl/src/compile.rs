@@ -8,7 +8,7 @@ use tiny_keccak::Hasher;
 
 pub use kindelia_lang::ast as kdl;
 
-use crate::{errors::KdlError, GenericCompilationToHVMError};
+use crate::{diagnostic::KdlDiagnostic, GenericCompilationToHVMError};
 
 pub const KDL_NAME_LEN: usize = 12;
 const U60_MAX: kdl::U120 = kdl::U120(0xFFFFFFFFFFFFFFF);
@@ -111,7 +111,7 @@ pub fn compile_book(
         if let Ok(new_name) = kdl::Name::from_str(&new_name) {
             ctx.kdl_names.insert(name.clone(), new_name);
         } else {
-            ctx.send_err(Box::new(KdlError::InvalidVarName(entry.name.range)));
+            ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(entry.name.range)));
         }
     }
 
@@ -334,7 +334,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
                 let body = Box::new(compile_expr(ctx, body));
                 To::Lam { name, body }
             } else {
-                ctx.send_err(Box::new(KdlError::InvalidVarName(param.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(param.range)));
                 err_term()
             }
         }
@@ -346,7 +346,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
                 let argm = Box::new(compile_expr(ctx, &val));
                 To::App { func, argm }
             } else {
-                ctx.send_err(Box::new(KdlError::InvalidVarName(name.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(name.range)));
                 err_term()
             }
         }
@@ -354,7 +354,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             numb: kdl::U120(*numb as u128),
         },
         From::F60 { numb: _ } => {
-            ctx.send_err(Box::new(KdlError::FloatUsed(expr.range)));
+            ctx.send_err(Box::new(KdlDiagnostic::FloatUsed(expr.range)));
             err_term()
         }
         From::Var { name } => {
@@ -362,7 +362,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             if let Ok(name) = res_name {
                 To::Var { name }
             } else {
-                ctx.send_err(Box::new(KdlError::InvalidVarName(name.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(name.range)));
                 err_term()
             }
         }
@@ -397,9 +397,9 @@ pub fn compile_entry(ctx: &mut CompileCtx, entry: &untyped::Entry) {
 
     if entry.attrs.kdl_run {
         if !entry.args.is_empty() {
-            ctx.send_err(Box::new(KdlError::ShouldNotHaveArguments(entry.range)));
+            ctx.send_err(Box::new(KdlDiagnostic::ShouldNotHaveArguments(entry.range)));
         } else if entry.rules.len() != 1 {
-            ctx.send_err(Box::new(KdlError::ShouldHaveOnlyOneRule(entry.range)));
+            ctx.send_err(Box::new(KdlDiagnostic::ShouldHaveOnlyOneRule(entry.range)));
         } else {
             let expr = compile_expr(ctx, &entry.rules[0].body);
             let statement = kdl::Statement::Run { expr, sign: None };
@@ -421,7 +421,7 @@ fn compile_common_function(ctx: &mut CompileCtx, entry: &untyped::Entry) {
         if let Ok(name) = kdl::Name::from_str(name) {
             args.push(name)
         } else {
-            ctx.send_err(Box::new(KdlError::InvalidVarName(*range)));
+            ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(*range)));
         }
     }
 
@@ -446,17 +446,17 @@ fn compile_common_function(ctx: &mut CompileCtx, entry: &untyped::Entry) {
             let init_entry = ctx.book.entrs.get(state_name.to_str());
             if let Some(entry) = init_entry {
                 if !entry.args.is_empty() {
-                    ctx.send_err(Box::new(KdlError::ShouldNotHaveArguments(entry.range)));
+                    ctx.send_err(Box::new(KdlDiagnostic::ShouldNotHaveArguments(entry.range)));
                     None
                 } else if entry.rules.len() != 1 {
-                    ctx.send_err(Box::new(KdlError::ShouldHaveOnlyOneRule(entry.range)));
+                    ctx.send_err(Box::new(KdlDiagnostic::ShouldHaveOnlyOneRule(entry.range)));
                     None
                 } else {
                     ctx.kdl_states.push(state_name.to_string());
                     Some(compile_expr(ctx, &entry.rules[0].body))
                 }
             } else {
-                ctx.send_err(Box::new(KdlError::NoInitEntry(state_name.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::NoInitEntry(state_name.range)));
                 None
             }
         } else {

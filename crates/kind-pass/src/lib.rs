@@ -7,7 +7,7 @@
 
 pub mod desugar;
 pub mod erasure;
-mod errors;
+mod diagnostic;
 pub mod expand;
 pub mod inline;
 pub mod unbound;

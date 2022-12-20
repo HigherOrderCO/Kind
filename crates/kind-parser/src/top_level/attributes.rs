@@ -1,7 +1,7 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::{Attribute, AttributeStyle};
 
-use crate::errors::SyntaxDiagnostic;
+use crate::diagnostic::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::state::Parser;
 

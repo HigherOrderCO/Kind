@@ -5,6 +5,7 @@ use std::{fmt, io};
 use clap::{Parser, Subcommand};
 use driver::resolution::ResolutionError;
 use kind_driver::session::Session;
+
 use kind_report::data::{Diagnostic, Log};
 use kind_report::report::{FileCache, Report};
 use kind_report::RenderConfig;

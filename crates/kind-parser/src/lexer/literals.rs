@@ -5,7 +5,7 @@
 
 use kind_span::Range;
 
-use crate::errors::{EncodeSequence, SyntaxDiagnostic};
+use crate::diagnostic::{EncodeSequence, SyntaxDiagnostic};
 use crate::lexer::tokens::Token;
 use crate::Lexer;
 

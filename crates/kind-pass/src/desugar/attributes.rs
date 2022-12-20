@@ -2,32 +2,32 @@ use kind_span::Locatable;
 use kind_tree::concrete::{self, Attribute, AttributeStyle};
 use kind_tree::Attributes;
 
-use crate::errors::PassError;
+use crate::diagnostic::PassDiagnostic;
 
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
     fn args_should_be_empty(&mut self, attr: &Attribute) {
         if !attr.args.is_empty() {
-            self.send_err(PassError::AttributeDoesNotExpectArgs(attr.range))
+            self.send_err(PassDiagnostic::AttributeDoesNotExpectArgs(attr.range))
         };
     }
 
     fn attr_without_value(&mut self, attr: &Attribute) {
         if attr.value.is_some() {
-            self.send_err(PassError::AttributeDoesNotExpectEqual(attr.range))
+            self.send_err(PassDiagnostic::AttributeDoesNotExpectEqual(attr.range))
         };
     }
 
     fn attr_invalid_argument(&mut self, attr: &Attribute) {
         if attr.value.is_none() {
-            self.send_err(PassError::InvalidAttributeArgument(attr.range))
+            self.send_err(PassDiagnostic::InvalidAttributeArgument(attr.range))
         };
     }
 
     fn attr_expects_a_value(&mut self, attr: &Attribute) {
         if attr.value.is_none() {
-            self.send_err(PassError::AttributeExpectsAValue(attr.range))
+            self.send_err(PassDiagnostic::AttributeExpectsAValue(attr.range))
         };
     }
 
@@ -89,14 +89,14 @@ impl<'a> DesugarState<'a> {
                             attributes.trace = Some(false);
                         }
                         Some(other) => {
-                            self.send_err(PassError::InvalidAttributeArgument(other.locate()))
+                            self.send_err(PassDiagnostic::InvalidAttributeArgument(other.locate()))
                         }
                         None => {
                             attributes.trace = Some(false);
                         }
                     }
                 }
-                _ => self.send_err(PassError::AttributeDoesNotExists(attr.range)),
+                _ => self.send_err(PassDiagnostic::AttributeDoesNotExists(attr.range)),
             }
         }
 

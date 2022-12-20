@@ -6,7 +6,7 @@ use kind_tree::backend::Term;
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::{desugared, Operator};
 
-use crate::errors::TypeError;
+use crate::diagnostic::TypeDiagnostic;
 use desugared::Expr;
 
 type Entry = (String, Box<Expr>, Vec<Box<Expr>>);
@@ -214,7 +214,7 @@ pub fn transform_entry(term: &Term) -> Result<Entry, String> {
     }
 }
 
-fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
+fn parse_type_error(expr: &Term) -> Result<TypeDiagnostic, String> {
     match expr {
         Term::Ctr { name, args } => {
             if args.len() < 2 {
@@ -225,25 +225,25 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
             let ctx = Context(entries.collect());
             let orig = match_opt!(*args[1], Term::U6O { numb } => EncodedRange(numb).to_range())?;
             match name.as_str() {
-                "Kind.Error.Quoted.unbound_variable" => Ok(TypeError::UnboundVariable(ctx, orig)),
-                "Kind.Error.Quoted.cant_infer_hole" => Ok(TypeError::CantInferHole(ctx, orig)),
-                "Kind.Error.Quoted.cant_infer_lambda" => Ok(TypeError::CantInferLambda(ctx, orig)),
-                "Kind.Error.Quoted.invalid_call" => Ok(TypeError::InvalidCall(ctx, orig)),
-                "Kind.Error.Quoted.impossible_case" => Ok(TypeError::ImpossibleCase(
+                "Kind.Error.Quoted.unbound_variable" => Ok(TypeDiagnostic::UnboundVariable(ctx, orig)),
+                "Kind.Error.Quoted.cant_infer_hole" => Ok(TypeDiagnostic::CantInferHole(ctx, orig)),
+                "Kind.Error.Quoted.cant_infer_lambda" => Ok(TypeDiagnostic::CantInferLambda(ctx, orig)),
+                "Kind.Error.Quoted.invalid_call" => Ok(TypeDiagnostic::InvalidCall(ctx, orig)),
+                "Kind.Error.Quoted.impossible_case" => Ok(TypeDiagnostic::ImpossibleCase(
                     ctx,
                     orig,
                     parse_all_expr(im_rc::HashMap::new(), &args[2])?,
                     parse_all_expr(im_rc::HashMap::new(), &args[3])?,
                 )),
-                "Kind.Error.Quoted.inspection" => Ok(TypeError::Inspection(
+                "Kind.Error.Quoted.inspection" => Ok(TypeDiagnostic::Inspection(
                     ctx,
                     orig,
                     parse_all_expr(im_rc::HashMap::new(), &args[2])?,
                 )),
                 "Kind.Error.Quoted.too_many_arguments" => {
-                    Ok(TypeError::TooManyArguments(ctx, orig))
+                    Ok(TypeDiagnostic::TooManyArguments(ctx, orig))
                 }
-                "Kind.Error.Quoted.type_mismatch" => Ok(TypeError::TypeMismatch(
+                "Kind.Error.Quoted.type_mismatch" => Ok(TypeDiagnostic::TypeMismatch(
                     ctx,
                     orig,
                     parse_all_expr(im_rc::HashMap::new(), &args[2])?,
@@ -256,7 +256,7 @@ fn parse_type_error(expr: &Term) -> Result<TypeError, String> {
     }
 }
 
-pub(crate) fn parse_report(expr: &Term) -> Result<Vec<TypeError>, String> {
+pub(crate) fn parse_report(expr: &Term) -> Result<Vec<TypeDiagnostic>, String> {
     let args = parse_list(expr)?;
     let mut errs = Vec::new();
 

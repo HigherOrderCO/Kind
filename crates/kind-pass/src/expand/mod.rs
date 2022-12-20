@@ -20,7 +20,7 @@ use kind_tree::concrete::RecordDecl;
 use kind_tree::concrete::SumTypeDecl;
 use kind_tree::concrete::{Attribute, TopLevel};
 
-use crate::errors::PassError;
+use crate::diagnostic::PassDiagnostic;
 
 /// Expands sum type and record definitions to a lot of
 /// helper definitions like eliminators and replace qualified identifiers
@@ -50,7 +50,7 @@ impl Display for Derive {
 
 pub fn insert_or_report(channel: Channel, hashmap: &mut Derivations, key: Derive, range: Range) {
     if let Some(last_range) = hashmap.get(&key) {
-        let err = Box::new(PassError::DuplicatedAttributeArgument(*last_range, range));
+        let err = Box::new(PassDiagnostic::DuplicatedAttributeArgument(*last_range, range));
         channel.send(err).unwrap();
     } else {
         hashmap.insert(key, range);
@@ -78,7 +78,7 @@ pub fn expand_derive(error_channel: Channel, attrs: &[Attribute]) -> Option<Deri
         }
 
         if let Some(attr) = &attr.value {
-            let err = Box::new(PassError::AttributeDoesNotExpectEqual(attr.locate()));
+            let err = Box::new(PassDiagnostic::AttributeDoesNotExpectEqual(attr.locate()));
             error_channel.send(err).unwrap();
             failed = true;
         }
@@ -91,7 +91,7 @@ pub fn expand_derive(error_channel: Channel, attrs: &[Attribute]) -> Option<Deri
                     insert_or_report(error_channel.clone(), &mut defs, key, *range)
                 }
                 other => {
-                    let err = Box::new(PassError::InvalidAttributeArgument(other.locate()));
+                    let err = Box::new(PassDiagnostic::InvalidAttributeArgument(other.locate()));
                     error_channel.send(err).unwrap();
                     failed = true;
                 }
@@ -127,7 +127,7 @@ pub fn expand_sum_type(
             }
             other => {
                 error_channel
-                    .send(Box::new(PassError::CannotDerive(other.to_string(), val)))
+                    .send(Box::new(PassDiagnostic::CannotDerive(other.to_string(), val)))
                     .unwrap();
                 failed = true;
             }

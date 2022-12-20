@@ -11,7 +11,7 @@ use std::sync::mpsc::Sender;
 use kind_report::data::Diagnostic;
 use kind_span::Range;
 
-use crate::errors::SyntaxDiagnostic;
+use crate::diagnostic::SyntaxDiagnostic;
 
 use self::{state::Lexer, tokens::Token};
 

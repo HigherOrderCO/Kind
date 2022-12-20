@@ -6,7 +6,7 @@ use kind_tree::concrete::*;
 use kind_tree::symbol::QualifiedIdent;
 use kind_tree::telescope::Telescope;
 
-use crate::errors::SyntaxDiagnostic;
+use crate::diagnostic::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::state::Parser;
 

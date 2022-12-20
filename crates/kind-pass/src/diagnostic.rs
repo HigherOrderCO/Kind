@@ -28,7 +28,7 @@ pub enum Sugar {
 
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
-pub enum PassError {
+pub enum PassDiagnostic {
     RepeatedVariable(Range, Range),
     IncorrectArity(Range, Vec<Range>, usize, usize),
     DuplicatedNamed(Range, Range),
@@ -57,40 +57,40 @@ pub enum PassError {
 }
 
 // TODO: A way to build an error message with methods
-impl Diagnostic for PassError {
+impl Diagnostic for PassDiagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex> {
         match self {
-            PassError::RepeatedVariable(range, _) => Some(range.ctx),
-            PassError::IncorrectArity(range, _, _, _) => Some(range.ctx),
-            PassError::DuplicatedNamed(range, _) => Some(range.ctx),
-            PassError::LetDestructOnlyForRecord(range) => Some(range.ctx),
-            PassError::LetDestructOnlyForSum(range) => Some(range.ctx),
-            PassError::NoCoverage(range, _) => Some(range.ctx),
-            PassError::CannotFindField(range, _, _) => Some(range.ctx),
-            PassError::CannotFindConstructor(range, _, _) => Some(range.ctx),
-            PassError::NeedToImplementMethods(range, _) => Some(range.ctx),
-            PassError::RuleWithIncorrectArity(range, _, _, _) => Some(range.ctx),
-            PassError::RulesWithInconsistentArity(range) => Some(range[0].0.ctx),
-            PassError::SugarIsBadlyImplemented(range, _, _) => Some(range.ctx),
-            PassError::CannotUseIrrelevant(_, range, _) => Some(range.ctx),
-            PassError::CannotFindAlias(_, range) => Some(range.ctx),
-            PassError::NotATypeConstructor(range, _) => Some(range.ctx),
-            PassError::ShouldBeAParameter(_, range) => Some(range.ctx),
-            PassError::NoFieldCoverage(range, _) => Some(range.ctx),
-            PassError::UnboundVariable(ranges, _) => Some(ranges[0].range.ctx),
-            PassError::AttributeDoesNotExpectEqual(range) => Some(range.ctx),
-            PassError::AttributeDoesNotExpectArgs(range) => Some(range.ctx),
-            PassError::InvalidAttributeArgument(range) => Some(range.ctx),
-            PassError::AttributeExpectsAValue(range) => Some(range.ctx),
-            PassError::DuplicatedAttributeArgument(range, _) => Some(range.ctx),
-            PassError::CannotDerive(_, range) => Some(range.ctx),
-            PassError::AttributeDoesNotExists(range) => Some(range.ctx),
+            PassDiagnostic::RepeatedVariable(range, _) => Some(range.ctx),
+            PassDiagnostic::IncorrectArity(range, _, _, _) => Some(range.ctx),
+            PassDiagnostic::DuplicatedNamed(range, _) => Some(range.ctx),
+            PassDiagnostic::LetDestructOnlyForRecord(range) => Some(range.ctx),
+            PassDiagnostic::LetDestructOnlyForSum(range) => Some(range.ctx),
+            PassDiagnostic::NoCoverage(range, _) => Some(range.ctx),
+            PassDiagnostic::CannotFindField(range, _, _) => Some(range.ctx),
+            PassDiagnostic::CannotFindConstructor(range, _, _) => Some(range.ctx),
+            PassDiagnostic::NeedToImplementMethods(range, _) => Some(range.ctx),
+            PassDiagnostic::RuleWithIncorrectArity(range, _, _, _) => Some(range.ctx),
+            PassDiagnostic::RulesWithInconsistentArity(range) => Some(range[0].0.ctx),
+            PassDiagnostic::SugarIsBadlyImplemented(range, _, _) => Some(range.ctx),
+            PassDiagnostic::CannotUseIrrelevant(_, range, _) => Some(range.ctx),
+            PassDiagnostic::CannotFindAlias(_, range) => Some(range.ctx),
+            PassDiagnostic::NotATypeConstructor(range, _) => Some(range.ctx),
+            PassDiagnostic::ShouldBeAParameter(_, range) => Some(range.ctx),
+            PassDiagnostic::NoFieldCoverage(range, _) => Some(range.ctx),
+            PassDiagnostic::UnboundVariable(ranges, _) => Some(ranges[0].range.ctx),
+            PassDiagnostic::AttributeDoesNotExpectEqual(range) => Some(range.ctx),
+            PassDiagnostic::AttributeDoesNotExpectArgs(range) => Some(range.ctx),
+            PassDiagnostic::InvalidAttributeArgument(range) => Some(range.ctx),
+            PassDiagnostic::AttributeExpectsAValue(range) => Some(range.ctx),
+            PassDiagnostic::DuplicatedAttributeArgument(range, _) => Some(range.ctx),
+            PassDiagnostic::CannotDerive(_, range) => Some(range.ctx),
+            PassDiagnostic::AttributeDoesNotExists(range) => Some(range.ctx),
         }
     }
 
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
-            PassError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
+            PassDiagnostic::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,
                 severity: Severity::Error,
                 title: format!("Cannot find the definition '{}'.", idents[0].to_str()),
@@ -114,7 +114,7 @@ impl Diagnostic for PassError {
                     })
                     .collect(),
             },
-            PassError::CannotUseIrrelevant(var_decl, place, declarated_place) => {
+            PassDiagnostic::CannotUseIrrelevant(var_decl, place, declarated_place) => {
                 let mut positions = vec![Marker {
                     position: *place,
                     color: Color::Fst,
@@ -152,7 +152,7 @@ impl Diagnostic for PassError {
                     positions,
                 }
             }
-            PassError::LetDestructOnlyForRecord(place) => DiagnosticFrame {
+            PassDiagnostic::LetDestructOnlyForRecord(place) => DiagnosticFrame {
                 code: 200,
                 severity: Severity::Error,
                 title: "Can only destruct record types.".to_string(),
@@ -166,7 +166,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::RulesWithInconsistentArity(arities) => DiagnosticFrame {
+            PassDiagnostic::RulesWithInconsistentArity(arities) => DiagnosticFrame {
                 code: 201,
                 severity: Severity::Error,
                 title: "All of the rules of a entry should have the same number of patterns.".to_string(),
@@ -183,7 +183,7 @@ impl Diagnostic for PassError {
                     })
                     .collect(),
             },
-            PassError::RuleWithIncorrectArity(place, _got, expected, hidden) => DiagnosticFrame {
+            PassDiagnostic::RuleWithIncorrectArity(place, _got, expected, hidden) => DiagnosticFrame {
                 code: 203,
                 severity: Severity::Error,
                 title: "This rule is with the incorrect arity.".to_string(),
@@ -203,7 +203,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::NeedToImplementMethods(expr_place, sugar) => DiagnosticFrame {
+            PassDiagnostic::NeedToImplementMethods(expr_place, sugar) => DiagnosticFrame {
                 code: 204,
                 severity: Severity::Error,
                 title: "Required functions are not implemented for this type.".to_string(),
@@ -226,7 +226,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::LetDestructOnlyForSum(place) => DiagnosticFrame {
+            PassDiagnostic::LetDestructOnlyForSum(place) => DiagnosticFrame {
                 code: 206,
                 severity: Severity::Error,
                 title: "Can only use match on sum types.".to_string(),
@@ -240,7 +240,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::CannotFindField(place, def_name, ty) => DiagnosticFrame {
+            PassDiagnostic::CannotFindField(place, def_name, ty) => DiagnosticFrame {
                 code: 207,
                 severity: Severity::Error,
                 title: format!("Cannot find this field in the definition '{}'.", ty),
@@ -263,7 +263,7 @@ impl Diagnostic for PassError {
                     },
                 ],
             },
-            PassError::CannotFindConstructor(place, def_name, ty) => DiagnosticFrame {
+            PassDiagnostic::CannotFindConstructor(place, def_name, ty) => DiagnosticFrame {
                 code: 208,
                 severity: Severity::Error,
                 title: format!("Cannot find this constructor in the type definition '{}'.", ty),
@@ -286,7 +286,7 @@ impl Diagnostic for PassError {
                     },
                 ],
             },
-            PassError::NoCoverage(place, other) => DiagnosticFrame {
+            PassDiagnostic::NoCoverage(place, other) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "The match is not covering all of the possibilities!".to_string(),
@@ -300,7 +300,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::IncorrectArity(head_range, got, expected, hidden) => {
+            PassDiagnostic::IncorrectArity(head_range, got, expected, hidden) => {
                 let positions = vec![Marker {
                     position: *head_range,
                     color: Color::Fst,
@@ -329,7 +329,7 @@ impl Diagnostic for PassError {
                     positions,
                 }
             }
-            PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
+            PassDiagnostic::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
                 code: 211,
                 severity: Severity::Error,
                 title: "Incorrect arity in the sugar definition".to_string(),
@@ -358,7 +358,7 @@ impl Diagnostic for PassError {
                     },
                 ],
             },
-            PassError::DuplicatedNamed(first_decl, last_decl) => DiagnosticFrame {
+            PassDiagnostic::DuplicatedNamed(first_decl, last_decl) => DiagnosticFrame {
                 code: 212,
                 severity: Severity::Error,
                 title: "Repeated named variable".to_string(),
@@ -381,7 +381,7 @@ impl Diagnostic for PassError {
                     },
                 ],
             },
-            PassError::RepeatedVariable(first_decl, last_decl) => DiagnosticFrame {
+            PassDiagnostic::RepeatedVariable(first_decl, last_decl) => DiagnosticFrame {
                 code: 214,
                 severity: Severity::Error,
                 title: "Repeated name".to_string(),
@@ -404,7 +404,7 @@ impl Diagnostic for PassError {
                     },
                 ],
             },
-            PassError::CannotFindAlias(name, range) => DiagnosticFrame {
+            PassDiagnostic::CannotFindAlias(name, range) => DiagnosticFrame {
                 code: 214,
                 severity: Severity::Error,
                 title: "Cannot find alias".to_string(),
@@ -418,7 +418,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::ShouldBeAParameter(error_range, declaration_range) => {
+            PassDiagnostic::ShouldBeAParameter(error_range, declaration_range) => {
                 let mut positions = vec![];
 
                 if let Some(error_range) = error_range {
@@ -448,7 +448,7 @@ impl Diagnostic for PassError {
                     positions,
                 }
             }
-            PassError::NotATypeConstructor(error_range, declaration_range) => DiagnosticFrame {
+            PassDiagnostic::NotATypeConstructor(error_range, declaration_range) => DiagnosticFrame {
                 code: 214,
                 severity: Severity::Error,
                 title: "This is not the type that is being declared.".to_string(),
@@ -471,7 +471,7 @@ impl Diagnostic for PassError {
                     },
                 ],
             },
-            PassError::NoFieldCoverage(place, other) => DiagnosticFrame {
+            PassDiagnostic::NoFieldCoverage(place, other) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "The case is not covering all the values inside of it!".to_string(),
@@ -488,7 +488,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::AttributeDoesNotExpectEqual(place) => DiagnosticFrame {
+            PassDiagnostic::AttributeDoesNotExpectEqual(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "This attribute does not support values!".to_string(),
@@ -502,7 +502,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::AttributeDoesNotExpectArgs(place) => DiagnosticFrame {
+            PassDiagnostic::AttributeDoesNotExpectArgs(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "This attribute does not expect arguments".to_string(),
@@ -516,7 +516,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::InvalidAttributeArgument(place) => DiagnosticFrame {
+            PassDiagnostic::InvalidAttributeArgument(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "Invalid attribute argument".to_string(),
@@ -530,7 +530,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::CannotDerive(name, place) => DiagnosticFrame {
+            PassDiagnostic::CannotDerive(name, place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: format!("Cannot derive '{}' for this definition", name),
@@ -545,7 +545,7 @@ impl Diagnostic for PassError {
                 }],
             },
 
-            PassError::AttributeExpectsAValue(place) => DiagnosticFrame {
+            PassDiagnostic::AttributeExpectsAValue(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "This attribute expects a value".to_string(),
@@ -559,7 +559,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::AttributeDoesNotExists(place) => DiagnosticFrame {
+            PassDiagnostic::AttributeDoesNotExists(place) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Error,
                 title: "This attribute does not exists".to_string(),
@@ -573,7 +573,7 @@ impl Diagnostic for PassError {
                     main: true,
                 }],
             },
-            PassError::DuplicatedAttributeArgument(first, sec) => DiagnosticFrame {
+            PassDiagnostic::DuplicatedAttributeArgument(first, sec) => DiagnosticFrame {
                 code: 209,
                 severity: Severity::Warning,
                 title: "Duplicated attribute argument".to_string(),
