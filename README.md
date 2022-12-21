@@ -87,6 +87,8 @@ clang -O2 file.c -o file
 
 ---
 
-If you need support related to Kind, email [supportkind@kindelia.org](mailto:supportkind@kindelia.org)
+- If you need support related to Kind, email [supportkind@kindelia.org](mailto:supportkind@kindelia.org)
 
-For Feedbacks, email [kind@kindelia.org](mailto:kind@kindelia.org)
+- For Feedbacks, email [kind@kindelia.org](mailto:kind@kindelia.org)
+
+- To ask questions and join our community, check our [Discord Server](https://discord.gg/kindelia).
