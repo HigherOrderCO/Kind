@@ -91,4 +91,4 @@ clang -O2 file.c -o file
 
 - For Feedbacks, email [kind@kindelia.org](mailto:kind@kindelia.org)
 
-- To ask questions and join our community, check our [Discord Server](discord.gg/kindelia).
+- To ask questions and join our community, check our [Discord Server](https://discord.gg/kindelia).
