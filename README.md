@@ -83,3 +83,9 @@ hvm compile file.hvm
 clang -O2 file.c -o file
 ./file
 ```
+
+
+---
+
+If you need support related to Kind, email [supportkind@kindelia.org](mailto:supportkind@kindelia.org)
+For Feedbacks, email [kind@kindelia.org](mailto:kind@kindelia.org)
