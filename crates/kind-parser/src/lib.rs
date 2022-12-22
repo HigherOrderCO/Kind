@@ -1,5 +1,5 @@
 //! Crate to parse the kind2 grammar.
-mod errors;
+mod diagnostic;
 mod expr;
 mod lexer;
 mod macros;

@@ -19,7 +19,7 @@ use kind_tree::concrete::visitor::Visitor;
 use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
-use crate::{errors::DriverError, session::Session};
+use crate::{diagnostic::DriverDiagnostic, session::Session};
 
 /// The extension of kind2 files.
 const EXT: &str = "kind2";
@@ -52,7 +52,7 @@ fn accumulate_neighbour_paths(
     dir_file_path.set_extension(EXT);
 
     if canon_path.exists() && dir_path.exists() && canon_path.is_file() && dir_path.is_dir() {
-        Err(Box::new(DriverError::MultiplePaths(
+        Err(Box::new(DriverDiagnostic::MultiplePaths(
             ident.clone(),
             vec![canon_path, dir_path],
         )))
@@ -96,7 +96,7 @@ fn try_to_insert_new_name<'a>(
     book: &'a mut Book,
 ) -> bool {
     if let Some(first_occorence) = book.names.get(ident.to_string().as_str()) {
-        let err = Box::new(DriverError::DefinedMultipleTimes(
+        let err = Box::new(DriverDiagnostic::DefinedMultipleTimes(
             first_occorence.clone(),
             ident,
         ));
@@ -193,7 +193,7 @@ fn parse_and_store_book_by_identifier(
 
 fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mut Book) -> bool {
     if !path.exists() {
-        let err = Box::new(DriverError::CannotFindFile(
+        let err = Box::new(DriverDiagnostic::CannotFindFile(
             path.to_str().unwrap().to_string(),
         ));
 
@@ -212,7 +212,7 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
         Err(_) => {
             session
                 .diagnostic_sender
-                .send(Box::new(DriverError::CannotFindFile(
+                .send(Box::new(DriverDiagnostic::CannotFindFile(
                     path.to_str().unwrap().to_string(),
                 )))
                 .unwrap();
@@ -255,7 +255,7 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
 
     similar_names.sort_by(|x, y| x.0.total_cmp(&y.0));
 
-    let err = Box::new(DriverError::UnboundVariable(
+    let err = Box::new(DriverDiagnostic::UnboundVariable(
         idents.to_vec(),
         similar_names.iter().take(5).map(|x| x.1.clone()).collect(),
     ));

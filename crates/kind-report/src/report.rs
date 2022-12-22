@@ -34,6 +34,10 @@ impl Display for Point {
     }
 }
 
+fn count_width(str: &str) -> (usize, usize) {
+    (UnicodeWidthStr::width(str), str.chars().filter(|x| *x == '\t').count())
+}
+
 fn group_markers(markers: &[Marker]) -> SortedMarkers {
     let mut file_group = SortedMarkers::default();
     for marker in markers {
@@ -148,18 +152,18 @@ fn mark_inlined<T: Write + Sized>(
 
     for marker in inline_markers.iter_mut() {
         if start < marker.0.column {
-            let pad = UnicodeWidthStr::width(&code[start..marker.0.column]);
-            write!(fmt, "{:pad$}", "", pad = pad)?;
+            let (pad, tab_pad) = count_width(&code[start..marker.0.column]);
+            write!(fmt, "{:pad$}{}", "", "\t".repeat(tab_pad), pad = pad)?;
             start = marker.0.column;
         }
         if start < marker.1.column {
-            let pad = UnicodeWidthStr::width(&code[start..marker.1.column]);
+            let (pad, tab_pad) = count_width(&code[start..marker.1.column]);
             let colorizer = get_colorizer(&marker.2.color);
             write!(fmt, "{}", colorizer(config.chars.bxline.to_string()))?;
             write!(
                 fmt,
                 "{}",
-                colorizer(config.chars.hbar.to_string().repeat(pad.saturating_sub(1)))
+                colorizer(config.chars.hbar.to_string().repeat((pad + tab_pad).saturating_sub(1)))
             )?;
             start = marker.1.column;
         }
@@ -179,8 +183,8 @@ fn mark_inlined<T: Write + Sized>(
         for j in 0..(inline_markers.len() - i) {
             let marker = inline_markers[j];
             if start < marker.0.column {
-                let pad = UnicodeWidthStr::width(&code[start..marker.0.column]);
-                write!(fmt, "{:pad$}", "", pad = pad)?;
+                let (pad, tab_pad) = count_width(&code[start..marker.0.column]);
+                write!(fmt, "{:pad$}{}", "", "\t".repeat(tab_pad), pad = pad)?;
                 start = marker.0.column;
             }
             if start < marker.1.column {

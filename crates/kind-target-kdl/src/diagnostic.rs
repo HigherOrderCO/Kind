@@ -1,7 +1,7 @@
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
-pub enum KdlError {
+pub enum KdlDiagnostic {
     InvalidVarName(Range),
     ShouldNotHaveArguments(Range),
     ShouldHaveOnlyOneRule(Range),
@@ -9,20 +9,20 @@ pub enum KdlError {
     FloatUsed(Range),
 }
 
-impl Diagnostic for KdlError {
+impl Diagnostic for KdlDiagnostic {
     fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
         match self {
-            KdlError::InvalidVarName(range) => Some(range.ctx),
-            KdlError::ShouldNotHaveArguments(range) => Some(range.ctx),
-            KdlError::ShouldHaveOnlyOneRule(range) => Some(range.ctx),
-            KdlError::NoInitEntry(range) => Some(range.ctx),
-            KdlError::FloatUsed(range) => Some(range.ctx),
+            KdlDiagnostic::InvalidVarName(range) => Some(range.ctx),
+            KdlDiagnostic::ShouldNotHaveArguments(range) => Some(range.ctx),
+            KdlDiagnostic::ShouldHaveOnlyOneRule(range) => Some(range.ctx),
+            KdlDiagnostic::NoInitEntry(range) => Some(range.ctx),
+            KdlDiagnostic::FloatUsed(range) => Some(range.ctx),
         }
     }
 
     fn to_diagnostic_frame(&self) -> kind_report::data::DiagnosticFrame {
         match self {
-            KdlError::InvalidVarName(range) => DiagnosticFrame {
+            KdlDiagnostic::InvalidVarName(range) => DiagnosticFrame {
                 code: 600,
                 severity: Severity::Error,
                 title: "Invalid variable name for Kindelia.".to_string(),
@@ -36,7 +36,7 @@ impl Diagnostic for KdlError {
                     main: true,
                 }],
             },
-            KdlError::ShouldNotHaveArguments(range) => DiagnosticFrame {
+            KdlDiagnostic::ShouldNotHaveArguments(range) => DiagnosticFrame {
                 code: 601,
                 severity: Severity::Error,
                 title: "This type of entry should not have arguments".to_string(),
@@ -50,7 +50,7 @@ impl Diagnostic for KdlError {
                     main: true,
                 }],
             },
-            KdlError::ShouldHaveOnlyOneRule(range) => DiagnosticFrame {
+            KdlDiagnostic::ShouldHaveOnlyOneRule(range) => DiagnosticFrame {
                 code: 603,
                 severity: Severity::Error,
                 title: "This entry should only have one rule.".to_string(),
@@ -64,7 +64,7 @@ impl Diagnostic for KdlError {
                     main: true,
                 }],
             },
-            KdlError::NoInitEntry(range) => DiagnosticFrame {
+            KdlDiagnostic::NoInitEntry(range) => DiagnosticFrame {
                 code: 604,
                 severity: Severity::Error,
                 title: "This entry must have a init entry".to_string(),
@@ -78,7 +78,7 @@ impl Diagnostic for KdlError {
                     main: true,
                 }],
             },
-            KdlError::FloatUsed(range) => DiagnosticFrame {
+            KdlDiagnostic::FloatUsed(range) => DiagnosticFrame {
                 code: 605,
                 severity: Severity::Error,
                 title: "Found F60 in kindelia program".to_string(),

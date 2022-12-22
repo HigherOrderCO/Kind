@@ -7,7 +7,7 @@ use kind_tree::untyped;
 pub use compile::File;
 
 mod compile;
-mod errors;
+mod diagnostic;
 mod flatten;
 mod linearize;
 mod subst;

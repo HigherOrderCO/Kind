@@ -3,7 +3,7 @@
 
 use kind_span::Range;
 
-use crate::errors::SyntaxDiagnostic;
+use crate::diagnostic::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::Lexer;
 

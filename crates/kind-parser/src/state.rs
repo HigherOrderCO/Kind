@@ -5,7 +5,7 @@ use std::{collections::VecDeque, sync::mpsc::Sender};
 use kind_report::data::Diagnostic;
 use kind_span::Range;
 
-use crate::{errors::SyntaxDiagnostic, lexer::tokens::Token, Lexer};
+use crate::{diagnostic::SyntaxDiagnostic, lexer::tokens::Token, Lexer};
 
 /// The parser state. it current have some parameters
 /// that makes the behaviour change

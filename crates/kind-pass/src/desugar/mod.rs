@@ -16,7 +16,7 @@ use kind_tree::{
     symbol::Ident,
 };
 
-use crate::errors::{PassError, GenericPassError};
+use crate::diagnostic::{PassDiagnostic, GenericPassError};
 
 pub mod app;
 pub mod attributes;
@@ -66,7 +66,7 @@ impl<'a> DesugarState<'a> {
         desugared::Expr::hole(range, self.gen_hole())
     }
 
-    fn send_err(&mut self, err: PassError) {
+    fn send_err(&mut self, err: PassDiagnostic) {
         self.errors.send(Box::new(err)).unwrap();
         self.failed = true;
     }

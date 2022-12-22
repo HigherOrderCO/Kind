@@ -3,7 +3,7 @@
 
 use core::fmt;
 
-use crate::errors::SyntaxDiagnostic;
+use crate::diagnostic::SyntaxDiagnostic;
 
 #[derive(Debug, Clone)]
 pub enum Token {

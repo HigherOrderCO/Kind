@@ -6,7 +6,7 @@ use kind_tree::concrete::{Binding, ExprKind};
 use kind_tree::desugared;
 use kind_tree::symbol::QualifiedIdent;
 
-use crate::errors::PassError;
+use crate::diagnostic::PassDiagnostic;
 
 use super::DesugarState;
 
@@ -39,7 +39,7 @@ impl<'a> DesugarState<'a> {
             }
         } else if spine.len() != entry.arguments.len() {
             // The expected size is the one provided by the desugar.
-            self.send_err(PassError::SugarIsBadlyImplemented(
+            self.send_err(PassDiagnostic::SugarIsBadlyImplemented(
                 entry.range,
                 range,
                 spine.len(),
@@ -99,7 +99,7 @@ impl<'a> DesugarState<'a> {
                         }
                     }
                 } else if entry.arguments.len() != args.len() {
-                    self.send_err(PassError::IncorrectArity(
+                    self.send_err(PassDiagnostic::IncorrectArity(
                         name.range,
                         args.iter().map(|x| x.locate()).collect(),
                         entry.arguments.len(),
@@ -119,7 +119,7 @@ impl<'a> DesugarState<'a> {
                             let pos = match positions.get(name.to_str()) {
                                 Some(pos) => *pos,
                                 None => {
-                                    self.send_err(PassError::CannotFindField(
+                                    self.send_err(PassDiagnostic::CannotFindField(
                                         name.range,
                                         name.range,
                                         name.to_string(),
@@ -129,7 +129,7 @@ impl<'a> DesugarState<'a> {
                             };
 
                             if let Some((range, _)) = arguments[pos] {
-                                self.send_err(PassError::DuplicatedNamed(range, *r));
+                                self.send_err(PassDiagnostic::DuplicatedNamed(range, *r));
                             } else {
                                 arguments[pos] = Some((*r, self.desugar_expr(v)))
                             }

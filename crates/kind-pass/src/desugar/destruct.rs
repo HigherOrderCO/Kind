@@ -4,7 +4,7 @@ use kind_tree::concrete::{expr, CaseBinding, Destruct, TopLevel};
 use kind_tree::desugared;
 use kind_tree::symbol::Ident;
 
-use crate::errors::{PassError, Sugar};
+use crate::diagnostic::{PassDiagnostic, Sugar};
 
 use super::DesugarState;
 
@@ -34,12 +34,12 @@ impl<'a> DesugarState<'a> {
 
             if let Some((idx, _)) = names.get(name.to_str()) {
                 if let (_, Some((range, _))) = ordered_fields[*idx] {
-                    self.send_err(PassError::DuplicatedNamed(range, name.range));
+                    self.send_err(PassDiagnostic::DuplicatedNamed(range, name.range));
                 } else {
                     ordered_fields[*idx] = (name.to_string(), Some((name.locate(), alias.clone())))
                 }
             } else {
-                self.send_err(PassError::CannotFindField(
+                self.send_err(PassDiagnostic::CannotFindField(
                     name.range,
                     *type_info.0,
                     type_info.1.to_string(),
@@ -54,7 +54,7 @@ impl<'a> DesugarState<'a> {
             .collect();
 
         if jump_rest.is_none() && !names.is_empty() {
-            self.send_err(PassError::NoFieldCoverage(*type_info.0, names))
+            self.send_err(PassDiagnostic::NoFieldCoverage(*type_info.0, names))
         }
 
         ordered_fields
@@ -81,12 +81,12 @@ impl<'a> DesugarState<'a> {
                 let record = if let Some(TopLevel::RecordType(record)) = rec {
                     record
                 } else {
-                    self.send_err(PassError::LetDestructOnlyForRecord(typ.range));
+                    self.send_err(PassDiagnostic::LetDestructOnlyForRecord(typ.range));
                     return desugared::Expr::err(typ.range);
                 };
 
                 if self.old_book.meta.get(&open_id.to_string()).is_none() {
-                    self.send_err(PassError::NeedToImplementMethods(
+                    self.send_err(PassDiagnostic::NeedToImplementMethods(
                         binding.locate(),
                         Sugar::Match(typ.to_string()),
                     ));
@@ -165,7 +165,7 @@ impl<'a> DesugarState<'a> {
         let match_id = matcher.typ.add_segment("match");
 
         if self.old_book.entries.get(&match_id.to_string()).is_none() {
-            self.send_err(PassError::NeedToImplementMethods(
+            self.send_err(PassDiagnostic::NeedToImplementMethods(
                 range,
                 Sugar::Match(matcher.typ.to_string()),
             ));
@@ -175,7 +175,7 @@ impl<'a> DesugarState<'a> {
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
         } else {
-            self.send_err(PassError::LetDestructOnlyForSum(matcher.typ.range));
+            self.send_err(PassDiagnostic::LetDestructOnlyForSum(matcher.typ.range));
             return desugared::Expr::err(matcher.typ.range);
         };
 
@@ -191,7 +191,7 @@ impl<'a> DesugarState<'a> {
             let index = match positions.get(case.constructor.to_str()) {
                 Some(pos) => *pos,
                 None => {
-                    self.send_err(PassError::CannotFindConstructor(
+                    self.send_err(PassDiagnostic::CannotFindConstructor(
                         case.constructor.range,
                         matcher.typ.range,
                         matcher.typ.to_string(),
@@ -201,7 +201,7 @@ impl<'a> DesugarState<'a> {
             };
 
             if let Some((range, _, _)) = cases_args[index] {
-                self.send_err(PassError::DuplicatedNamed(range, case.constructor.range));
+                self.send_err(PassDiagnostic::DuplicatedNamed(range, case.constructor.range));
             } else {
                 let sum_constructor = &sum.constructors[index];
 
@@ -259,7 +259,7 @@ impl<'a> DesugarState<'a> {
         }
 
         if !unbound.is_empty() {
-            self.send_err(PassError::NoCoverage(range, unbound));
+            self.send_err(PassDiagnostic::NoCoverage(range, unbound));
             return desugared::Expr::err(range);
         }
 

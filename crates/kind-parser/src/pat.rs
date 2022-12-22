@@ -1,6 +1,6 @@
 use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 
-use crate::errors::SyntaxDiagnostic;
+use crate::diagnostic::SyntaxDiagnostic;
 use crate::lexer::tokens::Token;
 use crate::macros::eat_single;
 use crate::state::Parser;

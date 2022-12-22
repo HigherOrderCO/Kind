@@ -8,7 +8,7 @@ use kind_tree::desugared;
 use kind_tree::symbol::QualifiedIdent;
 use kind_tree::untyped::{self};
 
-use crate::errors::{PassError, GenericPassError};
+use crate::diagnostic::{PassDiagnostic, GenericPassError};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 enum Relevance {
@@ -159,7 +159,7 @@ impl<'a> ErasureState<'a> {
             if relev != Ambient::Irrelevant {
                 if let Some(res) = edge.relevance.get(&Relevance::Irrelevant) {
                     self.errs
-                        .send(Box::new(PassError::CannotUseIrrelevant(None, res[0], None)))
+                        .send(Box::new(PassDiagnostic::CannotUseIrrelevant(None, res[0], None)))
                         .unwrap();
                     self.failed = true;
                 }

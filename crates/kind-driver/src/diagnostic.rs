@@ -19,7 +19,7 @@ impl Error for GenericDriverError { }
 
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
-pub(crate) enum DriverError {
+pub(crate) enum DriverDiagnostic {
     CannotFindFile(String),
     UnboundVariable(Vec<Ident>, Vec<String>),
     MultiplePaths(QualifiedIdent, Vec<PathBuf>),
@@ -27,20 +27,20 @@ pub(crate) enum DriverError {
     ThereIsntAMain,
 }
 
-impl Diagnostic for DriverError {
+impl Diagnostic for DriverDiagnostic {
     fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
         match self {
-            DriverError::CannotFindFile(_) => None,
-            DriverError::ThereIsntAMain => None,
-            DriverError::UnboundVariable(v, _) => Some(v[0].range.ctx),
-            DriverError::MultiplePaths(id, _) => Some(id.range.ctx),
-            DriverError::DefinedMultipleTimes(fst, _) => Some(fst.range.ctx),
+            DriverDiagnostic::CannotFindFile(_) => None,
+            DriverDiagnostic::ThereIsntAMain => None,
+            DriverDiagnostic::UnboundVariable(v, _) => Some(v[0].range.ctx),
+            DriverDiagnostic::MultiplePaths(id, _) => Some(id.range.ctx),
+            DriverDiagnostic::DefinedMultipleTimes(fst, _) => Some(fst.range.ctx),
         }
     }
 
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
-            DriverError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
+            DriverDiagnostic::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,
                 severity: Severity::Error,
                 title: format!("Cannot find the definition '{}'.", idents[0].to_str()),
@@ -64,7 +64,7 @@ impl Diagnostic for DriverError {
                     })
                     .collect(),
             },
-            DriverError::MultiplePaths(ident, paths) => DiagnosticFrame {
+            DriverDiagnostic::MultiplePaths(ident, paths) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Ambiguous definition location for the same name".to_string(),
@@ -81,7 +81,7 @@ impl Diagnostic for DriverError {
                     main: true,
                 }],
             },
-            DriverError::DefinedMultipleTimes(fst, snd) => DiagnosticFrame {
+            DriverDiagnostic::DefinedMultipleTimes(fst, snd) => DiagnosticFrame {
                 code: 102,
                 severity: Severity::Error,
                 title: "Defined multiple times for the same name".to_string(),
@@ -104,7 +104,7 @@ impl Diagnostic for DriverError {
                     },
                 ],
             },
-            DriverError::CannotFindFile(file) => DiagnosticFrame {
+            DriverDiagnostic::CannotFindFile(file) => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
                 title: format!("Cannot find file '{}'", file),
@@ -113,7 +113,7 @@ impl Diagnostic for DriverError {
                 positions: vec![],
             },
 
-            DriverError::ThereIsntAMain => DiagnosticFrame {
+            DriverDiagnostic::ThereIsntAMain => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
                 title: "Cannot find 'Main' function to run the file.".to_string(),

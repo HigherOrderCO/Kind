@@ -6,7 +6,7 @@ use kind_tree::concrete::{visitor::Visitor, Module};
 /// by their module names.
 use std::sync::mpsc::Sender;
 
-use crate::errors::PassError;
+use crate::diagnostic::PassDiagnostic;
 
 pub struct Expand {
     pub names: FxHashMap<String, String>,
@@ -23,7 +23,7 @@ impl Visitor for Expand {
             Some(path) => path,
             None => {
                 self.errors
-                    .send(Box::new(PassError::CannotFindAlias(
+                    .send(Box::new(PassDiagnostic::CannotFindAlias(
                         ident.get_root(),
                         ident.range,
                     )))

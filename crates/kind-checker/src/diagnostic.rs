@@ -7,7 +7,7 @@ use kind_tree::desugared::Expr;
 use crate::report::Context;
 
 #[derive(Debug)]
-pub(crate) enum TypeError {
+pub(crate) enum TypeDiagnostic {
     UnboundVariable(Context, Range),
     CantInferHole(Context, Range),
     CantInferLambda(Context, Range),
@@ -57,23 +57,23 @@ fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
     }
 }
 
-impl Diagnostic for TypeError {
+impl Diagnostic for TypeDiagnostic {
     fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
         match self {
-            TypeError::UnboundVariable(_, range) => Some(range.ctx),
-            TypeError::CantInferHole(_, range) => Some(range.ctx),
-            TypeError::CantInferLambda(_, range) => Some(range.ctx),
-            TypeError::InvalidCall(_, range) => Some(range.ctx),
-            TypeError::ImpossibleCase(_, range, _, _) => Some(range.ctx),
-            TypeError::Inspection(_, range, _) => Some(range.ctx),
-            TypeError::TooManyArguments(_, range) => Some(range.ctx),
-            TypeError::TypeMismatch(_, range, _, _) => Some(range.ctx),
+            TypeDiagnostic::UnboundVariable(_, range) => Some(range.ctx),
+            TypeDiagnostic::CantInferHole(_, range) => Some(range.ctx),
+            TypeDiagnostic::CantInferLambda(_, range) => Some(range.ctx),
+            TypeDiagnostic::InvalidCall(_, range) => Some(range.ctx),
+            TypeDiagnostic::ImpossibleCase(_, range, _, _) => Some(range.ctx),
+            TypeDiagnostic::Inspection(_, range, _) => Some(range.ctx),
+            TypeDiagnostic::TooManyArguments(_, range) => Some(range.ctx),
+            TypeDiagnostic::TypeMismatch(_, range, _, _) => Some(range.ctx),
         }
     }
 
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
-            TypeError::TypeMismatch(ctx, range, detected, expected) => {
+            TypeDiagnostic::TypeMismatch(ctx, range, detected, expected) => {
                 let mut subtitles = vec![
                     Subtitle::Phrase(
                         Color::Fst,
@@ -106,7 +106,7 @@ impl Diagnostic for TypeError {
                     }],
                 }
             }
-            TypeError::Inspection(ctx, range, expected) => {
+            TypeDiagnostic::Inspection(ctx, range, expected) => {
                 let mut subtitles = vec![Subtitle::Phrase(
                     Color::Snd,
                     vec![
@@ -132,7 +132,7 @@ impl Diagnostic for TypeError {
                     }],
                 }
             }
-            TypeError::ImpossibleCase(_, range, detected, expected) => DiagnosticFrame {
+            TypeDiagnostic::ImpossibleCase(_, range, detected, expected) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Impossible case.".to_string(),
@@ -161,7 +161,7 @@ impl Diagnostic for TypeError {
                     main: true,
                 }],
             },
-            TypeError::CantInferHole(_, range) => DiagnosticFrame {
+            TypeDiagnostic::CantInferHole(_, range) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Can't infer hole.".to_string(),
@@ -175,7 +175,7 @@ impl Diagnostic for TypeError {
                     main: true,
                 }],
             },
-            TypeError::InvalidCall(_, range) => DiagnosticFrame {
+            TypeDiagnostic::InvalidCall(_, range) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Cannot call this".to_string(),
@@ -189,7 +189,7 @@ impl Diagnostic for TypeError {
                     main: true,
                 }],
             },
-            TypeError::CantInferLambda(_, range) => DiagnosticFrame {
+            TypeDiagnostic::CantInferLambda(_, range) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Can't infer lambda.".to_string(),
@@ -203,7 +203,7 @@ impl Diagnostic for TypeError {
                     main: true,
                 }],
             },
-            TypeError::TooManyArguments(_, range) => DiagnosticFrame {
+            TypeDiagnostic::TooManyArguments(_, range) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Too many arguments".to_string(),
@@ -217,7 +217,7 @@ impl Diagnostic for TypeError {
                     main: true,
                 }],
             },
-            TypeError::UnboundVariable(_, range) => DiagnosticFrame {
+            TypeDiagnostic::UnboundVariable(_, range) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
                 title: "Unbound variable.".to_string(),

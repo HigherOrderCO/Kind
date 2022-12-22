@@ -1,24 +1,24 @@
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
-pub(crate) enum DeriveError {
+pub(crate) enum DeriveDiagnostic {
     CannotUseNamedVariable(Range),
     CannotUseAll(Range),
     InvalidReturnType(Range),
 }
 
-impl Diagnostic for DeriveError {
+impl Diagnostic for DeriveDiagnostic {
     fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
         match self {
-            DeriveError::CannotUseNamedVariable(range) => Some(range.ctx),
-            DeriveError::CannotUseAll(range) => Some(range.ctx),
-            DeriveError::InvalidReturnType(range) => Some(range.ctx),
+            DeriveDiagnostic::CannotUseNamedVariable(range) => Some(range.ctx),
+            DeriveDiagnostic::CannotUseAll(range) => Some(range.ctx),
+            DeriveDiagnostic::InvalidReturnType(range) => Some(range.ctx),
         }
     }
 
     fn to_diagnostic_frame(&self) -> DiagnosticFrame {
         match self {
-            DeriveError::CannotUseNamedVariable(range) => DiagnosticFrame {
+            DeriveDiagnostic::CannotUseNamedVariable(range) => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
                 title: "Cannot use named variable on match derivations".to_string(),
@@ -32,7 +32,7 @@ impl Diagnostic for DeriveError {
                     main: true,
                 }],
             },
-            DeriveError::CannotUseAll(range) => DiagnosticFrame {
+            DeriveDiagnostic::CannotUseAll(range) => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
                 title: "Data constructors cannot return function types.".to_string(),
@@ -46,7 +46,7 @@ impl Diagnostic for DeriveError {
                     main: true,
                 }],
             },
-            DeriveError::InvalidReturnType(range) => DiagnosticFrame {
+            DeriveDiagnostic::InvalidReturnType(range) => DiagnosticFrame {
                 code: 103,
                 severity: Severity::Error,
                 title: "Data constructors cannot return this type".to_string(),

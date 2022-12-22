@@ -4,7 +4,7 @@
 //! version that the Rust side can manipulate.
 
 pub mod compiler;
-mod errors;
+mod diagnostic;
 pub mod report;
 
 use std::sync::mpsc::Sender;

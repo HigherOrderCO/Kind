@@ -4,7 +4,7 @@ use kind_tree::desugared::{self, ExprKind};
 use kind_tree::symbol::QualifiedIdent;
 use kind_tree::telescope::Telescope;
 
-use crate::errors::{PassError, Sugar};
+use crate::diagnostic::{PassDiagnostic, Sugar};
 
 use super::DesugarState;
 
@@ -94,7 +94,7 @@ impl<'a> DesugarState<'a> {
                                     ExprKind::Var { name }
                                         if name.to_string() == parameter.name.to_string() => {}
                                     _ => {
-                                        self.send_err(PassError::ShouldBeAParameter(
+                                        self.send_err(PassDiagnostic::ShouldBeAParameter(
                                             Some(args[i].range),
                                             parameter.range,
                                         ));
@@ -102,7 +102,7 @@ impl<'a> DesugarState<'a> {
                                 }
                             }
                         }
-                        _ => self.send_err(PassError::NotATypeConstructor(
+                        _ => self.send_err(PassDiagnostic::NotATypeConstructor(
                             expr.range,
                             sum_type.name.range,
                         )),
@@ -206,7 +206,7 @@ impl<'a> DesugarState<'a> {
 
         let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
         if entry.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::Pair));
             return desugared::Expr::err(range);
         }
 
@@ -229,7 +229,7 @@ impl<'a> DesugarState<'a> {
         let cons = self.old_book.entries.get(nil_ident.to_string().as_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
-            self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::List));
             return desugared::Expr::err(range);
         }
 
@@ -273,7 +273,7 @@ impl<'a> DesugarState<'a> {
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
-                    self.send_err(PassError::IncorrectArity(
+                    self.send_err(PassDiagnostic::IncorrectArity(
                         head.range,
                         spine.iter().map(|x| x.range).collect(),
                         entry.arguments.len(),
@@ -339,7 +339,7 @@ impl<'a> DesugarState<'a> {
                 range: rule.range,
             }
         } else {
-            self.send_err(PassError::RuleWithIncorrectArity(
+            self.send_err(PassDiagnostic::RuleWithIncorrectArity(
                 rule.range,
                 pats.len(),
                 args.len(),
@@ -382,7 +382,7 @@ impl<'a> DesugarState<'a> {
         let diff = rule_numbers.iter().filter(|x| rule_numbers[0].1 != x.1);
 
         if !rule_numbers.is_empty() && diff.clone().count() >= 1 {
-            self.send_err(PassError::RulesWithInconsistentArity(
+            self.send_err(PassDiagnostic::RulesWithInconsistentArity(
                 diff.cloned().collect(),
             ));
         }
