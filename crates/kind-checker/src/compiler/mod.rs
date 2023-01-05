@@ -484,6 +484,14 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
 
     file.rules.push(lang::Rule {
         lhs: mk_ctr(
+            "Kind.Axiom.OrigOf".to_owned(),
+            vec![mk_ctr_name(&entry.name)],
+        ),
+        rhs: range_to_num(false, entry.name.range),
+    });
+
+    file.rules.push(lang::Rule {
+        lhs: mk_ctr(
             "Kind.Axiom.HashOf".to_owned(),
             vec![mk_ctr_name(&entry.name)],
         ),
@@ -570,6 +578,14 @@ pub fn codegen_families(file: &mut lang::File, book: &Book) {
             rhs: codegen_vec(family.constructors.iter().map(|x| mk_ctr_name(x))),
         });
 
+        file.rules.push(lang::Rule {
+            lhs: mk_ctr(
+                "Kind.Axiom.Family.Params".to_owned(),
+                vec![mk_ctr_name(&family.name)],
+            ),
+            rhs: mk_u60(family.parameters.len() as u64),
+        });
+
         let type_entry = book.entrs.get(family.name.to_str()).unwrap();
         let mut args = Vec::with_capacity(type_entry.args.len());
 
@@ -604,8 +620,8 @@ pub fn codegen_families(file: &mut lang::File, book: &Book) {
                 maker = mk_ctr(
                     "Kind.Coverage.Maker.Cons".to_string(),
                     vec![
-                        mk_u60(arg.name.encode()),
                         range_to_num(false, arg.range),
+                        codegen_all_expr(false, false, &mut 0, false, &arg.typ),
                         lam(&arg.name, maker),
                     ],
                 );
@@ -636,6 +652,14 @@ pub fn codegen_families(file: &mut lang::File, book: &Book) {
                     vec![mk_ctr_name(&constructor), mk_ctr_name(&constructor)],
                 ),
                 rhs: mk_single_ctr("Bool.true".to_string()),
+            });
+
+            file.rules.push(lang::Rule {
+                lhs: mk_ctr(
+                    "Kind.Axiom.ArgsCount".to_owned(),
+                    vec![mk_ctr_name(&constructor)],
+                ),
+                rhs: mk_u60(entry.args.len() as u64),
             });
 
             file.rules.push(lang::Rule {

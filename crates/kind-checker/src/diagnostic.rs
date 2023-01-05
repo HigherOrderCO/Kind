@@ -16,6 +16,7 @@ pub(crate) enum TypeDiagnostic {
     Inspection(Context, Range, Box<Expr>),
     TooManyArguments(Context, Range),
     TypeMismatch(Context, Range, Box<Expr>, Box<Expr>),
+    UncoveredPattern(Context, Range, Vec<Box<Expr>>)
 }
 
 fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
@@ -68,6 +69,7 @@ impl Diagnostic for TypeDiagnostic {
             TypeDiagnostic::Inspection(_, range, _) => Some(range.ctx),
             TypeDiagnostic::TooManyArguments(_, range) => Some(range.ctx),
             TypeDiagnostic::TypeMismatch(_, range, _, _) => Some(range.ctx),
+            TypeDiagnostic::UncoveredPattern(_, range, _) => Some(range.ctx),
         }
     }
 
@@ -180,6 +182,26 @@ impl Diagnostic for TypeDiagnostic {
                 severity: Severity::Error,
                 title: "Cannot call this".to_string(),
                 subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            TypeDiagnostic::UncoveredPattern(_, range, terms) => DiagnosticFrame {
+                code: 101,
+                severity: Severity::Error,
+                title: "This function does not covers all the possibilities!".to_string(),
+                subtitles: vec![Subtitle::Phrase(
+                    Color::Fst,
+                    vec![
+                        Word::White("Missing case :".to_string()),
+                        Word::Painted(Color::Fst, terms.iter().map(|x| format!("{}", x)).collect::<Vec<_>>().join(" ")),
+                    ],
+                ),],
                 hints: vec![],
                 positions: vec![Marker {
                     position: *range,

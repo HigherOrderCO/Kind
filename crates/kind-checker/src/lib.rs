@@ -13,6 +13,7 @@ use hvm::{language, get_cost};
 use hvm::{runtime, syntax::Term};
 use kind_report::data::Diagnostic;
 use kind_tree::desugared::Book;
+use kind_tree::symbol::Ident;
 use report::parse_report;
 
 pub const CHECKER: &str = include_str!("checker.hvm");
