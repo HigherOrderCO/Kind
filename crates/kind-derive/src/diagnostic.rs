@@ -62,4 +62,13 @@ impl Diagnostic for DeriveDiagnostic {
             }
         }
     }
+
+    fn get_severity(&self) -> Severity {
+        use DeriveDiagnostic::*;
+        match self {
+            CannotUseNamedVariable(_)
+            | CannotUseAll(_)
+            | InvalidReturnType(_) => Severity::Error,
+        }
+    }
 }

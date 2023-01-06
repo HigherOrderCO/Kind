@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use kind_span::{Range, SyntaxCtxIndex};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Severity {
     Error,
     Warning,
@@ -61,5 +61,6 @@ pub enum Log {
 }
 pub trait Diagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex>;
+    fn get_severity(&self) -> Severity;
     fn to_diagnostic_frame(&self) -> DiagnosticFrame;
 }

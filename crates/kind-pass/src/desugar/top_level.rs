@@ -1,6 +1,6 @@
 use kind_span::Range;
 use kind_tree::concrete::{self};
-use kind_tree::desugared::{self, ExprKind};
+use kind_tree::desugared::{self, ExprKind, Family};
 use kind_tree::symbol::QualifiedIdent;
 use kind_tree::telescope::Telescope;
 
@@ -73,6 +73,12 @@ impl<'a> DesugarState<'a> {
             .map(|arg| self.desugar_argument(arg).to_irrelevant())
             .to_vec();
 
+        let mut family = Family {
+            name: sum_type.name.clone(),
+            constructors: Vec::with_capacity(sum_type.constructors.len()),
+            parameters: desugared_params.clone(),
+        };
+
         for cons in &sum_type.constructors {
             let cons_ident = sum_type.name.add_segment(cons.name.to_str());
 
@@ -134,10 +140,14 @@ impl<'a> DesugarState<'a> {
                 range: cons.name.range,
             };
 
+            family.constructors.push(cons_ident.clone());
+
             self.new_book
                 .entrs
                 .insert(cons_ident.to_string(), Box::new(data_constructor));
         }
+
+        self.new_book.families.insert(sum_type.name.to_string(), family);
     }
 
     pub fn desugar_record_type(&mut self, rec_type: &concrete::RecordDecl) {
@@ -169,6 +179,12 @@ impl<'a> DesugarState<'a> {
         let typ = desugared::Expr::ctr(rec_type.name.range, rec_type.name.clone(), args);
 
         let cons_ident = rec_type.name.add_segment(rec_type.constructor.to_str());
+
+        self.new_book.families.insert(rec_type.name.to_string(), Family {
+            name: rec_type.name.clone(),
+            constructors: vec![cons_ident.clone()],
+            parameters: desugared_params.clone()
+        });
 
         let fields_args = rec_type
             .fields

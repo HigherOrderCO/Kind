@@ -3,12 +3,12 @@
       * Expected: (Equal _ 2n 5n) 
 
 
-      /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:26:17]
+      /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:30:17]
       |
-   25 |    Test_anon_fun : (Equal  (Nat.succ (Nat.succ (Nat.zero))) (U60.to_nat 5))
-   26 |    Test_anon_fun = ?
+   29 |    Test_anon_fun : (Equal  (Nat.succ (Nat.succ (Nat.zero))) (U60.to_nat 5))
+   30 |    Test_anon_fun = ?
       |                    v
       |                    \Here!
-   27 |    
+   31 |    
 
 

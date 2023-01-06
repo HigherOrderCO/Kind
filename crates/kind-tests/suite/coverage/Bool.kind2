@@ -1,0 +1,9 @@
+type Bool {
+    true
+    false
+}
+
+Or (b: Bool) (bo: Bool) : Bool
+Or Bool.true  _          = Bool.true
+Or _          Bool.true  = Bool.true
+Or Bool.false Bool.false = Bool.false

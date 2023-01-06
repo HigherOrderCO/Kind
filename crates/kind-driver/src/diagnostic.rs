@@ -123,4 +123,15 @@ impl Diagnostic for DriverDiagnostic {
             },
         }
     }
+
+    fn get_severity(&self) -> Severity {
+        use DriverDiagnostic::*;
+        match self {
+            CannotFindFile(_)
+            | UnboundVariable(_, _)
+            | MultiplePaths(_, _)
+            | DefinedMultipleTimes(_, _)
+            | ThereIsntAMain => Severity::Error
+        }
+    }
 }

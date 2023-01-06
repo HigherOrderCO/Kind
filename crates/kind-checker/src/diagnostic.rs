@@ -16,6 +16,7 @@ pub(crate) enum TypeDiagnostic {
     Inspection(Context, Range, Box<Expr>),
     TooManyArguments(Context, Range),
     TypeMismatch(Context, Range, Box<Expr>, Box<Expr>),
+    UncoveredPattern(Context, Range, Vec<Box<Expr>>)
 }
 
 fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
@@ -68,6 +69,7 @@ impl Diagnostic for TypeDiagnostic {
             TypeDiagnostic::Inspection(_, range, _) => Some(range.ctx),
             TypeDiagnostic::TooManyArguments(_, range) => Some(range.ctx),
             TypeDiagnostic::TypeMismatch(_, range, _, _) => Some(range.ctx),
+            TypeDiagnostic::UncoveredPattern(_, range, _) => Some(range.ctx),
         }
     }
 
@@ -189,6 +191,26 @@ impl Diagnostic for TypeDiagnostic {
                     main: true,
                 }],
             },
+            TypeDiagnostic::UncoveredPattern(_, range, terms) => DiagnosticFrame {
+                code: 101,
+                severity: Severity::Warning,
+                title: "This function does not covers all the possibilities!".to_string(),
+                subtitles: vec![Subtitle::Phrase(
+                    Color::For,
+                    vec![
+                        Word::White("Missing case :".to_string()),
+                        Word::Painted(Color::For, terms.iter().map(|x| format!("{}", x)).collect::<Vec<_>>().join(" ")),
+                    ],
+                ),],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::For,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
             TypeDiagnostic::CantInferLambda(_, range) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Error,
@@ -231,6 +253,23 @@ impl Diagnostic for TypeDiagnostic {
                     main: true,
                 }],
             },
+        }
+    }
+
+    fn get_severity(&self) -> Severity {
+        use TypeDiagnostic::*;
+        match self {
+            UnboundVariable(_, _)
+            | CantInferHole(_, _)
+            | CantInferLambda(_, _)
+            | InvalidCall(_, _)
+            | ImpossibleCase(_, _, _, _)
+            // Altough it's technically a information, we treat it as a error because
+            // it halts the compiler pipeline.
+            | Inspection(_, _, _)
+            | TooManyArguments(_, _)
+            | TypeMismatch(_, _, _, _) => Severity::Error,
+            | UncoveredPattern(_, _, _) => Severity::Warning,
         }
     }
 }

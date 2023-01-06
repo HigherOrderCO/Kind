@@ -8,9 +8,10 @@ use kind_span::Range;
 use linked_hash_map::LinkedHashMap;
 
 pub use crate::Operator;
+
 use crate::{
     symbol::{Ident, QualifiedIdent},
-    Attributes,
+    Attributes, telescope::Telescope,
 };
 
 /// Just a vector of expressions. It is called spine because
@@ -339,11 +340,20 @@ pub struct Entry {
     pub range: Range,
 }
 
+/// Type family information
+#[derive(Clone, Debug)]
+pub struct Family {
+    pub name: QualifiedIdent,
+    pub parameters: Telescope<Argument>,
+    pub constructors: Vec<QualifiedIdent>
+}
+
 /// A book is a collection of desugared entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
     pub entrs: LinkedHashMap<String, Box<Entry>>,
     pub names: FxHashMap<String, usize>,
+    pub families: FxHashMap<String, Family>,
     pub holes: u64,
 }
 

@@ -274,7 +274,6 @@ impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in self.entries.values() {
             match entr {
-                TopLevel::Entry(entr) if entr.generated_by.is_some() => (),
                 _ => write!(f, "{}", entr)?,
             }
         }
