@@ -194,7 +194,7 @@ impl Diagnostic for TypeDiagnostic {
             TypeDiagnostic::UncoveredPattern(_, range, terms) => DiagnosticFrame {
                 code: 101,
                 severity: Severity::Warning,
-                title: "This function does not covers all the possibilities!".to_string(),
+                title: "This function does not cover all the possibilities!".to_string(),
                 subtitles: vec![Subtitle::Phrase(
                     Color::For,
                     vec![
