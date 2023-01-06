@@ -27,6 +27,7 @@ pub fn type_check_book(
     path: &PathBuf,
     entrypoints: Vec<String>,
     tids: Option<usize>,
+    check_coverage: bool,
 ) -> anyhow::Result<(untyped::Book, u64)> {
     let concrete_book = to_book(session, path)?;
     let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book)?;
@@ -37,6 +38,7 @@ pub fn type_check_book(
         &desugared_book,
         session.diagnostic_sender.clone(),
         all,
+        check_coverage,
         tids,
     );
 
@@ -155,6 +157,6 @@ pub fn eval_in_checker(book: &desugared::Book) -> (String, u64) {
     checker::eval_api(book)
 }
 
-pub fn generate_checker(book: &desugared::Book) -> String {
-    checker::gen_checker(book, book.entrs.keys().cloned().collect())
+pub fn generate_checker(book: &desugared::Book, check_coverage: bool) -> String {
+    checker::gen_checker(book, check_coverage, book.entrs.keys().cloned().collect())
 }

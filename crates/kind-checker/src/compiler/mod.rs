@@ -568,14 +568,26 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
     });
 }
 
-pub fn codegen_families(file: &mut lang::File, book: &Book) {
+pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
+    for entry in book.entrs.values() {
+        if !entry.rules.is_empty() && !entry.rules[0].pats.is_empty() && !entry.attrs.partial && !entry.attrs.axiom {
+            file.rules.push(lang::Rule {
+                lhs: mk_ctr(
+                    "Kind.Axiom.CoverCheck".to_owned(),
+                    vec![mk_ctr_name(&entry.name)],
+                ),
+                rhs: mk_single_ctr("Bool.true".to_string()),
+            });
+        }
+    }
+
     for family in book.families.values() {
         file.rules.push(lang::Rule {
             lhs: mk_ctr(
                 "Kind.Axiom.Family.Constructors".to_owned(),
                 vec![mk_ctr_name(&family.name)],
             ),
-            rhs: codegen_vec(family.constructors.iter().map(|x| mk_ctr_name(x))),
+            rhs: mk_ctr("Maybe.some".to_string(), vec![codegen_vec(family.constructors.iter().map(|x| mk_ctr_name(x)))]),
         });
 
         file.rules.push(lang::Rule {
@@ -675,7 +687,7 @@ pub fn codegen_families(file: &mut lang::File, book: &Book) {
 
 /// Compiles a book into an format that is executed by the
 /// type checker in HVM.
-pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File {
+pub fn codegen_book(book: &Book, check_coverage: bool, functions_to_check: Vec<String>) -> lang::File {
     let mut file = lang::File {
         rules: vec![],
         smaps: vec![],
@@ -685,28 +697,13 @@ pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File 
         lhs: mk_ctr("Kind.Axiom.Functions".to_owned(), vec![]),
         rhs: codegen_vec(functions_to_check.iter().map(|x| mk_ctr_name_from_str(x))),
     };
-
-    for entry in book.entrs.values() {
-        codegen_entry(&mut file, entry);
-        if !entry.rules.is_empty() && !entry.rules[0].pats.is_empty() {
-            file.rules.push(lang::Rule {
-                lhs: mk_ctr(
-                    "Kind.Axiom.CoverCheck".to_owned(),
-                    vec![mk_ctr_name(&entry.name)],
-                ),
-                rhs: mk_single_ctr("Bool.true".to_string()),
-            });
-        }
-    }
-
+    
     file.rules.push(functions_entry);
 
     file.rules.push(lang::Rule {
         lhs: mk_ctr("HoleInit".to_owned(), vec![]),
         rhs: mk_u60(book.holes),
     });
-
-    codegen_families(&mut file, book);
 
     for rule in &file.rules {
         match &*rule.lhs {
@@ -717,26 +714,41 @@ pub fn codegen_book(book: &Book, functions_to_check: Vec<String>) -> lang::File 
         }
     }
 
+    for entry in book.entrs.values() {
+        codegen_entry(&mut file, entry);
+    }
+
+    if check_coverage {
+        codegen_coverage(&mut file, book);
+    }
+
     file.rules.push(lang::Rule {
-        lhs: mk_ctr(
-            "Kind.Axiom.Compare".to_owned(),
-            vec![mk_var("a"), mk_var("b")],
-        ),
+        lhs: mk_ctr("Kind.Axiom.CoverCheck".to_owned(), vec![mk_var("_")]),
         rhs: mk_single_ctr("Bool.false".to_string()),
     });
 
-    file.rules.push(lang::Rule {
-        lhs: mk_ctr(
-            "Kind.Coverage.Maker.Mk".to_owned(),
-            vec![mk_var("cons"), mk_var("a"), mk_var("b")],
-        ),
-        rhs: mk_single_ctr("Maybe.none".to_string()),
-    });
+    if check_coverage {
+        file.rules.push(lang::Rule {
+            lhs: mk_ctr(
+                "Kind.Axiom.Compare".to_owned(),
+                vec![mk_var("a"), mk_var("b")],
+            ),
+            rhs: mk_single_ctr("Bool.false".to_string()),
+        });
 
-    file.rules.push(lang::Rule {
-        lhs: mk_ctr("Kind.Axiom.CoverCheck".to_owned(), vec![mk_var("a")]),
-        rhs: mk_single_ctr("Bool.false".to_string()),
-    });
+        file.rules.push(lang::Rule {
+            lhs: mk_ctr(
+                "Kind.Coverage.Maker.Mk".to_owned(),
+                vec![mk_var("cons"), mk_var("a"), mk_var("b")],
+            ),
+            rhs: mk_single_ctr("Maybe.none".to_string()),
+        });
+
+        file.rules.push(lang::Rule {
+            lhs: mk_ctr("Kind.Axiom.Family.Constructors".to_owned(), vec![mk_var("_")]),
+            rhs: mk_single_ctr("Maybe.none".to_string()),
+        });
+    }
 
     file
 }

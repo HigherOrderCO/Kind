@@ -67,7 +67,7 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
 fn test_checker() -> Result<(), Error> {
     test_kind2(Path::new("./suite/checker"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
-        let check = driver::type_check_book(session, path, entrypoints, Some(1));
+        let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
         check.map(|_| "Ok!".to_string()).ok()
     })?;
     Ok(())
@@ -78,7 +78,7 @@ fn test_checker() -> Result<(), Error> {
 fn test_checker_issues() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/checker"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
-        let check = driver::type_check_book(session, path, entrypoints, Some(1));
+        let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
         check.map(|_| "Ok!".to_string()).ok()
     })?;
     Ok(())
@@ -132,6 +132,17 @@ fn test_erasure() -> Result<(), Error> {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints).map(|file| file.to_string());
         check.ok()
+    })?;
+    Ok(())
+}
+
+#[test]
+#[timeout(15000)]
+fn test_coverage() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/issues/checker"), |path, session| {
+        let entrypoints = vec!["Main".to_string()];
+        let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
+        check.map(|_| "Ok!".to_string()).ok()
     })?;
     Ok(())
 }

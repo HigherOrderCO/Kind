@@ -13,7 +13,6 @@ use hvm::{language, get_cost};
 use hvm::{runtime, syntax::Term};
 use kind_report::data::Diagnostic;
 use kind_tree::desugared::Book;
-use kind_tree::symbol::Ident;
 use report::parse_report;
 
 pub const CHECKER: &str = include_str!("checker.hvm");
@@ -48,9 +47,9 @@ pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<(
 
 /// Generates the checker in a string format that can be
 /// parsed by HVM.
-pub fn gen_checker(book: &Book, functions_to_check: Vec<String>) -> String {
+pub fn gen_checker(book: &Book, check_coverage: bool, functions_to_check: Vec<String>) -> String {
     let mut checker = CHECKER.to_string();
-    checker.push_str(&compiler::codegen_book(book, functions_to_check).to_string());
+    checker.push_str(&compiler::codegen_book(book, check_coverage, functions_to_check).to_string());
     checker
 }
 
@@ -60,9 +59,10 @@ pub fn type_check(
     book: &Book,
     tx: Sender<Box<dyn Diagnostic>>,
     functions_to_check: Vec<String>,
+    check_coverage: bool,
     tids: Option<usize>
 ) -> Option<u64> {
-    let file = gen_checker(book, functions_to_check);
+    let file = gen_checker(book, check_coverage, functions_to_check);
 
     match eval(&file, "Main", false, tids) {
         Ok((term, rewrites)) => {
@@ -94,7 +94,7 @@ pub fn type_check(
 /// and the checker can understand.
 pub fn eval_api(book: &Book) -> (String, u64) {
 
-    let file = gen_checker(book, Vec::new());
+    let file = gen_checker(book, false, Vec::new());
 
     let file = language::syntax::read_file(&file).unwrap();
 

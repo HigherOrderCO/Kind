@@ -54,6 +54,16 @@ impl<'a> DesugarState<'a> {
                     self.attr_without_value(attr);
                     attributes.kdl_run = true;
                 }
+                "partial" => {
+                    self.args_should_be_empty(attr);
+                    self.attr_without_value(attr);
+                    attributes.partial = true;
+                }
+                "axiom" => {
+                    self.args_should_be_empty(attr);
+                    self.attr_without_value(attr);
+                    attributes.axiom = true;
+                }
                 "kdl_erase" => {
                     self.args_should_be_empty(attr);
                     self.attr_without_value(attr);

@@ -595,4 +595,35 @@ impl Diagnostic for PassDiagnostic {
             },
         }
     }
+
+    fn get_severity(&self) -> Severity {
+        use PassDiagnostic::*;
+        match self {
+            RepeatedVariable(_, _)
+            | IncorrectArity(_, _, _, _)
+            | DuplicatedNamed(_, _)
+            | LetDestructOnlyForRecord(_)
+            | LetDestructOnlyForSum(_)
+            | NoCoverage(_, _)
+            | CannotFindField(_, _, _)
+            | CannotFindConstructor(_, _, _)
+            | NeedToImplementMethods(_, _)
+            | RuleWithIncorrectArity(_, _, _, _)
+            | RulesWithInconsistentArity(_)
+            | SugarIsBadlyImplemented(_, _, _)
+            | CannotUseIrrelevant(_, _, _)
+            | CannotFindAlias(_, _)
+            | NotATypeConstructor(_, _)
+            | ShouldBeAParameter(_, _)
+            | NoFieldCoverage(_, _)
+            | UnboundVariable(_, _)
+            | AttributeDoesNotExpectEqual(_)
+            | AttributeDoesNotExpectArgs(_)
+            | InvalidAttributeArgument(_)
+            | AttributeExpectsAValue(_)
+            | DuplicatedAttributeArgument(_, _)
+            | CannotDerive(_, _)
+            | AttributeDoesNotExists(_) => Severity::Error
+        }
+    }
 }

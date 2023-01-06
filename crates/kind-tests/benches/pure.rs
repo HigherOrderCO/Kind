@@ -195,7 +195,7 @@ fn bench_exp_pure_gen_checker(b: &mut Bencher) {
 
     b.iter(move || {
         books.iter().map(move |(_, book)| {
-            kind_checker::gen_checker(book, book.names.keys().cloned().collect())
+            kind_checker::gen_checker(book, true, book.names.keys().cloned().collect())
         }).fold(0, |n, _| n + 1)
     })
 }

@@ -94,4 +94,15 @@ impl Diagnostic for KdlDiagnostic {
             },
         }
     }
+
+    fn get_severity(&self) -> Severity {
+        use KdlDiagnostic::*;
+        match self {
+            InvalidVarName(_)
+            | ShouldNotHaveArguments(_)
+            | ShouldHaveOnlyOneRule(_)
+            | NoInitEntry(_)
+            | FloatUsed(_) => Severity::Error
+        }
+    }
 }
