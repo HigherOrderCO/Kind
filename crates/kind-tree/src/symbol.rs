@@ -130,6 +130,17 @@ impl QualifiedIdent {
         }
     }
 
+    pub fn pop_last_segment(&self) -> QualifiedIdent {
+        let mut segments = self.root.data.split(".").collect::<Vec<_>>();
+        segments.pop();
+        QualifiedIdent {
+            root: Symbol::new(segments.join(".")),
+            aux: self.aux.clone(),
+            range: self.range,
+            generated: self.generated,
+        }
+    }
+
     pub fn add_segment(&self, extension: &str) -> QualifiedIdent {
         QualifiedIdent {
             root: Symbol::new(format!("{}.{}", self.root.data, extension)),
