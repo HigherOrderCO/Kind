@@ -336,6 +336,28 @@ impl Diagnostic for SyntaxDiagnostic {
             },
         }
     }
+
+    fn get_severity(&self) -> Severity {
+        use SyntaxDiagnostic::*;
+        match self {
+            UnfinishedString(_)
+            | UnfinishedChar(_)
+            | UnfinishedComment(_)
+            | InvalidEscapeSequence(_, _)
+            | InvalidNumberRepresentation(_, _)
+            | UnexpectedChar(_, _)
+            | UnexpectedToken(_, _, _)
+            | LowerCasedDefinition(_, _)
+            | NotAClauseOfDef(_, _)
+            | Unclosed(_)
+            | IgnoreRestShouldBeOnTheEnd(_)
+            | MatchScrutineeShouldBeAName(_)
+            | CannotUseUse(_)
+            | ImportsCannotHaveAlias(_)
+            | InvalidNumberType(_, _) => Severity::Error,
+            | UnusedDocString(_) => Severity::Warning,
+        }
+    }
 }
 
 impl From<Box<SyntaxDiagnostic>> for DiagnosticFrame {

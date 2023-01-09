@@ -5,10 +5,10 @@
       * Context: 
       *   n : Nat 
 
-      /--[suite/issues/checker/HvmReducesTooMuch.kind2:13:29]
+      /--[suite/issues/checker/HvmReducesTooMuch.kind2:14:29]
       |
-   12 |    Beq_nat_refl (n: Nat) : Assert (Nat.count_layers n 0)
-   13 |    Beq_nat_refl (Nat.succ n) = ?
+   13 |    Beq_nat_refl (n: Nat) : Assert (Nat.count_layers n 0)
+   14 |    Beq_nat_refl (Nat.succ n) = ?
       |                                v
       |                                \Here!
 

@@ -27,9 +27,9 @@ Pivot : U60
 Pivot = 2147483648
 
 QSort (p: U60) (s: U60) (l: List U60): Tree U60
-QSort p s List.Nil          = Tree.Empty
+QSort p s List.Nil               = Tree.Empty
 QSort p s (List.Cons x List.Nil) = Tree.Single x
-QSort p s (List.Cons x xs)  = Split p s (List.Cons x xs) List.Nil List.Nil
+QSort p s (List.Cons x xs)       = Split p s (List.Cons x xs) List.Nil List.Nil
 
 //// Splits list in two partitions
 Split (p: U60) (s: U60) (l: List U60) (min: List U60) (max: List U60) : Tree U60
@@ -46,7 +46,7 @@ Split p s (List.Cons x xs) min max =
 
 Place (p: U60) (s: U60) (y: U60) (x: U60) (xs: List U60) (min: List U60) (max: List U60) : Tree U60
 Place p s 0 x xs min max = Split p s xs (List.Cons x min) max
-Place p s 1 x xs min max = Split p s xs min (List.Cons x max)
+Place p s _ x xs min max = Split p s xs min (List.Cons x max)
 
 //// Sorts and sums n random numbers
 Main : U60
