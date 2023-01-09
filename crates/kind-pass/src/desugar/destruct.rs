@@ -71,7 +71,7 @@ impl<'a> DesugarState<'a> {
         match binding {
             Destruct::Destruct(_, typ, case, jump_rest) => {
                 let meta = self.old_book.meta.get(&typ.to_string()).unwrap();
-                let open_id = typ.add_segment("match");
+                let open_id = typ.pop_last_segment().add_segment("match");
 
                 let rec = meta
                     .is_record_cons_of
@@ -172,9 +172,7 @@ impl<'a> DesugarState<'a> {
             return desugared::Expr::err(range);
         }
 
-        let sum = if let TopLevel::SumType(sum) = entry {
-            sum
-        } else {
+        let Some(constructors) = entry.get_constructors() else {
             self.send_err(PassDiagnostic::LetDestructOnlyForSum(matcher.typ.range));
             return desugared::Expr::err(matcher.typ.range);
         };
@@ -182,7 +180,7 @@ impl<'a> DesugarState<'a> {
         let mut cases_args = Vec::new();
         let mut positions = FxHashMap::default();
 
-        for case in &sum.constructors {
+        for case in constructors.iter() {
             positions.insert(case.name.to_str(), cases_args.len());
             cases_args.push(None)
         }
@@ -203,7 +201,7 @@ impl<'a> DesugarState<'a> {
             if let Some((range, _, _)) = cases_args[index] {
                 self.send_err(PassDiagnostic::DuplicatedNamed(range, case.constructor.range));
             } else {
-                let sum_constructor = &sum.constructors[index];
+                let sum_constructor = &constructors[index];
 
                 let ordered = self.order_case_arguments(
                     (&case.constructor.range, case.constructor.to_string()),
@@ -241,7 +239,7 @@ impl<'a> DesugarState<'a> {
             .collect::<Vec<_>>();
 
         for (i, case_arg) in cases_args.iter().enumerate() {
-            let case = &sum.constructors[i];
+            let case = &constructors[i];
             if let Some((_, arguments, val)) = &case_arg {
                 let case: Vec<bool> = case.args.iter().map(|x| x.erased).rev().collect();
 

@@ -2,6 +2,7 @@
 //! It's useful to pretty printing and resugarization
 //! from the type checker.
 
+use std::borrow::Cow;
 use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::{Ident, QualifiedIdent};
@@ -118,6 +119,12 @@ pub struct RecordDecl {
     pub cons_attrs: Vec<Attribute>,
 }
 
+impl RecordDecl {
+    pub fn get_constructor(&self) -> Constructor {
+        Constructor { name: self.constructor.clone(), docs: vec![], attrs:  self.cons_attrs.clone(), args: self.fields_to_arguments(), typ: None }
+    }
+}
+
 /// All of the structures
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum TopLevel {
@@ -127,6 +134,22 @@ pub enum TopLevel {
 }
 
 impl TopLevel {
+    pub fn get_constructors(&self) -> Option<Cow<Vec<Constructor>>> {
+        match self {
+            TopLevel::SumType(sum) => Some(Cow::Borrowed(&sum.constructors)),
+            TopLevel::RecordType(rec) => Some(Cow::Owned(vec![rec.get_constructor()])),
+            TopLevel::Entry(_) => None,
+        }
+    }
+
+    pub fn get_indices(&self) -> Option<Cow<Telescope<Argument>>> {
+        match self {
+            TopLevel::SumType(sum) => Some(Cow::Borrowed(&sum.indices)),
+            TopLevel::RecordType(_) => Some(Cow::Owned(Default::default())),
+            TopLevel::Entry(_) => None,
+        }
+    }
+
     pub fn is_record(&self) -> bool {
         matches!(self, TopLevel::RecordType(_))
     }

@@ -30,9 +30,8 @@ pub fn derive_match_rec(range: Range, rec: &RecordDecl) -> concrete::Entry {
     ).0;
 
     entry.name = rec
-    .name
-    .add_segment(rec.constructor.to_str())
-    .add_segment("match");
+        .name
+        .add_segment("match");
 
     for rule in &mut entry.rules {
         rule.name = entry.name.clone();

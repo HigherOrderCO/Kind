@@ -122,6 +122,10 @@ impl UnboundCollector {
                 debug_assert!(name_cons.get_aux().is_none());
 
                 self.record_defs.insert(rec.name.to_string(), rec.fields.iter().map(|x| x.0.to_string()).collect());
+                let constructor = rec.get_constructor();
+
+                let cons = (constructor.name.to_string(), constructor.args.map(|x| x.name.to_string()).to_vec());
+                self.type_defs.insert(rec.name.to_string(), FxHashMap::from_iter([cons]));
 
                 self.top_level_defs
                     .insert(rec.name.get_root(), rec.name.range);
