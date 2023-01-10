@@ -1,0 +1,13 @@
+   WARN  This function does not cover all the possibilities!
+
+      * Missing case : Bool.false Bool.true 
+
+      /--[suite/issues/coverage/IncompleteBool.kind2:6:1]
+      |
+    5 |    
+    6 |    Or (b: Bool) (bo: Bool) : Bool
+      |    v-
+      |    \Here!
+    7 |    Or Bool.true  _          = Bool.true
+
+
