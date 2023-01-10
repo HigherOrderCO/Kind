@@ -1,0 +1,10 @@
+//The coverage check, Native type U60 --bug
+
+type String {
+    cons (x: U60) (xs: String)
+    nil
+}
+
+Bits.from_hex (x: String) : U60
+Bits.from_hex (String.cons '0' xs) = 2
+Bits.from_hex (String.cons '1' xs) = 2

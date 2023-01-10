@@ -139,7 +139,7 @@ fn test_erasure() -> Result<(), Error> {
 #[test]
 #[timeout(15000)]
 fn test_coverage() -> Result<(), Error> {
-    test_kind2(Path::new("./suite/issues/checker"), |path, session| {
+    test_kind2(Path::new("./suite/issues/coverage"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
         check.map(|_| "Ok!".to_string()).ok()
