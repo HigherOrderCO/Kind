@@ -1,0 +1,9 @@
+type Test (a: Type) ~ (b: Type) {
+    trick (x: a) (xs: List a)
+}
+
+
+type Test (b: Type) {
+    trick (x: a)
+}
+

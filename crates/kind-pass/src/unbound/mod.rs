@@ -105,7 +105,12 @@ impl UnboundCollector {
                 self.top_level_defs
                     .insert(sum.name.get_root(), sum.name.range);
 
-                let res = sum.constructors.iter().map(|x| (x.name.to_string(), x.args.map(|x| x.name.to_string()).to_vec()));
+                let res = sum.constructors.iter().map(|x| {
+                    (
+                        x.name.to_string(),
+                        x.args.map(|x| x.name.to_string()).to_vec(),
+                    )
+                });
                 self.type_defs.insert(sum.name.to_string(), res.collect());
 
                 for cons in &sum.constructors {
@@ -121,11 +126,18 @@ impl UnboundCollector {
                 debug_assert!(rec.name.get_aux().is_none());
                 debug_assert!(name_cons.get_aux().is_none());
 
-                self.record_defs.insert(rec.name.to_string(), rec.fields.iter().map(|x| x.0.to_string()).collect());
+                self.record_defs.insert(
+                    rec.name.to_string(),
+                    rec.fields.iter().map(|x| x.0.to_string()).collect(),
+                );
                 let constructor = rec.get_constructor();
 
-                let cons = (constructor.name.to_string(), constructor.args.map(|x| x.name.to_string()).to_vec());
-                self.type_defs.insert(rec.name.to_string(), FxHashMap::from_iter([cons]));
+                let cons = (
+                    constructor.name.to_string(),
+                    constructor.args.map(|x| x.name.to_string()).to_vec(),
+                );
+                self.type_defs
+                    .insert(rec.name.to_string(), FxHashMap::from_iter([cons]));
 
                 self.top_level_defs
                     .insert(rec.name.get_root(), rec.name.range);
@@ -169,7 +181,10 @@ impl Visitor for UnboundCollector {
         if let Some(fst) = self.context_vars.iter().find(|x| x.1 == name) {
             if self.emit_errs {
                 self.errors
-                    .send(Box::new(PassDiagnostic::RepeatedVariable(fst.0, ident.0.range)))
+                    .send(Box::new(PassDiagnostic::RepeatedVariable(
+                        fst.0,
+                        ident.0.range,
+                    )))
                     .unwrap()
             }
         } else {
@@ -239,16 +254,13 @@ impl Visitor for UnboundCollector {
 
                 for cons in &entr.constructors {
                     match repeated_names.get(&cons.name.to_string()) {
+                        None => {
+                            repeated_names.insert(cons.name.to_string(), cons.name.range);
+                        },
                         Some(_) => {
                             failed = true;
                         }
-                        None => {
-                            repeated_names.insert(cons.name.to_string(), cons.name.range);
-                        }
                     }
-                    let name_cons = entr.name.add_segment(cons.name.to_str());
-                    self.context_vars
-                        .push((name_cons.range, name_cons.to_string()));
                 }
 
                 if failed {
@@ -390,7 +402,7 @@ impl Visitor for UnboundCollector {
 
     fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
         self.visit_qualified_ident(&mut matcher.typ);
-        
+
         for name in &mut matcher.with_vars {
             self.visit_ident(&mut name.0);
             if let Some(res) = &mut name.1 {
@@ -400,7 +412,8 @@ impl Visitor for UnboundCollector {
 
         if let Some(opt) = &mut matcher.value {
             self.visit_expr(opt);
-            self.context_vars.push((matcher.scrutinee.range, matcher.scrutinee.to_string()))
+            self.context_vars
+                .push((matcher.scrutinee.range, matcher.scrutinee.to_string()))
         } else {
             self.visit_ident(&mut matcher.scrutinee);
         }
@@ -531,9 +544,9 @@ impl Visitor for UnboundCollector {
                 fst,
                 snd,
             } => {
-                self.visit_qualified_ident(&mut QualifiedIdent::new_static(
-                    "Sigma", None, expr.range,
-                ).to_generated());
+                self.visit_qualified_ident(
+                    &mut QualifiedIdent::new_static("Sigma", None, expr.range).to_generated(),
+                );
                 self.visit_expr(fst);
                 self.visit_expr(snd);
             }
@@ -542,9 +555,9 @@ impl Visitor for UnboundCollector {
                 fst,
                 snd,
             } => {
-                self.visit_qualified_ident(&mut QualifiedIdent::new_static(
-                    "Sigma", None, expr.range,
-                ).to_generated());
+                self.visit_qualified_ident(
+                    &mut QualifiedIdent::new_static("Sigma", None, expr.range).to_generated(),
+                );
                 self.visit_expr(fst);
                 self.context_vars.push((ident.range, ident.to_string()));
                 self.visit_expr(snd);
@@ -595,16 +608,22 @@ impl Visitor for UnboundCollector {
 
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }
-            ExprKind::Open { type_name, var_name, motive, next } => {
+            ExprKind::Open {
+                type_name,
+                var_name,
+                motive,
+                next,
+            } => {
                 self.visit_qualified_ident(type_name);
 
                 if let Some(motive) = motive {
                     self.visit_expr(motive)
                 }
-                
+
                 if let Some(fields) = self.record_defs.get(type_name.to_str()) {
                     for field in fields {
-                        self.context_vars.push((var_name.range, format!("{}.{}", var_name, field)))
+                        self.context_vars
+                            .push((var_name.range, format!("{}.{}", var_name, field)))
                     }
                 }
 
@@ -615,7 +634,7 @@ impl Visitor for UnboundCollector {
                         self.context_vars.pop();
                     }
                 }
-            },
+            }
         }
     }
 }
