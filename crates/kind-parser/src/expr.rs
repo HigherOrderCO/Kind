@@ -91,16 +91,14 @@ impl<'a> Parser<'a> {
             && self.peek(2).same_variant(&Token::Colon)
     }
 
-    fn is_substitution(&self) -> bool {
-        self.get().same_variant(&Token::HashHash)
-    }
-
     fn parse_substitution(&mut self) -> Result<Box<Expr>, SyntaxDiagnostic> {
         let start = self.range();
-        self.advance(); // '##'
+        self.advance(); // 'specialize'
         let name = self.parse_id()?;
-        self.eat_variant(Token::Slash)?;
+        self.eat_id("into")?;
+        self.eat_variant(Token::Hash)?;
         let redx = self.parse_num_lit()?;
+        self.eat_id("in")?;
         let expr = self.parse_expr(false)?;
         let range = start.mix(expr.range);
         Ok(Box::new(Expr {
@@ -129,7 +127,7 @@ impl<'a> Parser<'a> {
             Token::Num60(name) => Some(name.to_string()),
             _ => None,
         })?;
-    
+
         let ident = Ident::new_static(&id, range);
         Ok(ident)
     }
@@ -893,6 +891,8 @@ impl<'a> Parser<'a> {
             self.parse_if()
         } else if self.check_actual_id("open") {
             self.parse_open()
+        } else if self.check_actual_id("specialize") {
+            self.parse_substitution()
         } else if self.check_actual(Token::Dollar) {
             self.parse_sigma_pair()
         } else if self.is_lambda() {
@@ -901,8 +901,6 @@ impl<'a> Parser<'a> {
             self.parse_pi_or_lambda(false)
         } else if self.is_sigma_type() {
             self.parse_sigma_type()
-        } else if self.is_substitution() {
-            self.parse_substitution()
         } else if self.check_actual(Token::Tilde) {
             self.parse_erased()
         } else {
