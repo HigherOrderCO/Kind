@@ -1,0 +1,13 @@
+   WARN  This function does not cover all the possibilities!
+
+      * Missing case : _ 
+
+      /--[suite/issues/coverage/FunNo.kind2:7:1]
+      |
+    6 |    
+    7 |    Char.is_whitespace (c: Name) : U60
+      |    v-----------------
+      |    \Here!
+    8 |    Char.is_whitespace Teste = _
+
+

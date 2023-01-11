@@ -1,0 +1,11 @@
+   ERROR  This rule is with the incorrect arity.
+
+      /--[suite/issues/coverage/Bool-2.kind2:7:1]
+      |
+    6 |    Fun (a: Bool) (b: Bool) (c: Bool) (d: Bool) (e: Bool) (f: Bool) (g: Bool) (h: Bool) (i: Bool) (j: Bool) (k: Bool) (l: Bool) (m: Bool) (n: Bool) (o: Bool) (p: Bool) (q: Bool) : U60
+    7 |    Fun Bool.false _          _          _          _          _          _          _          _          _          _          _          _          _          _          _          = 2
+      |    v--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      |    \Here!
+
+      Hint: This rule expects 17 arguments
+

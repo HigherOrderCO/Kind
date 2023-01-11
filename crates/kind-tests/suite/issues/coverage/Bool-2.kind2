@@ -1,0 +1,7 @@
+type Bool {
+    true
+    false
+}
+
+Fun (a: Bool) (b: Bool) (c: Bool) (d: Bool) (e: Bool) (f: Bool) (g: Bool) (h: Bool) (i: Bool) (j: Bool) (k: Bool) (l: Bool) (m: Bool) (n: Bool) (o: Bool) (p: Bool) (q: Bool) : U60
+Fun Bool.false _          _          _          _          _          _          _          _          _          _          _          _          _          _          _          = 2

@@ -37,6 +37,7 @@ Algebra.Monoid.concat t (Algebra.Monoid.new t_ sg empty id) = (Algebra.Semigroup
 Algebra.Magma.concat <t> (magma: (Algebra.Magma t)) : (t -> t -> t)
 Algebra.Magma.concat t (Algebra.Magma.new t_ concat) = concat
 
+#axiom
 Equal <t> (a: t) (b: t) : Type
 
 type Algebra.Group <t> {

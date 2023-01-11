@@ -570,7 +570,7 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
 
 pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
     for entry in book.entrs.values() {
-        if !entry.rules.is_empty() && !entry.rules[0].pats.is_empty() && !entry.attrs.partial && !entry.attrs.axiom {
+        if !entry.attrs.partial && !entry.attrs.axiom {
             file.rules.push(lang::Rule {
                 lhs: mk_ctr(
                     "Kind.Axiom.CoverCheck".to_owned(),

@@ -199,7 +199,10 @@ impl<'a> DesugarState<'a> {
             };
 
             if let Some((range, _, _)) = cases_args[index] {
-                self.send_err(PassDiagnostic::DuplicatedNamed(range, case.constructor.range));
+                self.send_err(PassDiagnostic::DuplicatedNamed(
+                    range,
+                    case.constructor.range,
+                ));
             } else {
                 let sum_constructor = &constructors[index];
 
@@ -240,16 +243,17 @@ impl<'a> DesugarState<'a> {
 
         for (i, case_arg) in cases_args.iter().enumerate() {
             let case = &constructors[i];
+
+            // FIX: The order of the with_vars things are inverted when we try to generate the lambda
+            // for each case.
+
             if let Some((_, arguments, val)) = &case_arg {
                 let case: Vec<bool> = case.args.iter().map(|x| x.erased).rev().collect();
 
                 let expr = self.desugar_expr(val);
-
                 let irrelev = matcher.with_vars.iter().map(|_| false).collect::<Vec<_>>();
                 let expr = desugared::Expr::unfold_lambda(&irrelev, &names, expr);
-
                 let expr = desugared::Expr::unfold_lambda(&case, arguments, expr);
-
                 lambdas.push(expr)
             } else {
                 unbound.push(case.name.to_string())
@@ -277,7 +281,8 @@ impl<'a> DesugarState<'a> {
             .map(|x| {
                 (
                     x.0.clone(),
-                    x.1.clone().map(|x| self.desugar_expr(&x))
+                    x.1.clone()
+                        .map(|x| self.desugar_expr(&x))
                         .unwrap_or_else(|| self.gen_hole_expr(range)),
                 )
             })
