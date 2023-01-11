@@ -1,11 +1,13 @@
-   ERROR  This rule is with the incorrect arity.
+   WARN  This function does not cover all the possibilities!
 
-      /--[suite/issues/coverage/Bool-2.kind2:7:1]
+      * Missing case : Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true _ Bool.true _ Bool.true Bool.false _ _ 
+
+      /--[suite/issues/coverage/Bool-2.kind2:6:1]
       |
-    6 |    Fun (a: Bool) (b: Bool) (c: Bool) (d: Bool) (e: Bool) (f: Bool) (g: Bool) (h: Bool) (i: Bool) (j: Bool) (k: Bool) (l: Bool) (m: Bool) (n: Bool) (o: Bool) (p: Bool) (q: Bool) : U60
-    7 |    Fun Bool.false _          _          _          _          _          _          _          _          _          _          _          _          _          _          _          = 2
-      |    v--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    5 |    
+    6 |    Fun (a: Bool) (b: Bool) (c: Bool) (d: Bool) (e: Bool) (f: Bool) (g: Bool) (h: Bool) (i: Bool) (j: Bool) (k: Bool) (l: Bool) (m: Bool) (n: Bool) (o: Bool) : U60
+      |    v--
       |    \Here!
+    7 |    Fun Bool.false Bool.false Bool.false Bool.true  Bool.true  Bool.false Bool.true  Bool.false Bool.false Bool.true  _          _          Bool.false _          Bool.true  = 2
 
-      Hint: This rule expects 17 arguments
 
