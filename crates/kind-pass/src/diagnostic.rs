@@ -54,6 +54,9 @@ pub enum PassDiagnostic {
     DuplicatedAttributeArgument(Range, Range),
     CannotDerive(String, Range),
     AttributeDoesNotExists(Range),
+
+    #[allow(dead_code)]
+    CannotPatternMatchOnFunction(Range)
 }
 
 // TODO: A way to build an error message with methods
@@ -85,6 +88,7 @@ impl Diagnostic for PassDiagnostic {
             PassDiagnostic::DuplicatedAttributeArgument(range, _) => Some(range.ctx),
             PassDiagnostic::CannotDerive(_, range) => Some(range.ctx),
             PassDiagnostic::AttributeDoesNotExists(range) => Some(range.ctx),
+            PassDiagnostic::CannotPatternMatchOnFunction(range) => Some(range.ctx)
         }
     }
 
@@ -593,6 +597,20 @@ impl Diagnostic for PassDiagnostic {
                     main: true,
                 }],
             },
+            PassDiagnostic::CannotPatternMatchOnFunction(place) => DiagnosticFrame {
+                code: 209,
+                severity: Severity::Error,
+                title: "Cannot pattern match on functions".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *place,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
         }
     }
 
@@ -623,7 +641,8 @@ impl Diagnostic for PassDiagnostic {
             | AttributeExpectsAValue(_)
             | DuplicatedAttributeArgument(_, _)
             | CannotDerive(_, _)
-            | AttributeDoesNotExists(_) => Severity::Error
+            | CannotPatternMatchOnFunction(_)
+            | AttributeDoesNotExists(_) => Severity::Error,
         }
     }
 }

@@ -1,14 +1,26 @@
+   WARN  This function does not cover all the possibilities!
+
+      * Missing case : _ _ _ 
+
+      /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:33:1]
+      |
+   32 |    
+   33 |    Equal <t> (a: t) (b: t) : Type
+      |    v----
+      |    \Here!
+
+
    INFO  Inspection.
 
       * Expected: (Equal _ 2n 5n) 
 
 
-      /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:30:17]
+      /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:31:17]
       |
-   29 |    Test_anon_fun : (Equal  (Nat.succ (Nat.succ (Nat.zero))) (U60.to_nat 5))
-   30 |    Test_anon_fun = ?
+   30 |    Test_anon_fun : (Equal  (Nat.succ (Nat.succ (Nat.zero))) (U60.to_nat 5))
+   31 |    Test_anon_fun = ?
       |                    v
       |                    \Here!
-   31 |    
+   32 |    
 
 

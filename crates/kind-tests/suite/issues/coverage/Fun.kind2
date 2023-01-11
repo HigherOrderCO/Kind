@@ -1,0 +1,9 @@
+#axiom
+Name : Type
+
+#axiom
+Teste : Name
+
+Char.is_whitespace (c: Name) : U60
+Char.is_whitespace Teste = _
+Char.is_whitespace _     = _

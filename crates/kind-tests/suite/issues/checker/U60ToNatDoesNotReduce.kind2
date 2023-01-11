@@ -16,6 +16,7 @@ Nat.add (Nat.zero) b = b
 #partial
 Nat.succ (pred: (Nat)) : (Nat)
 
+#axiom
 Nat : Type
 
 Main : _

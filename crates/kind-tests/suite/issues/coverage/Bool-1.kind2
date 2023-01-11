@@ -1,0 +1,10 @@
+type Bool {
+    true
+    false
+}
+
+Fun (n: Bool) (m: Bool) : U60
+Fun Bool.false _          = 2
+Fun _          Bool.false = 2
+Fun Bool.false Bool.false = 2
+Fun Bool.true  Bool.true = 2

@@ -53,7 +53,7 @@ impl<'a> DesugarState<'a> {
         let desugared_params = params.map(|arg| self.desugar_argument(arg));
         let desugared_indices = indices.map(|arg| self.desugar_argument(arg));
 
-        let type_constructor = desugared::Entry {
+        let mut type_constructor = desugared::Entry {
             name: sum_type.name.clone(),
             args: desugared_params.extend(&desugared_indices).to_vec(),
             typ: desugared::Expr::typ(sum_type.name.range),
@@ -61,6 +61,8 @@ impl<'a> DesugarState<'a> {
             range: sum_type.name.range,
             attrs: self.desugar_attributes(&sum_type.attrs),
         };
+
+        type_constructor.attrs.axiom = true;
 
         self.new_book
             .entrs
@@ -126,7 +128,7 @@ impl<'a> DesugarState<'a> {
                 }
             };
 
-            let data_constructor = desugared::Entry {
+            let mut data_constructor = desugared::Entry {
                 name: cons_ident.clone(),
                 args: [
                     irrelevant_params.as_slice(),
@@ -139,6 +141,8 @@ impl<'a> DesugarState<'a> {
                 attrs: self.desugar_attributes(&cons.attrs),
                 range: cons.name.range,
             };
+
+            data_constructor.attrs.axiom = true;
 
             family.constructors.push(cons_ident.clone());
 
@@ -155,7 +159,7 @@ impl<'a> DesugarState<'a> {
 
         let desugared_params = params.map(|arg| self.desugar_argument(arg));
 
-        let type_constructor = desugared::Entry {
+        let mut type_constructor = desugared::Entry {
             name: rec_type.name.clone(),
             args: desugared_params.clone().to_vec(),
             typ: desugared::Expr::typ(rec_type.name.range),
@@ -163,6 +167,8 @@ impl<'a> DesugarState<'a> {
             range: rec_type.name.range,
             attrs: self.desugar_attributes(&rec_type.attrs),
         };
+
+        type_constructor.attrs.axiom = true;
 
         self.new_book
             .entrs
@@ -198,7 +204,7 @@ impl<'a> DesugarState<'a> {
             })
             .collect::<Vec<desugared::Argument>>();
 
-        let data_constructor = desugared::Entry {
+        let mut data_constructor = desugared::Entry {
             name: cons_ident.clone(),
             args: [irrelevant_params.as_slice(), fields_args.as_slice()].concat(),
             typ,
@@ -206,6 +212,8 @@ impl<'a> DesugarState<'a> {
             range: rec_type.constructor.range,
             attrs: self.desugar_attributes(&rec_type.cons_attrs),
         };
+
+        data_constructor.attrs.axiom = true;
 
         self.new_book
             .entrs
@@ -269,8 +277,12 @@ impl<'a> DesugarState<'a> {
                     .expect("Internal Error: Cannot find definition");
 
                 if !entry.is_ctr {
-                    // TODO: Check if only data constructors declared inside
-                    // inductive types can be used in patterns.
+                    // TODO: Only constructors can pattern match
+                    // 
+                    // self.send_err(PassDiagnostic::CannotPatternMatchOnFunction(
+                    //     head.range
+                    // ));
+                    // return desugared::Expr::err(pat.range);
                 }
 
                 let fill_hidden = spine.len() == entry.arguments.len() - entry.hiddens;

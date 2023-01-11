@@ -7,6 +7,7 @@ type Bool {
 }
 
 Char.is_whitespace (c: Char) : Bool
+Char.is_whitespace   c = Bool.false
 Char.is_whitespace   9 = Bool.true
 Char.is_whitespace  10 = Bool.true
 Char.is_whitespace  11 = Bool.true
@@ -15,4 +16,3 @@ Char.is_whitespace  13 = Bool.true
 Char.is_whitespace  32 = Bool.true
 Char.is_whitespace 133 = Bool.true
 Char.is_whitespace 160 = Bool.true
-Char.is_whitespace   c = Bool.false
