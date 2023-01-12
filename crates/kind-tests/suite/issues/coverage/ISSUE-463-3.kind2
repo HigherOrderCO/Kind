@@ -1,0 +1,20 @@
+type Bool {
+    true
+    false
+}
+
+type Assert ~ (b: Bool) {
+    tt : Assert Bool.true
+    ff : Assert Bool.false
+}
+
+type Empty
+
+Complete (m: Assert Bool.true) (e: Empty) : Type
+
+Complete2 (m: Assert Bool.true) : Type
+Complete2 Assert.tt = Type
+
+Complete3 (n: Bool) (m: Assert n) : Type
+Complete3 Bool.true  Assert.tt = Type
+Complete3 Bool.false Assert.ff = Type

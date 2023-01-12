@@ -24,7 +24,7 @@ impl<'a> Parser<'a> {
             || self.peek(1).same_variant(&Token::LBrace) // '{'
             || self.peek(1).same_variant(&Token::Less)   // '<'
             || self.peek(1).same_variant(&Token::Minus)  // '-'
-            || self.peek(1).same_variant(&Token::Plus)   // '+'
+            || self.peek(1).same_variant(&Token::Plus) // '+'
     }
 
     fn is_top_level_entry(&self) -> bool {

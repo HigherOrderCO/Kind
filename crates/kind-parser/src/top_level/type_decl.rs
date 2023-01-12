@@ -10,7 +10,7 @@ impl<'a> Parser<'a> {
     pub fn parse_constructor(&mut self) -> Result<Constructor, SyntaxDiagnostic> {
         let attrs = self.parse_attrs()?;
         let docs = self.parse_docs()?;
-        
+
         let name = self.parse_any_id()?;
 
         let args = self.parse_arguments()?;
@@ -50,15 +50,16 @@ impl<'a> Parser<'a> {
         };
 
         let range = self.range();
-        self.eat_variant(Token::LBrace)?;
 
         let mut constructors = vec![];
 
-        while !self.get().same_variant(&Token::RBrace) && !self.get().same_variant(&Token::Eof) {
-            constructors.push(self.parse_constructor()?);
+        if self.check_and_eat(Token::LBrace) {
+            while !self.get().same_variant(&Token::RBrace) && !self.get().same_variant(&Token::Eof)
+            {
+                constructors.push(self.parse_constructor()?);
+            }
+            self.eat_closing_keyword(Token::RBrace, range)?;
         }
-
-        self.eat_closing_keyword(Token::RBrace, range)?;
 
         Ok(SumTypeDecl {
             name,
@@ -83,30 +84,30 @@ impl<'a> Parser<'a> {
 
         let range = self.range();
 
-        self.eat_variant(Token::LBrace)?;
-
-        let cons_attrs = self.parse_attrs()?;
-
-        let constructor = if self.check_actual_id("constructor") {
-            self.eat_id("constructor")?;
-            let res = self.parse_id()?;
-            self.check_and_eat(Token::Comma);
-            res
-        } else {
-            Ident::new("new".to_string(), name.range)
-        };
-
         let mut fields = vec![];
+        let mut cons_attrs = vec![];
+        let mut constructor = Ident::new("new".to_string(), name.range);
 
-        while !self.get().same_variant(&Token::RBrace) && !self.get().same_variant(&Token::Eof) {
-            let docs = self.parse_docs()?;
-            let name = self.parse_id()?;
-            self.eat_variant(Token::Colon)?;
-            let typ = self.parse_expr(false)?;
-            fields.push((name, docs, typ))
+        if self.check_and_eat(Token::LBrace) {
+            cons_attrs = self.parse_attrs()?;
+
+            if self.check_actual_id("constructor") {
+                self.eat_id("constructor")?;
+                constructor = self.parse_id()?;
+                self.check_and_eat(Token::Comma);
+            }
+
+            while !self.get().same_variant(&Token::RBrace) && !self.get().same_variant(&Token::Eof)
+            {
+                let docs = self.parse_docs()?;
+                let name = self.parse_id()?;
+                self.eat_variant(Token::Colon)?;
+                let typ = self.parse_expr(false)?;
+                fields.push((name, docs, typ))
+            }
+
+            self.eat_closing_keyword(Token::RBrace, range)?;
         }
-
-        self.eat_closing_keyword(Token::RBrace, range)?;
 
         Ok(RecordDecl {
             name,

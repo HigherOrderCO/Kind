@@ -50,7 +50,10 @@ impl Display for Derive {
 
 pub fn insert_or_report(channel: Channel, hashmap: &mut Derivations, key: Derive, range: Range) {
     if let Some(last_range) = hashmap.get(&key) {
-        let err = Box::new(PassDiagnostic::DuplicatedAttributeArgument(*last_range, range));
+        let err = Box::new(PassDiagnostic::DuplicatedAttributeArgument(
+            *last_range,
+            range,
+        ));
         channel.send(err).unwrap();
     } else {
         hashmap.insert(key, range);
@@ -127,7 +130,10 @@ pub fn expand_sum_type(
             }
             other => {
                 error_channel
-                    .send(Box::new(PassDiagnostic::CannotDerive(other.to_string(), val)))
+                    .send(Box::new(PassDiagnostic::CannotDerive(
+                        other.to_string(),
+                        val,
+                    )))
                     .unwrap();
                 failed = true;
             }

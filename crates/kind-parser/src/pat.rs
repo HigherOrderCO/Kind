@@ -33,7 +33,7 @@ impl<'a> Parser<'a> {
             data: PatKind::U60(num),
         }))
     }
-    
+
     fn parse_pat_char(&mut self) -> Result<Box<Pat>, SyntaxDiagnostic> {
         let start = self.range();
         let num = eat_single!(self, Token::Char(n) => *n)?;

@@ -1,4 +1,4 @@
-use std::{fmt::Display, error::Error};
+use std::{error::Error, fmt::Display};
 
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::{Range, SyntaxCtxIndex};
@@ -13,7 +13,7 @@ impl Display for GenericPassError {
     }
 }
 
-impl Error for GenericPassError { }
+impl Error for GenericPassError {}
 
 pub enum Sugar {
     DoNotation,
@@ -56,7 +56,7 @@ pub enum PassDiagnostic {
     AttributeDoesNotExists(Range),
 
     #[allow(dead_code)]
-    CannotPatternMatchOnFunction(Range)
+    CannotPatternMatchOnFunction(Range),
 }
 
 // TODO: A way to build an error message with methods
@@ -88,7 +88,7 @@ impl Diagnostic for PassDiagnostic {
             PassDiagnostic::DuplicatedAttributeArgument(range, _) => Some(range.ctx),
             PassDiagnostic::CannotDerive(_, range) => Some(range.ctx),
             PassDiagnostic::AttributeDoesNotExists(range) => Some(range.ctx),
-            PassDiagnostic::CannotPatternMatchOnFunction(range) => Some(range.ctx)
+            PassDiagnostic::CannotPatternMatchOnFunction(range) => Some(range.ctx),
         }
     }
 

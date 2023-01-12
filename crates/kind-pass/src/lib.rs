@@ -6,8 +6,8 @@
 //! * [inline][inline]   - Inlines expressions
 
 pub mod desugar;
-pub mod erasure;
 mod diagnostic;
+pub mod erasure;
 pub mod expand;
 pub mod inline;
 pub mod unbound;

@@ -1,6 +1,6 @@
    WARN  This function does not cover all the possibilities!
 
-      * Missing case : Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true _ Bool.true _ Bool.true Bool.false _ _ 
+      * Missing case : Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true Bool.true _ Bool.true _ Bool.true Bool.false Bool.true Bool.true 
 
       /--[suite/issues/coverage/Bool-2.kind2:6:1]
       |

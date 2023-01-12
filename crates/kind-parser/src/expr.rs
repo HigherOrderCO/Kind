@@ -1,5 +1,5 @@
 use kind_span::{Locatable, Range};
-use kind_tree::concrete::expr::{*};
+use kind_tree::concrete::expr::*;
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::Operator;
 
@@ -469,7 +469,7 @@ impl<'a> Parser<'a> {
             Ok(Binding::Positional(self.parse_atom()?))
         }
     }
-    
+
     fn parse_typed_ident(&mut self) -> Result<(Ident, Option<Box<Expr>>), SyntaxDiagnostic> {
         let start = self.range();
         if self.check_and_eat(Token::LPar) {
@@ -613,7 +613,6 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_open(&mut self) -> Result<Box<Expr>, SyntaxDiagnostic> {
-
         let start = self.range();
         self.advance(); // 'open'
         let type_name = self.parse_upper_id()?;
@@ -627,7 +626,12 @@ impl<'a> Parser<'a> {
         })?;
 
         Ok(Box::new(Expr {
-            data: ExprKind::Open { type_name, var_name, motive, next },
+            data: ExprKind::Open {
+                type_name,
+                var_name,
+                motive,
+                next,
+            },
             range: start.mix(end),
         }))
     }
@@ -747,10 +751,12 @@ impl<'a> Parser<'a> {
         let expr_scrutinee = self.parse_expr(false)?;
 
         let scrutinee = match expr_scrutinee.data {
-            ExprKind::Var { name } => {
-                name
-            },
-            _ => return Err(SyntaxDiagnostic::MatchScrutineeShouldBeAName(expr_scrutinee.range))
+            ExprKind::Var { name } => name,
+            _ => {
+                return Err(SyntaxDiagnostic::MatchScrutineeShouldBeAName(
+                    expr_scrutinee.range,
+                ))
+            }
         };
 
         let value = if self.check_and_eat(Token::Eq) {

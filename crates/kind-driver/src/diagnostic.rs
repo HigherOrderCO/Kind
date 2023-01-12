@@ -1,7 +1,7 @@
 //! Errors created by the driver. All of them
 //! are related with paths and unbounded variables.
 
-use std::{path::PathBuf, fmt::Display, error::Error};
+use std::{error::Error, fmt::Display, path::PathBuf};
 
 use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word};
 use kind_tree::symbol::{Ident, QualifiedIdent};
@@ -15,7 +15,7 @@ impl Display for GenericDriverError {
     }
 }
 
-impl Error for GenericDriverError { }
+impl Error for GenericDriverError {}
 
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
@@ -131,7 +131,7 @@ impl Diagnostic for DriverDiagnostic {
             | UnboundVariable(_, _)
             | MultiplePaths(_, _)
             | DefinedMultipleTimes(_, _)
-            | ThereIsntAMain => Severity::Error
+            | ThereIsntAMain => Severity::Error,
         }
     }
 }

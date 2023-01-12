@@ -35,7 +35,10 @@ impl Display for Point {
 }
 
 fn count_width(str: &str) -> (usize, usize) {
-    (UnicodeWidthStr::width(str), str.chars().filter(|x| *x == '\t').count())
+    (
+        UnicodeWidthStr::width(str),
+        str.chars().filter(|x| *x == '\t').count(),
+    )
 }
 
 fn group_markers(markers: &[Marker]) -> SortedMarkers {
@@ -163,7 +166,13 @@ fn mark_inlined<T: Write + Sized>(
             write!(
                 fmt,
                 "{}",
-                colorizer(config.chars.hbar.to_string().repeat((pad + tab_pad).saturating_sub(1)))
+                colorizer(
+                    config
+                        .chars
+                        .hbar
+                        .to_string()
+                        .repeat((pad + tab_pad).saturating_sub(1))
+                )
             )?;
             start = marker.1.column;
         }

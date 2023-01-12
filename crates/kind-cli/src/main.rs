@@ -88,7 +88,6 @@ pub enum Command {
     GenChecker {
         #[arg(short, long)]
         coverage: bool,
-      
         file: String,
     },
 
@@ -162,6 +161,8 @@ pub fn compile_in_session<T>(
     let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
 
     let mut contains_error = false;
+
+    eprintln!();
 
     for diagnostic in diagnostics {
         if diagnostic.get_severity() == Severity::Error {

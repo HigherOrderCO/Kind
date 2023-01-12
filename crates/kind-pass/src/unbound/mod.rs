@@ -256,7 +256,7 @@ impl Visitor for UnboundCollector {
                     match repeated_names.get(&cons.name.to_string()) {
                         None => {
                             repeated_names.insert(cons.name.to_string(), cons.name.range);
-                        },
+                        }
                         Some(_) => {
                             failed = true;
                         }

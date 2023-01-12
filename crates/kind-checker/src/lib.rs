@@ -9,7 +9,7 @@ pub mod report;
 
 use std::sync::mpsc::Sender;
 
-use hvm::{language, get_cost};
+use hvm::{get_cost, language};
 use hvm::{runtime, syntax::Term};
 use kind_report::data::Diagnostic;
 use kind_tree::desugared::Book;
@@ -17,7 +17,12 @@ use report::parse_report;
 
 pub const CHECKER: &str = include_str!("checker.hvm");
 
-pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<(Box<Term>, u64), String> {
+pub fn eval(
+    file: &str,
+    term: &str,
+    dbug: bool,
+    tids: Option<usize>,
+) -> Result<(Box<Term>, u64), String> {
     let file = language::syntax::read_file(&format!("{}\nHVM_MAIN_CALL = {}", file, term))?;
 
     let book = language::rulebook::gen_rulebook(&file);
@@ -42,7 +47,6 @@ pub fn eval(file: &str, term: &str, dbug: bool, tids: Option<usize>) -> Result<(
     runtime::collect(&heap, &prog.aris, tids[0], runtime::load_ptr(&heap, host));
     runtime::free(&heap, 0, 0, 1);
     Ok((code, get_cost(&heap)))
-
 }
 
 /// Generates the checker in a string format that can be
@@ -60,7 +64,7 @@ pub fn type_check(
     tx: Sender<Box<dyn Diagnostic>>,
     functions_to_check: Vec<String>,
     check_coverage: bool,
-    tids: Option<usize>
+    tids: Option<usize>,
 ) -> Option<u64> {
     let file = gen_checker(book, check_coverage, functions_to_check);
 
@@ -93,7 +97,6 @@ pub fn type_check(
 /// we run the "eval_main" that runs the generated version that both HVM and
 /// and the checker can understand.
 pub fn eval_api(book: &Book) -> (String, u64) {
-
     let file = gen_checker(book, false, Vec::new());
 
     let file = language::syntax::read_file(&file).unwrap();

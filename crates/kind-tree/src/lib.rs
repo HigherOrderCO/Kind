@@ -22,7 +22,7 @@ pub mod telescope;
 /// instead of a string due to optimizations.
 pub mod symbol;
 
-use std::fmt::{Formatter, Display, Error};
+use std::fmt::{Display, Error, Formatter};
 
 pub use hvm::syntax as backend;
 use symbol::Ident;

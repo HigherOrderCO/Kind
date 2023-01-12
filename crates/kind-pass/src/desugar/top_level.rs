@@ -79,6 +79,7 @@ impl<'a> DesugarState<'a> {
             name: sum_type.name.clone(),
             constructors: Vec::with_capacity(sum_type.constructors.len()),
             parameters: desugared_params.clone(),
+            indices: desugared_indices.clone()
         };
 
         for cons in &sum_type.constructors {
@@ -151,7 +152,9 @@ impl<'a> DesugarState<'a> {
                 .insert(cons_ident.to_string(), Box::new(data_constructor));
         }
 
-        self.new_book.families.insert(sum_type.name.to_string(), family);
+        self.new_book
+            .families
+            .insert(sum_type.name.to_string(), family);
     }
 
     pub fn desugar_record_type(&mut self, rec_type: &concrete::RecordDecl) {
@@ -186,11 +189,15 @@ impl<'a> DesugarState<'a> {
 
         let cons_ident = rec_type.name.add_segment(rec_type.constructor.to_str());
 
-        self.new_book.families.insert(rec_type.name.to_string(), Family {
-            name: rec_type.name.clone(),
-            constructors: vec![cons_ident.clone()],
-            parameters: desugared_params.clone()
-        });
+        self.new_book.families.insert(
+            rec_type.name.to_string(),
+            Family {
+                name: rec_type.name.clone(),
+                constructors: vec![cons_ident.clone()],
+                parameters: desugared_params.clone(),
+                indices: Default::default()
+            },
+        );
 
         let fields_args = rec_type
             .fields
@@ -278,7 +285,7 @@ impl<'a> DesugarState<'a> {
 
                 if !entry.is_ctr {
                     // TODO: Only constructors can pattern match
-                    // 
+                    //
                     // self.send_err(PassDiagnostic::CannotPatternMatchOnFunction(
                     //     head.range
                     // ));

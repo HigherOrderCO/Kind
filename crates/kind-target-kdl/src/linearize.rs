@@ -148,11 +148,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                 // create a var with the name generated before
                 // concatenated with '.{{times_used}}'
                 if let Some(name) = ctx.name_table.get(name) {
-                    let used = *ctx
-                        .uses
-                        .entry(*name)
-                        .and_modify(|x| *x += 1)
-                        .or_insert(1);
+                    let used = *ctx.uses.entry(*name).and_modify(|x| *x += 1).or_insert(1);
                     let name = Name::from_str(&format!("{}.{}", name, used - 1)).unwrap(); // TODO: Think if this errs or not
                     Term::Var { name }
                 } else {
@@ -200,9 +196,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
             if let Some(x) = got_name {
                 ctx.name_table.insert(*name, x);
             }
-            let expr = Box::new(Term::Var {
-                name: new_name,
-            });
+            let expr = Box::new(Term::Var { name: new_name });
             let body = dup_var(ctx, &new_name, expr, body);
             rename_erased(ctx, &mut new_name);
             Term::Lam {
@@ -237,9 +231,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                 args: new_args,
             }
         }
-        Term::Num { numb } => {
-            Term::Num { numb: *numb }
-        }
+        Term::Num { numb } => Term::Num { numb: *numb },
         Term::Op2 { oper, val0, val1 } => {
             let val0 = linearize_term(ctx, val0, lhs);
             let val1 = linearize_term(ctx, val1, lhs);

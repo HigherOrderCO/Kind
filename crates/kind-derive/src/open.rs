@@ -13,7 +13,8 @@ pub fn derive_match_rec(range: Range, rec: &RecordDecl) -> concrete::Entry {
         name: rec.constructor.clone(),
         docs: vec![],
         attrs: rec.cons_attrs.clone(),
-        args: Telescope::new(rec.fields.clone()).map(|x| Argument::new_explicit(x.0.clone(), x.2.clone(), x.2.range)),
+        args: Telescope::new(rec.fields.clone())
+            .map(|x| Argument::new_explicit(x.0.clone(), x.2.clone(), x.2.range)),
         typ: None,
     };
 
@@ -27,11 +28,10 @@ pub fn derive_match_rec(range: Range, rec: &RecordDecl) -> concrete::Entry {
             constructors: vec![cons],
             attrs: rec.attrs.clone(),
         },
-    ).0;
+    )
+    .0;
 
-    entry.name = rec
-        .name
-        .add_segment("match");
+    entry.name = rec.name.add_segment("match");
 
     for rule in &mut entry.rules {
         rule.name = entry.name.clone();

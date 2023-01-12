@@ -57,11 +57,7 @@ pub fn derive_getters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
 
     let mut pats: Vec<Box<Pat>> = Vec::new();
 
-    let spine: Vec<_> = rec
-        .fields
-        .iter()
-        .map(|(name, _, ty)| (name, ty))
-        .collect();
+    let spine: Vec<_> = rec.fields.iter().map(|(name, _, ty)| (name, ty)).collect();
 
     pats.push(Box::new(Pat {
         data: concrete::pat::PatKind::App(
@@ -71,7 +67,9 @@ pub fn derive_getters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
                 .cloned()
                 .map(|x| {
                     Box::new(Pat {
-                        data: concrete::pat::PatKind::Var(PatIdent(x.0.clone().with_name(|f| format!("{}_", f)))),
+                        data: concrete::pat::PatKind::Var(PatIdent(
+                            x.0.clone().with_name(|f| format!("{}_", f)),
+                        )),
                         range,
                     })
                 })
@@ -84,14 +82,10 @@ pub fn derive_getters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
 
     for (arg, typ) in spine {
         let body = mk_var(arg.with_name(|f| format!("{}_", f)).clone());
-    
-        let mut name = rec
-            .name
-            .add_segment(arg.to_str())
-            .add_segment("get");
+
+        let mut name = rec.name.add_segment(arg.to_str()).add_segment("get");
 
         name.range = rec.constructor.range;
-
 
         let rules = vec![Box::new(Rule {
             name: name.clone(),
@@ -99,7 +93,7 @@ pub fn derive_getters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
             body,
             range: rec.constructor.range,
         })];
-    
+
         let entry = Entry {
             name: name.clone(),
             docs: Vec::new(),
@@ -110,7 +104,7 @@ pub fn derive_getters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
             attrs: Vec::new(),
             generated_by: Some(rec.name.to_string().clone()),
         };
-    
+
         entries.push(entry)
     }
 

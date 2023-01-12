@@ -1,15 +1,3 @@
-   WARN  This function does not cover all the possibilities!
-
-      * Missing case : _ _ _ 
-
-      /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:33:1]
-      |
-   32 |    
-   33 |    Equal <t> (a: t) (b: t) : Type
-      |    v----
-      |    \Here!
-
-
    INFO  Inspection.
 
       * Expected: (Equal _ 2n 5n) 

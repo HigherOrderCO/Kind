@@ -355,7 +355,7 @@ impl Diagnostic for SyntaxDiagnostic {
             | CannotUseUse(_)
             | ImportsCannotHaveAlias(_)
             | InvalidNumberType(_, _) => Severity::Error,
-            | UnusedDocString(_) => Severity::Warning,
+            UnusedDocString(_) => Severity::Warning,
         }
     }
 }

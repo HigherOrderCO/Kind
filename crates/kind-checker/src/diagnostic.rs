@@ -16,7 +16,7 @@ pub(crate) enum TypeDiagnostic {
     Inspection(Context, Range, Box<Expr>),
     TooManyArguments(Context, Range),
     TypeMismatch(Context, Range, Box<Expr>, Box<Expr>),
-    UncoveredPattern(Context, Range, Vec<Box<Expr>>)
+    UncoveredPattern(Context, Range, Vec<Box<Expr>>),
 }
 
 fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
@@ -199,9 +199,16 @@ impl Diagnostic for TypeDiagnostic {
                     Color::For,
                     vec![
                         Word::White("Missing case :".to_string()),
-                        Word::Painted(Color::For, terms.iter().map(|x| format!("{}", x)).collect::<Vec<_>>().join(" ")),
+                        Word::Painted(
+                            Color::For,
+                            terms
+                                .iter()
+                                .map(|x| format!("{}", x))
+                                .collect::<Vec<_>>()
+                                .join(" "),
+                        ),
                     ],
-                ),],
+                )],
                 hints: vec![],
                 positions: vec![Marker {
                     position: *range,

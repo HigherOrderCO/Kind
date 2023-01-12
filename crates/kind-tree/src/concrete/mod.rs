@@ -121,7 +121,13 @@ pub struct RecordDecl {
 
 impl RecordDecl {
     pub fn get_constructor(&self) -> Constructor {
-        Constructor { name: self.constructor.clone(), docs: vec![], attrs:  self.cons_attrs.clone(), args: self.fields_to_arguments(), typ: None }
+        Constructor {
+            name: self.constructor.clone(),
+            docs: vec![],
+            attrs: self.cons_attrs.clone(),
+            args: self.fields_to_arguments(),
+            typ: None,
+        }
     }
 }
 

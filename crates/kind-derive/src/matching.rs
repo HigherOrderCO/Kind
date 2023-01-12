@@ -24,7 +24,9 @@ pub fn to_app_binding(errs: &mut Errs, binding: &Binding) -> AppBinding {
             data: expr.clone(),
         },
         Binding::Named(_, name, expr) => {
-            errs.push(Box::new(DeriveDiagnostic::CannotUseNamedVariable(name.range)));
+            errs.push(Box::new(DeriveDiagnostic::CannotUseNamedVariable(
+                name.range,
+            )));
             AppBinding::explicit(expr.clone())
         }
     }

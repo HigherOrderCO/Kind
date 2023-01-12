@@ -279,7 +279,12 @@ impl<'a> Visitor for Subst<'a> {
                 ));
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }
-            ExprKind::Open { type_name, var_name, motive, next } => {
+            ExprKind::Open {
+                type_name,
+                var_name,
+                motive,
+                next,
+            } => {
                 self.visit_qualified_ident(type_name);
                 self.visit_ident(var_name);
                 self.visit_expr(next);

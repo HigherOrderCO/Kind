@@ -7,7 +7,7 @@ use kind_span::SyntaxCtxIndex;
 use kind_tree::{backend, concrete, desugared, untyped};
 use resolution::ResolutionError;
 use session::Session;
-use std::{path::PathBuf};
+use std::path::PathBuf;
 
 use kind_checker as checker;
 
@@ -146,9 +146,7 @@ pub fn check_main_desugared_entry(
 
 pub fn execute_file(file: &str, tids: Option<usize>) -> anyhow::Result<(String, u64)> {
     match eval(file, "Main", false, tids) {
-        Ok((res, rewrites)) => {
-            Ok((res.to_string(), rewrites))
-        },
+        Ok((res, rewrites)) => Ok((res.to_string(), rewrites)),
         Err(_) => anyhow::Result::Err(GenericDriverError.into()),
     }
 }

@@ -1,4 +1,4 @@
-use std::{sync::mpsc::Sender, fmt::Display, error::Error};
+use std::{error::Error, fmt::Display, sync::mpsc::Sender};
 
 use flatten::flatten;
 use kind_report::data::Diagnostic;
@@ -21,7 +21,7 @@ impl Display for GenericCompilationToHVMError {
     }
 }
 
-impl Error for GenericCompilationToHVMError { }
+impl Error for GenericCompilationToHVMError {}
 
 pub fn compile_book(
     book: untyped::Book,

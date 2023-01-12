@@ -30,4 +30,5 @@ Nat.mul (Nat.zero) b = (Nat.zero)
 Test_anon_fun : (Equal  (Nat.succ (Nat.succ (Nat.zero))) (U60.to_nat 5))
 Test_anon_fun = ?
 
+#axiom
 Equal <t> (a: t) (b: t) : Type

@@ -490,6 +490,16 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
         rhs: range_to_num(false, entry.name.range),
     });
 
+
+    file.rules.push(lang::Rule {
+        lhs: mk_ctr(
+            "Kind.Axiom.ArgsCount".to_owned(),
+            vec![mk_ctr_name(&entry.name)],
+        ),
+        rhs: mk_u60(entry.args.len() as u64),
+    });
+
+
     file.rules.push(lang::Rule {
         lhs: mk_ctr(
             "Kind.Axiom.HashOf".to_owned(),
@@ -587,7 +597,12 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
                 "Kind.Axiom.Family.Constructors".to_owned(),
                 vec![mk_ctr_name(&family.name)],
             ),
-            rhs: mk_ctr("Maybe.some".to_string(), vec![codegen_vec(family.constructors.iter().map(|x| mk_ctr_name(x)))]),
+            rhs: mk_ctr(
+                "Maybe.some".to_string(),
+                vec![codegen_vec(
+                    family.constructors.iter().map(|x| mk_ctr_name(x)),
+                )],
+            ),
         });
 
         file.rules.push(lang::Rule {
@@ -596,6 +611,14 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
                 vec![mk_ctr_name(&family.name)],
             ),
             rhs: mk_u60(family.parameters.len() as u64),
+        });
+
+        file.rules.push(lang::Rule {
+            lhs: mk_ctr(
+                "Kind.Axiom.Family.Indices".to_owned(),
+                vec![mk_ctr_name(&family.name)],
+            ),
+            rhs: mk_u60(family.indices.len() as u64),
         });
 
         let type_entry = book.entrs.get(family.name.to_str()).unwrap();
@@ -687,7 +710,11 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
 
 /// Compiles a book into an format that is executed by the
 /// type checker in HVM.
-pub fn codegen_book(book: &Book, check_coverage: bool, functions_to_check: Vec<String>) -> lang::File {
+pub fn codegen_book(
+    book: &Book,
+    check_coverage: bool,
+    functions_to_check: Vec<String>,
+) -> lang::File {
     let mut file = lang::File {
         rules: vec![],
         smaps: vec![],
@@ -697,7 +724,7 @@ pub fn codegen_book(book: &Book, check_coverage: bool, functions_to_check: Vec<S
         lhs: mk_ctr("Kind.Axiom.Functions".to_owned(), vec![]),
         rhs: codegen_vec(functions_to_check.iter().map(|x| mk_ctr_name_from_str(x))),
     };
-    
+
     file.rules.push(functions_entry);
 
     file.rules.push(lang::Rule {
@@ -745,9 +772,21 @@ pub fn codegen_book(book: &Book, check_coverage: bool, functions_to_check: Vec<S
         });
 
         file.rules.push(lang::Rule {
-            lhs: mk_ctr("Kind.Axiom.Family.Constructors".to_owned(), vec![mk_var("_")]),
+            lhs: mk_ctr(
+                "Kind.Axiom.Family.Constructors".to_owned(),
+                vec![mk_var("_")],
+            ),
             rhs: mk_single_ctr("Maybe.none".to_string()),
         });
+
+        file.rules.push(lang::Rule {
+            lhs: mk_ctr(
+                "Kind.Axiom.Family.Indices".to_owned(),
+                vec![mk_var("_")],
+            ),
+            rhs: mk_u60(0),
+        });
+        
     }
 
     file

@@ -102,7 +102,7 @@ impl Diagnostic for KdlDiagnostic {
             | ShouldNotHaveArguments(_)
             | ShouldHaveOnlyOneRule(_)
             | NoInitEntry(_)
-            | FloatUsed(_) => Severity::Error
+            | FloatUsed(_) => Severity::Error,
         }
     }
 }

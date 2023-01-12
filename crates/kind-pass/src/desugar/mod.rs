@@ -16,7 +16,7 @@ use kind_tree::{
     symbol::Ident,
 };
 
-use crate::diagnostic::{PassDiagnostic, GenericPassError};
+use crate::diagnostic::{GenericPassError, PassDiagnostic};
 
 pub mod app;
 pub mod attributes;
