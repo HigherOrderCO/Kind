@@ -466,16 +466,34 @@ impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "match {} {}", self.typ, self.scrutinee)?;
 
-        match &self.motive {
-            None => Ok(()),
-            Some(res) => write!(f, " : {}", res),
-        }?;
+        if let Some(res) = &self.value {
+            write!(f, " = {}", res)?;
+        }
+
+        if !self.with_vars.is_empty() {
+            write!(f, " with")?;
+            for var in &self.with_vars {
+                if let Some(ty) = &var.1 {
+                    write!(f, " ({} : {})", var.0, ty)?;
+                } else {
+                    write!(f, " {}", var.0)?;
+                }
+            }
+        }
+
         write!(f, " {{ ")?;
 
         for case in &self.cases {
             write!(f, "{}; ", case)?
         }
-        write!(f, "}}")
+
+        write!(f, "}}")?;
+
+        if let Some(res) = &self.motive {
+            write!(f, " : {}", res)?;
+        }
+
+        Ok(())
     }
 }
 
