@@ -38,7 +38,7 @@ Main : IO (Result () String) {
 }
 ```
 
-Theorems can be proved inductivelly, as in [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php) and [Idris](https://www.idris-lang.org/):
+Theorems can be proved inductively, as in [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php) and [Idris](https://www.idris-lang.org/):
 
 ```javascript
 // Black Friday Theorem. Proof that, for every Nat n: n * 2 / 2 == n.
