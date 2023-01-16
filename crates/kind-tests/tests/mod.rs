@@ -86,8 +86,8 @@ fn test_checker_issues() -> Result<(), Error> {
 
 #[test]
 #[timeout(15000)]
-fn test_eval() -> Result<(), Error> {
-    test_kind2(Path::new("./suite/eval"), |path, session| {
+fn test_run() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/run"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints)
             .map(|file| driver::compile_book_to_hvm(file, false))
@@ -101,8 +101,32 @@ fn test_eval() -> Result<(), Error> {
 
 #[test]
 #[timeout(15000)]
+fn test_eval() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/eval"), |path, session| {
+        let check = driver::desugar_book(session, path)
+            .map(|file| driver::eval_in_checker(&file));
+
+        check.ok().map(|x| x.0)
+    })?;
+    Ok(())
+}
+
+#[test]
+#[timeout(15000)]
 fn test_eval_issues() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/eval"), |path, session| {
+        let check = driver::desugar_book(session, path)
+            .map(|file| driver::eval_in_checker(&file));
+
+        check.ok().map(|x| x.0)
+    })?;
+    Ok(())
+}
+
+#[test]
+#[timeout(15000)]
+fn test_run_issues() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/issues/run"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints)
             .map(|file| driver::compile_book_to_hvm(file, false))
