@@ -8,6 +8,7 @@ use std::sync::mpsc::Sender;
 use fxhash::FxHashMap;
 use kind_derive::getters::derive_getters;
 use kind_derive::matching::derive_match;
+use kind_derive::mutters::derive_mutters;
 use kind_derive::open::derive_match_rec;
 use kind_derive::setters::derive_setters;
 use kind_report::data::Diagnostic;
@@ -36,6 +37,7 @@ pub enum Derive {
     Match,
     Getters,
     Setters,
+    Mutters
 }
 
 impl Display for Derive {
@@ -44,13 +46,17 @@ impl Display for Derive {
             Derive::Match => write!(f, "match"),
             Derive::Getters => write!(f, "getters"),
             Derive::Setters => write!(f, "setters"),
+            Derive::Mutters => write!(f, "mutters"),
         }
     }
 }
 
 pub fn insert_or_report(channel: Channel, hashmap: &mut Derivations, key: Derive, range: Range) {
     if let Some(last_range) = hashmap.get(&key) {
-        let err = Box::new(PassDiagnostic::DuplicatedAttributeArgument(*last_range, range));
+        let err = Box::new(PassDiagnostic::DuplicatedAttributeArgument(
+            *last_range,
+            range,
+        ));
         channel.send(err).unwrap();
     } else {
         hashmap.insert(key, range);
@@ -62,6 +68,7 @@ fn string_to_derive(name: &str) -> Option<Derive> {
         "match" => Some(Derive::Match),
         "getters" => Some(Derive::Getters),
         "setters" => Some(Derive::Setters),
+        "mutters" => Some(Derive::Mutters),
         _ => None,
     }
 }
@@ -127,7 +134,10 @@ pub fn expand_sum_type(
             }
             other => {
                 error_channel
-                    .send(Box::new(PassDiagnostic::CannotDerive(other.to_string(), val)))
+                    .send(Box::new(PassDiagnostic::CannotDerive(
+                        other.to_string(),
+                        val,
+                    )))
                     .unwrap();
                 failed = true;
             }
@@ -158,6 +168,12 @@ pub fn expand_record_type(
             }
             Derive::Setters => {
                 for res in derive_setters(rec.name.range, rec) {
+                    let info = res.extract_book_info();
+                    entries.insert(res.name.to_string(), (res, info));
+                }
+            }
+            Derive::Mutters => {
+                for res in derive_mutters(rec.name.range, rec) {
                     let info = res.extract_book_info();
                     entries.insert(res.name.to_string(), (res, info));
                 }

@@ -210,8 +210,8 @@ pub enum ExprKind {
         type_name: QualifiedIdent,
         var_name: Ident,
         motive: Option<Box<Expr>>,
-        next: Box<Expr>
-    }
+        next: Box<Expr>,
+    },
 }
 
 /// Describes a single expression inside Kind2.
@@ -292,7 +292,25 @@ impl Expr {
             range,
         })
     }
+}
 
+impl Binding {
+    pub fn to_app_binding(&self) -> AppBinding {
+        match self {
+            Binding::Positional(expr) => {
+                AppBinding {
+                    data: expr.clone(),
+                    erased: false,
+                }
+            },
+            Binding::Named(_, _, expr) => {
+                AppBinding {
+                    data: expr.clone(),
+                    erased: false,
+                }
+            },
+        }
+    }
 }
 
 impl Locatable for Binding {
@@ -467,16 +485,34 @@ impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "match {} {}", self.typ, self.scrutinee)?;
 
-        match &self.motive {
-            None => Ok(()),
-            Some(res) => write!(f, " : {}", res),
-        }?;
+        if let Some(res) = &self.value {
+            write!(f, " = {}", res)?;
+        }
+
+        if !self.with_vars.is_empty() {
+            write!(f, " with")?;
+            for var in &self.with_vars {
+                if let Some(ty) = &var.1 {
+                    write!(f, " ({} : {})", var.0, ty)?;
+                } else {
+                    write!(f, " {}", var.0)?;
+                }
+            }
+        }
+
         write!(f, " {{ ")?;
 
         for case in &self.cases {
             write!(f, "{}; ", case)?
         }
-        write!(f, "}}")
+
+        write!(f, "}}")?;
+
+        if let Some(res) = &self.motive {
+            write!(f, " : {}", res)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -556,8 +592,18 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
-            Open { type_name, var_name, motive: Some(motive), next } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
-            Open { type_name, var_name, motive: None, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
+            Open {
+                type_name,
+                var_name,
+                motive: Some(motive),
+                next,
+            } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
+            Open {
+                type_name,
+                var_name,
+                motive: None,
+                next,
+            } => write!(f, "(open {} {}; {})", type_name, var_name, next),
             If { cond, then_, else_ } => {
                 write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
             }
