@@ -73,3 +73,12 @@ impl Display for Pat {
         }
     }
 }
+
+impl Pat {
+    pub fn var(name: Ident) -> Box<Pat> {
+        Box::new(Pat {
+            range: name.range,
+            data: PatKind::Var(PatIdent(name)),
+        })
+    }
+}

@@ -8,3 +8,4 @@ pub mod open;
 pub mod subst;
 pub mod getters;
 pub mod setters;
+pub mod mutters;
