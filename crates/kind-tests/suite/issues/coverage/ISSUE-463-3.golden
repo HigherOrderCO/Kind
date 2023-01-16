@@ -1,1 +1,13 @@
-Ok!
+   WARN  This function does not cover all the possibilities!
+
+      * Missing case :  
+
+      /--[suite/issues/coverage/ISSUE-463-3.kind2:13:1]
+      |
+   12 |    
+   13 |    Complete (m: Assert Bool.true) (e: Empty) : Type
+      |    v-------
+      |    \Here!
+   14 |    
+
+

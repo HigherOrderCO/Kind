@@ -78,6 +78,7 @@ impl InlineState {
                         FxHashMap::from_iter(inlinable.names.iter().cloned().zip(args.clone()));
                     *expr = inlinable.body.clone();
                     subst_on_expr(expr, subst);
+                    self.inline_expr(expr)
                 } else {
                     for arg in args {
                         self.inline_expr(arg);
