@@ -1,0 +1,10 @@
+#derive[getters]
+record Pair (a: Type) (b: Type) {
+    fst : a
+    snd : b
+}
+
+Main : U60
+Main =
+    let a = (Pair.new 100 200 :: Pair U60 U60)
+    (+ (Pair.fst.get a) (Pair.snd.get a))

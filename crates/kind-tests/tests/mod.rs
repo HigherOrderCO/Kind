@@ -86,13 +86,25 @@ fn test_checker_issues() -> Result<(), Error> {
 
 #[test]
 #[timeout(15000)]
-fn test_eval() -> Result<(), Error> {
-    test_kind2(Path::new("./suite/eval"), |path, session| {
+fn test_run() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/run"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
         let check = driver::erase_book(session, path, entrypoints)
             .map(|file| driver::compile_book_to_hvm(file, false))
             .map(|file| driver::execute_file(&file.to_string(), Some(1)))
             .flatten();
+
+        check.ok().map(|x| x.0)
+    })?;
+    Ok(())
+}
+
+#[test]
+#[timeout(15000)]
+fn test_eval() -> Result<(), Error> {
+    test_kind2(Path::new("./suite/eval"), |path, session| {
+        let check = driver::desugar_book(session, path)
+            .map(|file| driver::eval_in_checker(&file));
 
         check.ok().map(|x| x.0)
     })?;

@@ -1,0 +1,19 @@
+#derive[match]
+type Nat {
+    succ (pred: Nat)
+    zero
+}
+
+Run (n: Nat) : Type
+Run (Nat.succ n) = U60
+Run (Nat.zero)   = U60
+
+Lero <t> (n: Nat) (f: Run n) : U60
+Lero t1 n f =
+    match Nat n with (f : Run n) {
+        succ => (+ f 2)
+        zero => (+ f 1)
+    }
+
+Main : U60
+Main = Lero (Nat.succ Nat.zero) 1

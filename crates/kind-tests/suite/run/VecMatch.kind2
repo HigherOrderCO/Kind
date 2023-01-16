@@ -1,0 +1,20 @@
+type Nat {
+    succ (pred : Nat)
+    zero
+}
+
+#derive[match]
+type Vec (t: Type) ~ (n: Nat) {
+    cons <size : Nat> (x : t) (xs : Vec t size) : Vec t (Nat.succ size)
+    nil : Vec t Nat.zero
+}
+
+Vec.count <t> <n: Nat> (v: Vec t n) : U60
+Vec.count vec = 
+    match Vec vec {
+        cons xs .. => (+ 1 (Vec.count xs))
+        nil        => 0
+    }
+
+Main : U60
+Main = Vec.count (Vec.cons 10 (Vec.cons 20 (Vec.cons 30 Vec.nil)))
