@@ -2,8 +2,6 @@
 
 ![banner]
 
----
-
 &nbsp;
 
 [![crates.io][crates.io-badge]][crates.io]
@@ -15,6 +13,8 @@
 [Getting started](#getting-started) •
 [Examples](#examples) •
 [Installation](#installation)
+
+&nbsp;
 
 </div>
 
