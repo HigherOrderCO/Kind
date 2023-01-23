@@ -618,13 +618,16 @@ impl<'a> Parser<'a> {
         self.advance(); // 'open'
         let type_name = self.parse_upper_id()?;
         let var_name = self.parse_id()?;
-        let next = self.parse_expr(false)?;
-        let end = next.range;
 
         let motive = self.try_single(&|this| {
             this.eat_variant(Token::Colon)?;
             this.parse_expr(false)
         })?;
+
+        self.check_and_eat(Token::Semi);
+
+        let next = self.parse_expr(false)?;
+        let end = next.range;
 
         Ok(Box::new(Expr {
             data: ExprKind::Open { type_name, var_name, motive, next },

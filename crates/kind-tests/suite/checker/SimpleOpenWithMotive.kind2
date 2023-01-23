@@ -1,0 +1,14 @@
+#derive[match]
+record Pudim {
+    owo : U60
+    uwu : U60
+}
+
+#keep
+Ok (n: Pudim) : U60
+Ok n =
+    open Pudim n : _;
+    (+ n.owo n.uwu)
+
+Main : U60
+Main = Ok (Pudim.new 10 20)
