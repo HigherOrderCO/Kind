@@ -1,3 +1,0 @@
-Maybe.bind <a> <b> (ma: Maybe a) (mb: a -> Maybe b) : Maybe b
-Maybe.bind a b (Maybe.none t)     mb = Maybe.none
-Maybe.bind a b (Maybe.some t val) mb = (mb val)

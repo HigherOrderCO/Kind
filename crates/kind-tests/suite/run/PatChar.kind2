@@ -1,6 +1,0 @@
-Lol (n: U60) : U60
-Lol 'A' = 'A'
-Lol _   = 0
-
-Main : U60
-Main = (Lol 'A')

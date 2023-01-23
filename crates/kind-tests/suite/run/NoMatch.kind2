@@ -1,5 +1,0 @@
-Main : U60
-Main =
-    match NoMatch t = NoMatch.pudding {
-        pudding => 2
-    }

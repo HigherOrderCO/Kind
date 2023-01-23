@@ -1,8 +1,0 @@
-type Nat {
-    succ (pred: Nat)
-    zero
-}
-
-Nat.pred (n: Nat) : Nat
-Nat.pred Nat.zero     = Nat.zero
-Nat.pred (Nat.succ n) = n

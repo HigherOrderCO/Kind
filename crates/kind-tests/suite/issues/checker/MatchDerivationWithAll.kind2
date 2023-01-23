@@ -1,4 +1,0 @@
-#derive[match]
-type WithCtx (a: Type) { 
-    new: U60 -> (WithCtx a)
-}

@@ -1,7 +1,0 @@
-type OwO {
-    2
-    3
-}
-
-Ok : OwO
-Ok = OwO.2

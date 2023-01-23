@@ -1,4 +1,0 @@
-record FieldDependency {
-    ty : Type
-    snd : ty
-}

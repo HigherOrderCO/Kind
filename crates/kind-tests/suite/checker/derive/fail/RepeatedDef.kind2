@@ -1,7 +1,0 @@
-type Nat {
-    zero
-    succ
-}
-
-Nat.zero : U60
-Nat.zero = 2

@@ -1,7 +1,0 @@
-A (n : U60) : U60
-A n = n
-
-ArityOnLet : U60
-ArityOnLet = 
-    let a = A
-    2

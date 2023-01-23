@@ -7,8 +7,4 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-hvm = { git = "https://github.com/Kindelia/HVM.git" }
-
 kind-span = {path = "../kind-span"}
-linked-hash-map = "0.5.6"
-fxhash = "0.2.1"

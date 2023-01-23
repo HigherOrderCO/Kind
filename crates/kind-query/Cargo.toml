@@ -2,18 +2,7 @@
 name = "kind-query"
 version = "0.1.0"
 edition = "2021"
-license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-parser = { path = "../kind-parser" }
-kind-tree = { path = "../kind-tree" }
-kind-span = { path = "../kind-span" }
-kind-report = { path = "../kind-report" }
-kind-checker = { path = "../kind-checker" }
-kind-pass = { path = "../kind-pass" }
-kind-target-hvm = { path = "../kind-target-hvm" }
-
-fxhash = "0.2.1"
-pathdiff = "0.2.1"
