@@ -12,7 +12,7 @@ use std::fmt::{Display, Error, Formatter};
 
 /// A binding express the positional or named argument of
 /// a constructor or function.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum Binding {
     Positional(Box<Expr>),
     Named(Range, Ident, Box<Expr>),
@@ -22,7 +22,7 @@ pub enum Binding {
 pub type Spine = Vec<Binding>;
 
 /// A binding that is used inside applications.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct AppBinding {
     pub data: Box<Expr>,
     pub erased: bool,
@@ -46,7 +46,7 @@ impl AppBinding {
 
 /// A case binding is a field or a rename of some field
 /// inside a match expression.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum CaseBinding {
     Field(Ident),
     Renamed(Ident, Ident),
@@ -56,7 +56,7 @@ pub enum CaseBinding {
 /// strutinizer, bindings to the names of each arguments and
 /// a right-hand side value. The ignore_rest flag useful to just
 /// fill all of the case bindings that are not used with a default name.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Case {
     pub constructor: Ident,
     pub bindings: Vec<CaseBinding>,
@@ -66,7 +66,7 @@ pub struct Case {
 
 /// A match block that will be desugared
 /// into an eliminator of a datatype.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Match {
     pub typ: QualifiedIdent,
     pub scrutinee: Ident,
@@ -77,7 +77,7 @@ pub struct Match {
 }
 
 /// Substitution
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Substitution {
     pub name: Ident,
     pub redx: usize,
@@ -85,7 +85,7 @@ pub struct Substitution {
     pub expr: Box<Expr>,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum Literal {
     /// The universe of types (e.g. Type)
     Type,
@@ -111,13 +111,13 @@ pub enum Literal {
 
 /// A destruct of a single constructor. It's a flat destruct
 /// and just translates into a eliminator for records.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum Destruct {
     Destruct(Range, QualifiedIdent, Vec<CaseBinding>, Option<Range>),
     Ident(Ident),
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum SttmKind {
     Expr(Box<Expr>, Box<Sttm>),
     Ask(Destruct, Box<Expr>, Box<Sttm>),
@@ -130,13 +130,27 @@ pub enum SttmKind {
 /// describes the idea of `sequence` inside a monad
 /// each monadic action contains a `next` element that is
 /// desugared into a 'monadic bind'.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Sttm {
     pub data: SttmKind,
     pub range: Range,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
+pub enum SeqOperation {
+    Set(Box<Expr>),
+    Mut(Box<Expr>),
+    Get
+}
+
+#[derive(Clone, Debug)]
+pub struct SeqRecord {
+    pub typ_: Box<Expr>,
+    pub ident: Vec<Ident>,
+    pub operation: SeqOperation
+}
+
+#[derive(Clone, Debug)]
 pub enum ExprKind {
     /// Name of a variable
     Var { name: Ident },
@@ -210,12 +224,14 @@ pub enum ExprKind {
         type_name: QualifiedIdent,
         var_name: Ident,
         motive: Option<Box<Expr>>,
-        next: Box<Expr>,
+        next: Box<Expr>
     },
+
+    SeqRecord(SeqRecord)
 }
 
 /// Describes a single expression inside Kind2.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Expr {
     pub data: ExprKind,
     pub range: Range,
@@ -292,25 +308,7 @@ impl Expr {
             range,
         })
     }
-}
 
-impl Binding {
-    pub fn to_app_binding(&self) -> AppBinding {
-        match self {
-            Binding::Positional(expr) => {
-                AppBinding {
-                    data: expr.clone(),
-                    erased: false,
-                }
-            },
-            Binding::Named(_, _, expr) => {
-                AppBinding {
-                    data: expr.clone(),
-                    erased: false,
-                }
-            },
-        }
-    }
 }
 
 impl Locatable for Binding {
@@ -485,34 +483,16 @@ impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "match {} {}", self.typ, self.scrutinee)?;
 
-        if let Some(res) = &self.value {
-            write!(f, " = {}", res)?;
-        }
-
-        if !self.with_vars.is_empty() {
-            write!(f, " with")?;
-            for var in &self.with_vars {
-                if let Some(ty) = &var.1 {
-                    write!(f, " ({} : {})", var.0, ty)?;
-                } else {
-                    write!(f, " {}", var.0)?;
-                }
-            }
-        }
-
+        match &self.motive {
+            None => Ok(()),
+            Some(res) => write!(f, " : {}", res),
+        }?;
         write!(f, " {{ ")?;
 
         for case in &self.cases {
             write!(f, "{}; ", case)?
         }
-
-        write!(f, "}}")?;
-
-        if let Some(res) = &self.motive {
-            write!(f, " : {}", res)?;
-        }
-
-        Ok(())
+        write!(f, "}}")
     }
 }
 
@@ -592,18 +572,8 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
-            Open {
-                type_name,
-                var_name,
-                motive: Some(motive),
-                next,
-            } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
-            Open {
-                type_name,
-                var_name,
-                motive: None,
-                next,
-            } => write!(f, "(open {} {}; {})", type_name, var_name, next),
+            Open { type_name, var_name, motive: Some(motive), next } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
+            Open { type_name, var_name, motive: None, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
             If { cond, then_, else_ } => {
                 write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
             }
@@ -620,6 +590,34 @@ impl Display for Expr {
             Match(matcher) => write!(f, "({})", matcher),
             Subst(subst) => write!(f, "({})", subst),
             Hole => write!(f, "_"),
+            SeqRecord(rec) => {
+                use SeqOperation::*;
+                write!(f, "(!({}) {}", rec.typ_, rec.ident.iter().map(|x| x.to_str()).collect::<Vec<_>>().join(","))?;
+                match &rec.operation {
+                    Set(expr) => write!(f, "+= {})", expr),
+                    Mut(expr) => write!(f, "@= {})", expr),
+                    Get => write!(f, ")")
+                }
+            },
+        }
+    }
+}
+
+impl Binding {
+    pub fn to_app_binding(&self) -> AppBinding {
+        match self {
+            Binding::Positional(expr) => {
+                AppBinding {
+                    data: expr.clone(),
+                    erased: false,
+                }
+            },
+            Binding::Named(_, _, expr) => {
+                AppBinding {
+                    data: expr.clone(),
+                    erased: false,
+                }
+            },
         }
     }
 }

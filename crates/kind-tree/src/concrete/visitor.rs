@@ -492,5 +492,6 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
         ExprKind::Hole => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),
         ExprKind::Match(matcher) => ctx.visit_match(matcher),
+        ExprKind::SeqRecord(_) => todo!(),
     }
 }

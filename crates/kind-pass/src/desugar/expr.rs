@@ -40,15 +40,15 @@ impl<'a> DesugarState<'a> {
                 let list_ident = QualifiedIdent::new_static("Nat", None, range);
                 let cons_ident = list_ident.add_segment("succ");
                 let nil_ident = list_ident.add_segment("zero");
-                
+
                 let mut res = self.mk_desugared_ctr(range, nil_ident, Vec::new(), false);
 
                 for _ in 0..*num {
                     res = self.mk_desugared_ctr(range, cons_ident.clone(), vec![res], false)
                 }
-                
+
                 res
-            },
+            }
             Literal::NumU120(num) => {
                 if !self.check_implementation("U120.new", range, Sugar::U120) {
                     return desugared::Expr::err(range);
@@ -72,6 +72,14 @@ impl<'a> DesugarState<'a> {
             sub.redx,
             self.desugar_expr(&sub.expr),
         )
+    }
+
+    pub(crate) fn desugar_seq(
+        &mut self,
+        range: Range,
+        sub: &expr::SeqRecord,
+    ) -> Box<desugared::Expr> {
+        todo!()
     }
 
     pub(crate) fn desugar_sttm(
@@ -157,7 +165,10 @@ impl<'a> DesugarState<'a> {
         let pure = self.old_book.names.get(pure_ident.to_str());
 
         if bind.is_none() || pure.is_none() {
-            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::DoNotation));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(
+                range,
+                Sugar::DoNotation,
+            ));
             return desugared::Expr::err(range);
         }
 
@@ -249,7 +260,7 @@ impl<'a> DesugarState<'a> {
         type_name: &QualifiedIdent,
         var_name: &Ident,
         motive: &Option<Box<expr::Expr>>,
-        next: &expr::Expr
+        next: &expr::Expr,
     ) -> Box<desugared::Expr> {
         let rec = self.old_book.entries.get(type_name.to_str());
 
@@ -270,16 +281,23 @@ impl<'a> DesugarState<'a> {
             return desugared::Expr::err(range);
         }
 
-        let field_names : Vec<_> = record.fields.iter().map(|x| var_name.add_segment(x.0.to_str())).collect();
+        let field_names: Vec<_> = record
+            .fields
+            .iter()
+            .map(|x| var_name.add_segment(x.0.to_str()))
+            .collect();
 
         let irrelev = vec![false; field_names.len()];
 
-        let motive = motive.as_ref().map(|x| self.desugar_expr(x)).unwrap_or_else(|| self.gen_hole_expr(range));
+        let motive = motive
+            .as_ref()
+            .map(|x| self.desugar_expr(x))
+            .unwrap_or_else(|| self.gen_hole_expr(range));
 
         let spine = vec![
             desugared::Expr::var(var_name.clone()),
             desugared::Expr::lambda(range, var_name.clone(), motive, false),
-            desugared::Expr::unfold_lambda(&irrelev, &field_names, self.desugar_expr(next))
+            desugared::Expr::unfold_lambda(&irrelev, &field_names, self.desugar_expr(next)),
         ];
 
         self.mk_desugared_fun(range, open_id, spine, false)
@@ -367,7 +385,13 @@ impl<'a> DesugarState<'a> {
             Pair { fst, snd } => self.desugar_pair(expr.range, fst, snd),
             Match(matcher) => self.desugar_match(expr.range, matcher),
             Subst(sub) => self.desugar_sub(expr.range, sub),
-            Open { type_name, var_name, motive, next } => self.desugar_open(expr.range, type_name, var_name, motive, &next)
+            Open {
+                type_name,
+                var_name,
+                motive,
+                next,
+            } => self.desugar_open(expr.range, type_name, var_name, motive, &next),
+            SeqRecord(sec) => self.desugar_seq(expr.range, sec),
         }
     }
 }
