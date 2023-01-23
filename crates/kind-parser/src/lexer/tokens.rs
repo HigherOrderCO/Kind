@@ -75,6 +75,10 @@ pub enum Token {
     BangEq,
     Bang,
 
+    PlusEq,
+    AtEq,
+    At,
+
     HashHash,
     Hash,
 
@@ -181,6 +185,9 @@ impl fmt::Display for Token {
             Token::With => write!(f, "with"),
             Token::Return => write!(f, "return"),
             Token::Ask => write!(f, "ask"),
+            Token::PlusEq => write!(f, "+="),
+            Token::AtEq => write!(f, "@="),
+            Token::At => write!(f, "@"),
         }
     }
 }

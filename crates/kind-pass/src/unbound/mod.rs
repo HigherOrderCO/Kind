@@ -638,9 +638,9 @@ impl Visitor for UnboundCollector {
             ExprKind::SeqRecord(sec) => {
                 use kind_tree::concrete::SeqOperation::*;
 
-                self.visit_expr(&mut sec.typ_);
+                self.visit_expr(&mut sec.typ);
 
-                self.visit_ident(&mut sec.ident[0]);
+                self.visit_ident(&mut sec.name);
 
                 match &mut sec.operation {
                     Set(expr) => self.visit_expr(expr),

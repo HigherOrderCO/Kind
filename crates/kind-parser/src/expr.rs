@@ -879,6 +879,46 @@ impl<'a> Parser<'a> {
         }
     }
 
+    pub fn parse_seq(&mut self) -> Result<Box<Expr>, SyntaxDiagnostic> {
+        let start = self.range();
+
+        self.eat_variant(Token::Bang)?;
+
+        let typ = self.parse_atom()?;
+
+        let name = self.parse_id()?;
+
+        let mut fields = vec![];
+
+        let mut end = self.range();
+
+        while let Token::Dot = &self.get() {
+            self.advance();
+            end = self.range();
+            fields.push(self.parse_id()?);
+        }
+
+        let operation = if self.check_and_eat(Token::Eq) {
+            SeqOperation::Set(self.parse_expr(false)?)
+        } else if self.check_and_eat(Token::AtEq) {
+            SeqOperation::Mut(self.parse_expr(false)?)
+        } else {
+            SeqOperation::Get
+        };
+
+        Ok(Box::new(Expr {
+            data: ExprKind::SeqRecord(
+                SeqRecord {
+                    typ,
+                    name,
+                    fields,
+                    operation,
+                }
+            ),
+            range: start.mix(end),
+        }))
+    }
+
     /// The infinite hell of else ifs. But it's the most readable way
     /// to check if the queue of tokens match a pattern as we need
     /// some looakhead tokens.
@@ -904,6 +944,8 @@ impl<'a> Parser<'a> {
             self.parse_pi_or_lambda(false)
         } else if self.is_sigma_type() {
             self.parse_sigma_type()
+        } else if self.check_actual(Token::Bang) {
+            self.parse_seq()
         } else if self.check_actual(Token::Tilde) {
             self.parse_erased()
         } else {

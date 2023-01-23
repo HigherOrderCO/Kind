@@ -1,6 +1,6 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::{self, expr, Literal, TopLevel};
-use kind_tree::desugared::{self};
+use kind_tree::desugared::{self, Expr};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
 use crate::diagnostic::{PassDiagnostic, Sugar};
@@ -79,7 +79,78 @@ impl<'a> DesugarState<'a> {
         range: Range,
         sub: &expr::SeqRecord,
     ) -> Box<desugared::Expr> {
-        todo!()
+        use concrete::SeqOperation::*;
+
+        let typ = self.desugar_expr(&sub.typ);
+
+        let mut value = vec![];
+        self.desugar_record_field_sequence(&mut value, typ, &sub.fields);
+
+        match &sub.operation {
+            Set(expr) => {
+                let value_ident = Ident::generate("_value");
+                let expr = self.desugar_expr(&expr);
+
+                let mut result = value.iter().rfold(expr, |acc, (name, field)| {
+                    let name = name.add_segment(field.to_str()).add_segment("mut");
+                    self.mk_desugared_ctr(
+                        range,
+                        name,
+                        vec![Expr::var(value_ident.clone()), Expr::lambda(range.clone(), value_ident.clone(), acc, false)],
+                        false,
+                    )
+                });
+
+                match &mut result.data {
+                    desugared::ExprKind::Ctr { args, .. } => {
+                        if let desugared::ExprKind::Var { name } = &mut args[0].data {
+                            *name = sub.name.clone()
+                        }
+                    },
+                    _ => ()
+                }
+
+                result
+            },
+            Mut(expr) => {
+                let value_ident = Ident::generate("_value");
+                let expr = self.desugar_expr(&expr);
+    
+                let mut result = value.iter().rfold(expr, |acc, (name, field)| {
+                    let name = name.add_segment(field.to_str()).add_segment("mut");
+                    Expr::lambda(name.range.clone(), value_ident.clone(), self.mk_desugared_ctr(
+                        range,
+                        name,
+                        vec![Expr::var(value_ident.clone()), acc],
+                        false,
+                    ), false)
+                });
+
+                let mut result = match result.data {
+                    desugared::ExprKind::Lambda { body, .. } => {
+                        body
+                    }
+                    _ => panic!()
+                };
+
+                match &mut result.data {
+                    desugared::ExprKind::Ctr { args, .. } => {
+                        if let desugared::ExprKind::Var { name } = &mut args[0].data {
+                            *name = sub.name.clone()
+                        }
+                    },
+                    _ => ()
+                }
+
+                result
+            }
+            Get => value
+                .iter()
+                .fold(Expr::var(sub.name.clone()), |acc, (name, field)| {
+                    let name = name.add_segment(field.to_str()).add_segment("get");
+                    self.mk_desugared_ctr(range, name, vec![acc], false)
+                }),
+        }
     }
 
     pub(crate) fn desugar_sttm(

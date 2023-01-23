@@ -145,8 +145,9 @@ pub enum SeqOperation {
 
 #[derive(Clone, Debug)]
 pub struct SeqRecord {
-    pub typ_: Box<Expr>,
-    pub ident: Vec<Ident>,
+    pub typ: Box<Expr>,
+    pub name: Ident,
+    pub fields: Vec<Ident>,
     pub operation: SeqOperation
 }
 
@@ -592,7 +593,7 @@ impl Display for Expr {
             Hole => write!(f, "_"),
             SeqRecord(rec) => {
                 use SeqOperation::*;
-                write!(f, "(!({}) {}", rec.typ_, rec.ident.iter().map(|x| x.to_str()).collect::<Vec<_>>().join(","))?;
+                write!(f, "(!({}) {} {}", rec.typ, rec.name, rec.fields.iter().map(|x| format!(".{}", x.to_str())).collect::<Vec<_>>().join(","))?;
                 match &rec.operation {
                     Set(expr) => write!(f, "+= {})", expr),
                     Mut(expr) => write!(f, "@= {})", expr),
