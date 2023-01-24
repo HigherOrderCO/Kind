@@ -1,4 +1,5 @@
 use fxhash::FxHashMap;
+use kind_span::Range;
 use kind_tree::{
     concrete::{self, TopLevel},
     desugared::{self, Expr},
@@ -6,7 +7,7 @@ use kind_tree::{
     telescope::Telescope,
 };
 
-use crate::subst::subst_on_expr;
+use crate::{subst::subst_on_expr, diagnostic::PassDiagnostic};
 
 use super::DesugarState;
 
@@ -45,12 +46,13 @@ impl<'a> DesugarState<'a> {
 
     pub fn desugar_record_field_sequence(
         &mut self,
+        range: Range,
         res: &mut Vec<(QualifiedIdent, Ident)>,
         typ: Box<desugared::Expr>,
         fields: &[Ident],
-    ) {
+    ) -> bool {
         if fields.is_empty() {
-            return;
+            return true;
         }
 
         if let Some((name, params, record_fields, args)) = self.specialize_on_field(typ.clone()) {
@@ -70,22 +72,26 @@ impl<'a> DesugarState<'a> {
                     &field
                         .typ
                         .clone()
-                        .unwrap_or_else(|| concrete::expr::Expr::typ(field.range.clone())),
+                        .unwrap_or_else(|| concrete::expr::Expr::typ(field.range)),
                 );
 
-
                 subst_on_expr(&mut val, pair);
-
-                println!("{}", val);
-
                 res.push((name, key));
-
-                self.desugar_record_field_sequence(res, val, &fields[1..])
+                self.desugar_record_field_sequence(range, res, val, &fields[1..]);
+                return true;
             } else {
-                panic!("no field")
+                self.send_err(PassDiagnostic::CannotFindTheField(
+                    fields[0].range,
+                    fields[0].to_string()
+                ));
             }
         } else {
-            panic!("no record {}", typ)
+            self.send_err(PassDiagnostic::CannotAccessType(
+                fields[0].range,
+                fields[0].to_string()
+            ));
         }
+
+        false
     }
 }

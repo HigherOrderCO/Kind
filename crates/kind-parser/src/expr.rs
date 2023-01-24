@@ -886,7 +886,7 @@ impl<'a> Parser<'a> {
 
         let typ = self.parse_atom()?;
 
-        let name = self.parse_id()?;
+        let name = self.parse_atom()?;
 
         let mut fields = vec![];
 
@@ -899,9 +899,13 @@ impl<'a> Parser<'a> {
         }
 
         let operation = if self.check_and_eat(Token::Eq) {
-            SeqOperation::Set(self.parse_expr(false)?)
+            let expr = self.parse_expr(false)?;
+            end = expr.range;
+            SeqOperation::Set(expr)
         } else if self.check_and_eat(Token::AtEq) {
-            SeqOperation::Mut(self.parse_expr(false)?)
+            let expr = self.parse_expr(false)?;
+            end = expr.range;
+            SeqOperation::Mut(expr)
         } else {
             SeqOperation::Get
         };
@@ -910,7 +914,7 @@ impl<'a> Parser<'a> {
             data: ExprKind::SeqRecord(
                 SeqRecord {
                     typ,
-                    name,
+                    expr: name,
                     fields,
                     operation,
                 }

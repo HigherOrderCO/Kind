@@ -292,7 +292,7 @@ pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> anyhow
     }
 
     for unbound in unbound_names.values() {
-        unbound_variable(session, book, &unbound);
+        unbound_variable(session, book, unbound);
         failed = true;
     }
 

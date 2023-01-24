@@ -44,7 +44,9 @@ pub fn desugar_book(
         name_count: 0,
         failed: false,
     };
+
     state.desugar_book(book);
+
     if state.failed {
         Err(GenericPassError.into())
     } else {

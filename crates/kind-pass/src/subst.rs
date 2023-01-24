@@ -53,7 +53,7 @@ fn subst(bindings: im_rc::HashSet<String>, expr: &mut Expr, substs: &FxHashMap<S
         },
         Binary { left, right, .. } => {
             subst(bindings.clone(), left, substs);
-            subst(bindings.clone(), right, substs);
+            subst(bindings, right, substs);
         },
         _ => ()
     }

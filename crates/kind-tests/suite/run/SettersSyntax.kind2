@@ -1,0 +1,20 @@
+type Sum {
+    a
+    b
+    c
+}
+
+#derive[mutters]
+record Identity (t: Type) {
+    value: t
+}
+
+#derive[mutters]
+record NoTypeVar {
+    some_thing: Identity (Identity U60)
+}
+
+Main : NoTypeVar
+Main =
+    let f = NoTypeVar.new (Identity.new (Identity.new 100))
+    !NoTypeVar f .some_thing .value .value = 400

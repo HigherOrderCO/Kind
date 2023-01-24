@@ -291,7 +291,7 @@ impl<'a> Visitor for Subst<'a> {
             ExprKind::SeqRecord(sec) => {
                 use kind_tree::concrete::SeqOperation::*;
 
-                self.visit_ident(&mut sec.name);
+                self.visit_expr(&mut sec.expr);
 
                 self.visit_expr(&mut sec.typ);
 
