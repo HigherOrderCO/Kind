@@ -881,23 +881,16 @@ impl<'a> Parser<'a> {
 
     pub fn parse_seq(&mut self) -> Result<Box<Expr>, SyntaxDiagnostic> {
         let start = self.range();
-
         self.eat_variant(Token::Bang)?;
-
         let typ = self.parse_atom()?;
-
         let name = self.parse_atom()?;
-
         let mut fields = vec![];
-
         let mut end = self.range();
-
         while let Token::Dot = &self.get() {
             self.advance();
             end = self.range();
             fields.push(self.parse_id()?);
         }
-
         let operation = if self.check_and_eat(Token::Eq) {
             let expr = self.parse_expr(false)?;
             end = expr.range;
@@ -909,7 +902,6 @@ impl<'a> Parser<'a> {
         } else {
             SeqOperation::Get
         };
-
         Ok(Box::new(Expr {
             data: ExprKind::SeqRecord(
                 SeqRecord {
