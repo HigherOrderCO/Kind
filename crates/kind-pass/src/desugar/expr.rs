@@ -1,6 +1,6 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::{self, expr, Literal, TopLevel};
-use kind_tree::desugared::{self};
+use kind_tree::desugared::{self, Expr};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
 use crate::diagnostic::{PassDiagnostic, Sugar};
@@ -40,15 +40,15 @@ impl<'a> DesugarState<'a> {
                 let list_ident = QualifiedIdent::new_static("Nat", None, range);
                 let cons_ident = list_ident.add_segment("succ");
                 let nil_ident = list_ident.add_segment("zero");
-                
+
                 let mut res = self.mk_desugared_ctr(range, nil_ident, Vec::new(), false);
 
                 for _ in 0..*num {
                     res = self.mk_desugared_ctr(range, cons_ident.clone(), vec![res], false)
                 }
-                
+
                 res
-            },
+            }
             Literal::NumU120(num) => {
                 if !self.check_implementation("U120.new", range, Sugar::U120) {
                     return desugared::Expr::err(range);
@@ -72,6 +72,111 @@ impl<'a> DesugarState<'a> {
             sub.redx,
             self.desugar_expr(&sub.expr),
         )
+    }
+
+    pub(crate) fn desugar_seq(
+        &mut self,
+        range: Range,
+        sub: &expr::SeqRecord,
+    ) -> Box<desugared::Expr> {
+        use concrete::SeqOperation::*;
+
+        let typ = self.desugar_expr(&sub.typ);
+
+        let mut value = vec![];
+        self.desugar_record_field_sequence(range, &mut value, typ, &sub.fields);
+
+        if self.failed {
+            return Expr::err(range)
+        }
+
+        match &sub.operation {
+            Set(expr) => {
+                let value_ident = Ident::generate("_value");
+                let expr = self.desugar_expr(&expr);
+
+                let mut result = value.iter().rfold(expr, |acc, (typ, field)| {
+                    let name = typ.add_segment(field.to_str()).add_segment("mut");
+
+                    if self.failed || !self.check_implementation(name.to_str(), range, Sugar::Mutter(typ.to_string())) {
+                        return desugared::Expr::err(range);
+                    }
+    
+                    self.mk_desugared_ctr(
+                        range,
+                        name,
+                        vec![
+                            Expr::var(value_ident.clone()),
+                            Expr::lambda(range.clone(), value_ident.clone(), acc, false),
+                        ],
+                        false,
+                    )
+                });
+
+                if let desugared::ExprKind::Ctr { args, .. } = &mut result.data {
+                    args[0] = self.desugar_expr(&sub.expr);
+                }
+
+                result
+            }
+            Mut(expr) => {
+                let value_ident = Ident::generate("_value");
+                let expr = self.desugar_expr(&expr);
+
+                let result = value.iter().rfold(expr, |acc, (typ, field)| {
+                    let name = typ.add_segment(field.to_str()).add_segment("mut");
+
+                    if self.failed || !self.check_implementation(name.to_str(), range, Sugar::Mutter(typ.to_string())) {
+                        return desugared::Expr::err(range);
+                    }
+
+                    Expr::lambda(
+                        name.range.clone(),
+                        value_ident.clone(),
+                        self.mk_desugared_ctr(
+                            range,
+                            name,
+                            vec![Expr::var(value_ident.clone()), acc],
+                            false,
+                        ),
+                        false,
+                    )
+                });
+
+                if self.failed {
+                    return Expr::err(range)
+                }
+
+                let mut result = if let desugared::ExprKind::Lambda { body, .. } = result.data {
+                    body
+                } else {
+                    self.send_err(PassDiagnostic::NeedsAField(
+                        sub.expr.range.clone()
+                    ));
+                    return Expr::err(range)
+                };
+
+                match &mut result.data {
+                    desugared::ExprKind::Ctr { args, .. } => {
+                        args[0] = self.desugar_expr(&sub.expr);
+                    }
+                    _ => (),
+                }
+
+                result
+            }
+            Get => value
+                .iter()
+                .fold(self.desugar_expr(&sub.expr), |acc, (typ, field)| {
+                    let name = typ.add_segment(field.to_str()).add_segment("get");
+
+                    if self.failed || !self.check_implementation(name.to_str(), range, Sugar::Getter(typ.to_string())) {
+                        return desugared::Expr::err(range);
+                    }
+
+                    self.mk_desugared_ctr(range, name, vec![acc], false)
+                }),
+        }
     }
 
     pub(crate) fn desugar_sttm(
@@ -157,7 +262,10 @@ impl<'a> DesugarState<'a> {
         let pure = self.old_book.names.get(pure_ident.to_str());
 
         if bind.is_none() || pure.is_none() {
-            self.send_err(PassDiagnostic::NeedToImplementMethods(range, Sugar::DoNotation));
+            self.send_err(PassDiagnostic::NeedToImplementMethods(
+                range,
+                Sugar::DoNotation,
+            ));
             return desugared::Expr::err(range);
         }
 
@@ -249,7 +357,7 @@ impl<'a> DesugarState<'a> {
         type_name: &QualifiedIdent,
         var_name: &Ident,
         motive: &Option<Box<expr::Expr>>,
-        next: &expr::Expr
+        next: &expr::Expr,
     ) -> Box<desugared::Expr> {
         let rec = self.old_book.entries.get(type_name.to_str());
 
@@ -270,16 +378,23 @@ impl<'a> DesugarState<'a> {
             return desugared::Expr::err(range);
         }
 
-        let field_names : Vec<_> = record.fields.iter().map(|x| var_name.add_segment(x.0.to_str())).collect();
+        let field_names: Vec<_> = record
+            .fields
+            .iter()
+            .map(|x| var_name.add_segment(x.0.to_str()))
+            .collect();
 
         let irrelev = vec![false; field_names.len()];
 
-        let motive = motive.as_ref().map(|x| self.desugar_expr(x)).unwrap_or_else(|| self.gen_hole_expr(range));
+        let motive = motive
+            .as_ref()
+            .map(|x| self.desugar_expr(x))
+            .unwrap_or_else(|| self.gen_hole_expr(range));
 
         let spine = vec![
             desugared::Expr::var(var_name.clone()),
             desugared::Expr::lambda(range, var_name.clone(), motive, false),
-            desugared::Expr::unfold_lambda(&irrelev, &field_names, self.desugar_expr(next))
+            desugared::Expr::unfold_lambda(&irrelev, &field_names, self.desugar_expr(next)),
         ];
 
         self.mk_desugared_fun(range, open_id, spine, false)
@@ -367,7 +482,13 @@ impl<'a> DesugarState<'a> {
             Pair { fst, snd } => self.desugar_pair(expr.range, fst, snd),
             Match(matcher) => self.desugar_match(expr.range, matcher),
             Subst(sub) => self.desugar_sub(expr.range, sub),
-            Open { type_name, var_name, motive, next } => self.desugar_open(expr.range, type_name, var_name, motive, &next)
+            Open {
+                type_name,
+                var_name,
+                motive,
+                next,
+            } => self.desugar_open(expr.range, type_name, var_name, motive, &next),
+            SeqRecord(sec) => self.desugar_seq(expr.range, sec),
         }
     }
 }

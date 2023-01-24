@@ -288,6 +288,16 @@ impl<'a> Visitor for Subst<'a> {
                     self.visit_expr(motive);
                 }
             }
+            ExprKind::SeqRecord(sec) => {
+                use kind_tree::concrete::SeqOperation::*;
+                self.visit_expr(&mut sec.expr);
+                self.visit_expr(&mut sec.typ);
+                match &mut sec.operation {
+                    Set(expr) => self.visit_expr(expr),
+                    Mut(expr) => self.visit_expr(expr),
+                    Get => (),
+                }
+            },
         }
     }
 }

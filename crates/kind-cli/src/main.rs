@@ -150,7 +150,7 @@ pub fn compile_in_session<T>(
     eprintln!();
 
     render_to_stderr(
-        &render_config,
+        render_config,
         &session,
         &Log::Checking(format!("The file '{}'", file)),
     );
@@ -168,12 +168,12 @@ pub fn compile_in_session<T>(
             contains_error = true;
         }
 
-        render_to_stderr(&render_config, &session, &diagnostic)
+        render_to_stderr(render_config, &session, &diagnostic)
     }
 
     if !contains_error {
         render_to_stderr(
-            &render_config,
+            render_config,
             &session,
             &if compiled {
                 Log::Compiled(start.elapsed())
@@ -186,7 +186,7 @@ pub fn compile_in_session<T>(
 
         res
     } else {
-        render_to_stderr(&render_config, &session, &Log::Failed(start.elapsed()));
+        render_to_stderr(render_config, &session, &Log::Failed(start.elapsed()));
         eprintln!();
 
         match res {

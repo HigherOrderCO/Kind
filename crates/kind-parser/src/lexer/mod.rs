@@ -175,7 +175,20 @@ impl<'a> Lexer<'a> {
                 ';' => self.single_token(Token::Semi, start),
                 '$' => self.single_token(Token::Dollar, start),
                 ',' => self.single_token(Token::Comma, start),
-                '+' => self.single_token(Token::Plus, start),
+                '+' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some('=') => self.single_token(Token::PlusEq, start),
+                        _ => (Token::Plus, self.mk_range(start)),
+                    }
+                }
+                '@' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some('=') => self.single_token(Token::AtEq, start),
+                        _ => (Token::At, self.mk_range(start)),
+                    }
+                }
                 '-' => {
                     self.next_char();
                     match self.peekable.peek() {

@@ -22,7 +22,7 @@ pub mod visitor;
 pub use expr::*;
 
 /// A value of a attribute
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum AttributeStyle {
     Ident(Range, Ident),
     String(Range, String),
@@ -34,7 +34,7 @@ pub enum AttributeStyle {
 /// that usually is on the top of a declaration
 /// and can be attached to a function declaration
 /// it express some compiler properties
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Attribute {
     pub name: Ident,
     pub args: Vec<AttributeStyle>,
@@ -48,7 +48,7 @@ pub struct Attribute {
 /// compiled.
 /// hide: that express a implicit argument (that will
 /// be discovered through unification).
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Argument {
     pub hidden: bool,
     pub erased: bool,
@@ -60,7 +60,7 @@ pub struct Argument {
 /// A rule is a equation that in the left-hand-side
 /// contains a list of patterns @pats@ and on the
 /// right hand side a value.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Rule {
     pub name: QualifiedIdent,
     pub pats: Vec<Box<Pat>>,
@@ -72,7 +72,7 @@ pub struct Rule {
 /// and has rules. The type of the function
 /// consists of the arguments @args@ and the
 /// return type @typ@.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Entry {
     pub name: QualifiedIdent,
     pub docs: Vec<String>,
@@ -86,7 +86,7 @@ pub struct Entry {
 
 /// A single cosntructor inside the algebraic data
 /// type definition.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Constructor {
     pub name: Ident,
     pub docs: Vec<String>,
@@ -97,7 +97,7 @@ pub struct Constructor {
 
 /// An algebraic data type definition that supports
 /// parametric and indexed data type definitions.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct SumTypeDecl {
     pub name: QualifiedIdent,
     pub docs: Vec<String>,
@@ -108,7 +108,7 @@ pub struct SumTypeDecl {
 }
 
 /// A single constructor data type.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct RecordDecl {
     pub name: QualifiedIdent,
     pub docs: Vec<String>,
@@ -126,7 +126,7 @@ impl RecordDecl {
 }
 
 /// All of the structures
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub enum TopLevel {
     SumType(SumTypeDecl),
     RecordType(RecordDecl),
@@ -166,7 +166,7 @@ impl TopLevel {
 /// A module is a collection of top level entries
 /// that contains syntatic sugars. In the future
 /// it will contain a HashMap to local renames.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Module {
     pub entries: Vec<TopLevel>,
     pub uses: FxHashMap<String, String>,

@@ -11,3 +11,4 @@ mod diagnostic;
 pub mod expand;
 pub mod inline;
 pub mod unbound;
+pub mod subst;

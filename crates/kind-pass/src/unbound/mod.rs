@@ -471,13 +471,10 @@ impl Visitor for UnboundCollector {
     fn visit_literal(&mut self, range: Range, lit: &mut kind_tree::concrete::Literal) {
         use kind_tree::concrete::Literal::*;
 
-        match lit {
-            String(_) => {
-                let string = &mut QualifiedIdent::new_static("String", None, range);
-                self.visit_qualified_ident(&mut string.add_segment("cons").to_generated());
-                self.visit_qualified_ident(&mut string.add_segment("nil").to_generated());
-            }
-            _ => (),
+        if let String(_) = lit {
+            let string = &mut QualifiedIdent::new_static("String", None, range);
+            self.visit_qualified_ident(&mut string.add_segment("cons").to_generated());
+            self.visit_qualified_ident(&mut string.add_segment("nil").to_generated());
         }
     }
 
@@ -635,6 +632,20 @@ impl Visitor for UnboundCollector {
                     }
                 }
             }
+            ExprKind::SeqRecord(sec) => {
+                use kind_tree::concrete::SeqOperation::*;
+
+                self.visit_expr(&mut sec.typ);
+
+                self.visit_expr(&mut sec.expr);
+
+                match &mut sec.operation {
+                    Set(expr) => self.visit_expr(expr),
+                    Mut(expr) => self.visit_expr(expr),
+                    Get => (),
+                }
+
+            },
         }
     }
 }

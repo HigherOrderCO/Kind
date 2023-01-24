@@ -23,6 +23,8 @@ pub enum Sugar {
     BoolIf,
     String,
     U120,
+    Getter(String),
+    Mutter(String),
     Match(String),
 }
 
@@ -54,6 +56,9 @@ pub enum PassDiagnostic {
     DuplicatedAttributeArgument(Range, Range),
     CannotDerive(String, Range),
     AttributeDoesNotExists(Range),
+    NeedsAField(Range),
+    CannotFindTheField(Range, String),
+    CannotAccessType(Range, String),
 }
 
 // TODO: A way to build an error message with methods
@@ -85,6 +90,9 @@ impl Diagnostic for PassDiagnostic {
             PassDiagnostic::DuplicatedAttributeArgument(range, _) => Some(range.ctx),
             PassDiagnostic::CannotDerive(_, range) => Some(range.ctx),
             PassDiagnostic::AttributeDoesNotExists(range) => Some(range.ctx),
+            PassDiagnostic::NeedsAField(range) => Some(range.ctx),
+            PassDiagnostic::CannotFindTheField(range, _) => Some(range.ctx),
+            PassDiagnostic::CannotAccessType(range, _) => Some(range.ctx),
         }
     }
 
@@ -216,7 +224,9 @@ impl Diagnostic for PassDiagnostic {
                     Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
                     Sugar::String => "You must implement 'String.cons' in order to use the string notation.".to_string(),
                     Sugar::U120 => "You must implement 'U120.new' in order to use the u120 notation.".to_string(),
-                    Sugar::Match(_) => format!("You must implement 'match' in order to use the match notation (or derive match with #derive[match])."),
+                    Sugar::Match(_) => "You must implement 'match' in order to use the match notation (or derive match with #derive[match]).".to_string(),
+                    Sugar::Mutter(typ) => format!("You must derive 'mutters' for '{}' in order to use this syntax", typ),
+                    Sugar::Getter(typ) => format!("You must derive 'getters' for '{}' in order to use this syntax", typ)
                 }],
                 positions: vec![Marker {
                     position: *expr_place,
@@ -574,7 +584,7 @@ impl Diagnostic for PassDiagnostic {
                 }],
             },
             PassDiagnostic::DuplicatedAttributeArgument(first, sec) => DiagnosticFrame {
-                code: 209,
+                code: 210,
                 severity: Severity::Warning,
                 title: "Duplicated attribute argument".to_string(),
                 subtitles: vec![],
@@ -589,6 +599,48 @@ impl Diagnostic for PassDiagnostic {
                     position: *first,
                     color: Color::For,
                     text: "First declaration!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassDiagnostic::NeedsAField(range) => DiagnosticFrame {
+                code: 211,
+                severity: Severity::Error,
+                title: "This expression does not access any field.".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassDiagnostic::CannotFindTheField(range, _) => DiagnosticFrame {
+                code: 212,
+                severity: Severity::Error,
+                title: "Cannot find the field".to_string(),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                    main: true,
+                }],
+            },
+            PassDiagnostic::CannotAccessType(range, _) => DiagnosticFrame {
+                code: 213,
+                severity: Severity::Error,
+                title: "Cannot access the type fields.".to_string(),
+                subtitles: vec![],
+                hints: vec!["This syntax only access some types, it does not make complete type directed syntax.".to_string()],
+                positions: vec![Marker {
+                    position: *range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
                     no_code: false,
                     main: true,
                 }],
@@ -623,7 +675,10 @@ impl Diagnostic for PassDiagnostic {
             | AttributeExpectsAValue(_)
             | DuplicatedAttributeArgument(_, _)
             | CannotDerive(_, _)
-            | AttributeDoesNotExists(_) => Severity::Error
+            | NeedsAField(_)
+            | CannotFindTheField(_, _)
+            | CannotAccessType(_, _)
+            | AttributeDoesNotExists(_) => Severity::Error,
         }
     }
 }

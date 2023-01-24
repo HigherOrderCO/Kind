@@ -23,6 +23,7 @@ pub mod attributes;
 pub mod destruct;
 pub mod expr;
 pub mod top_level;
+pub mod record_field;
 
 pub struct DesugarState<'a> {
     pub errors: Sender<Box<dyn Diagnostic>>,
@@ -43,7 +44,9 @@ pub fn desugar_book(
         name_count: 0,
         failed: false,
     };
+
     state.desugar_book(book);
+
     if state.failed {
         Err(GenericPassError.into())
     } else {
