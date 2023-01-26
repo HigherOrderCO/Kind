@@ -7,10 +7,10 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-span = { path = "../kind-span" }
-kind-tree = { path = "../kind-tree" }
-kind-report = { path = "../kind-report" }
-kind-derive = { path = "../kind-derive" }
+kind-span = { path = "../kind-span", version = "0.1.0" }
+kind-tree = { path = "../kind-tree", version = "0.1.0" }
+kind-report = { path = "../kind-report", version = "0.1.0" }
+kind-derive = { path = "../kind-derive", version = "0.1.0" }
 
 kindelia_lang = { git = "https://github.com/developedby/Kindelia/", branch = "kdl-lang-crate" }
 linked-hash-map = "0.5.6"

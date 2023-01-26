@@ -7,13 +7,13 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-parser = { path = "../kind-parser" }
-kind-tree = { path = "../kind-tree" }
-kind-span = { path = "../kind-span" }
-kind-report = { path = "../kind-report" }
-kind-checker = { path = "../kind-checker" }
-kind-pass = { path = "../kind-pass" }
-kind-target-hvm = { path = "../kind-target-hvm" }
+kind-parser = { path = "../kind-parser", version = "0.1.0" }
+kind-tree = { path = "../kind-tree", version = "0.1.0" }
+kind-span = { path = "../kind-span", version = "0.1.0" }
+kind-report = { path = "../kind-report", version = "0.1.0" }
+kind-checker = { path = "../kind-checker", version = "0.1.0"  }
+kind-pass = { path = "../kind-pass", version = "0.1.0"  }
+kind-target-hvm = { path = "../kind-target-hvm", version = "0.1.0"  }
 
 fxhash = "0.2.1"
 pathdiff = "0.2.1"

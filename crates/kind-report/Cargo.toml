@@ -7,7 +7,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-span = { path = "../kind-span" }
+kind-span = { path = "../kind-span", version = "0.1.0" }
 
 unicode-width = "0.1.10"
 yansi = "0.5.1"
