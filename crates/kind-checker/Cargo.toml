@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-tree = { path = "../kind-tree" }
-kind-span = { path = "../kind-span" }
-kind-report = { path = "../kind-report" }
+kind-tree = { path = "../kind-tree", version = "0.1.0" }
+kind-span = { path = "../kind-span", version = "0.1.0" }
+kind-report = { path = "../kind-report", version = "0.1.0" }
 
 hvm = { git = "https://github.com/Kindelia/HVM.git" }
 
