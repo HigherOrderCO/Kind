@@ -16,7 +16,7 @@ kind-pass = { path = "../kind-pass", version = "0.1.0"  }
 kind-target-hvm = { path = "../kind-target-hvm" }
 kind-target-kdl = { path = "../kind-target-kdl" }
 
-hvm = { git = "https://github.com/Kindelia/HVM.git" }
+hvm = "1.0.0"
 
 anyhow = "1.0.66"
 strsim = "0.10.0"
