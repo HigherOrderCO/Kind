@@ -3,6 +3,7 @@ name = "kind-report"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+description = "Report module for the kind compiler"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -3,6 +3,7 @@ use std::{fmt::Display, sync::mpsc::Sender};
 use fxhash::FxHashMap;
 use kind_report::data::Diagnostic;
 use kind_tree::{symbol::QualifiedIdent, untyped};
+use kindelia_lang::ast::Name;
 use linked_hash_map::LinkedHashMap;
 use tiny_keccak::Hasher;
 
@@ -12,6 +13,31 @@ use crate::{diagnostic::KdlDiagnostic, GenericCompilationToHVMError};
 
 pub const KDL_NAME_LEN: usize = 12;
 const U60_MAX: kdl::U120 = kdl::U120(0xFFFFFFFFFFFFFFF);
+
+fn char_to_code(chr: char) -> Result<u128, String> {
+    let num = match chr {
+      '.' => 0,
+      '0'..='9' => 1 + chr as u128 - '0' as u128,
+      'A'..='Z' => 11 + chr as u128 - 'A' as u128,
+      'a'..='z' => 37 + chr as u128 - 'a' as u128,
+      '_' => 63,
+      _ => {
+        return Err(format!("Invalid Kindelia Name letter '{}'.", chr));
+      }
+    };
+    Ok(num)
+}
+
+pub fn from_str(name_txt: &str) -> Result<Name, String> {
+    let mut num: u128 = 0;
+    for (i, chr) in name_txt.chars().enumerate() {
+        if i >= Name::MAX_CHARS {
+            return Err("Too big".to_string())
+        }
+        num = (num << 6) + char_to_code(chr)?;
+    }
+    Ok(Name(num))
+}
 
 #[derive(Debug)]
 pub struct File {
@@ -108,7 +134,7 @@ pub fn compile_book(
             .map(|x| x.to_string())
             .unwrap_or_else(|| name_shortener(&entry.name, namespace).to_string());
 
-        if let Ok(new_name) = kdl::Name::from_str(&new_name) {
+        if let Ok(new_name) = from_str(&new_name) {
             ctx.kdl_names.insert(name.clone(), new_name);
         } else {
             ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(entry.name.range)));
@@ -329,7 +355,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             body,
             erased: _,
         } => {
-            let name = kdl::Name::from_str(param.to_str());
+            let name = from_str(param.to_str());
             if let Ok(name) = name {
                 let body = Box::new(compile_expr(ctx, body));
                 To::Lam { name, body }
@@ -339,7 +365,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             }
         }
         From::Let { name, val, next } => {
-            let res_name = kdl::Name::from_str(name.to_str());
+            let res_name = from_str(name.to_str());
             if let Ok(name) = res_name {
                 let expr = Box::new(compile_expr(ctx, next));
                 let func = Box::new(To::Lam { name, body: expr });
@@ -358,7 +384,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             err_term()
         }
         From::Var { name } => {
-            let res_name = kdl::Name::from_str(name.to_str());
+            let res_name = from_str(name.to_str());
             if let Ok(name) = res_name {
                 To::Var { name }
             } else {
@@ -418,7 +444,7 @@ fn compile_common_function(ctx: &mut CompileCtx, entry: &untyped::Entry) {
 
     let mut args = Vec::new();
     for (name, range, _strictness) in &entry.args {
-        if let Ok(name) = kdl::Name::from_str(name) {
+        if let Ok(name) = from_str(name) {
             args.push(name)
         } else {
             ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(*range)));
@@ -476,8 +502,8 @@ fn compile_common_function(ctx: &mut CompileCtx, entry: &untyped::Entry) {
 
 fn compile_u120_new(ctx: &mut CompileCtx, entry: &untyped::Entry) {
     // U120.new hi lo = (hi << 60) | lo
-    let hi_name = kdl::Name::from_str("hi").unwrap();
-    let lo_name = kdl::Name::from_str("lo").unwrap();
+    let hi_name = kdl::Name::from_str_unsafe("hi");
+    let lo_name = kdl::Name::from_str_unsafe("lo");
     let hi_var = kdl::Term::Var {
         name: hi_name.clone(),
     };

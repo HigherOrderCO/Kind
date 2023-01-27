@@ -2,9 +2,10 @@
 //! a Expr of the kind-tree package.
 
 use kind_span::{EncodedRange, Range};
-use kind_tree::backend::Term;
 use kind_tree::symbol::{Ident, QualifiedIdent};
 use kind_tree::{desugared, Operator};
+
+use hvm::Term;
 
 use crate::diagnostic::TypeDiagnostic;
 use desugared::Expr;
