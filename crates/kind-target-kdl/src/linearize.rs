@@ -24,7 +24,7 @@ pub struct LinearizeCtx {
 
 impl LinearizeCtx {
     fn create_name(&mut self) -> Name {
-        let name = Name::from_str(&format!("x{}", self.name_count)).unwrap();
+        let name = Name::from_str_unsafe(&format!("x{}", self.name_count));
         self.name_count += 1;
         name
     }
@@ -153,7 +153,7 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
                         .entry(*name)
                         .and_modify(|x| *x += 1)
                         .or_insert(1);
-                    let name = Name::from_str(&format!("{}.{}", name, used - 1)).unwrap(); // TODO: Think if this errs or not
+                    let name = Name::from_str_unsafe(&format!("{}.{}", name, used - 1)); // TODO: Think if this errs or not
                     Term::Var { name }
                 } else {
                     unreachable!("Unbound variable '{}' in kdl compilation", name.to_string());
@@ -182,8 +182,8 @@ pub fn linearize_term(ctx: &mut LinearizeCtx, term: &Term, lhs: bool) -> Box<Ter
             if let Some(x) = got_1 {
                 ctx.name_table.insert(*nam1, x);
             }
-            let nam0 = Name::from_str(&format!("{}{}", new_nam0, ".0")).unwrap();
-            let nam1 = Name::from_str(&format!("{}{}", new_nam1, ".0")).unwrap();
+            let nam0 = Name::from_str_unsafe(&format!("{}{}", new_nam0, ".0"));
+            let nam1 = Name::from_str_unsafe(&format!("{}{}", new_nam1, ".0"));
             Term::Dup {
                 nam0,
                 nam1,
@@ -274,7 +274,7 @@ pub fn dup_var(ctx: &mut LinearizeCtx, name: &Name, expr: Box<Term>, body: Box<T
             0 => body,
             // if used once just make a let (lambda then app)
             1 => {
-                let name = Name::from_str(&format!("{}.0", name)).unwrap(); // TODO: handle err
+                let name = Name::from_str_unsafe(&format!("{}.0", name)); // TODO: handle err
                 let func = Box::new(Term::Lam { name, body });
                 let term = Term::App { func, argm: expr };
                 Box::new(term)
@@ -287,12 +287,12 @@ pub fn dup_var(ctx: &mut LinearizeCtx, name: &Name, expr: Box<Term>, body: Box<T
                 // generate name for duplicated variables
                 for i in (aux_amount..(dup_times * 2)).rev() {
                     let i = i - aux_amount; // moved to 0,1,..
-                    let key = Name::from_str(&format!("{}.{}", name, i)).unwrap();
+                    let key = Name::from_str_unsafe(&format!("{}.{}", name, i));
                     vars.push(key);
                 }
                 // generate name for aux variables
                 for i in (0..aux_amount).rev() {
-                    let key = Name::from_str(&format!("c.{}", i)).unwrap();
+                    let key = Name::from_str_unsafe(&format!("c.{}", i));
                     vars.push(key);
                 }
                 // use aux variables to duplicate the variable
@@ -318,7 +318,7 @@ fn dup_var_go(idx: u64, dup_times: u64, body: Box<Term>, vars: &mut Vec<Name>) -
     } else {
         let nam0 = vars.pop().unwrap();
         let nam1 = vars.pop().unwrap();
-        let var_name = Name::from_str(&format!("c.{}", idx - 1)).unwrap();
+        let var_name = Name::from_str_unsafe(&format!("c.{}", idx - 1));
         let expr = Box::new(Term::Var { name: var_name });
         let dup = Term::Dup {
             nam0,

@@ -3,6 +3,7 @@ name = "kind-derive"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+description = "Derive generator the kind compiler"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,4 +12,4 @@ kind-span = { path = "../kind-span", version = "0.1.0" }
 kind-tree = { path = "../kind-tree", version = "0.1.0" }
 kind-report = { path = "../kind-report", version = "0.1.0" }
 fxhash = "0.2.1"
-im-rc = "*"
+im-rc = "15.1.0"

@@ -491,46 +491,17 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.9-beta"
-source = "git+https://github.com/Kindelia/HVM.git?rev=bd744430430a3ebeb69918572ed0be0a8dacb86a#bd744430430a3ebeb69918572ed0be0a8dacb86a"
-dependencies = [
- "backtrace",
- "clap 3.2.23",
- "crossbeam",
- "highlight_error",
- "im",
- "instant",
- "itertools",
- "sysinfo",
-]
-
-[[package]]
-name = "hvm"
-version = "1.0.13-beta"
-source = "git+https://github.com/Kindelia/HVM.git#30f6f35dcb9fad3d4585ab0b236313f6143249c9"
-dependencies = [
- "backtrace",
- "clap 3.2.23",
- "crossbeam",
- "highlight_error",
- "im",
- "instant",
- "itertools",
- "sysinfo",
-]
-
-[[package]]
-name = "im"
-version = "15.1.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0acd33ff0285af998aaf9b57342af478078f53492322fafc47450e09397e0e9"
+checksum = "937a98729b61eb583f952d71b628ec656eb04c31704ccbd57165ad6cc6824e42"
 dependencies = [
- "bitmaps",
- "rand_core 0.6.4",
- "rand_xoshiro",
- "sized-chunks",
- "typenum",
- "version_check",
+ "backtrace",
+ "clap 3.2.23",
+ "crossbeam",
+ "highlight_error",
+ "instant",
+ "itertools",
+ "sysinfo",
 ]
 
 [[package]]
@@ -653,7 +624,7 @@ name = "kind-checker"
 version = "0.1.0"
 dependencies = [
  "fxhash",
- "hvm 1.0.13-beta",
+ "hvm",
  "im-rc",
  "kind-report",
  "kind-span",
@@ -678,7 +649,7 @@ dependencies = [
  "anyhow",
  "dashmap",
  "fxhash",
- "hvm 1.0.13-beta",
+ "hvm",
  "kind-checker",
  "kind-parser",
  "kind-pass",
@@ -715,21 +686,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kind-query"
-version = "0.1.0"
-dependencies = [
- "fxhash",
- "kind-checker",
- "kind-parser",
- "kind-pass",
- "kind-report",
- "kind-span",
- "kind-target-hvm",
- "kind-tree",
- "pathdiff",
-]
-
-[[package]]
 name = "kind-report"
 version = "0.1.0"
 dependencies = [
@@ -749,7 +705,7 @@ version = "0.1.0"
 name = "kind-target-hvm"
 version = "0.1.0"
 dependencies = [
- "hvm 1.0.9-beta",
+ "hvm",
  "kind-derive",
  "kind-report",
  "kind-span",
@@ -793,7 +749,6 @@ name = "kind-tree"
 version = "0.1.0"
 dependencies = [
  "fxhash",
- "hvm 1.0.13-beta",
  "kind-span",
  "linked-hash-map",
 ]
@@ -806,14 +761,14 @@ dependencies = [
  "clap 4.0.29",
  "kind-checker",
  "kind-driver",
- "kind-query",
  "kind-report",
 ]
 
 [[package]]
 name = "kindelia_common"
-version = "0.1.5"
-source = "git+https://github.com/developedby/Kindelia/?branch=kdl-lang-crate#ff2f75e319c167cbc9d19cbc35fbe0d9a510b56a"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8de1aea9d5b1e5bce50affa6c3d720f48a8bcf59bc8e53be68e6509740554cb"
 dependencies = [
  "bit-vec",
  "hex",
@@ -826,12 +781,14 @@ dependencies = [
 
 [[package]]
 name = "kindelia_lang"
-version = "0.1.0"
-source = "git+https://github.com/developedby/Kindelia/?branch=kdl-lang-crate#ff2f75e319c167cbc9d19cbc35fbe0d9a510b56a"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4306d4e6a8215201432d0c0b0010ec6374dd31982a02adab41fa491c453f909f"
 dependencies = [
  "hex",
  "kindelia_common",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
