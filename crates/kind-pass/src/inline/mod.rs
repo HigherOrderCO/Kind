@@ -46,6 +46,7 @@ pub fn inline_book(book: &mut untyped::Book) {
 
     for name in &to_remove {
         book.entrs.remove(name);
+        book.names.remove(name);
     }
 
     let mut state = InlineState { funs };
