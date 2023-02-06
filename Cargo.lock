@@ -717,6 +717,7 @@ name = "kind-target-kdl"
 version = "0.1.0"
 dependencies = [
  "fxhash",
+ "im-rc",
  "kind-derive",
  "kind-report",
  "kind-span",
@@ -755,7 +756,7 @@ dependencies = [
 
 [[package]]
 name = "kind2"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "anyhow",
  "clap 4.0.29",
