@@ -2,7 +2,7 @@ use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
 use kind_span::Range;
 
 pub enum KdlDiagnostic {
-    InvalidVarName(Range),
+    InvalidVarName(String, Range),
     ShouldNotHaveArguments(Range),
     ShouldHaveOnlyOneRule(Range),
     NoInitEntry(Range),
@@ -12,7 +12,7 @@ pub enum KdlDiagnostic {
 impl Diagnostic for KdlDiagnostic {
     fn get_syntax_ctx(&self) -> Option<kind_span::SyntaxCtxIndex> {
         match self {
-            KdlDiagnostic::InvalidVarName(range) => Some(range.ctx),
+            KdlDiagnostic::InvalidVarName(_, range) => Some(range.ctx),
             KdlDiagnostic::ShouldNotHaveArguments(range) => Some(range.ctx),
             KdlDiagnostic::ShouldHaveOnlyOneRule(range) => Some(range.ctx),
             KdlDiagnostic::NoInitEntry(range) => Some(range.ctx),
@@ -22,10 +22,10 @@ impl Diagnostic for KdlDiagnostic {
 
     fn to_diagnostic_frame(&self) -> kind_report::data::DiagnosticFrame {
         match self {
-            KdlDiagnostic::InvalidVarName(range) => DiagnosticFrame {
+            KdlDiagnostic::InvalidVarName(s, range) => DiagnosticFrame {
                 code: 600,
                 severity: Severity::Error,
-                title: "Invalid variable name for Kindelia.".to_string(),
+                title: format!("Invalid variable name '{s}' for Kindelia."),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marker {
@@ -98,7 +98,7 @@ impl Diagnostic for KdlDiagnostic {
     fn get_severity(&self) -> Severity {
         use KdlDiagnostic::*;
         match self {
-            InvalidVarName(_)
+            InvalidVarName(_, _)
             | ShouldNotHaveArguments(_)
             | ShouldHaveOnlyOneRule(_)
             | NoInitEntry(_)
