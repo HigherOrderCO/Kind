@@ -1,0 +1,17 @@
+ctr {String.nil}
+ctr {Pair.new fst snd}
+ctr {String.cons head tail}
+
+fun (Test n) {
+  (Test ~) = (!@x1 (!@x1.0 (Pair.match x1.0 @x2 (!@x2.0 @~ (String.match x2.0 #1 @~ @~ #2) x2)) x1) {Pair.new {String.cons #84 {String.cons #101 {String.cons #115 {String.cons #116 {String.cons #101 {String.nil}}}}}} #0})
+}
+
+fun (Pair.match scrutinee new_) {
+  (Pair.match {Pair.new x0 x1} x2) = (!@x2.0 (!@x1.0 (!@x0.0 (!(!x2.0 x0.0) x1.0) x0) x1) x2)
+}
+
+fun (String.match scrutinee nil_ cons_) {
+  (String.match {String.nil} x0 ~) = (!@x0.0 x0.0 x0)
+  (String.match {String.cons x0 x1} ~ x3) = (!@x3.0 (!@x1.0 (!@x0.0 (!(!x3.0 x0.0) x1.0) x0) x1) x3)
+}
+
