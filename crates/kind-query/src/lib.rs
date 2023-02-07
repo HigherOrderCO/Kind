@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+mod dependency;
 
 fn main() {
     println!("Hello, world!");
