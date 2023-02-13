@@ -1,3 +1,5 @@
+//! The interner stores an arena with all the strings that were created during compilation.
+
 use crate::Symbol;
 use fxhash::FxHashMap;
 use std::cell::RefCell;
@@ -24,7 +26,7 @@ impl Interner {
             };
 
             id.unwrap_or_else(|| {
-                let str: &str = *interner.arena.alloc(str);
+                let str: &str = interner.arena.alloc(str);
                 let str: &'static str = unsafe { &*(str as *const str) };
 
                 let id = {

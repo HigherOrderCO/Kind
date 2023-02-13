@@ -1,20 +1,15 @@
-use fxhash::{FxHashMap};
-use petgraph::{Directed, Graph, stable_graph::NodeIndex};
-use std::{hash::Hash};
-
+use fxhash::FxHashMap;
+use petgraph::{stable_graph::NodeIndex, Directed, Graph};
+use std::hash::Hash;
 
 #[derive(Default)]
 pub struct DependencyTree<Name, Data> {
     loaded_modules: Vec<Data>,
     loaded_names: FxHashMap<Name, (NodeIndex, usize)>,
-    removed_indices: Vec<usize>,
     graph: Graph<usize, (), Directed>,
 }
 
-impl<Name, Data> DependencyTree<Name, Data>
-where
-    Name: Hash + PartialEq + Eq
-{
+impl<Name: Hash + PartialEq + Eq, Data> DependencyTree<Name, Data> {
     pub fn add(&mut self, name: Name, data: Data) -> NodeIndex {
         let place = self.loaded_modules.len();
         let id = self.graph.add_node(place);

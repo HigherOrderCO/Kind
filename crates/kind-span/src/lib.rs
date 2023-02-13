@@ -4,9 +4,15 @@ use std::ops::Range;
 
 mod interner;
 
+pub type Spanned<T> = (T, Span);
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+/// A index key to a source code.
+pub struct SyntaxCtxIndex(pub usize);
+
 /// A symbol is a index in the symbol interner. It's useful for
 /// O(1) comparison and to avoid copies.
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Symbol(pub u32);
 
 impl Symbol {
@@ -15,18 +21,20 @@ impl Symbol {
         Interner::intern(str)
     }
 
+    #[inline]
     pub fn to_str(&self) -> &'static str {
         Interner::get_string(self)
     }
 }
 
 impl ToString for Symbol {
+    #[inline]
     fn to_string(&self) -> String {
         Interner::get_string(self).to_string()
     }
 }
 
-/// A location between two byte positions
+/// A location between two byte positions inside a string.
 pub type Span = Range<usize>;
 
 #[derive(Hash, PartialEq, Eq)]
@@ -36,6 +44,7 @@ pub enum NodeIdSegment {
 }
 
 impl From<Symbol> for NodeIdSegment {
+    #[inline]
     fn from(value: Symbol) -> Self {
         NodeIdSegment::Symbol(value.0)
     }
@@ -75,11 +84,4 @@ impl NodeId {
     pub fn segments(&self) -> &[NodeIdSegment] {
         &self.data
     }
-}
-
-/// A data structure that has an identifier. It's useful to keep track of
-/// some information on LSP.
-pub struct Identified<T> {
-    pub data: T,
-    pub id: NodeId,
 }
