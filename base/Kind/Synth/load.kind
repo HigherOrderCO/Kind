@@ -108,7 +108,7 @@ Kind.Synth.get_kind_code(file: String): IO(String)
   IO {
     get code = IO.get_file(file)
     if String.is_upper(String.take(1,file)) && String.eql(code,"") then IO {
-      get code = IO.request("http://old.kindelia.org:7172/" | file)
+      get code = IO.request("https://raw.githubusercontent.com/HigherOrderCO/Kind1/master/base/" | file)
       return code;
     } else IO {
       return code;
