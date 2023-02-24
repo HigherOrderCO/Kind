@@ -1,0 +1,21 @@
+use crate::lexer;
+
+use kind_tree::concrete::*;
+use kind_span::Symbol;
+
+use std::ops::Range;
+
+grammar;
+
+extern {
+    type Location = usize;
+    type Error = lexer::LexicalError;
+
+    enum lexer::Token {
+    }
+}
+
+pub Ident: Symbol = {
+    => Symbol("a".to_string())
+}
+

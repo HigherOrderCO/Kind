@@ -135,6 +135,6 @@ mod test {
             .with_hint("T".to_string())
             .build();
 
-        assert!(res.code == 1, "res code is not equal one");
+        assert!(res.code == 1, "res code is equal to one");
     }
 }

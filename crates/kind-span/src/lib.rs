@@ -1,41 +1,30 @@
-use interner::Interner;
+use std::fmt::{Display, Debug};
 use std::hash::Hash;
 use std::ops::Range;
 
-mod interner;
+pub struct Symbol(pub String);
+
+impl Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 pub type Spanned<T> = (T, Span);
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 /// A index key to a source code.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct SyntaxCtxIndex(pub usize);
 
-/// A symbol is a index in the symbol interner. It's useful for
-/// O(1) comparison and to avoid copies.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct Symbol(pub u32);
-
-impl Symbol {
-    #[inline]
-    pub fn intern(str: &str) -> Self {
-        Interner::intern(str)
-    }
-
-    #[inline]
-    pub fn to_str(&self) -> &'static str {
-        Interner::get_string(self)
-    }
-}
-
-impl ToString for Symbol {
-    #[inline]
-    fn to_string(&self) -> String {
-        Interner::get_string(self).to_string()
-    }
-}
-
 /// A location between two byte positions inside a string.
-pub type Span = Range<usize>;
+#[derive(Clone)]
+pub struct Span(Range<usize>);
+
+impl Debug for Span {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.0)
+    }
+}
 
 #[derive(Hash, PartialEq, Eq)]
 pub enum NodeIdSegment {
@@ -46,7 +35,7 @@ pub enum NodeIdSegment {
 impl From<Symbol> for NodeIdSegment {
     #[inline]
     fn from(value: Symbol) -> Self {
-        NodeIdSegment::Symbol(value.0)
+        NodeIdSegment::Symbol(fxhash::hash32(&value.0))
     }
 }
 

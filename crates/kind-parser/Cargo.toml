@@ -5,6 +5,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[build-dependencies]
+lalrpop = "0.19.8"
+
 [dependencies]
 kind-diagnostic = {path = "../kind-diagnostic"}
 kind-span = {path = "../kind-span"}
+kind-tree = {path = "../kind-tree"}
+thin-vec = "0.2.10"
+
+lalrpop-util = "0.19.7"
+regex = "1"
+logos = "0.12.1"

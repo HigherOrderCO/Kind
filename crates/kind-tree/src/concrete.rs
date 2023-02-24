@@ -11,7 +11,6 @@ use thin_vec::ThinVec;
 /// some information on LSP.
 pub struct Item<T> {
     pub data: T,
-    pub id: NodeId,
     pub span: Span,
 }
 
@@ -24,35 +23,37 @@ pub struct Item<T> {
 pub enum AttributeStyle {
     String(Symbol),
     Number(u64),
-    Identifier(Symbol),
+    Identifier(Ident),
+    List(ThinVec<AttributeStyle>)
+}
+
+pub struct IdentFrame {
+    pub data: ThinVec<Symbol>
 }
 
 /// An identifier is a symbol with an id.
-pub struct Ident {
-    pub ident: Symbol,
-    pub id: NodeId,
-}
+pub type Ident = Item<IdentFrame>;
 
 /// A qualified identifier describes names in the language
 /// that are separated by dots e.g "Data.List"
 pub struct QualifiedIdent {
-    pub idents: ThinVec<Ident>,
-    pub id: NodeId,
+    pub data: Item<ThinVec<Symbol>>,
 }
-
-/// An attribute is a special compiler flag.
-pub struct Attribute {
+pub struct AttributeKind {
     pub name: Ident,
     pub value: Option<AttributeStyle>,
     pub arguments: ThinVec<AttributeStyle>,
 }
+
+/// An attribute is a special compiler flag.
+pub type Attribute = Item<AttributeKind>;
 
 pub enum LiteralKind {
     /// The universe of types (e.g. Type)
     Type,
     /// The help operator that prints the context
     /// and the goal (e.g. ?)
-    Help(Ident),
+    Help(Symbol),
     /// The type literal of 60 bit numbers (e.g. 2 : U60)
     NumTypeU60,
     NumTypeF60,
@@ -64,10 +65,10 @@ pub enum LiteralKind {
     NumU120(u128),
     // A 60 bit floating point number literal
     NumF60(f64),
-    // Naturals represented by u128
-    Nat(u128),
+    // Naturals represented by u64
+    Nat(u64),
     // A String literal
-    String(String),
+    String(Symbol),
 }
 
 /// A variable node.
@@ -75,16 +76,32 @@ pub struct VarNode {
     pub name: Ident,
 }
 
-/// A named or unnamed argument.
-pub enum Binding {
+/// A node that renames a field
+pub enum Rename {
     Named { field: Ident, to: Ident },
     Unnamed(Ident),
+}
+
+/// A named or unnamed argument.
+pub enum Binding {
+    Named { name: Ident, expr: Expr },
+    Unnamed(Expr),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Erased {
     Yes,
     No,
+}
+
+impl From<bool> for Erased {
+    fn from(value: bool) -> Self {
+        if value {
+            Erased::Yes
+        } else {
+            Erased::No
+        }
+    }
 }
 
 /// Erasable nodes that are used in arguments of
@@ -94,10 +111,19 @@ pub struct Erasable<T> {
     pub erased: Erased,
 }
 
+impl<T> Erasable<T> {
+    pub fn new(data: T, erased: Erased) -> Self {
+        Erasable {
+            data,
+            erased
+        }
+    }
+}
+
 /// Application of a top level definition.
 pub struct ConstructorNode {
     pub name: QualifiedIdent,
-    pub args: ThinVec<Erasable<Binding>>,
+    pub args: ThinVec<Erasable<Item<Binding>>>,
 }
 
 /// Application of an expression.
@@ -121,7 +147,7 @@ pub struct SigmaNode {
 }
 
 pub struct LambdaNode {
-    pub param: Ident,
+    pub param: Erasable<Ident>,
     pub typ: Option<Box<Expr>>,
     pub body: Box<Expr>,
 }
@@ -176,7 +202,7 @@ pub struct IfNode {
 /// A case of a match
 pub struct Case {
     pub constructor: Ident,
-    pub bindings: ThinVec<Binding>,
+    pub bindings: ThinVec<Rename>,
     pub value: Box<Expr>,
 }
 
@@ -185,7 +211,7 @@ pub struct MatchNode {
     pub typ: QualifiedIdent,
     pub scrutinee: Ident,
     pub value: Option<Box<Expr>>,
-    pub with_vars: ThinVec<Binding>,
+    pub with_vars: ThinVec<(Ident, Option<Expr>)>,
     pub cases: ThinVec<Case>,
     pub motive: Option<Box<Expr>>,
 }
@@ -284,37 +310,44 @@ pub enum ExprKind {
     Access(AccessNode),
 
     /// Parenthesis node (it's useful as a CST)
-    Par(Box<Expr>),
+    Paren(Box<Expr>),
+
+    /// Sentinel error token
+    Err,
 }
 
 pub type Expr = Item<ExprKind>;
 
 /// An argument is the left side piece of a pi type. It's used
 /// in entries and in constructors.
-pub struct Argument {
+pub struct ArgumentKind {
     pub hidden: bool,
     pub erased: bool,
     pub name: Ident,
     pub typ: Option<Box<Expr>>,
-    pub id: NodeId,
 }
 
+pub type Argument = Item<ArgumentKind>;
+
 /// Constructor of a sum type.
-pub struct Constructor {
+pub struct ConstructorKind {
     pub name: Ident,
     pub docs: ThinVec<String>,
     pub attrs: ThinVec<Attribute>,
     pub args: ThinVec<Argument>,
     pub typ: Option<Box<Expr>>,
-    pub id: NodeId,
 }
 
+pub type Constructor = Item<ConstructorKind>;
+
 /// Field of a record type definition.
-pub struct Field {
+pub struct FieldKind {
     pub name: Ident,
     pub typ: Box<Expr>,
     pub id: NodeId,
 }
+
+pub type Field = Item<FieldKind>;
 
 /// Record type declaration. It's like a struct.
 pub struct RecordDecl {
@@ -433,9 +466,9 @@ pub enum OperatorKind {
     Neq,
 }
 
-struct Comma<'a, T>(&'static str, &'a [T]);
+struct Intersperse<'a, T>(&'static str, &'a [T]);
 
-impl<'a, T: Display> Display for Comma<'a, T> {
+impl<'a, T: Display> Display for Intersperse<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if !self.0.is_empty() {
             write!(f, "{}", self.1[0])?;
@@ -459,6 +492,13 @@ impl<'a, T: Display> Display for Spaced<'a, T> {
     }
 }
 
+
+impl Display for IdentFrame {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Intersperse(".", &self.data))
+    }
+}
+
 impl<T: Display> Display for Item<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.data)
@@ -472,29 +512,24 @@ impl Display for AttributeStyle {
             String(str) => write!(f, "\"{}\"", str.to_string()),
             Number(n) => write!(f, "{n}"),
             Identifier(n) => write!(f, "{}", n.to_string()),
+            List(ls) => write!(f, "[{}]", Intersperse(", ", ls)),
         }
-    }
-}
-
-impl Display for Ident {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.ident.to_str())
     }
 }
 
 impl Display for QualifiedIdent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", Comma(".", &self.idents))?;
+        write!(f, "{}", Intersperse(".", &self.data.data))?;
         Ok(())
     }
 }
 
-impl Display for Attribute {
+impl Display for AttributeKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "@{}", self.name)?;
 
         if !self.arguments.is_empty() {
-            write!(f, "[{}]", Comma(",", &self.arguments))?;
+            write!(f, "[{}]", Intersperse(",", &self.arguments))?;
         }
 
         if let Some(argument) = &self.value {
@@ -526,8 +561,17 @@ impl Display for LiteralKind {
 impl Display for Binding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Binding::Named { field, to } => write!(f, "({field} = {to})"),
+            Binding::Named { name, expr } => write!(f, "({name} = {expr})"),
             Binding::Unnamed(name) => write!(f, "{name}"),
+        }
+    }
+}
+
+impl Display for Rename {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Rename::Named { field, to } => write!(f, "({field} = {to})"),
+            Rename::Unnamed(name) => write!(f, "{name}"),
         }
     }
 }
@@ -668,7 +712,14 @@ impl Display for MatchNode {
         }
 
         if !self.with_vars.is_empty() {
-            write!(f, "with{} ", Spaced(" ", &self.with_vars))?;
+            write!(f, "with ")?;
+            for (var, typ) in &self.with_vars {
+                if let Some(typ) = typ {
+                    write!(f, "({var} : {typ}) ")?;
+                } else {
+                    write!(f, "{var} ")?;
+                }
+            }
         }
 
         write!(f, "{{")?;
@@ -738,7 +789,7 @@ impl Display for PairNode {
 
 impl Display for ListNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}]", Comma(", ", &self.elements))
+        write!(f, "[{}]", Intersperse(", ", &self.elements))
     }
 }
 
@@ -763,7 +814,8 @@ impl Display for ExprKind {
             ExprKind::Subst(node) => write!(f, "({node})"),
             ExprKind::List(node) => write!(f, "{node}"),
             ExprKind::Access(node) => write!(f, "({node})"),
-            ExprKind::Par(node) => write!(f, "({node})"),
+            ExprKind::Paren(node) => write!(f, "({node})"),
+            ExprKind::Err => write!(f, "ERR"),
         }
     }
 }
@@ -791,7 +843,7 @@ impl Display for OperatorKind {
     }
 }
 
-impl Display for Argument {
+impl Display for ArgumentKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let (open, close) = match (self.erased, self.hidden) {
             (false, false) => ("(", ")"),
@@ -841,7 +893,7 @@ impl Display for Command {
     }
 }
 
-impl Display for Constructor {
+impl Display for ConstructorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for doc in &self.docs {
             writeln!(f, "  ///{}", doc)?;
@@ -882,7 +934,7 @@ impl Display for SumDecl {
     }
 }
 
-impl Display for Field {
+impl Display for FieldKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} : {}", self.name, self.typ)
     }
