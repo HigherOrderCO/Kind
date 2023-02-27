@@ -1,6 +1,9 @@
+use std::fmt::Debug;
 use std::ops::Range;
 
 use logos::Logos;
+use num_bigint::BigUint;
+use num_traits::Num;
 
 #[derive(Debug)]
 pub enum LexicalError {
@@ -80,6 +83,15 @@ pub enum Token {
     #[token("type")]
     Type,
 
+    #[token("Type")]
+    U,
+
+    #[token("U60")]
+    U60,
+
+    #[token("F60")]
+    F60,
+
     #[token("record")]
     Record,
 
@@ -101,42 +113,42 @@ pub enum Token {
     #[token("with")]
     With,
 
-    #[regex("\\?[A-Za-z_]*")]
-    Help,
+    #[regex("\\?[A-Za-z_]*", |lex| lex.slice()[1..].to_string())]
+    Help(String),
 
-    #[regex("[a-z_][a-zA-Z0-9_]*")]
-    LowerId,
+    #[regex("[a-z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
+    LowerId(String),
 
-    #[regex("[A-Z][a-zA-Z0-9_]*")]
-    UpperId,
+    #[regex("[A-Z][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
+    UpperId(String),
 
-    #[regex(r"'", |x| read_string(x, '\''))]
+    #[regex(r"'", |x| read_string(x, '\'');)]
     Char,
 
-    #[regex(r#"""#, |x| read_string(x, '\"'))]
-    Str,
+    #[regex(r#"""#, |x| read_string(x, '\"').slice().to_string())]
+    Str(String),
 
-    #[regex("[0-9][_0-9]*")]
-    #[regex("0[xX][0-9A-F][_0-9A-F]*")]
-    #[regex("0[bB][01][01_]*")]
-    #[regex("0[oO][0-7][0-7_]*")]
-    Num60,
+    #[regex("[0-9][_0-9]*n", |lex| read_number::<BigUint>(lex, false, 10, 1))]
+    #[regex("0[xX][0-9A-F][_0-9A-F]*n", |lex| read_number::<BigUint>(lex, true, 16, 1))]
+    #[regex("0[bB][01][01_]*n", |lex| read_number::<BigUint>(lex, true, 2, 1))]
+    #[regex("0[oO][0-7][0-7]*n", |lex| read_number::<BigUint>(lex, true, 8, 1))]
+    Nat(BigUint),
 
-    #[regex("[0-9][_0-9]*u120")]
-    #[regex("0[xX][0-9A-F][_0-9A-F]*u120")]
-    #[regex("0[bB][01][01]*u120")]
-    #[regex("0[oO][0-7][0-7]*u120")]
-    Num120,
+    #[regex("[0-9][_0-9]*u120", |lex| read_number::<u128>(lex, false, 10, 4))]
+    #[regex("0[xX][0-9A-F][_0-9A-F]*u120", |lex| read_number::<u128>(lex, true, 16, 4))]
+    #[regex("0[bB][01][01_]*u120", |lex| read_number::<u128>(lex, true, 2, 4))]
+    #[regex("0[oO][0-7][0-7_]*u120", |lex| read_number::<u128>(lex, true, 8, 4))]
+    Num120(u128),
 
-    #[regex("[0-9][_0-9]n")]
-    #[regex("0[xX][0-9A-F][_0-9A-F]n")]
-    #[regex("0[bB][01][01_]n")]
-    #[regex("0[oO][0-7][0-7]n")]
-    Nat,
+    #[regex("[0-9][_0-9]*", |lex| read_number::<u64>(lex, false, 10, 0))]
+    #[regex("0[xX][0-9A-F][_0-9A-F]*", |lex| read_number::<u64>(lex, true, 16, 0))]
+    #[regex("0[bB][01][01_]*", |lex| read_number::<u64>(lex, true, 2, 0))]
+    #[regex("0[oO][0-7][0-7_]*", |lex| read_number::<u64>(lex, true, 8, 0))]
+    Num60(u64),
 
-    #[regex("[0-9]+\\.[0-9]*")]
-    #[regex("[0-9]+(\\.[0-9]*)?[eE][+-]?[0-9]+")]
-    Float,
+    #[regex("[0-9]+\\.[0-9]*", |lex| lex.slice().parse::<f64>().unwrap())]
+    #[regex("[0-9]+(\\.[0-9]*)?[eE][+-]?[0-9]+", |lex| lex.slice().parse::<f64>().unwrap())]
+    Float(f64),
 
     #[token("+")]
     Plus,
@@ -201,7 +213,7 @@ pub enum Token {
     #[token("#")]
     Hash,
 
-    /// It shifts to another lexer.
+    // It shifts to another lexer.
     #[token("/*")]
     CommentStart,
 
@@ -223,14 +235,12 @@ enum Comment {
     Skip,
 }
 
-fn read_string(lex: &mut logos::Lexer<Token>, end: char) -> bool {
+fn read_string<'b, 'a>(lex: &'b mut logos::Lexer<'a,Token>, end: char) -> &'b mut logos::Lexer<'a, Token> {
     let mut escaped = false;
 
     for char in lex.remainder().chars() {
         match (escaped, char) {
-            (false, c) if c == end => {
-                return true;
-            }
+            (false, c) if c == end => return lex,
             (false, '\'') => escaped = true,
             (true, _) => escaped = false,
             (false, _) => (),
@@ -238,7 +248,31 @@ fn read_string(lex: &mut logos::Lexer<Token>, end: char) -> bool {
         lex.bump(char.len_utf8());
     }
 
-    false
+    lex
+}
+
+fn read_number<T: Num + Debug>(
+    lex: &mut logos::Lexer<Token>,
+    slice: bool,
+    radix: u32,
+    trim: usize,
+) -> T {
+    let iter = lex.slice().chars().filter(|c| *c != '_');
+
+    let string: String = if slice {
+        iter.skip(2).collect()
+    } else {
+        iter.collect()
+    };
+
+    let end = string.len() - trim;
+    let res: Result<T, <T as Num>::FromStrRadixErr> = Num::from_str_radix(&string[..end], radix);
+
+    // I cant use expect here 👍
+    match res {
+        Ok(res) => res,
+        Err(_) => panic!("read number error '{}'", &string[..trim]),
+    }
 }
 
 pub struct Lexer<'input>(pub logos::Lexer<'input, Token>);
@@ -254,13 +288,13 @@ impl<'input> Lexer<'input> {
                 Some(Comment::End) => {
                     nest -= 1;
                     if nest == 0 {
-                        break Ok(())
+                        break Ok(());
                     } else {
-                        continue
+                        continue;
                     }
                 }
                 Some(Comment::Skip) => continue,
-                None => break Err(LexicalError::CommentNotClosed())
+                None => break Err(LexicalError::CommentNotClosed()),
             }
         };
 
@@ -277,12 +311,10 @@ impl<'input> Iterator for Lexer<'input> {
         let span = self.0.span();
 
         match res {
-            Token::CommentStart => {
-                match self.skip_comment() {
-                    Ok(_) => self.next(),
-                    Err(err) => Some(Err(err))
-                }
-            }
+            Token::CommentStart => match self.skip_comment() {
+                Ok(_) => self.next(),
+                Err(err) => Some(Err(err)),
+            },
             Token::Error => Some(Result::Err(LexicalError::Err(self.0.span()))),
             other => Some(Result::Ok((span.start, other, span.end))),
         }
@@ -291,8 +323,8 @@ impl<'input> Iterator for Lexer<'input> {
 
 #[cfg(test)]
 mod tests {
-    use logos::Logos;
     use crate::lexer::*;
+    use logos::Logos;
 
     #[test]
     pub fn test_parser_pi() {
@@ -301,7 +333,7 @@ mod tests {
              List.take_back <a> (n: Nat) (xs: List a) : List a {
                 let ndrop = Nat.sub (List.length xs) n
                 List.drop xs ndrop
-             }"
+             }",
         ));
         for tkn in lexer {
             if let Err(err) = tkn {
@@ -316,6 +348,17 @@ mod tests {
         for tkn in lexer {
             if let Err(err) = tkn {
                 panic!("oh no, error {:?}", err)
+            }
+        }
+    }
+
+    #[test]
+    pub fn test_parser_number() {
+        let lexer = Lexer(crate::lexer::Token::lexer("456 123n 0x321 123432 4556u120"));
+        for tkn in lexer {
+            match tkn {
+                Ok(ok) => println!("{:?}", ok.1),
+                Err(err) => panic!("oh no, error {:?}", err),
             }
         }
     }

@@ -9,3 +9,4 @@ license = "MIT"
 [dependencies]
 kind-span = {path = "../kind-span"}
 thin-vec = "0.2.10"
+num-bigint = "0.4.3"

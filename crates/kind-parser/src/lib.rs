@@ -3,10 +3,12 @@ extern crate lalrpop_util;
 
 pub mod lexer;
 
+lalrpop_mod!(pub parser);
+
 #[cfg(test)]
 mod tests {
-    use logos::Logos;
     use crate::lexer::*;
+    use logos::Logos;
 
     #[test]
     pub fn test_parser_pi() {

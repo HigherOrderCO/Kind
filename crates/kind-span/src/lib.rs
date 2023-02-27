@@ -1,4 +1,4 @@
-use std::fmt::{Display, Debug};
+use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::ops::Range;
 
@@ -18,7 +18,7 @@ pub struct SyntaxCtxIndex(pub usize);
 
 /// A location between two byte positions inside a string.
 #[derive(Clone)]
-pub struct Span(Range<usize>);
+pub struct Span(pub Range<usize>);
 
 impl Debug for Span {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

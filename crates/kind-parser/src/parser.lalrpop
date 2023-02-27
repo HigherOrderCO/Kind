@@ -1,9 +1,11 @@
 use crate::lexer;
 
 use kind_tree::concrete::*;
-use kind_span::Symbol;
+use kind_span::{Symbol, Span};
 
-use std::ops::Range;
+use thin_vec::thin_vec;
+use thin_vec::ThinVec;
+use num_bigint::BigUint;
 
 grammar;
 
@@ -12,10 +14,188 @@ extern {
     type Error = lexer::LexicalError;
 
     enum lexer::Token {
+        "(" => lexer::Token::LPar,
+        ")" => lexer::Token::RPar,
+        "[" => lexer::Token::LBracket,
+        "]" => lexer::Token::RBracket,
+        "{" => lexer::Token::LBrace,
+        "}" => lexer::Token::RBrace,
+        "=" => lexer::Token::Eq,
+        ":" => lexer::Token::Colon,
+        ";" => lexer::Token::Semi,
+        "=>" => lexer::Token::FatArrow,
+        "$" => lexer::Token::Dollar,
+        "," => lexer::Token::Comma,
+        "->" => lexer::Token::RightArrow,
+        ".." => lexer::Token::DotDot,
+        "." => lexer::Token::Dot,
+        "~" => lexer::Token::Tilde,
+        "::" => lexer::Token::ColonColon,
+        "do" => lexer::Token::Do,
+        "if" => lexer::Token::If,
+        "else" => lexer::Token::Else,
+        "match" => lexer::Token::Match,
+        "let" => lexer::Token::Let,
+        "type" => lexer::Token::Type,
+        "record" => lexer::Token::Record,
+        "constructor" => lexer::Token::Constructor,
+        "use" => lexer::Token::Use,
+        "as" => lexer::Token::As,
+        "return" => lexer::Token::Return,
+        "ask" => lexer::Token::Ask,
+        "with" => lexer::Token::With,
+        help => lexer::Token::Help(<String>),
+        char => lexer::Token::Char,
+        str => lexer::Token::Str(<String>),
+        "+" => lexer::Token::Plus,
+        "-" => lexer::Token::Minus,
+        "/" => lexer::Token::Slash,
+        "<<" => lexer::Token::LessLess,
+        "*" => lexer::Token::Star,
+        ">>" => lexer::Token::GreaterGreater,
+        "%" => lexer::Token::Percent,
+        "&" => lexer::Token::Ampersand,
+        "|" => lexer::Token::Bar,
+        "^" => lexer::Token::Hat,
+        "<" => lexer::Token::Less,
+        "<=" => lexer::Token::LessEq,
+        "==" => lexer::Token::EqEq,
+        ">=" => lexer::Token::GreaterEq,
+        ">" => lexer::Token::Greater,
+        "!=" => lexer::Token::BangEq,
+        "!" => lexer::Token::Bang,
+        "+=" => lexer::Token::PlusEq,
+        "@=" => lexer::Token::AtEq,
+        "##" => lexer::Token::HashHash,
+        "#" => lexer::Token::Hash,
+        lower_id => lexer::Token::LowerId(<String>),
+        upper_id => lexer::Token::UpperId(<String>),
+        num60 => lexer::Token::Num60(<u64>),
+        num120 => lexer::Token::Num120(<u128>),
+        nat => lexer::Token::Nat(<BigUint>),
+        float => lexer::Token::Float(<f64>),
+        typeu60 => lexer::Token::U60,
+        typef60 => lexer::Token::F60,
+        U => lexer::Token::U,
     }
 }
 
-pub Ident: Symbol = {
-    => Symbol("a".to_string())
+Comma<T>: ThinVec<T> = {
+    <mut v:(<T> ",")*> <e:T?> => match e {
+        None => v.into(),
+        Some(e) => {
+            v.push(e);
+            v.into()
+        }
+    }
+};
+
+Comma1<T>: ThinVec<T> = {
+    <mut v:(<T> ",")*> <e:T> => match e {
+        v.push(e);
+        v.into()
+    }
+};
+
+Item<T> : Item<T> = {
+    <s: @L> <data: T> <e: @L> => Item {
+        span: Span(s..e),
+        data
+    }
 }
 
+Erasable<T> : Erasable<T> = {
+    "~" <data: T> => Erasable::new(data, Erased::Yes),
+    <data: T>     => Erasable::new(data, Erased::No),
+}
+
+// Identifiers
+
+AnyIdent : Item<Symbol> = {
+    <fst: Item<lower_id>> => fst.map(|x| Symbol(x)),
+    <fst: Item<upper_id>> => fst.map(|x| Symbol(x)),
+}
+
+UpperId : Item<Symbol> = {
+    <fst: Item<upper_id>> => fst.map(|x| Symbol(x)),
+}
+
+LowerId : Item<Symbol> = {
+    <fst: Item<lower_id>> => fst.map(|x| Symbol(x)),
+}
+
+QualifiedIdentInner : ThinVec<Item<Symbol>> = {
+    <fst: UpperId> <rest: ("." <AnyIdent>)*> => {
+        let mut vec = thin_vec![fst];
+        vec.extend(rest);
+        vec
+    }
+}
+
+IdentFrame : IdentFrame = {
+    <fst: LowerId> <rest: ("." <AnyIdent>)*> => {
+        let mut data = thin_vec![fst];
+        data.extend(rest);
+        IdentFrame { data }
+    }
+}
+
+QualifiedIdent : QualifiedIdent = {
+    <data: Item<QualifiedIdentInner>> => QualifiedIdent { data }
+}
+
+pub Ident : Ident = {
+    <data: Item<IdentFrame>> => data
+}
+
+// Attributes
+
+AttributeStyle : AttributeStyle = {
+    <str: str>                           => AttributeStyle::String(Symbol(str)),
+    <num: num60>                         => AttributeStyle::Number(num),
+    <id: Ident>                          => AttributeStyle::Identifier(id),
+    "[" <ids: Comma<AttributeStyle>> "]" => AttributeStyle::List(ids.into()),
+}
+
+Attribute : AttributeKind = {
+    "#" <name: Ident> <args: ("(" <Comma<AttributeStyle>> ")")?> <value: ("=" <AttributeStyle>)?> => {
+        AttributeKind {
+            name,
+            arguments: args.unwrap_or_default(),
+            value
+        }
+    }
+}
+
+// Literal
+
+LiteralKind : LiteralKind = {
+    U             => LiteralKind::Type,
+    <h: help>     => LiteralKind::Help(Symbol(h)),
+    typeu60       => LiteralKind::NumTypeU60,
+    typef60       => LiteralKind::NumTypeF60,
+    <num: num60>  => LiteralKind::NumU60(num),
+    <num: num120> => LiteralKind::NumU120(num),
+    <abs: float>  => LiteralKind::NumF60(abs),
+    <nat: nat>    => LiteralKind::Nat(nat),
+    <str: str>    => LiteralKind::String(Symbol(str)),
+}
+
+VarNode : VarNode = { <name: Ident> => VarNode { name } }
+
+AppNode : AppNode = {
+    <fun: Atom> <args: Erasable<Atom>*> => AppNode { fun: Box::new(fun), args: args.into() }
+}
+
+AtomKind : ExprKind = {
+    <lit: LiteralKind>   => ExprKind::Lit(lit),
+    "(" <expr: Expr> ")" => expr.data
+}
+
+Atom : Expr = { <expr: Item<AtomKind>> => expr }
+
+ExprKind : ExprKind = {
+    <atom: Atom> => atom.data,
+}
+
+Expr : Expr = { <expr:Item<ExprKind>> => expr }

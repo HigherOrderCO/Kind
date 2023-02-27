@@ -5,6 +5,7 @@
 use std::fmt::Display;
 
 use kind_span::{NodeId, Span, Symbol};
+use num_bigint::BigUint;
 use thin_vec::ThinVec;
 
 /// A data structure that has an identifier. It's useful to keep track of
@@ -12,6 +13,15 @@ use thin_vec::ThinVec;
 pub struct Item<T> {
     pub data: T,
     pub span: Span,
+}
+
+impl<T> Item<T> {
+    pub fn map<U>(self, f: fn(T) -> U) -> Item<U> {
+        Item {
+            data: f(self.data),
+            span: self.span,
+        }
+    }
 }
 
 /// The "argument" part of the attribute. It can be used either in
@@ -24,11 +34,11 @@ pub enum AttributeStyle {
     String(Symbol),
     Number(u64),
     Identifier(Ident),
-    List(ThinVec<AttributeStyle>)
+    List(ThinVec<AttributeStyle>),
 }
 
 pub struct IdentFrame {
-    pub data: ThinVec<Symbol>
+    pub data: ThinVec<Item<Symbol>>,
 }
 
 /// An identifier is a symbol with an id.
@@ -37,7 +47,7 @@ pub type Ident = Item<IdentFrame>;
 /// A qualified identifier describes names in the language
 /// that are separated by dots e.g "Data.List"
 pub struct QualifiedIdent {
-    pub data: Item<ThinVec<Symbol>>,
+    pub data: Item<ThinVec<Item<Symbol>>>,
 }
 pub struct AttributeKind {
     pub name: Ident,
@@ -66,7 +76,7 @@ pub enum LiteralKind {
     // A 60 bit floating point number literal
     NumF60(f64),
     // Naturals represented by u64
-    Nat(u64),
+    Nat(BigUint),
     // A String literal
     String(Symbol),
 }
@@ -113,10 +123,7 @@ pub struct Erasable<T> {
 
 impl<T> Erasable<T> {
     pub fn new(data: T, erased: Erased) -> Self {
-        Erasable {
-            data,
-            erased
-        }
+        Erasable { data, erased }
     }
 }
 
@@ -256,10 +263,6 @@ pub struct AccessNode {
 pub enum ExprKind {
     /// Variable
     Var(VarNode),
-
-    /// A constructor is an application with the head
-    /// as a QualifiedIdentifier
-    Constructor(ConstructorNode),
 
     /// An application of a local variable.
     App(AppNode),
@@ -410,21 +413,23 @@ pub enum RuleRHS {
 /// contains a list of patterns and on the
 /// right hand side a value.
 pub struct Rule {
+    pub name: QualifiedIdent,
     pub pats: Vec<Box<Pat>>,
     pub body: RuleRHS,
 }
 
-/// A function that is typed and has [Rule]s.
-/// The type of the function consists of the arguments
-/// and the return type.
-pub struct Function {
+/// A type signature of a function
+pub struct Signature {
     pub name: QualifiedIdent,
-    pub docs: Vec<String>,
     pub args: ThinVec<Argument>,
     pub typ: Box<Expr>,
-    pub rules: Vec<Box<Rule>>,
-    pub attrs: Vec<Attribute>,
-    pub generated_by: Option<String>,
+}
+
+pub struct Function {
+    pub name: QualifiedIdent,
+    pub args: ThinVec<Argument>,
+    pub typ: Option<Box<Expr>>,
+    pub body: Box<Expr>,
 }
 
 pub struct Command {
@@ -435,11 +440,18 @@ pub struct Command {
 pub enum TopLevelKind {
     SumType(SumDecl),
     RecordType(RecordDecl),
-    Function(Function),
     Command(Command),
+
+    Function(Function),
+    Signature(Signature),
+    Rule(Rule),
 }
 
-pub type TopLevel = Item<TopLevelKind>;
+pub struct TopLevel {
+    docs: ThinVec<String>,
+    attrs: ThinVec<Attribute>,
+    data: Item<TopLevelKind>,
+}
 
 pub struct Module {
     pub declarations: ThinVec<TopLevel>,
@@ -492,7 +504,6 @@ impl<'a, T: Display> Display for Spaced<'a, T> {
     }
 }
 
-
 impl Display for IdentFrame {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", Intersperse(".", &self.data))
@@ -509,9 +520,9 @@ impl Display for AttributeStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use AttributeStyle::*;
         match self {
-            String(str) => write!(f, "\"{}\"", str.to_string()),
+            String(str) => write!(f, "\"{}\"", str),
             Number(n) => write!(f, "{n}"),
-            Identifier(n) => write!(f, "{}", n.to_string()),
+            Identifier(n) => write!(f, "{}", n),
             List(ls) => write!(f, "[{}]", Intersperse(", ", ls)),
         }
     }
@@ -797,7 +808,6 @@ impl Display for ExprKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ExprKind::Var(node) => write!(f, "{node}"),
-            ExprKind::Constructor(node) => write!(f, "({node})"),
             ExprKind::App(node) => write!(f, "({node})"),
             ExprKind::All(node) => write!(f, "({node})"),
             ExprKind::Sigma(node) => write!(f, "({node})"),
@@ -867,23 +877,9 @@ impl Display for RuleRHS {
     }
 }
 
-impl Display for Function {
+impl Display for Signature {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for doc in &self.docs {
-            writeln!(f, "///{}", doc)?;
-        }
-
-        for attr in &self.attrs {
-            writeln!(f, "{attr}")?;
-        }
-
-        write!(f, "{} {}", self.name, Spaced(" ", &self.args))?;
-
-        for rule in &self.rules {
-            writeln!(f, "{}{}{}", self.name, Spaced(" ", &rule.pats), rule.body)?;
-        }
-
-        Ok(())
+        write!(f, "{} {}", self.name, Spaced(" ", &self.args))
     }
 }
 
@@ -895,14 +891,6 @@ impl Display for Command {
 
 impl Display for ConstructorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for doc in &self.docs {
-            writeln!(f, "  ///{}", doc)?;
-        }
-
-        for attr in &self.attrs {
-            writeln!(f, "  {attr}")?;
-        }
-
         write!(f, "{}{}", self.name, Spaced(" ", &self.args))?;
 
         if let Some(typ) = &self.typ {
@@ -915,14 +903,6 @@ impl Display for ConstructorKind {
 
 impl Display for SumDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for doc in &self.docs {
-            writeln!(f, "///{}", doc)?;
-        }
-
-        for attr in &self.attrs {
-            writeln!(f, "{attr}")?;
-        }
-
         write!(f, "type {}{}", self.name, Spaced(" ", &self.parameters))?;
 
         if !self.indices.is_empty() {
@@ -942,14 +922,6 @@ impl Display for FieldKind {
 
 impl Display for RecordDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for doc in &self.docs {
-            writeln!(f, "///{}", doc)?;
-        }
-
-        for attr in &self.attrs {
-            writeln!(f, "{attr}")?;
-        }
-
         write!(
             f,
             "record {}{} {{",
@@ -962,14 +934,42 @@ impl Display for RecordDecl {
     }
 }
 
+impl Display for TopLevel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for doc in &self.docs {
+            writeln!(f, "///{}", doc)?;
+        }
+
+        for attr in &self.attrs {
+            writeln!(f, "{attr}")?;
+        }
+
+        writeln!(f, "{}", self.data)
+    }
+}
+
+impl Display for Rule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}{}{}", self.name, Spaced(" ", &self.pats), self.body)
+    }
+}
+
+impl Display for Function {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.body)
+    }
+}
+
 impl Display for TopLevelKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use TopLevelKind::*;
         match self {
             SumType(res) => write!(f, "{}", res),
             RecordType(res) => write!(f, "{}", res),
-            Function(res) => write!(f, "{}", res),
+            Signature(res) => write!(f, "{}", res),
             Command(res) => write!(f, "{}", res),
+            Rule(res) => write!(f, "{}", res),
+            Function(res) => write!(f, "{}", res),
         }
     }
 }
@@ -990,5 +990,11 @@ impl Display for PatKind {
             PatKind::Absurd => write!(f, "(.)"),
             PatKind::Err => write!(f, "ERR"),
         }
+    }
+}
+
+impl Display for Module {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Spaced("\n", &self.declarations))
     }
 }
