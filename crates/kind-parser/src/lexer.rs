@@ -37,8 +37,7 @@ pub enum Token {
     #[token(":")]
     Colon,
 
-    #[token("\n")]
-    #[token(";")]
+    #[token("[;\n]+")]
     Semi,
 
     #[token("=>")]
@@ -77,6 +76,9 @@ pub enum Token {
     #[token("match")]
     Match,
 
+    #[token("open")]
+    Open,
+
     #[token("let")]
     Let,
 
@@ -98,6 +100,9 @@ pub enum Token {
     #[token("constructor")]
     Constructor,
 
+    #[token("impossible")]
+    Impossible,
+
     #[token("use")]
     Use,
 
@@ -113,17 +118,26 @@ pub enum Token {
     #[token("with")]
     With,
 
+    #[token("specialize")]
+    Specialize,
+
+    #[token("into")]
+    Into,
+
+    #[token("in")]
+    In,
+
     #[regex("\\?[A-Za-z_]*", |lex| lex.slice()[1..].to_string())]
     Help(String),
 
-    #[regex("[a-z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
+    #[regex("[a-z_][a-zA-Z0-9_.]*", |lex| lex.slice().to_string())]
     LowerId(String),
 
     #[regex("[A-Z][a-zA-Z0-9_]*", |lex| lex.slice().to_string())]
     UpperId(String),
 
-    #[regex(r"'", |x| read_string(x, '\'');)]
-    Char,
+    #[regex(r"'", |x| read_string(x, '\'').slice().to_string().chars().next().unwrap())]
+    Char(char),
 
     #[regex(r#"""#, |x| read_string(x, '\"').slice().to_string())]
     Str(String),
@@ -217,7 +231,10 @@ pub enum Token {
     #[token("/*")]
     CommentStart,
 
-    #[regex(r"//[^\n]*")]
+    #[regex(r"//![^\n]*", |lex| lex.slice().to_string())]
+    DocComment(String),
+
+    #[regex(r"//[^!][^\n]*", logos::skip)]
     Comment,
 
     #[error]
@@ -336,6 +353,7 @@ mod tests {
              }",
         ));
         for tkn in lexer {
+            println!("{:?}", tkn);
             if let Err(err) = tkn {
                 panic!("oh no, error {:?}", err)
             }

@@ -37,12 +37,8 @@ pub enum AttributeStyle {
     List(ThinVec<AttributeStyle>),
 }
 
-pub struct IdentFrame {
-    pub data: ThinVec<Item<Symbol>>,
-}
-
 /// An identifier is a symbol with an id.
-pub type Ident = Item<IdentFrame>;
+pub type Ident = Item<Symbol>;
 
 /// A qualified identifier describes names in the language
 /// that are separated by dots e.g "Data.List"
@@ -142,7 +138,7 @@ pub struct AppNode {
 /// Pi type node. e.g (x: T) -> U
 pub struct AllNode {
     pub param: Option<Ident>,
-    pub typ: Box<Expr>,
+    pub typ: Box<Erasable<Expr>>,
     pub body: Box<Expr>,
 }
 
@@ -178,9 +174,9 @@ pub struct BinaryNode {
 }
 
 /// Tuple
-pub struct PairNode {
-    pub left: Box<Expr>,
-    pub right: Box<Expr>,
+pub struct PairNode<T> {
+    pub left: Box<T>,
+    pub right: Box<T>,
 }
 
 pub enum SttmKind {
@@ -202,8 +198,8 @@ pub struct DoNode {
 
 pub struct IfNode {
     pub cond: Box<Expr>,
-    pub r#if: Box<Expr>,
-    pub r#else: Box<Expr>,
+    pub if_: Box<Expr>,
+    pub else_: Box<Expr>,
 }
 
 /// A case of a match
@@ -216,9 +212,9 @@ pub struct Case {
 /// Dependent eliminator
 pub struct MatchNode {
     pub typ: QualifiedIdent,
-    pub scrutinee: Ident,
+    pub scrutinee: Box<Expr>,
     pub value: Option<Box<Expr>>,
-    pub with_vars: ThinVec<(Ident, Option<Expr>)>,
+    pub with_vars: ThinVec<(Ident, Option<Box<Expr>>)>,
     pub cases: ThinVec<Case>,
     pub motive: Option<Box<Expr>>,
 }
@@ -226,7 +222,7 @@ pub struct MatchNode {
 /// Dependent eliminator with one constructor
 pub struct OpenNode {
     pub type_name: QualifiedIdent,
-    pub var_name: Ident,
+    pub scrutinee: Box<Expr>,
     pub motive: Option<Box<Expr>>,
     pub next: Box<Expr>,
 }
@@ -234,14 +230,13 @@ pub struct OpenNode {
 /// A substitution changes a variable with a value.
 pub struct SubstNode {
     pub name: Ident,
-    pub redx: usize,
-    pub indx: usize,
+    pub redx: u64,
     pub expr: Box<Expr>,
 }
 
 /// List node operation.
-pub struct ListNode {
-    pub elements: ThinVec<Expr>,
+pub struct ListNode<T> {
+    pub elements: ThinVec<T>,
 }
 
 /// The operation that is used at the [AccessNode]
@@ -289,7 +284,7 @@ pub enum ExprKind {
     Binary(BinaryNode),
 
     /// Pair term
-    Pair(PairNode),
+    Pair(PairNode<Expr>),
 
     /// Do notation expression
     Do(DoNode),
@@ -307,7 +302,7 @@ pub enum ExprKind {
     Subst(SubstNode),
 
     /// List expression
-    List(ListNode),
+    List(ListNode<Expr>),
 
     /// Acesssor expression
     Access(AccessNode),
@@ -383,21 +378,21 @@ pub enum PatKind {
     /// 120 bit unsigned integer
     U120(u128),
     /// 60 bit floating point number
-    F60(u64),
+    F60(f64),
+    // Nat
+    Nat(BigUint),
     /// Pair
-    Pair(PairNode),
+    Pair(PairNode<Pat>),
     /// List literal
-    List(ListNode),
+    List(ListNode<Pat>),
     /// Str literal
-    Str(String),
+    Str(Symbol),
     /// Char literal
     Char(char),
-    /// Wildcard
-    Hole,
     /// Absurd pattern
     Absurd,
     /// Error sentinel value
-    Err,
+    Paren(Box<Pat>),
 }
 
 /// A pattern for pattern matching
@@ -448,9 +443,9 @@ pub enum TopLevelKind {
 }
 
 pub struct TopLevel {
-    docs: ThinVec<String>,
-    attrs: ThinVec<Attribute>,
-    data: Item<TopLevelKind>,
+    pub docs: ThinVec<String>,
+    pub attrs: ThinVec<Attribute>,
+    pub data: Item<TopLevelKind>,
 }
 
 pub struct Module {
@@ -501,12 +496,6 @@ impl<'a, T: Display> Display for Spaced<'a, T> {
             write!(f, "{}{ident}", self.0)?;
         }
         Ok(())
-    }
-}
-
-impl Display for IdentFrame {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", Intersperse(".", &self.data))
     }
 }
 
@@ -697,7 +686,7 @@ impl Display for IfNode {
         write!(
             f,
             "if {} {{{}}} else {{{}}}",
-            self.cond, self.r#if, self.r#else
+            self.cond, self.if_, self.else_
         )
     }
 }
@@ -751,7 +740,7 @@ impl Display for MatchNode {
 
 impl Display for OpenNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "open {} {}", self.type_name, self.var_name)?;
+        write!(f, "open {} {}", self.type_name, self.scrutinee)?;
         if let Some(motive) = &self.motive {
             write!(f, " : {}", motive)?;
         }
@@ -792,13 +781,13 @@ impl Display for VarNode {
     }
 }
 
-impl Display for PairNode {
+impl<T : Display> Display for PairNode<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "$ {} {}", self.left, self.right)
     }
 }
 
-impl Display for ListNode {
+impl<T : Display> Display for ListNode<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{}]", Intersperse(", ", &self.elements))
     }
@@ -937,7 +926,7 @@ impl Display for RecordDecl {
 impl Display for TopLevel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for doc in &self.docs {
-            writeln!(f, "///{}", doc)?;
+            writeln!(f, "//!{}", doc)?;
         }
 
         for attr in &self.attrs {
@@ -982,13 +971,13 @@ impl Display for PatKind {
             PatKind::U60(n) => write!(f, "{n}"),
             PatKind::U120(n) => write!(f, "{n}"),
             PatKind::F60(n) => write!(f, "{n}"),
+            PatKind::Nat(n) => write!(f, "{n}"),
             PatKind::Pair(p) => write!(f, "{p}"),
             PatKind::List(l) => write!(f, "{l}"),
             PatKind::Str(s) => write!(f, "\"{s}\""),
             PatKind::Char(c) => write!(f, "'{c}'"),
-            PatKind::Hole => write!(f, "_"),
             PatKind::Absurd => write!(f, "(.)"),
-            PatKind::Err => write!(f, "ERR"),
+            PatKind::Paren(p) => write!(f, "({p})"),
         }
     }
 }
