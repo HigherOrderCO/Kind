@@ -1,6 +1,6 @@
 [package]
 name = "kind-tests"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 
@@ -8,10 +8,10 @@ license = "MIT"
 
 [dev-dependencies]
 kind-driver  = { path = "../kind-driver" }
-kind-parser = { path = "../kind-parser", version = "0.1.0" }
-kind-tree = { path = "../kind-tree", version = "0.1.0" }
-kind-span = { path = "../kind-span", version = "0.1.0" }
-kind-report = { path = "../kind-report", version = "0.1.0" }
+kind-parser = { path = "../kind-parser", version = "0.1.1" }
+kind-tree = { path = "../kind-tree", version = "0.1.1" }
+kind-span = { path = "../kind-span", version = "0.1.1" }
+kind-report = { path = "../kind-report", version = "0.1.1" }
 kind-checker = { path = "../kind-checker" }
 kind-pass = { path = "../kind-pass" }
 

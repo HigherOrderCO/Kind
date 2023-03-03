@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "HOPA"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "20caa548c77bd2b36eb5f027a2fc2e4a91ff4b548b53ff88dd1cb9a1063f39d5"
+dependencies = [
+ "highlight_error",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -491,46 +500,18 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.9-beta"
-source = "git+https://github.com/Kindelia/HVM.git?rev=bd744430430a3ebeb69918572ed0be0a8dacb86a#bd744430430a3ebeb69918572ed0be0a8dacb86a"
-dependencies = [
- "backtrace",
- "clap 3.2.23",
- "crossbeam",
- "highlight_error",
- "im",
- "instant",
- "itertools",
- "sysinfo",
-]
-
-[[package]]
-name = "hvm"
-version = "1.0.13-beta"
-source = "git+https://github.com/Kindelia/HVM.git#30f6f35dcb9fad3d4585ab0b236313f6143249c9"
-dependencies = [
- "backtrace",
- "clap 3.2.23",
- "crossbeam",
- "highlight_error",
- "im",
- "instant",
- "itertools",
- "sysinfo",
-]
-
-[[package]]
-name = "im"
-version = "15.1.0"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0acd33ff0285af998aaf9b57342af478078f53492322fafc47450e09397e0e9"
+checksum = "3f1fc0af0e1b783f072678cd4b557bee147e5c8653930778f5c0c333e6ac0849"
 dependencies = [
- "bitmaps",
- "rand_core 0.6.4",
- "rand_xoshiro",
- "sized-chunks",
- "typenum",
- "version_check",
+ "HOPA",
+ "backtrace",
+ "clap 3.2.23",
+ "crossbeam",
+ "highlight_error",
+ "instant",
+ "itertools",
+ "sysinfo",
 ]
 
 [[package]]
@@ -650,10 +631,10 @@ dependencies = [
 
 [[package]]
 name = "kind-checker"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
- "hvm 1.0.13-beta",
+ "hvm",
  "im-rc",
  "kind-report",
  "kind-span",
@@ -662,7 +643,7 @@ dependencies = [
 
 [[package]]
 name = "kind-derive"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
  "im-rc",
@@ -673,12 +654,12 @@ dependencies = [
 
 [[package]]
 name = "kind-driver"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "dashmap",
  "fxhash",
- "hvm 1.0.13-beta",
+ "hvm",
  "kind-checker",
  "kind-parser",
  "kind-pass",
@@ -692,7 +673,7 @@ dependencies = [
 
 [[package]]
 name = "kind-parser"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
  "kind-report",
@@ -702,7 +683,7 @@ dependencies = [
 
 [[package]]
 name = "kind-pass"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "fxhash",
@@ -716,7 +697,7 @@ dependencies = [
 
 [[package]]
 name = "kind-query"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
  "kind-checker",
@@ -731,7 +712,7 @@ dependencies = [
 
 [[package]]
 name = "kind-report"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
  "kind-span",
@@ -743,13 +724,13 @@ dependencies = [
 
 [[package]]
 name = "kind-span"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "kind-target-hvm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
- "hvm 1.0.9-beta",
+ "hvm",
  "kind-derive",
  "kind-report",
  "kind-span",
@@ -758,7 +739,7 @@ dependencies = [
 
 [[package]]
 name = "kind-target-kdl"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
  "kind-derive",
@@ -772,7 +753,7 @@ dependencies = [
 
 [[package]]
 name = "kind-tests"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kind-checker",
  "kind-driver",
@@ -790,10 +771,10 @@ dependencies = [
 
 [[package]]
 name = "kind-tree"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fxhash",
- "hvm 1.0.13-beta",
+ "hvm",
  "kind-span",
  "linked-hash-map",
 ]

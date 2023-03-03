@@ -1,16 +1,16 @@
 [package]
 name = "kind-pass"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-span = { path = "../kind-span", version = "0.1.0" }
-kind-tree = { path = "../kind-tree", version = "0.1.0" }
-kind-report = { path = "../kind-report", version = "0.1.0" }
-kind-derive = { path = "../kind-derive", version = "0.1.0"  }
+kind-span = { path = "../kind-span", version = "0.1.1" }
+kind-tree = { path = "../kind-tree", version = "0.1.1" }
+kind-report = { path = "../kind-report", version = "0.1.1" }
+kind-derive = { path = "../kind-derive", version = "0.1.1"  }
 
 linked-hash-map = "0.5.6"
 fxhash = "0.2.1"
