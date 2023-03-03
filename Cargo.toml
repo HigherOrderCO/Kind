@@ -2,11 +2,14 @@
 members = [
   "crates/kind-tree",
   "crates/kind-span",
+  "crates/kind-parser",
+  "crates/kind-lexer",
   "crates/kind-query",
+  "crates/kind-diagnostic",
 ]
 
-[profile.test.package.hvm]
-opt-level = 3
-
-[profile.bench.package.hvm]
-opt-level = 3
+# [profile.test.package.hvm]
+# opt-level = 3
+# 
+# [profile.bench.package.hvm]
+# opt-level = 3

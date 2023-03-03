@@ -42,9 +42,16 @@ pub type Ident = Item<Symbol>;
 
 /// A qualified identifier describes names in the language
 /// that are separated by dots e.g "Data.List"
+///
+/// # Example:
+///
+/// ```kind
+/// A.B.c
+/// ````
 pub struct QualifiedIdent {
     pub data: Item<ThinVec<Item<Symbol>>>,
 }
+
 pub struct AttributeKind {
     pub name: Ident,
     pub value: Option<AttributeStyle>,
@@ -781,13 +788,13 @@ impl Display for VarNode {
     }
 }
 
-impl<T : Display> Display for PairNode<T> {
+impl<T: Display> Display for PairNode<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "$ {} {}", self.left, self.right)
     }
 }
 
-impl<T : Display> Display for ListNode<T> {
+impl<T: Display> Display for ListNode<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{}]", Intersperse(", ", &self.elements))
     }

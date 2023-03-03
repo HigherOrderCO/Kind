@@ -1,8 +1,18 @@
+/// Data structures to express locality in source code.
+
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::ops::Range;
 
-pub struct Symbol(pub String);
+/// A useful structure to be modified in the future in order to make things like
+/// a Symbol interner.
+pub struct Symbol(String);
+
+impl Symbol {
+    pub fn intern(str: String) -> Symbol {
+        Symbol(str)
+    }
+}
 
 impl Display for Symbol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
