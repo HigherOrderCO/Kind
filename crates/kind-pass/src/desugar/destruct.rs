@@ -220,8 +220,8 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg.1 {
                         arguments.push(name)
                     } else {
-                        let id =
-                            Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
+                        let mut id = Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
+                        id.range = case.constructor.range;
                         arguments.push(id);
                     }
                 }

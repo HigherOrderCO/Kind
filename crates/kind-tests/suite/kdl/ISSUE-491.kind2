@@ -1,0 +1,23 @@
+#keep
+A {
+  let xaaaaaaaaaaaaaaaaaaaaaa = 2
+  xaaaaaaaaaaaaaaaaaaaaaa => x => x
+}
+
+#keep
+B {
+  xaaaaaaaaaaaaaaaaaaaaaa => x => x
+}
+
+#keep
+C {
+  let aaaaaaaaaaaaaaaaaaaaaa = 2
+  let aaaaaaaaaaaaaaaaaaaaaa = 3
+  2
+}
+
+#keep
+D {
+  let xxxxxxxxxxxx = ((xxxxxxxxxxxx => 2) (xxxxxxxxxxxx => 2))
+  233
+}

@@ -1,9 +1,8 @@
 use hvm::u60;
 
-use kind_tree::{
-    backend::{File, Rule, Term},
-    untyped,
-};
+use kind_tree::untyped;
+
+use hvm::syntax::{File, Rule, Term};
 
 pub fn compile_book(book: untyped::Book, trace: bool) -> File {
     let mut file = File {

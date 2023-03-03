@@ -3,6 +3,7 @@ name = "kind-target-hvm"
 version = "0.1.1"
 edition = "2021"
 license = "MIT"
+description = "HVM Code generator for the kind compiler"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

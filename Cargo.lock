@@ -742,6 +742,7 @@ name = "kind-target-kdl"
 version = "0.1.1"
 dependencies = [
  "fxhash",
+ "im-rc",
  "kind-derive",
  "kind-report",
  "kind-span",
@@ -781,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "kind2"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "anyhow",
  "clap 4.0.29",
@@ -793,8 +794,9 @@ dependencies = [
 
 [[package]]
 name = "kindelia_common"
-version = "0.1.5"
-source = "git+https://github.com/developedby/Kindelia/?branch=kdl-lang-crate#ff2f75e319c167cbc9d19cbc35fbe0d9a510b56a"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8de1aea9d5b1e5bce50affa6c3d720f48a8bcf59bc8e53be68e6509740554cb"
 dependencies = [
  "bit-vec",
  "hex",
@@ -807,12 +809,14 @@ dependencies = [
 
 [[package]]
 name = "kindelia_lang"
-version = "0.1.0"
-source = "git+https://github.com/developedby/Kindelia/?branch=kdl-lang-crate#ff2f75e319c167cbc9d19cbc35fbe0d9a510b56a"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4306d4e6a8215201432d0c0b0010ec6374dd31982a02adab41fa491c453f909f"
 dependencies = [
  "hex",
  "kindelia_common",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

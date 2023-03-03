@@ -24,7 +24,6 @@ pub mod symbol;
 
 use std::fmt::{Formatter, Display, Error};
 
-pub use hvm::syntax as backend;
 use symbol::Ident;
 
 /// Attributes describes some compiler specific aspects

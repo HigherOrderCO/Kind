@@ -4,7 +4,8 @@ use kind_pass::{desugar, erasure, inline::inline_book};
 use kind_report::report::FileCache;
 use kind_span::SyntaxCtxIndex;
 
-use kind_tree::{backend, concrete, desugared, untyped};
+use hvm::language::{syntax as backend};
+use kind_tree::{concrete, desugared, untyped};
 use resolution::ResolutionError;
 use session::Session;
 use std::{path::PathBuf};

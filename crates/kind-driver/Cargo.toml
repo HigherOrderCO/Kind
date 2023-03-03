@@ -3,6 +3,7 @@ name = "kind-driver"
 version = "0.1.1"
 edition = "2021"
 license = "MIT"
+description = "Driver for the kind compiler"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,8 +15,8 @@ kind-report = { path = "../kind-report", version = "0.1.1" }
 kind-checker = { path = "../kind-checker", version = "0.1.1"  }
 kind-pass = { path = "../kind-pass", version = "0.1.1"  }
 
-kind-target-hvm = { path = "../kind-target-hvm" }
-kind-target-kdl = { path = "../kind-target-kdl" }
+kind-target-hvm = { path = "../kind-target-hvm", version = "0.1.0" }
+kind-target-kdl = { path = "../kind-target-kdl", version = "0.1.0" }
 
 hvm = "1.0.3"
 
