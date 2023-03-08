@@ -1,5 +1,4 @@
 /// Data structures to express locality in source code.
-
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::ops::Range;

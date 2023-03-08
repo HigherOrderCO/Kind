@@ -9,6 +9,6 @@ edition = "2021"
 kind-span = {path = "../kind-span"}
 kind-diagnostic = {path = "../kind-diagnostic"}
 
-
 num-bigint = "0.4.3"
 num-traits = "0.2.15"
+thin-vec = "0.2.12"

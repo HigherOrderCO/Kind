@@ -11,7 +11,7 @@ lalrpop = "0.19.8"
 [dependencies]
 kind-diagnostic = {path = "../kind-diagnostic"}
 kind-span = {path = "../kind-span"}
-kind-tree = {path = "../kind-tree"}
+kind-syntax = {path = "../kind-syntax"}
 thin-vec = "0.2.10"
 
 num-bigint = "0.4.3"

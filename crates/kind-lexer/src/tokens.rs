@@ -1,7 +1,12 @@
+//! Lexemes for the kind programming language.
+
+use kind_span::{Span, Spanned};
 use num_bigint::BigUint;
+use thin_vec::ThinVec;
 
 /// A single lexeme of the Kind programming language.
-pub enum Token {
+#[derive(Debug)]
+pub enum TokenKind {
     /// "("
     LPar,
     /// ")"
@@ -104,12 +109,34 @@ pub enum Token {
     HashHash,
     /// "#"
     Hash,
-    /// Documentation comment.
-    Comment { is_doc: bool, data: String },
-
     /// End of file token
     EOF,
-
     /// Error token literal.
     Error,
+}
+
+/// A comment token that can be attached to any other token.
+#[derive(Debug)]
+pub struct Comment {
+    pub is_doc: bool,
+    pub text: String,
+}
+
+/// A single lexeme of the Kind programming language.
+#[derive(Debug)]
+pub struct Token {
+    pub comments: ThinVec<Spanned<Comment>>,
+    pub data: TokenKind,
+    pub span: Span,
+    pub after_newline: bool,
+}
+
+/// The encode of a sequence of characters.
+#[derive(Debug)]
+pub enum EncodeSequence {
+    Binary,
+    Octal,
+    Decimal,
+    Hexa,
+    Unicode,
 }
