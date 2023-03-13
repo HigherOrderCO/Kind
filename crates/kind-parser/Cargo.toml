@@ -12,6 +12,7 @@ lalrpop = "0.19.8"
 kind-diagnostic = {path = "../kind-diagnostic"}
 kind-span = {path = "../kind-span"}
 kind-syntax = {path = "../kind-syntax"}
+kind-lexer = {path = "../kind-lexer"}
 thin-vec = "0.2.10"
 
 num-bigint = "0.4.3"

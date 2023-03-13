@@ -1,9 +1,11 @@
 //! Diagnostics for the lexer. These are used to report errors and
 //! warnings to the user.
 
+use kind_diagnostic::Diagnostic;
 use kind_span::Span;
 
 use crate::tokens::EncodeSequence;
+
 
 #[derive(Debug)]
 pub enum LexerDiagnosticKind {
@@ -26,5 +28,11 @@ pub struct LexerDiagnostic {
 impl LexerDiagnosticKind {
     pub fn with(self, span: Span) -> LexerDiagnostic {
         LexerDiagnostic { data: self, span }
+    }
+}
+
+impl Into<Diagnostic> for LexerDiagnostic {
+    fn into(self) -> Diagnostic {
+        todo!()
     }
 }

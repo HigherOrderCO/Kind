@@ -29,6 +29,12 @@ pub struct SyntaxCtxIndex(pub usize);
 #[derive(Clone)]
 pub struct Span(pub Range<usize>);
 
+impl Span {
+    pub fn mix(&self, other: &Span) -> Span {
+        Span(self.0.start..other.0.end)
+    }
+}
+
 impl Debug for Span {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.0)

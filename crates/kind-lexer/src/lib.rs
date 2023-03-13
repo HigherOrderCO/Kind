@@ -17,7 +17,6 @@ use tokens::{
 use kind_span::{Span, Spanned};
 
 pub mod diagnostics;
-pub mod lookahead;
 pub mod tokens;
 
 /// A small type synonym just to add a default error type as it is repeated
@@ -26,7 +25,7 @@ type Result<T, U = LexerDiagnostic> = std::result::Result<T, U>;
 
 /// An iterator over the characters of a text file, which generates tokens
 /// through the [Cursor::lex()] function.
-pub struct Cursor<'a> {
+pub struct Lexer<'a> {
     // The input text being iterated over
     input: &'a str,
 
@@ -63,10 +62,10 @@ fn is_useless(chr: char) -> bool {
     matches!(chr, ' ' | '\t' | '\r')
 }
 
-impl<'a> Cursor<'a> {
+impl<'a> Lexer<'a> {
     /// Creates a new `Cursor` instance with the given input.
     pub fn new(input: &'a str) -> Self {
-        Cursor {
+        Lexer {
             chars: input.chars().peekable(),
             input,
             pos: 0..0,
@@ -175,7 +174,7 @@ impl<'a> Cursor<'a> {
 
         let comment = Comment {
             is_doc,
-            text: data.to_string(),
+            text: data[2..].to_string(),
         };
 
         (comment, self.span())
@@ -491,7 +490,7 @@ impl<'a> Cursor<'a> {
     }
 }
 
-impl<'a> Iterator for Cursor<'a> {
+impl<'a> Iterator for Lexer<'a> {
     type Item = Result<Token>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -504,11 +503,11 @@ impl<'a> Iterator for Cursor<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::Cursor;
+    use crate::Lexer;
 
     #[test]
     pub fn test_lexer() {
-        let mut cursor = Cursor::new("#!/bin/bash\n(\"adadhsa\")");
+        let mut cursor = Lexer::new("#!/bin/bash\n//ata\n(\"ata\")");
         cursor.strip_shebang();
 
         for n in cursor {
