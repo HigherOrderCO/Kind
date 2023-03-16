@@ -121,6 +121,8 @@ pub enum TokenKind {
     Hash,
     /// End of file token
     EOF,
+    /// Let Token
+    Let,
     /// Error token literal.
     Error,
 }

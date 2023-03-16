@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "crates/kind-tree",
+  "crates/kind-syntax",
   "crates/kind-span",
   "crates/kind-parser",
   "crates/kind-lexer",

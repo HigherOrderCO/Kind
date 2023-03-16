@@ -199,6 +199,7 @@ dependencies = [
  "kind-span",
  "num-bigint",
  "num-traits",
+ "thin-vec",
 ]
 
 [[package]]
@@ -206,8 +207,9 @@ name = "kind-parser"
 version = "0.1.0"
 dependencies = [
  "kind-diagnostic",
+ "kind-lexer",
  "kind-span",
- "kind-tree",
+ "kind-syntax",
  "lalrpop",
  "num-bigint",
  "num-traits",
@@ -231,9 +233,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "kind-tree"
+name = "kind-syntax"
 version = "0.1.0"
 dependencies = [
+ "kind-lexer",
  "kind-span",
  "num-bigint",
  "thin-vec",
@@ -514,9 +517,9 @@ dependencies = [
 
 [[package]]
 name = "thin-vec"
-version = "0.2.10"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c630eb670b67091a53c40a5f8819be456c8c155c18d350c4e2c43c7cfe1f9c26"
+checksum = "aac81b6fd6beb5884b0cf3321b8117e6e5d47ecb6fc89f414cfdcca8b2fe2dd8"
 
 [[package]]
 name = "thiserror"

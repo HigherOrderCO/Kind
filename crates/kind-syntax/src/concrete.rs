@@ -4,6 +4,7 @@
 //! to reconstruct the entire program.
 
 use kind_span::Span;
+use num_bigint::BigUint;
 use thin_vec::ThinVec;
 
 use kind_lexer::tokens::Token;
@@ -51,6 +52,36 @@ pub struct Colon<T>(pub Token, pub T);
 #[derive(Debug)]
 pub struct Tokenized<T>(pub Token, pub T);
 
+impl<T> Parenthesis<T> {
+    pub fn span(&self) -> Span {
+        self.0.span.mix(&self.2.span)
+    }
+}
+
+impl<T> Bracket<T> {
+    pub fn span(&self) -> Span {
+        self.0.span.mix(&self.2.span)
+    }
+}
+
+impl<T> Brace<T> {
+    pub fn span(&self) -> Span {
+        self.0.span.mix(&self.2.span)
+    }
+}
+
+impl<T> Tokenized<T> {
+    pub fn span(&self) -> Span {
+        self.0.span.clone()
+    }
+}
+
+impl<T> Into<Item<T>> for Tokenized<T> {
+    fn into(self) -> Item<T> {
+        Item::new(self.span(), self.1)
+    }
+}
+
 // Concrete syntax tree
 
 #[derive(Debug)]
@@ -67,9 +98,8 @@ pub struct Item<T> {
     pub span: Span,
 }
 
-
 impl<T> Item<T> {
-    pub fn new(data: T, span: Span) -> Item<T> {
+    pub fn new(span: Span, data: T) -> Item<T> {
         Item { data, span }
     }
 
@@ -85,7 +115,7 @@ impl<T> Item<T> {
 pub enum AttributeStyleKind {
     String(Tokenized<String>),
     Number(Tokenized<u64>),
-    Identifier(Item<Ident>),
+    Identifier(Ident),
     List(Bracket<ThinVec<AttributeStyle>>),
 }
 
@@ -102,7 +132,7 @@ pub type AttributeStyle = Item<AttributeStyleKind>;
 #[derive(Debug)]
 pub struct AttributeKind {
     pub hash: Hash,
-    pub name: Item<Ident>,
+    pub name: Ident,
     pub value: Option<Equal<AttributeStyle>>,
     pub arguments: Option<Bracket<ThinVec<AttributeStyle>>>,
 }
@@ -130,11 +160,9 @@ pub struct VarNode {
     pub name: Ident
 }
 
-/// A constructor node is an application of a series of arguments
-/// to a global function.
-pub struct ConstructorNode<T> {
-    pub name: QualifiedIdent,
-    pub arguments: ThinVec<T>
+/// A constructor node is the name of a global function.
+pub struct ConstructorNode {
+    pub name: QualifiedIdent
 }
 
 /// A param is a variable or a type binding.
@@ -168,21 +196,33 @@ pub struct SigmaNode {
 
 /// A lambda expression (an anonymous function).
 pub struct LambdaNode {
-    pub tilde: Tilde,
+    pub tilde: Option<Tilde>,
     pub param: Param,
     pub arrow: FatArrow,
     pub body: Box<Expr>
 }
 
+pub struct Rename(pub Ident, pub Equal<Box<Expr>>);
+
+pub enum NamedBinding {
+    Named(Parenthesis<Rename>),
+    Expr(Box<Expr>)
+}
+
+pub struct Binding {
+    pub tilde: Option<Tilde>,
+    pub value: NamedBinding,
+}
+
 /// Application of a function to a sequence of arguments.
 pub struct AppNode {
     pub fun: Box<Expr>,
-    pub arg: ThinVec<Expr>
+    pub arg: ThinVec<Binding>
 }
 
 /// Let binding expression.
 pub struct LetNode {
-    pub lett: Let,
+    pub let_: Let,
     pub name: Ident,
     pub val: Equal<Box<Expr>>,
     pub semi: Option<Semi>,
@@ -198,19 +238,21 @@ pub struct AnnNode {
 
 /// A literal is a constant value that can be used in the program.
 pub enum LiteralNode {
-    Help(Tokenized<Help>),
+    U60(Tokenized<u64>),
+    F60(Tokenized<f64>),
+    U120(Tokenized<u128>),
+    Nat(Tokenized<BigUint>),
+    String(Tokenized<String>),
+    Char(Tokenized<char>),
+}
 
+// TODO: Rename
+pub enum TypeNode {
+    Help(Tokenized<String>),
     Type(Type),
     TypeU60(Token),
     TypeU120(Token),
     TypeF60(Token),
-
-    U60(Tokenized<u64>),
-    F60(Tokenized<f64>),
-    U120(Tokenized<u128>),
-
-    Nat(Tokenized<u128>),
-    String(Tokenized<String>),
 }
 
 
@@ -241,7 +283,7 @@ pub struct BinaryNode {
     pub right: Box<Expr>
 }
 
-    /// Monadic binding without a variable name.
+/// Monadic binding without a variable name.
 pub struct NextSttmNode {
     pub left: Box<Expr>,
     pub semi: Option<Semi>,
@@ -323,11 +365,9 @@ pub struct DoNode {
 
 /// Conditional expression.
 pub struct IfNode {
-    pub ift: Token,
-    pub cond: Box<Expr>,
+    pub cond: Tokenized<Box<Expr>>,
     pub then: Brace<Box<Expr>>,
-    pub elset: Token,
-    pub else_: Brace<Box<Expr>>,
+    pub else_: Tokenized<Brace<Box<Expr>>>,
 }
 
 /// A PairNode represents a dependent pair. i.e.
@@ -424,27 +464,35 @@ pub struct AccessNode {
     pub operation: AccessOperation
 }
 
+/// A constructor node is the name of a global function.
+pub struct PatConstructorNode {
+    pub name: QualifiedIdent,
+    pub args: ThinVec<Argument>
+}
+
 /// An expression is a piece of code that can be evaluated.
 pub enum ExprKind {
-    Var(VarNode),
-    All(AllNode),
-    Sigma(SigmaNode),
-    Lambda(LambdaNode),
-    App(AppNode),
-    Let(LetNode),
-    Ann(AnnNode),
-    Binary(BinaryNode),
-    Do(DoNode),
-    If(IfNode),
-    Literal(LiteralNode),
-    Constructor(ConstructorNode<Expr>),
-    Pair(PairNode<Expr>),
-    List(ListNode<Expr>),
-    Subst(SubstNode),
-    Match(MatchNode),
-    Open(OpenNode),
-    Access(AccessNode),
-    Err
+    Var(Box<VarNode>),
+    All(Box<AllNode>),
+    Sigma(Box<SigmaNode>),
+    Lambda(Box<LambdaNode>),
+    App(Box<AppNode>),
+    Let(Box<LetNode>),
+    Ann(Box<AnnNode>),
+    Binary(Box<BinaryNode>),
+    Do(Box<DoNode>),
+    If(Box<IfNode>),
+    Literal(Box<LiteralNode>),
+    Constructor(Box<ConstructorNode>),
+    Pair(Box<PairNode<Expr>>),
+    List(Box<ListNode<Expr>>),
+    Subst(Box<SubstNode>),
+    Match(Box<MatchNode>),
+    Open(Box<OpenNode>),
+    Access(Box<AccessNode>),
+    Type(Box<TypeNode>),
+    Paren(Box<Parenthesis<Expr>>),
+    Error
 }
 
 pub type Expr = Item<ExprKind>;
@@ -453,7 +501,7 @@ pub type Expr = Item<ExprKind>;
 pub enum PatKind {
     Ident(Ident),
     Pair(PairNode<Pat>),
-    Constructor(ConstructorNode<Pat>),
+    Constructor(ConstructorNode),
     List(ListNode<Pat>),
     Literal(LiteralNode),
 }
@@ -512,21 +560,59 @@ pub struct Command {
     pub arguments: ThinVec<Expr>,
 }
 
+/// A constructor is a structure that defines a data constructor of a type
+/// family. i.e.
+///
+/// ```kind
+///    some (value: a) : Maybe a
+/// ```
+pub struct Constructor {
+    pub name: Ident,
+    pub arguments: ThinVec<Argument>,
+    pub typ: Option<Colon<ThinVec<Expr>>>,
+}
+
+/// A type definition is a top-level structure that defines a type family
+/// with multiple constructors that named fields, indices and parameters.
+pub struct TypeDef {
+    pub name: QualifiedIdent,
+    pub constructors: ThinVec<Constructor>,
+    pub params: ThinVec<Argument>,
+    pub indices: ThinVec<Argument>,
+}
+
+/// A record definition is a top-level structure that defines a type with
+/// a single constructor that has named fields with named fields.
+pub struct RecordDef {
+    pub name: QualifiedIdent,
+    pub fields: ThinVec<TypeBinding>,
+    pub params: ThinVec<Argument>,
+    pub indices: ThinVec<Argument>,
+}
+
 /// A top-level item is a item that is on the outermost level of a
 /// program. It includes functions, commands, signatures and rules.
 pub enum TopLevelKind {
     Function(Function),
     Commmand(Command),
     Signature(Signature),
+    Record(RecordDef),
+    Type(TypeDef),
     Rule(Rule)
 }
 
-pub type TopLevel = Item<TopLevelKind>;
+pub struct Attributed<T> {
+    pub attributes: ThinVec<Attribute>,
+    pub data: T,
+}
+
+/// A top level structure with attributes.
+pub type TopLevel = Attributed<Item<TopLevelKind>>;
 
 /// A collection of top-level items. This is the root of the CST and
 /// is the result of parsing a module.
 pub struct Module {
-    pub shebang: String,
+    pub shebang: Option<String>,
     pub items: ThinVec<TopLevel>,
     pub eof: Token
 }

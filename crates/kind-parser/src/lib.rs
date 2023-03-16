@@ -119,6 +119,14 @@ impl<'a> Parser<'a> {
         }
     }
 
+    pub fn eat(&mut self, expect: TokenKind) -> Option<Token> {
+        if self.is(expect) {
+            Some(self.bump())
+        } else {
+            None
+        }
+    }
+
     /// Checks if the next token is the expected identifier and returns the consumed token.
     pub fn expect_keyword(&mut self, str: &str) -> Result<Token> {
         if self.get().is_identifier(str) {
@@ -128,17 +136,15 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_any_name(&mut self) -> Result<Item<Ident>> {
+    pub fn parse_any_name(&mut self) -> Result<Ident> {
         if let TokenKind::UpperId(str) | TokenKind::LowerId(str) = &self.get().data {
             let str = str.clone();
             let tkn = self.bump();
-            Ok(Item {
-                span: tkn.span.clone(),
-                data: Ident(Item {
-                    span: tkn.span.clone(),
-                    data: Tokenized(tkn, str),
-                }),
-            })
+            let span = tkn.span.clone();
+            Ok(Ident(Item {
+                span,
+                data: Tokenized(tkn, str),
+            }))
         } else {
             self.unexpected()
         }
@@ -147,12 +153,20 @@ impl<'a> Parser<'a> {
     /// Parses brackets around another parser defined in the argument `fun`
     pub(crate) fn parse_bracket<T>(
         &mut self,
-        fun: fn(&mut Self) -> Result<T>,
+        fun: &dyn Fn(&mut Self) -> Result<T>,
     ) -> Result<Bracket<T>> {
         Ok(Bracket(
             self.expect(TokenKind::LBracket)?,
             fun(self)?,
             self.expect(TokenKind::RBracket)?,
+        ))
+    }
+
+    pub(crate) fn parse_brace<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Brace<T>> {
+        Ok(Brace(
+            self.expect(TokenKind::LBrace)?,
+            fun(self)?,
+            self.expect(TokenKind::RBrace)?,
         ))
     }
 
@@ -185,40 +199,46 @@ impl<'a> Parser<'a> {
         Ok(vec)
     }
 
+    pub fn parse_string(&mut self) -> Result<Tokenized<String>> {
+        if let TokenKind::Str(str) = &self.get().data {
+            let str = str.clone();
+            let tkn = self.bump();
+            Ok(Tokenized(tkn, str))
+        } else {
+            self.unexpected()
+        }
+    }
+
+    pub fn parse_u60(&mut self) -> Result<Tokenized<u64>> {
+        if let TokenKind::Num60(n) = &self.get().data {
+            let n = *n;
+            let tkn = self.bump();
+            Ok(Tokenized(tkn, n))
+        } else {
+            self.unexpected()
+        }
+    }
+
     pub fn parse_attribute_style(&mut self) -> Result<AttributeStyle> {
         match &self.get().data {
             TokenKind::UpperId(_) | TokenKind::LowerId(_) => {
                 let name = self.parse_any_name()?;
-                Ok(Item {
-                    span: name.span.clone(),
-                    data: AttributeStyleKind::Identifier(name),
-                })
+                let span = name.0.span.clone();
+                Ok(Item::new(span, AttributeStyleKind::Identifier(name)))
             }
-            TokenKind::Str(str) => {
-                let str = str.clone();
-                let tkn = self.bump();
-                Ok(Item {
-                    span: tkn.span.clone(),
-                    data: AttributeStyleKind::String(Tokenized(tkn, str)),
-                })
+            TokenKind::Str(_) => {
+                let token = self.parse_string()?;
+                Ok(Item::new(token.span(), AttributeStyleKind::String(token)))
             }
-            TokenKind::Num60(n) => {
-                let n = *n;
-                let tkn = self.bump();
-                Ok(Item {
-                    span: tkn.span.clone(),
-                    data: AttributeStyleKind::Number(Tokenized(tkn, n)),
-                })
+            TokenKind::Num60(_) => {
+                let token = self.parse_u60()?;
+                Ok(Item::new(token.span(), AttributeStyleKind::Number(token)))
             }
             TokenKind::LBracket => {
-                let bracket = self.parse_bracket(|this| {
+                let bracket = self.parse_bracket(&|this| {
                     this.parse_separated_by_comma(|this| this.parse_attribute_style())
                 })?;
-
-                Ok(Item {
-                    span: bracket.0.span.mix(&bracket.2.span),
-                    data: AttributeStyleKind::List(bracket),
-                })
+                Ok(Item::new(bracket.span(), AttributeStyleKind::List(bracket)))
             }
             _ => self.unexpected(),
         }
@@ -229,7 +249,7 @@ impl<'a> Parser<'a> {
         let name = self.parse_any_name()?;
 
         let arguments = self.try_with(|this| {
-            this.parse_bracket(|this| {
+            this.parse_bracket(&|this| {
                 this.parse_separated_by_comma(|this| this.parse_attribute_style())
             })
         })?;
@@ -250,6 +270,220 @@ impl<'a> Parser<'a> {
                 arguments,
             },
         })
+    }
+
+    pub fn parse_var(&mut self) -> Result<VarNode> {
+        let name = self.parse_any_name()?;
+        Ok(VarNode { name })
+    }
+
+    pub fn parse_type_binding(&mut self) -> Result<TypeBinding> {
+        let name = self.parse_any_name()?;
+        let colon = self.expect(TokenKind::Colon)?;
+        let ty = self.parse_expr()?;
+        Ok(TypeBinding {
+            name,
+            typ: Colon(colon, Box::new(ty)),
+        })
+    }
+
+    pub fn is_param(&mut self) -> bool {
+        self.peek(0).is(TokenKind::LPar)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).is(TokenKind::Colon)
+    }
+
+    pub fn parse_param(&mut self) -> Result<Param> {
+        if self.is_param() {
+            let paren = self.parse_paren(|this| this.parse_type_binding())?;
+            Ok(Param::Named(paren))
+        } else {
+            let expr = Box::new(self.parse_expr()?);
+            Ok(Param::Expr(expr))
+        }
+    }
+
+    pub fn is_binding_rename(&mut self) -> bool {
+        self.peek(0).is(TokenKind::LPar)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).is(TokenKind::Eq)
+    }
+
+    pub fn parse_binding(&mut self) -> Result<Binding> {
+        let tilde = self.eat(TokenKind::Tilde);
+
+        let value = if self.is_binding_rename() {
+            let rename = self.parse_paren(|this| {
+                let name = this.parse_any_name()?;
+                let eq = this.expect(TokenKind::Eq)?;
+                let expr = this.parse_expr()?;
+                Ok(Rename(name, Equal(eq, Box::new(expr))))
+            })?;
+
+            NamedBinding::Named(rename)
+        } else {
+            NamedBinding::Expr(Box::new(self.parse_atom()?))
+        };
+
+        Ok(Binding { tilde, value })
+    }
+
+    pub fn parse_lower_id(&mut self) -> Result<Ident> {
+        if let TokenKind::LowerId(name) = &self.get().data {
+            let name = name.clone();
+            let tkn = self.bump();
+            Ok(Ident(Item {
+                span: tkn.span.clone(),
+                data: Tokenized(tkn, name),
+            }))
+        } else {
+            // TODO: Improve this error message for upper cased identifiers.
+            self.unexpected()
+        }
+    }
+
+    pub fn parse_let(&mut self) -> Result<LetNode> {
+        let let_ = self.expect(TokenKind::Let)?;
+        let name = self.parse_lower_id()?;
+        let eq = self.expect(TokenKind::Eq)?;
+        let val = self.parse_expr()?;
+        let semi = self.eat(TokenKind::Semi);
+        let next = self.parse_expr()?;
+
+        Ok(LetNode {
+            let_,
+            name,
+            val: Equal(eq, Box::new(val)),
+            semi,
+            next: Box::new(next),
+        })
+    }
+
+    pub fn parse_if(&mut self) -> Result<IfNode> {
+        let if_ = self.expect_keyword("if")?;
+        let cond = self.parse_expr()?;
+        let then = self.parse_brace(|this| this.parse_boxed_expr())?;
+        let else_ = self.expect_keyword("else")?;
+        let else_cond = self.parse_brace(|this| Ok(this.parse_boxed_expr()?))?;
+
+        Ok(IfNode {
+            cond: Tokenized(if_, Box::new(cond)),
+            then,
+            else_: Tokenized(else_, else_cond),
+        })
+    }
+
+    pub fn parse_pair<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<PairNode<T>> {
+        let dollar = self.expect(TokenKind::Dollar)?;
+        let left = fun(self)?;
+        let right = fun(self)?;
+        Ok(PairNode {
+            dollar,
+            left: Box::new(left),
+            right: Box::new(right),
+        })
+    }
+
+    pub fn parse_list<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<ListNode<T>> {
+        let bracket = self.parse_bracket(&|this| {
+            let mut vec = ThinVec::default();
+
+            if !this.get().is(TokenKind::RBracket) {
+                vec.push(fun(this)?);
+                let with_comma = this.get().is(TokenKind::Comma);
+                while !this.get().is(TokenKind::RBracket) {
+                    if with_comma {
+                        this.expect(TokenKind::Comma)?;
+                    }
+                    vec.push(fun(this)?);
+                }
+            }
+
+            Ok(vec)
+        })?;
+
+        Ok(ListNode { bracket })
+    }
+
+    pub fn parse_literal(&mut self) -> Result<LiteralNode> {
+        let tkn = self.bump();
+        match &tkn.data {
+            TokenKind::Num60(n60) => {
+                let data = *n60;
+                Ok(LiteralNode::U60(Tokenized(tkn, data)))
+            }
+            TokenKind::Float(float) => {
+                let data = *float;
+                Ok(LiteralNode::F60(Tokenized(tkn, data)))
+            }
+            TokenKind::Num120(n120) => {
+                let data = *n120;
+                Ok(LiteralNode::U120(Tokenized(tkn, data)))
+            }
+            TokenKind::Nat(nat) => {
+                let data = nat.clone();
+                Ok(LiteralNode::Nat(Tokenized(tkn, data)))
+            }
+            TokenKind::Str(str) => {
+                let data = str.clone();
+                Ok(LiteralNode::String(Tokenized(tkn, data)))
+            }
+            TokenKind::Char(char) => {
+                let data = *char;
+                Ok(LiteralNode::Char(Tokenized(tkn, data)))
+            }
+            _ => self.unexpected(),
+        }
+    }
+
+    pub fn parse_atom_type(&mut self) -> Result<TypeNode> {
+        match &self.get().data {
+            TokenKind::U => Ok(TypeNode::Type(self.bump())),
+            TokenKind::U60 => Ok(TypeNode::TypeU60(self.bump())),
+            TokenKind::U120 => Ok(TypeNode::TypeU120(self.bump())),
+            TokenKind::F60 => Ok(TypeNode::TypeF60(self.bump())),
+            TokenKind::Help(x) => {
+                let data = x.clone();
+                let tkn = self.bump();
+                Ok(TypeNode::Help(Tokenized(tkn, data)))
+            }
+            _ => self.unexpected(),
+        }
+    }
+
+    pub fn parse_atom_kind(&mut self) -> Result<ExprKind> {
+        match &self.get().data {
+            TokenKind::LowerId(_) => {
+                Ok(ExprKind::Var(Box::new(self.parse_var()?)))
+            },
+            TokenKind::LPar => {
+                let paren = self.parse_paren(|this| this.parse_expr())?;
+                Ok(ExprKind::Paren(Box::new(paren)))
+            }
+            TokenKind::LBracket => {
+                let list = self.parse_list(|this| this.parse_atom())?;
+                Ok(ExprKind::List(Box::new(list)))
+            }
+            _ => Ok(ExprKind::Type(Box::new(self.parse_atom_type()?))),
+        }
+    }
+
+    pub fn parse_atom(&mut self) -> Result<Expr> {
+        let start = self.get().span.clone();
+        let kind = self.parse_atom_kind()?;
+        let end = self.prev_span.clone();
+        Ok(Item {
+            data: kind,
+            span: start.mix(&end),
+        })
+    }
+
+    pub fn parse_expr(&mut self) -> Result<Expr> {
+        todo!()
+    }
+
+    pub fn parse_boxed_expr(&mut self) -> Result<Box<Expr>> {
+        Ok(Box::new(self.parse_expr()?))
     }
 }
 

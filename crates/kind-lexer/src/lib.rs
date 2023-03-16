@@ -1,5 +1,5 @@
 //! The hand-written lexer for the Kind programming language. The main
-//! structure is the [Cursor] that is the state of the lexer iterator.
+//! structure is the [Lexer] that is the state of the lexer iterator.
 //!
 //! It's a reusable library that outputs [Token]s. Each token contain
 //! enough information to recreate the entire program lexically.
@@ -24,7 +24,7 @@ pub mod tokens;
 type Result<T, U = LexerDiagnostic> = std::result::Result<T, U>;
 
 /// An iterator over the characters of a text file, which generates tokens
-/// through the [Cursor::lex()] function.
+/// through the [Lexer::lex()] function.
 pub struct Lexer<'a> {
     // The input text being iterated over
     input: &'a str,
@@ -371,16 +371,19 @@ impl<'a> Lexer<'a> {
         self.pos.start = self.pos.end;
     }
 
-    pub fn strip_shebang(&mut self) {
+    pub fn strip_shebang(&mut self) -> Option<String> {
         if self.input.len() < 2 {
-            return;
+            return None;
         }
 
         let mut lex = self.input.chars();
 
         if lex.next().unwrap() == '#' && lex.next().unwrap() == '!' {
-            self.eat_while(&|x| x != '\n' && x != '\0');
+            let str = self.eat_while(&|x| x != '\n' && x != '\0');
+            return Some(str.to_string());
         }
+
+        None
     }
 
     /// Tokenizes a single token and returns it.
@@ -508,10 +511,11 @@ mod tests {
     #[test]
     pub fn test_lexer() {
         let mut cursor = Lexer::new("#!/bin/bash\n//ata\n(\"ata\")");
-        cursor.strip_shebang();
+        let res = cursor.strip_shebang();
+
+        assert!(res.is_some());
 
         for n in cursor {
-            println!("{:?}", n);
             assert!(n.is_ok());
         }
     }
