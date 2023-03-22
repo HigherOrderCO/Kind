@@ -13,4 +13,4 @@ kind-tree = { path = "../kind-tree", version = "0.1.1" }
 kind-report = { path = "../kind-report", version = "0.1.1" }
 kind-derive = { path = "../kind-derive", version = "0.1.1" }
 
-hvm = "1.0.3"
+hvm = "1.0.6"
