@@ -18,7 +18,7 @@ kind-pass = { path = "../kind-pass", version = "0.1.1"  }
 kind-target-hvm = { path = "../kind-target-hvm", version = "0.1.0" }
 kind-target-kdl = { path = "../kind-target-kdl", version = "0.1.0" }
 
-hvm = "1.0.3"
+hvm = "1.0.6"
 
 anyhow = "1.0.66"
 strsim = "0.10.0"
