@@ -1,7 +1,24 @@
-Kind2
-=====
+<div align="center">
 
-**Kind2** is a **functional programming language** and **proof assistant**.
+![banner]
+
+&nbsp;
+
+[![crates.io][crates.io-badge]][crates.io]
+[![discord.invite][discord.badge]][discord.invite]
+![build.badge]
+
+**Kind** is a **pure functional programming language** and **proof assistant**.
+
+[Getting started](#getting-started) •
+[Examples](#examples) •
+[Installation](#installation)
+
+&nbsp;
+
+</div>
+
+# Getting started
 
 It is a complete rewrite of [Kind1](https://github.com/kindelia/kind-legacy), based on
 [HVM](https://github.com/kindelia/hvm), a **lazy**, **non-garbage-collected** and **massively parallel** virtual
@@ -11,10 +28,9 @@ unleashes the [inherent parallelism of the Lambda
 Calculus](https://github.com/VictorTaelin/Symmetric-Interaction-Calculus) to become the ultimate programming language of
 the next century.
 
-**Welcome to the inevitable parallel, functional future of computers!**
+<div align="center"><b>Welcome to the inevitable parallel, functional future of computers! </b></div>
 
-Examples
---------
+## Examples
 
 Pure functions are defined via equations, as in [Haskell](https://www.haskell.org/):
 
@@ -23,19 +39,6 @@ Pure functions are defined via equations, as in [Haskell](https://www.haskell.or
 map <a> <b> (list: List a) (f: a -> b) : List b
 map a b Nil              f = Nil
 map a b (Cons head tail) f = Cons (f head) (map tail f)
-```
-
-Side-effective programs are written via monads, resembling [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/):
-
-```javascript
-// Prints the double of every number up to a limit
-Main : IO (Result () String) {
-  ask limit = IO.prompt "Enter limit:"
-  for x in (List.range limit) {
-    IO.print "{} * 2 = {}" x (Nat.double x)
-  }
-  return Ok ()
-}
 ```
 
 Theorems can be proved inductively, as in [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php) and [Idris](https://www.idris-lang.org/):
@@ -49,21 +52,13 @@ black_friday_theorem (Nat.succ n) = Equal.apply (x => Nat.succ x) (black_friday_
 
 For more examples, check the [Wikind](https://github.com/kindelia/wikind).
 
-Usage
------
+# Installation
 
 First, install [Rust](https://www.rust-lang.org/tools/install) first, then enter:
 
 ```
 cargo install kind2
 ```
-
-### Warning:
-New versions probably are not in `cargo`, so you can install the current version of kind2 by following these instructions:
-
-1. Install Rust Nightly Toolchain
-2. Clone the repository
-3. `cargo install --path crates/kind-cli --force`
 
 Then, use any of the commands below:
 
@@ -72,18 +67,15 @@ Command    | Usage                     | Note
 Check      | `kind2 check  file.kind2` | Checks all definitions.
 Eval       | `kind2 eval   file.kind2` | Runs using the type-checker's evaluator.
 Run        | `kind2 run    file.kind2` | Runs using HVM's evaluator, on Rust-mode.
-To-HVM     | `kind2 to-hvm file.kind2` | Generates a [.hvm](https://github.com/kindelia/hvm) file. Can then be compiled to C.
+To-HVM     | `kind2 to-hvm file.kind2` | Generates a [.hvm](https://github.com/kindelia/hvm) file. Can then be compiled to a rust crate using HVM.
 To-KDL     | `kind2 to-kdl file.kind2` | Generates a [.kdl](https://github.com/kindelia/kindelia) file. Can then be deployed to [Kindelia](https://github.com/kindelia/kindelia).
 
-Executables can be generated via HVM:
+The rust crate can be generated via HVM:
 
 ```
-kind2 to-hvm file.kind2
+kind2 to-hvm file.kind2 > file.hvm
 hvm compile file.hvm
-clang -O2 file.c -o file
-./file
 ```
-
 
 ---
 
@@ -92,3 +84,14 @@ clang -O2 file.c -o file
 - For Feedbacks, email [kind@kindelia.org](mailto:kind@kindelia.org)
 
 - To ask questions and join our community, check our [Discord Server](https://discord.gg/kindelia).
+
+
+[banner]: ./img/banner.png
+
+[crates.io-badge]: https://img.shields.io/crates/v/kind2?style=flat-square
+[crates.io]: https://crates.io/crates/zoxide
+
+[discord.badge]: https://img.shields.io/discord/912426566838013994?style=flat-square
+[discord.invite]: https://discord.gg/kindelia
+
+[build.badge]: https://img.shields.io/github/actions/workflow/status/kindelia/kind/ci.yml?style=flat-square
