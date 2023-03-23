@@ -364,7 +364,7 @@ impl<'a> Parser<'a> {
         let cond = self.parse_expr()?;
         let then = self.parse_brace(|this| this.parse_boxed_expr())?;
         let else_ = self.expect_keyword("else")?;
-        let else_cond = self.parse_brace(|this| Ok(this.parse_boxed_expr()?))?;
+        let else_cond = self.parse_brace(|this| this.parse_boxed_expr())?;
 
         Ok(IfNode {
             cond: Tokenized(if_, Box::new(cond)),
@@ -453,9 +453,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_atom_kind(&mut self) -> Result<ExprKind> {
         match &self.get().data {
-            TokenKind::LowerId(_) => {
-                Ok(ExprKind::Var(Box::new(self.parse_var()?)))
-            },
+            TokenKind::LowerId(_) => Ok(ExprKind::Var(Box::new(self.parse_var()?))),
             TokenKind::LPar => {
                 let paren = self.parse_paren(|this| this.parse_expr())?;
                 Ok(ExprKind::Paren(Box::new(paren)))
