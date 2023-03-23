@@ -36,18 +36,18 @@ Pure functions are defined via equations, as in [Haskell](https://www.haskell.or
 
 ```javascript
 // Applies a function to every element of a list
-map <a> <b> (list: List a) (f: a -> b) : List b
-map a b Nil              f = Nil
-map a b (Cons head tail) f = Cons (f head) (map tail f)
+Map <a> <b> (list: List a) (f: a -> b) : List b
+Map a b Nil              f             = Nil
+Map a b (Cons head tail) f             = Cons (f head) (Map tail f)
 ```
 
 Theorems can be proved inductively, as in [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php) and [Idris](https://www.idris-lang.org/):
 
 ```javascript
 // Black Friday Theorem. Proof that, for every Nat n: n * 2 / 2 == n.
-black_friday_theorem (n: Nat) : Equal Nat (Nat.half (Nat.double n)) n
-black_friday_theorem Nat.zero     = Equal.refl
-black_friday_theorem (Nat.succ n) = Equal.apply (x => Nat.succ x) (black_friday_theorem n)
+BlackFridayTheorem (n: Nat)     : Equal Nat (Nat.half (Nat.double n)) n
+BlackFridayTheorem Nat.zero     = Equal.refl
+BlackFridayTheorem (Nat.succ n) = Equal.apply (x => Nat.succ x) (BlackFridayTheorem n)
 ```
 
 For more examples, check the [Wikind](https://github.com/kindelia/wikind).
