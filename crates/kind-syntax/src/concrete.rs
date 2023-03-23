@@ -9,21 +9,7 @@ use thin_vec::ThinVec;
 
 use kind_lexer::tokens::Token;
 
-// Lexemes
-
-type Hash = Token;
-type Minus = Token;
-type Plus = Token;
-type Semi = Token;
-type RightArrow = Token;
-type Tilde = Token;
-type FatArrow = Token;
-type ColonColon = Token;
-type Let = Token;
-type Type = Token;
-type Help = Token;
-type With = Token;
-type Dot = Token;
+use crate::lexemes;
 
 pub enum Either<A, B> {
     Left(A),
@@ -131,7 +117,7 @@ pub type AttributeStyle = Item<AttributeStyleKind>;
 
 #[derive(Debug)]
 pub struct AttributeKind {
-    pub hash: Hash,
+    pub r#hash: lexemes::Hash,
     pub name: Ident,
     pub value: Option<Equal<AttributeStyle>>,
     pub arguments: Option<Bracket<ThinVec<AttributeStyle>>>,
@@ -150,8 +136,8 @@ pub type ArgumentBinding = Either<AngleBracket<Param>, Paren<Param>>;
 
 /// An argument of a type signature.
 pub struct Argument {
-    pub minus: Option<Minus>,
-    pub plus: Option<Plus>,
+    pub minus: Option<lexemes::Minus>,
+    pub plus: Option<lexemes::Plus>,
     pub binding: ArgumentBinding,
 }
 
@@ -181,9 +167,9 @@ pub enum Param {
 
 /// A all node is a dependent function type.
 pub struct PiExpr {
-    pub tilde: Tilde,
+    pub r#tilde: lexemes::Tilde,
     pub param: Param,
-    pub arrow: RightArrow,
+    pub r#arrow: lexemes::RightArrow,
     pub body: Box<Expr>,
 }
 
@@ -192,15 +178,15 @@ pub struct PiExpr {
 /// of the pair on the first one.
 pub struct SigmaExpr {
     pub param: Bracket<TypeBinding>,
-    pub arrow: RightArrow,
+    pub r#arrow: lexemes::RightArrow,
     pub body: Box<Expr>,
 }
 
 /// A lambda expression (an anonymous function).
 pub struct LambdaExpr {
-    pub tilde: Option<Tilde>,
+    pub r#tilde: Option<lexemes::Tilde>,
     pub param: Param,
-    pub arrow: FatArrow,
+    pub r#arrow: lexemes::FatArrow,
     pub body: Box<Expr>,
 }
 
@@ -212,7 +198,7 @@ pub enum NamedBinding {
 }
 
 pub struct Binding {
-    pub tilde: Option<Tilde>,
+    pub r#tilde: Option<lexemes::Tilde>,
     pub value: NamedBinding,
 }
 
@@ -224,22 +210,22 @@ pub struct AppExpr {
 
 /// Let binding expression.
 pub struct LetExpr {
-    pub let_: Let,
+    pub r#let: lexemes::Let,
     pub name: Ident,
-    pub val: Equal<Box<Expr>>,
-    pub semi: Option<Semi>,
+    pub value: Equal<Box<Expr>>,
+    pub r#semi: Option<lexemes::Semi>,
     pub next: Box<Expr>,
 }
 
 /// A type annotation.
 pub struct AnnExpr {
-    pub val: Box<Expr>,
-    pub colon: ColonColon,
+    pub value: Box<Expr>,
+    pub r#colon: lexemes::ColonColon,
     pub typ: Box<Expr>,
 }
 
 /// A literal is a constant value that can be used in the program.
-pub enum LiteralExpr {
+pub enum Literal {
     U60(Tokenized<u64>),
     F60(Tokenized<f64>),
     U120(Tokenized<u128>),
@@ -251,7 +237,7 @@ pub enum LiteralExpr {
 // TODO: Rename
 pub enum TypeExpr {
     Help(Tokenized<String>),
-    Type(Type),
+    Type(lexemes::Type),
     TypeU60(Token),
     TypeU120(Token),
     TypeF60(Token),
@@ -287,30 +273,30 @@ pub struct BinaryExpr {
 /// Monadic binding without a variable name.
 pub struct NextStmt {
     pub left: Box<Expr>,
-    pub semi: Option<Semi>,
+    pub r#semi: Option<lexemes::Semi>,
     pub next: Box<Stmt>,
 }
 
 /// An ask statement is a monadic binding inside the `do` notation
 /// with a name.
 pub struct AskStmt {
-    pub ask: Token,
+    pub r#ask: lexemes::Ask,
     pub name: Ident,
-    pub colon: Equal<Box<Expr>>,
+    pub value: Equal<Box<Expr>>,
     pub next: Box<Stmt>,
 }
 
 /// A let binding inside the `do` notation.
 pub struct LetStmt {
-    pub lett: Token,
+    pub r#let: lexemes::Let,
     pub name: Ident,
-    pub colon: Equal<Box<Expr>>,
+    pub value: Equal<Box<Expr>>,
     pub next: Box<Stmt>,
 }
 
 /// The "pure" function of the `A` monad.
 pub struct ReturnStmt {
-    pub ret: Token,
+    pub r#return: lexemes::Return,
     pub value: Box<Expr>,
     pub next: Box<Stmt>,
 }
@@ -343,7 +329,7 @@ pub enum StmtKind {
     /// The "pure" function of the `A` monad.
     Return(ReturnStmt),
     /// An expression without the "pure" function.
-    RetExpr(ReturnExprStmt),
+    ReturnExpr(ReturnExprStmt),
 }
 
 pub type Stmt = Item<StmtKind>;
@@ -359,16 +345,16 @@ pub type Stmt = Item<StmtKind>;
 /// }
 /// ```
 pub struct DoNode {
-    pub do_: Token,
+    pub r#do: lexemes::Do,
     pub typ: Option<Ident>,
-    pub body: Brace<Stmt>,
+    pub value: Brace<Stmt>,
 }
 
 /// Conditional expression.
-pub struct IfNode {
+pub struct IfExpr {
     pub cond: Tokenized<Box<Expr>>,
     pub then: Brace<Box<Expr>>,
-    pub else_: Tokenized<Brace<Box<Expr>>>,
+    pub otherwise: Tokenized<Brace<Box<Expr>>>,
 }
 
 /// A Pair node represents a dependent pair. i.e.
@@ -377,7 +363,7 @@ pub struct IfNode {
 /// $ a b
 /// ```
 pub struct PairNode<T> {
-    pub dollar: Token,
+    pub r#sign: lexemes::Sign,
     pub left: Box<T>,
     pub right: Box<T>,
 }
@@ -389,25 +375,25 @@ pub struct PairNode<T> {
 /// specialize a into #0 in a
 /// ```
 pub struct SubstExpr {
-    pub specialize: Token,
+    pub r#specialize: lexemes::Specialize,
     pub name: Ident,
-    pub into: Token,
-    pub hash: Hash,
+    pub r#into: lexemes::Into,
+    pub r#hash: lexemes::Hash,
     pub num: u64,
-    pub in_: Token,
-    pub expr: Box<Expr>,
+    pub r#in: Token,
+    pub value: Box<Expr>,
 }
 
 /// A List expression represents a list of values.
-pub struct ListExpr<T> {
+pub struct ListNode<T> {
     pub bracket: Bracket<ThinVec<T>>,
 }
 
 /// A Case is a single case in a match node.
 pub struct Case {
     pub name: Ident,
-    pub fat_arrow: FatArrow,
-    pub body: Box<Expr>,
+    pub r#arrow: lexemes::FatArrow,
+    pub value: Box<Expr>,
 }
 
 /// A match expression is a case analysis on a value (dependent eliminator)
@@ -420,11 +406,11 @@ pub struct Case {
 /// }
 /// ```
 pub struct MatchExpr {
-    pub match_: Token,
-    pub typ: Ident,
-    pub with: Option<(With, ThinVec<Param>)>,
+    pub r#match: lexemes::Match,
+    pub typ: Option<Ident>,
+    pub with: Option<(lexemes::With, ThinVec<Param>)>,
     pub scrutinee: Box<Expr>,
-    pub body: Brace<ThinVec<Case>>,
+    pub cases: Brace<ThinVec<Case>>,
     pub motive: Option<Colon<Box<Expr>>>,
 }
 
@@ -438,7 +424,7 @@ pub struct MatchExpr {
 /// ```
 ///
 pub struct OpenExpr {
-    pub open: Token,
+    pub r#open: lexemes::Open,
     pub typ: Ident,
 
     /// The concrete syntax tree allows some more flexibility in order
@@ -459,9 +445,9 @@ pub enum AccessOperation {
 
 /// A node for accessing and modifying fields of a record.
 pub struct AccessExpr {
-    pub type_: Box<Expr>,
+    pub typ: Box<Expr>,
     pub expr: Box<Expr>,
-    pub fields: ThinVec<(Dot, Ident)>,
+    pub fields: ThinVec<(lexemes::Dot, Ident)>,
     pub operation: AccessOperation,
 }
 
@@ -476,11 +462,11 @@ pub enum ExprKind {
     Ann(Box<AnnExpr>),
     Binary(Box<BinaryExpr>),
     Do(Box<DoNode>),
-    If(Box<IfNode>),
-    Literal(Box<LiteralExpr>),
+    If(Box<IfExpr>),
+    Literal(Box<Literal>),
     Constructor(Box<ConstructorExpr>),
     Pair(Box<PairNode<Expr>>),
-    List(Box<ListExpr<Expr>>),
+    List(Box<ListNode<Expr>>),
     Subst(Box<SubstExpr>),
     Match(Box<MatchExpr>),
     Open(Box<OpenExpr>),
@@ -503,8 +489,8 @@ pub enum PatKind {
     Ident(Ident),
     Pair(PairNode<Pat>),
     Constructor(ConstructorPat),
-    List(ListExpr<Pat>),
-    Literal(LiteralExpr),
+    List(ListNode<Pat>),
+    Literal(Literal),
 }
 
 pub type Pat = Item<PatKind>;
@@ -544,7 +530,7 @@ pub struct Rule {
 pub struct Function {
     pub name: Ident,
     pub arguments: ThinVec<Argument>,
-    pub colon: Option<Colon<Expr>>,
+    pub return_typ: Option<Colon<Expr>>,
     pub value: Brace<Expr>,
 }
 

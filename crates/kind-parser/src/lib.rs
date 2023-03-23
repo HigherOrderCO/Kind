@@ -350,23 +350,23 @@ impl<'a> Parser<'a> {
         Ok(LetExpr {
             let_,
             name,
-            val: Equal(eq, Box::new(val)),
+            value: Equal(eq, Box::new(val)),
             semi,
             next: Box::new(next),
         })
     }
 
-    pub fn parse_if(&mut self) -> Result<IfNode> {
+    pub fn parse_if(&mut self) -> Result<IfExpr> {
         let if_ = self.expect_keyword("if")?;
         let cond = self.parse_expr()?;
         let then = self.parse_brace(|this| this.parse_boxed_expr())?;
         let else_ = self.expect_keyword("else")?;
         let else_cond = self.parse_brace(|this| this.parse_boxed_expr())?;
 
-        Ok(IfNode {
+        Ok(IfExpr {
             cond: Tokenized(if_, Box::new(cond)),
             then,
-            else_: Tokenized(else_, else_cond),
+            otherwise: Tokenized(else_, else_cond),
         })
     }
 
@@ -381,7 +381,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    pub fn parse_list<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<ListExpr<T>> {
+    pub fn parse_list<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<ListNode<T>> {
         let bracket = self.parse_bracket(&|this| {
             let mut vec = ThinVec::default();
 
@@ -399,35 +399,35 @@ impl<'a> Parser<'a> {
             Ok(vec)
         })?;
 
-        Ok(ListExpr { bracket })
+        Ok(ListNode { bracket })
     }
 
-    pub fn parse_literal(&mut self) -> Result<LiteralExpr> {
+    pub fn parse_literal(&mut self) -> Result<Literal> {
         let tkn = self.bump();
         match &tkn.data {
             TokenKind::Num60(n60) => {
                 let data = *n60;
-                Ok(LiteralExpr::U60(Tokenized(tkn, data)))
+                Ok(Literal::U60(Tokenized(tkn, data)))
             }
             TokenKind::Float(float) => {
                 let data = *float;
-                Ok(LiteralExpr::F60(Tokenized(tkn, data)))
+                Ok(Literal::F60(Tokenized(tkn, data)))
             }
             TokenKind::Num120(n120) => {
                 let data = *n120;
-                Ok(LiteralExpr::U120(Tokenized(tkn, data)))
+                Ok(Literal::U120(Tokenized(tkn, data)))
             }
             TokenKind::Nat(nat) => {
                 let data = nat.clone();
-                Ok(LiteralExpr::Nat(Tokenized(tkn, data)))
+                Ok(Literal::Nat(Tokenized(tkn, data)))
             }
             TokenKind::Str(str) => {
                 let data = str.clone();
-                Ok(LiteralExpr::String(Tokenized(tkn, data)))
+                Ok(Literal::String(Tokenized(tkn, data)))
             }
             TokenKind::Char(char) => {
                 let data = *char;
-                Ok(LiteralExpr::Char(Tokenized(tkn, data)))
+                Ok(Literal::Char(Tokenized(tkn, data)))
             }
             _ => self.unexpected(),
         }

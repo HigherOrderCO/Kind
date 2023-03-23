@@ -1,0 +1,24 @@
+use kind_lexer::tokens::Token;
+
+pub type Hash = Token;
+pub type Minus = Token;
+pub type Plus = Token;
+pub type Semi = Token;
+pub type RightArrow = Token;
+pub type Tilde = Token;
+pub type FatArrow = Token;
+pub type ColonColon = Token;
+pub type Let = Token;
+pub type Type = Token;
+pub type Help = Token;
+pub type With = Token;
+pub type Ask = Token;
+pub type Return = Token;
+pub type Sign = Token;
+pub type Specialize = Token;
+pub type Into = Token;
+pub type In = Token;
+pub type Match = Token;
+pub type Open = Token;
+pub type Do = Token;
+pub type Dot = Token;
