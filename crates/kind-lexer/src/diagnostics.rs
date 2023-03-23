@@ -6,7 +6,6 @@ use kind_span::Span;
 
 use crate::tokens::EncodeSequence;
 
-
 #[derive(Debug)]
 pub enum LexerDiagnosticKind {
     UnknownChar(char),
@@ -31,8 +30,8 @@ impl LexerDiagnosticKind {
     }
 }
 
-impl Into<Diagnostic> for LexerDiagnostic {
-    fn into(self) -> Diagnostic {
+impl From<LexerDiagnostic> for Diagnostic {
+    fn from(val: LexerDiagnostic) -> Self {
         todo!()
     }
 }

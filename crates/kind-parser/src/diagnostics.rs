@@ -1,12 +1,12 @@
 //! Diagnostics for the parser.
 
-use kind_lexer::tokens::Token;
 use kind_diagnostic::Diagnostic;
+use kind_lexer::tokens::Token;
 use kind_span::Span;
 
 #[derive(Debug)]
 pub enum SyntaxDiagnosticKind {
-    UnexpectedToken(Token)
+    UnexpectedToken(Token),
 }
 
 #[derive(Debug)]
@@ -21,8 +21,8 @@ impl SyntaxDiagnosticKind {
     }
 }
 
-impl Into<Diagnostic> for SyntaxDiagnostic {
-    fn into(self) -> Diagnostic {
+impl From<SyntaxDiagnostic> for Diagnostic {
+    fn from(val: SyntaxDiagnostic) -> Self {
         todo!()
     }
 }

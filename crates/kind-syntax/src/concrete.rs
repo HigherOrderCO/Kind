@@ -76,9 +76,9 @@ impl<T> Tokenized<T> {
     }
 }
 
-impl<T> Into<Item<T>> for Tokenized<T> {
-    fn into(self) -> Item<T> {
-        Item::new(self.span(), self.1)
+impl<T> From<Tokenized<T>> for Item<T> {
+    fn from(val: Tokenized<T>) -> Self {
+        Item::new(val.span(), val.1)
     }
 }
 
@@ -143,7 +143,7 @@ pub type Attribute = Item<AttributeKind>;
 /// A type binding is a type annotation for a variable.
 pub struct TypeBinding {
     pub name: Ident,
-    pub typ: Colon<Box<Expr>>
+    pub typ: Colon<Box<Expr>>,
 }
 
 pub type ArgumentBinding = Either<AngleBracket<Param>, Parenthesis<Param>>;
@@ -152,17 +152,17 @@ pub type ArgumentBinding = Either<AngleBracket<Param>, Parenthesis<Param>>;
 pub struct Argument {
     pub minus: Option<Minus>,
     pub plus: Option<Plus>,
-    pub binding: ArgumentBinding
+    pub binding: ArgumentBinding,
 }
 
 /// A lower cased variable.
 pub struct VarNode {
-    pub name: Ident
+    pub name: Ident,
 }
 
 /// A constructor node is the name of a global function.
 pub struct ConstructorNode {
-    pub name: QualifiedIdent
+    pub name: QualifiedIdent,
 }
 
 /// A param is a variable or a type binding.
@@ -174,7 +174,7 @@ pub struct ConstructorNode {
 /// ```
 pub enum Param {
     Named(Parenthesis<TypeBinding>),
-    Expr(Box<Expr>)
+    Expr(Box<Expr>),
 }
 
 /// A all node is a dependent function type.
@@ -182,7 +182,7 @@ pub struct AllNode {
     pub tilde: Tilde,
     pub param: Param,
     pub arrow: RightArrow,
-    pub body: Box<Expr>
+    pub body: Box<Expr>,
 }
 
 /// A sigma node is a dependent pair type. It express
@@ -191,7 +191,7 @@ pub struct AllNode {
 pub struct SigmaNode {
     pub param: Bracket<TypeBinding>,
     pub arrow: RightArrow,
-    pub body: Box<Expr>
+    pub body: Box<Expr>,
 }
 
 /// A lambda expression (an anonymous function).
@@ -199,14 +199,14 @@ pub struct LambdaNode {
     pub tilde: Option<Tilde>,
     pub param: Param,
     pub arrow: FatArrow,
-    pub body: Box<Expr>
+    pub body: Box<Expr>,
 }
 
 pub struct Rename(pub Ident, pub Equal<Box<Expr>>);
 
 pub enum NamedBinding {
     Named(Parenthesis<Rename>),
-    Expr(Box<Expr>)
+    Expr(Box<Expr>),
 }
 
 pub struct Binding {
@@ -217,7 +217,7 @@ pub struct Binding {
 /// Application of a function to a sequence of arguments.
 pub struct AppNode {
     pub fun: Box<Expr>,
-    pub arg: ThinVec<Binding>
+    pub arg: ThinVec<Binding>,
 }
 
 /// Let binding expression.
@@ -233,7 +233,7 @@ pub struct LetNode {
 pub struct AnnNode {
     pub val: Box<Expr>,
     pub colon: ColonColon,
-    pub typ: Box<Expr>
+    pub typ: Box<Expr>,
 }
 
 /// A literal is a constant value that can be used in the program.
@@ -254,7 +254,6 @@ pub enum TypeNode {
     TypeU120(Token),
     TypeF60(Token),
 }
-
 
 pub enum Operation {
     Add,
@@ -280,14 +279,14 @@ pub enum Operation {
 pub struct BinaryNode {
     pub left: Box<Expr>,
     pub op: Tokenized<Operation>,
-    pub right: Box<Expr>
+    pub right: Box<Expr>,
 }
 
 /// Monadic binding without a variable name.
 pub struct NextSttmNode {
     pub left: Box<Expr>,
     pub semi: Option<Semi>,
-    pub next: Box<Sttm>
+    pub next: Box<Sttm>,
 }
 
 /// An ask statement is a monadic binding inside the `do` notation
@@ -296,7 +295,7 @@ pub struct AskSttmNode {
     pub ask: Token,
     pub name: Ident,
     pub colon: Equal<Box<Expr>>,
-    pub next: Box<Sttm>
+    pub next: Box<Sttm>,
 }
 
 /// A let binding inside the `do` notation.
@@ -304,20 +303,20 @@ pub struct LetSttmNode {
     pub lett: Token,
     pub name: Ident,
     pub colon: Equal<Box<Expr>>,
-    pub next: Box<Sttm>
+    pub next: Box<Sttm>,
 }
 
 /// The "pure" function of the `A` monad.
 pub struct ReturnNode {
     pub ret: Token,
     pub value: Box<Expr>,
-    pub next: Box<Sttm>
+    pub next: Box<Sttm>,
 }
 
 /// An expression without the "pure" function.
 pub struct ReturnExprNode {
     pub value: Box<Expr>,
-    pub next: Box<Expr>
+    pub next: Box<Expr>,
 }
 
 /// An statement is a "single line" of code inside the
@@ -360,7 +359,7 @@ pub type Sttm = Item<SttmKind>;
 pub struct DoNode {
     pub do_: Token,
     pub typ: Option<Ident>,
-    pub body: Brace<Sttm>
+    pub body: Brace<Sttm>,
 }
 
 /// Conditional expression.
@@ -399,14 +398,14 @@ pub struct SubstNode {
 
 /// A ListNode represents a list of values.
 pub struct ListNode<T> {
-    pub bracket: Bracket<ThinVec<T>>
+    pub bracket: Bracket<ThinVec<T>>,
 }
 
 /// A Case is a single case in a match node.
 pub struct Case {
     pub name: Ident,
     pub fat_arrow: FatArrow,
-    pub body: Box<Expr>
+    pub body: Box<Expr>,
 }
 
 /// A MatchNode is a case analysis on a value (dependent eliminator)
@@ -461,13 +460,13 @@ pub struct AccessNode {
     pub type_: Box<Expr>,
     pub expr: Box<Expr>,
     pub fields: ThinVec<(Dot, Ident)>,
-    pub operation: AccessOperation
+    pub operation: AccessOperation,
 }
 
 /// A constructor node is the name of a global function.
 pub struct PatConstructorNode {
     pub name: QualifiedIdent,
-    pub args: ThinVec<Argument>
+    pub args: ThinVec<Argument>,
 }
 
 /// An expression is a piece of code that can be evaluated.
@@ -492,7 +491,7 @@ pub enum ExprKind {
     Access(Box<AccessNode>),
     Type(Box<TypeNode>),
     Paren(Box<Parenthesis<Expr>>),
-    Error
+    Error,
 }
 
 pub type Expr = Item<ExprKind>;
@@ -544,7 +543,7 @@ pub struct Function {
     pub name: Ident,
     pub arguments: ThinVec<Argument>,
     pub colon: Option<Colon<Expr>>,
-    pub value: Brace<Expr>
+    pub value: Brace<Expr>,
 }
 
 /// Commands are top level structures that will run at compile time.
@@ -598,7 +597,7 @@ pub enum TopLevelKind {
     Signature(Signature),
     Record(RecordDef),
     Type(TypeDef),
-    Rule(Rule)
+    Rule(Rule),
 }
 
 pub struct Attributed<T> {
@@ -614,5 +613,5 @@ pub type TopLevel = Attributed<Item<TopLevelKind>>;
 pub struct Module {
     pub shebang: Option<String>,
     pub items: ThinVec<TopLevel>,
-    pub eof: Token
+    pub eof: Token,
 }
