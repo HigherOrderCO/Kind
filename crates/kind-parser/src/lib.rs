@@ -7,6 +7,7 @@ use kind_lexer::Lexer;
 use kind_span::Span;
 use kind_syntax::concrete::*;
 
+use kind_syntax::lexemes;
 use thin_vec::ThinVec;
 
 mod diagnostics;
@@ -136,14 +137,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_any_name(&mut self) -> Result<Ident> {
+    pub fn parse_any_name(&mut self) -> Result<lexemes::Ident> {
         if let TokenKind::UpperId(str) | TokenKind::LowerId(str) = &self.get().data {
             let str = str.clone();
             let tkn = self.bump();
             let span = tkn.span.clone();
-            Ok(Ident(Item {
+            Ok(lexemes::Ident(lexemes::Item {
                 span,
-                data: Tokenized(tkn, str),
+                data: lexemes::Tokenized(tkn, str),
             }))
         } else {
             self.unexpected()
@@ -154,16 +155,19 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_bracket<T>(
         &mut self,
         fun: &dyn Fn(&mut Self) -> Result<T>,
-    ) -> Result<Bracket<T>> {
-        Ok(Bracket(
+    ) -> Result<lexemes::Bracket<T>> {
+        Ok(lexemes::Bracket(
             self.expect(TokenKind::LBracket)?,
             fun(self)?,
             self.expect(TokenKind::RBracket)?,
         ))
     }
 
-    pub(crate) fn parse_brace<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Brace<T>> {
-        Ok(Brace(
+    pub(crate) fn parse_brace<T>(
+        &mut self,
+        fun: fn(&mut Self) -> Result<T>,
+    ) -> Result<lexemes::Brace<T>> {
+        Ok(lexemes::Brace(
             self.expect(TokenKind::LBrace)?,
             fun(self)?,
             self.expect(TokenKind::RBrace)?,
@@ -171,8 +175,11 @@ impl<'a> Parser<'a> {
     }
 
     /// Parses parenthesis around another parser defined in the argument `fun`.
-    pub(crate) fn parse_paren<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Paren<T>> {
-        Ok(Paren(
+    pub(crate) fn parse_paren<T>(
+        &mut self,
+        fun: fn(&mut Self) -> Result<T>,
+    ) -> Result<lexemes::Paren<T>> {
+        Ok(lexemes::Paren(
             self.expect(TokenKind::LPar)?,
             fun(self)?,
             self.expect(TokenKind::RPar)?,
@@ -196,21 +203,21 @@ impl<'a> Parser<'a> {
         Ok(vec)
     }
 
-    pub fn parse_string(&mut self) -> Result<Tokenized<String>> {
+    pub fn parse_string(&mut self) -> Result<lexemes::Tokenized<String>> {
         if let TokenKind::Str(str) = &self.get().data {
             let str = str.clone();
             let tkn = self.bump();
-            Ok(Tokenized(tkn, str))
+            Ok(lexemes::Tokenized(tkn, str))
         } else {
             self.unexpected()
         }
     }
 
-    pub fn parse_u60(&mut self) -> Result<Tokenized<u64>> {
+    pub fn parse_u60(&mut self) -> Result<lexemes::Tokenized<u64>> {
         if let TokenKind::Num60(n) = &self.get().data {
             let n = *n;
             let tkn = self.bump();
-            Ok(Tokenized(tkn, n))
+            Ok(lexemes::Tokenized(tkn, n))
         } else {
             self.unexpected()
         }
@@ -221,21 +228,33 @@ impl<'a> Parser<'a> {
             TokenKind::UpperId(_) | TokenKind::LowerId(_) => {
                 let name = self.parse_any_name()?;
                 let span = name.0.span.clone();
-                Ok(Item::new(span, AttributeStyleKind::Identifier(name)))
+                Ok(lexemes::Item::new(
+                    span,
+                    AttributeStyleKind::Identifier(name),
+                ))
             }
             TokenKind::Str(_) => {
                 let token = self.parse_string()?;
-                Ok(Item::new(token.span(), AttributeStyleKind::String(token)))
+                Ok(lexemes::Item::new(
+                    token.span(),
+                    AttributeStyleKind::String(token),
+                ))
             }
             TokenKind::Num60(_) => {
                 let token = self.parse_u60()?;
-                Ok(Item::new(token.span(), AttributeStyleKind::Number(token)))
+                Ok(lexemes::Item::new(
+                    token.span(),
+                    AttributeStyleKind::Number(token),
+                ))
             }
             TokenKind::LBracket => {
                 let bracket = self.parse_bracket(&|this| {
                     this.parse_separated_by_comma(|this| this.parse_attribute_style())
                 })?;
-                Ok(Item::new(bracket.span(), AttributeStyleKind::List(bracket)))
+                Ok(lexemes::Item::new(
+                    bracket.span(),
+                    AttributeStyleKind::List(bracket),
+                ))
             }
             _ => self.unexpected(),
         }
@@ -252,7 +271,7 @@ impl<'a> Parser<'a> {
         })?;
 
         let value = self.try_with(|this| {
-            Ok(Equal(
+            Ok(lexemes::Equal(
                 this.expect(TokenKind::Eq)?,
                 this.parse_attribute_style()?,
             ))
@@ -280,7 +299,7 @@ impl<'a> Parser<'a> {
         let ty = self.parse_expr()?;
         Ok(TypeBinding {
             name,
-            typ: Colon(colon, Box::new(ty)),
+            typ: lexemes::Colon(colon, Box::new(ty)),
         })
     }
 
@@ -314,7 +333,7 @@ impl<'a> Parser<'a> {
                 let name = this.parse_any_name()?;
                 let eq = this.expect(TokenKind::Eq)?;
                 let expr = this.parse_expr()?;
-                Ok(Rename(name, Equal(eq, Box::new(expr))))
+                Ok(Rename(name, lexemes::Equal(eq, Box::new(expr))))
             })?;
 
             NamedBinding::Named(rename)
@@ -325,13 +344,13 @@ impl<'a> Parser<'a> {
         Ok(Binding { tilde, value })
     }
 
-    pub fn parse_lower_id(&mut self) -> Result<Ident> {
+    pub fn parse_lower_id(&mut self) -> Result<lexemes::Ident> {
         if let TokenKind::LowerId(name) = &self.get().data {
             let name = name.clone();
             let tkn = self.bump();
-            Ok(Ident(Item {
+            Ok(lexemes::Ident(lexemes::Item {
                 span: tkn.span.clone(),
-                data: Tokenized(tkn, name),
+                data: lexemes::Tokenized(tkn, name),
             }))
         } else {
             // TODO: Improve this error message for upper cased identifiers.
@@ -340,7 +359,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_let(&mut self) -> Result<LetExpr> {
-        let let_ = self.expect(TokenKind::Let)?;
+        let r#let = self.expect(TokenKind::Let)?;
         let name = self.parse_lower_id()?;
         let eq = self.expect(TokenKind::Eq)?;
         let val = self.parse_expr()?;
@@ -348,9 +367,9 @@ impl<'a> Parser<'a> {
         let next = self.parse_expr()?;
 
         Ok(LetExpr {
-            let_,
+            r#let,
             name,
-            value: Equal(eq, Box::new(val)),
+            value: lexemes::Equal(eq, Box::new(val)),
             semi,
             next: Box::new(next),
         })
@@ -364,18 +383,18 @@ impl<'a> Parser<'a> {
         let else_cond = self.parse_brace(|this| this.parse_boxed_expr())?;
 
         Ok(IfExpr {
-            cond: Tokenized(if_, Box::new(cond)),
+            cond: lexemes::Tokenized(if_, Box::new(cond)),
             then,
-            otherwise: Tokenized(else_, else_cond),
+            otherwise: lexemes::Tokenized(else_, else_cond),
         })
     }
 
     pub fn parse_pair<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<PairNode<T>> {
-        let dollar = self.expect(TokenKind::Dollar)?;
+        let sign = self.expect(TokenKind::Sign)?;
         let left = fun(self)?;
         let right = fun(self)?;
         Ok(PairNode {
-            dollar,
+            sign,
             left: Box::new(left),
             right: Box::new(right),
         })
@@ -407,27 +426,27 @@ impl<'a> Parser<'a> {
         match &tkn.data {
             TokenKind::Num60(n60) => {
                 let data = *n60;
-                Ok(Literal::U60(Tokenized(tkn, data)))
+                Ok(Literal::U60(lexemes::Tokenized(tkn, data)))
             }
             TokenKind::Float(float) => {
                 let data = *float;
-                Ok(Literal::F60(Tokenized(tkn, data)))
+                Ok(Literal::F60(lexemes::Tokenized(tkn, data)))
             }
             TokenKind::Num120(n120) => {
                 let data = *n120;
-                Ok(Literal::U120(Tokenized(tkn, data)))
+                Ok(Literal::U120(lexemes::Tokenized(tkn, data)))
             }
             TokenKind::Nat(nat) => {
                 let data = nat.clone();
-                Ok(Literal::Nat(Tokenized(tkn, data)))
+                Ok(Literal::Nat(lexemes::Tokenized(tkn, data)))
             }
             TokenKind::Str(str) => {
                 let data = str.clone();
-                Ok(Literal::String(Tokenized(tkn, data)))
+                Ok(Literal::String(lexemes::Tokenized(tkn, data)))
             }
             TokenKind::Char(char) => {
                 let data = *char;
-                Ok(Literal::Char(Tokenized(tkn, data)))
+                Ok(Literal::Char(lexemes::Tokenized(tkn, data)))
             }
             _ => self.unexpected(),
         }
@@ -442,7 +461,7 @@ impl<'a> Parser<'a> {
             TokenKind::Help(x) => {
                 let data = x.clone();
                 let tkn = self.bump();
-                Ok(TypeExpr::Help(Tokenized(tkn, data)))
+                Ok(TypeExpr::Help(lexemes::Tokenized(tkn, data)))
             }
             _ => self.unexpected(),
         }
@@ -467,7 +486,7 @@ impl<'a> Parser<'a> {
         let start = self.get().span.clone();
         let kind = self.parse_atom_kind()?;
         let end = self.prev_span.clone();
-        Ok(Item {
+        Ok(lexemes::Item {
             data: kind,
             span: start.mix(&end),
         })

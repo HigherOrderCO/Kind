@@ -405,7 +405,7 @@ impl<'a> Lexer<'a> {
             '{' => self.make_token(LBrace),
             '}' => self.make_token(RBrace),
             ';' => self.make_token(Semi),
-            '$' => self.make_token(Dollar),
+            '$' => self.make_token(Sign),
             ',' => self.make_token(Comma),
             '~' => self.make_token(Tilde),
             '*' => self.make_token(Star),
