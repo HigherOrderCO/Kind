@@ -1,17 +1,17 @@
 [package]
-name = "kind-report"
-version = "0.1.1"
+description = "Report module for the kind compiler"
 edition = "2021"
 license = "MIT"
-description = "Report module for the kind compiler"
+name = "kind-report"
+version = "0.1.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-span = { path = "../kind-span", version = "0.1.1" }
+kind-span = {path = "../kind-span", version = "0.1.2"}
 
+fxhash = "0.2.1"
+pathdiff = "0.2.1"
+termsize = "0.1"
 unicode-width = "0.1.10"
 yansi = "0.5.1"
-pathdiff = "0.2.1"
-fxhash = "0.2.1"
-termsize = "0.1"
