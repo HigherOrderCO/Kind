@@ -155,13 +155,15 @@ pub struct Argument {
     pub binding: ArgumentBinding,
 }
 
-/// A lower cased variable.
-pub struct VarNode {
+/// A local expression is a reference atom to a local declaration.
+/// * Always starts with a lower case letter.
+pub struct LocalExpr {
     pub name: Ident,
 }
 
-/// A constructor node is the name of a global function.
-pub struct ConstructorNode {
+/// A constructor expression is a reference atom to a top level declaration.
+/// * Always starts with an upper case letter.
+pub struct ConstructorExpr {
     pub name: QualifiedIdent,
 }
 
@@ -178,7 +180,7 @@ pub enum Param {
 }
 
 /// A all node is a dependent function type.
-pub struct AllNode {
+pub struct PiExpr {
     pub tilde: Tilde,
     pub param: Param,
     pub arrow: RightArrow,
@@ -188,14 +190,14 @@ pub struct AllNode {
 /// A sigma node is a dependent pair type. It express
 /// the dependency of the type of the second element
 /// of the pair on the first one.
-pub struct SigmaNode {
+pub struct SigmaExpr {
     pub param: Bracket<TypeBinding>,
     pub arrow: RightArrow,
     pub body: Box<Expr>,
 }
 
 /// A lambda expression (an anonymous function).
-pub struct LambdaNode {
+pub struct LambdaExpr {
     pub tilde: Option<Tilde>,
     pub param: Param,
     pub arrow: FatArrow,
@@ -215,13 +217,13 @@ pub struct Binding {
 }
 
 /// Application of a function to a sequence of arguments.
-pub struct AppNode {
+pub struct AppExpr {
     pub fun: Box<Expr>,
     pub arg: ThinVec<Binding>,
 }
 
 /// Let binding expression.
-pub struct LetNode {
+pub struct LetExpr {
     pub let_: Let,
     pub name: Ident,
     pub val: Equal<Box<Expr>>,
@@ -230,14 +232,14 @@ pub struct LetNode {
 }
 
 /// A type annotation.
-pub struct AnnNode {
+pub struct AnnExpr {
     pub val: Box<Expr>,
     pub colon: ColonColon,
     pub typ: Box<Expr>,
 }
 
 /// A literal is a constant value that can be used in the program.
-pub enum LiteralNode {
+pub enum LiteralExpr {
     U60(Tokenized<u64>),
     F60(Tokenized<f64>),
     U120(Tokenized<u128>),
@@ -247,7 +249,7 @@ pub enum LiteralNode {
 }
 
 // TODO: Rename
-pub enum TypeNode {
+pub enum TypeExpr {
     Help(Tokenized<String>),
     Type(Type),
     TypeU60(Token),
@@ -276,45 +278,45 @@ pub enum Operation {
 }
 
 /// A binary operation.
-pub struct BinaryNode {
+pub struct BinaryExpr {
     pub left: Box<Expr>,
     pub op: Tokenized<Operation>,
     pub right: Box<Expr>,
 }
 
 /// Monadic binding without a variable name.
-pub struct NextSttmNode {
+pub struct NextStmt {
     pub left: Box<Expr>,
     pub semi: Option<Semi>,
-    pub next: Box<Sttm>,
+    pub next: Box<Stmt>,
 }
 
 /// An ask statement is a monadic binding inside the `do` notation
 /// with a name.
-pub struct AskSttmNode {
+pub struct AskStmt {
     pub ask: Token,
     pub name: Ident,
     pub colon: Equal<Box<Expr>>,
-    pub next: Box<Sttm>,
+    pub next: Box<Stmt>,
 }
 
 /// A let binding inside the `do` notation.
-pub struct LetSttmNode {
+pub struct LetStmt {
     pub lett: Token,
     pub name: Ident,
     pub colon: Equal<Box<Expr>>,
-    pub next: Box<Sttm>,
+    pub next: Box<Stmt>,
 }
 
 /// The "pure" function of the `A` monad.
-pub struct ReturnNode {
+pub struct ReturnStmt {
     pub ret: Token,
     pub value: Box<Expr>,
-    pub next: Box<Sttm>,
+    pub next: Box<Stmt>,
 }
 
 /// An expression without the "pure" function.
-pub struct ReturnExprNode {
+pub struct ReturnExprStmt {
     pub value: Box<Expr>,
     pub next: Box<Expr>,
 }
@@ -331,20 +333,20 @@ pub struct ReturnExprNode {
 ///    return a + 2   // The "pure" functoin of the `A` monad
 /// }
 /// ```
-pub enum SttmKind {
+pub enum StmtKind {
     /// Monadic binding without a variable name.
-    Next(NextSttmNode),
+    Next(NextStmt),
     /// Monadic binding with a variable name.
-    Ask(AskSttmNode),
+    Ask(AskStmt),
     /// A simple let expression.
-    Let(LetSttmNode),
+    Let(LetStmt),
     /// The "pure" function of the `A` monad.
-    Return(ReturnNode),
+    Return(ReturnStmt),
     /// An expression without the "pure" function.
-    RetExpr(ReturnExprNode),
+    RetExpr(ReturnExprStmt),
 }
 
-pub type Sttm = Item<SttmKind>;
+pub type Stmt = Item<StmtKind>;
 
 /// A DoNode is similar to the haskell do notation.
 /// i.e.
@@ -359,7 +361,7 @@ pub type Sttm = Item<SttmKind>;
 pub struct DoNode {
     pub do_: Token,
     pub typ: Option<Ident>,
-    pub body: Brace<Sttm>,
+    pub body: Brace<Stmt>,
 }
 
 /// Conditional expression.
@@ -369,7 +371,7 @@ pub struct IfNode {
     pub else_: Tokenized<Brace<Box<Expr>>>,
 }
 
-/// A PairNode represents a dependent pair. i.e.
+/// A Pair node represents a dependent pair. i.e.
 ///
 /// ```kind
 /// $ a b
@@ -380,13 +382,13 @@ pub struct PairNode<T> {
     pub right: Box<T>,
 }
 
-/// A substitution node is a substitution of a value inside the context.
+/// A substitution expression is a substitution of a value inside the context.
 /// i.e.
 ///
 /// ```kind
 /// specialize a into #0 in a
 /// ```
-pub struct SubstNode {
+pub struct SubstExpr {
     pub specialize: Token,
     pub name: Ident,
     pub into: Token,
@@ -396,8 +398,8 @@ pub struct SubstNode {
     pub expr: Box<Expr>,
 }
 
-/// A ListNode represents a list of values.
-pub struct ListNode<T> {
+/// A List expression represents a list of values.
+pub struct ListExpr<T> {
     pub bracket: Bracket<ThinVec<T>>,
 }
 
@@ -408,7 +410,7 @@ pub struct Case {
     pub body: Box<Expr>,
 }
 
-/// A MatchNode is a case analysis on a value (dependent eliminator)
+/// A match expression is a case analysis on a value (dependent eliminator)
 /// i.e.
 ///
 /// ```kind
@@ -417,7 +419,7 @@ pub struct Case {
 ///     cons => a.head
 /// }
 /// ```
-pub struct MatchNode {
+pub struct MatchExpr {
     pub match_: Token,
     pub typ: Ident,
     pub with: Option<(With, ThinVec<Param>)>,
@@ -435,7 +437,7 @@ pub struct MatchNode {
 /// a.head
 /// ```
 ///
-pub struct OpenNode {
+pub struct OpenExpr {
     pub open: Token,
     pub typ: Ident,
 
@@ -444,7 +446,7 @@ pub struct OpenNode {
     /// but the parser will allow any expression.
     pub name: Box<Expr>,
     pub motive: Option<Colon<Box<Expr>>>,
-    pub body: Brace<ThinVec<Sttm>>,
+    pub body: Brace<ThinVec<Stmt>>,
 }
 
 /// A node that express the operation after accessing fields
@@ -456,53 +458,53 @@ pub enum AccessOperation {
 }
 
 /// A node for accessing and modifying fields of a record.
-pub struct AccessNode {
+pub struct AccessExpr {
     pub type_: Box<Expr>,
     pub expr: Box<Expr>,
     pub fields: ThinVec<(Dot, Ident)>,
     pub operation: AccessOperation,
 }
 
-/// A constructor node is the name of a global function.
-pub struct PatConstructorNode {
-    pub name: QualifiedIdent,
-    pub args: ThinVec<Argument>,
-}
-
 /// An expression is a piece of code that can be evaluated.
 pub enum ExprKind {
-    Var(Box<VarNode>),
-    All(Box<AllNode>),
-    Sigma(Box<SigmaNode>),
-    Lambda(Box<LambdaNode>),
-    App(Box<AppNode>),
-    Let(Box<LetNode>),
-    Ann(Box<AnnNode>),
-    Binary(Box<BinaryNode>),
+    Local(Box<LocalExpr>),
+    Pi(Box<PiExpr>),
+    Sigma(Box<SigmaExpr>),
+    Lambda(Box<LambdaExpr>),
+    App(Box<AppExpr>),
+    Let(Box<LetExpr>),
+    Ann(Box<AnnExpr>),
+    Binary(Box<BinaryExpr>),
     Do(Box<DoNode>),
     If(Box<IfNode>),
-    Literal(Box<LiteralNode>),
-    Constructor(Box<ConstructorNode>),
+    Literal(Box<LiteralExpr>),
+    Constructor(Box<ConstructorExpr>),
     Pair(Box<PairNode<Expr>>),
-    List(Box<ListNode<Expr>>),
-    Subst(Box<SubstNode>),
-    Match(Box<MatchNode>),
-    Open(Box<OpenNode>),
-    Access(Box<AccessNode>),
-    Type(Box<TypeNode>),
+    List(Box<ListExpr<Expr>>),
+    Subst(Box<SubstExpr>),
+    Match(Box<MatchExpr>),
+    Open(Box<OpenExpr>),
+    Access(Box<AccessExpr>),
+    Type(Box<TypeExpr>),
     Paren(Box<Parenthesis<Expr>>),
     Error,
 }
 
 pub type Expr = Item<ExprKind>;
 
+/// A constructor node is the name of a global function.
+pub struct ConstructorPat {
+    pub name: QualifiedIdent,
+    pub args: ThinVec<Argument>,
+}
+
 /// A pattern is part of a rule. It is a structure that matches an expression.
 pub enum PatKind {
     Ident(Ident),
     Pair(PairNode<Pat>),
-    Constructor(ConstructorNode),
-    List(ListNode<Pat>),
-    Literal(LiteralNode),
+    Constructor(ConstructorPat),
+    List(ListExpr<Pat>),
+    Literal(LiteralExpr),
 }
 
 pub type Pat = Item<PatKind>;

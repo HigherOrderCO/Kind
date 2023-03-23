@@ -272,9 +272,9 @@ impl<'a> Parser<'a> {
         })
     }
 
-    pub fn parse_var(&mut self) -> Result<VarNode> {
+    pub fn parse_var(&mut self) -> Result<LocalExpr> {
         let name = self.parse_any_name()?;
-        Ok(VarNode { name })
+        Ok(LocalExpr { name })
     }
 
     pub fn parse_type_binding(&mut self) -> Result<TypeBinding> {
@@ -342,7 +342,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_let(&mut self) -> Result<LetNode> {
+    pub fn parse_let(&mut self) -> Result<LetExpr> {
         let let_ = self.expect(TokenKind::Let)?;
         let name = self.parse_lower_id()?;
         let eq = self.expect(TokenKind::Eq)?;
@@ -350,7 +350,7 @@ impl<'a> Parser<'a> {
         let semi = self.eat(TokenKind::Semi);
         let next = self.parse_expr()?;
 
-        Ok(LetNode {
+        Ok(LetExpr {
             let_,
             name,
             val: Equal(eq, Box::new(val)),
@@ -384,7 +384,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    pub fn parse_list<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<ListNode<T>> {
+    pub fn parse_list<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<ListExpr<T>> {
         let bracket = self.parse_bracket(&|this| {
             let mut vec = ThinVec::default();
 
@@ -402,50 +402,50 @@ impl<'a> Parser<'a> {
             Ok(vec)
         })?;
 
-        Ok(ListNode { bracket })
+        Ok(ListExpr { bracket })
     }
 
-    pub fn parse_literal(&mut self) -> Result<LiteralNode> {
+    pub fn parse_literal(&mut self) -> Result<LiteralExpr> {
         let tkn = self.bump();
         match &tkn.data {
             TokenKind::Num60(n60) => {
                 let data = *n60;
-                Ok(LiteralNode::U60(Tokenized(tkn, data)))
+                Ok(LiteralExpr::U60(Tokenized(tkn, data)))
             }
             TokenKind::Float(float) => {
                 let data = *float;
-                Ok(LiteralNode::F60(Tokenized(tkn, data)))
+                Ok(LiteralExpr::F60(Tokenized(tkn, data)))
             }
             TokenKind::Num120(n120) => {
                 let data = *n120;
-                Ok(LiteralNode::U120(Tokenized(tkn, data)))
+                Ok(LiteralExpr::U120(Tokenized(tkn, data)))
             }
             TokenKind::Nat(nat) => {
                 let data = nat.clone();
-                Ok(LiteralNode::Nat(Tokenized(tkn, data)))
+                Ok(LiteralExpr::Nat(Tokenized(tkn, data)))
             }
             TokenKind::Str(str) => {
                 let data = str.clone();
-                Ok(LiteralNode::String(Tokenized(tkn, data)))
+                Ok(LiteralExpr::String(Tokenized(tkn, data)))
             }
             TokenKind::Char(char) => {
                 let data = *char;
-                Ok(LiteralNode::Char(Tokenized(tkn, data)))
+                Ok(LiteralExpr::Char(Tokenized(tkn, data)))
             }
             _ => self.unexpected(),
         }
     }
 
-    pub fn parse_atom_type(&mut self) -> Result<TypeNode> {
+    pub fn parse_atom_type(&mut self) -> Result<TypeExpr> {
         match &self.get().data {
-            TokenKind::U => Ok(TypeNode::Type(self.bump())),
-            TokenKind::U60 => Ok(TypeNode::TypeU60(self.bump())),
-            TokenKind::U120 => Ok(TypeNode::TypeU120(self.bump())),
-            TokenKind::F60 => Ok(TypeNode::TypeF60(self.bump())),
+            TokenKind::U => Ok(TypeExpr::Type(self.bump())),
+            TokenKind::U60 => Ok(TypeExpr::TypeU60(self.bump())),
+            TokenKind::U120 => Ok(TypeExpr::TypeU120(self.bump())),
+            TokenKind::F60 => Ok(TypeExpr::TypeF60(self.bump())),
             TokenKind::Help(x) => {
                 let data = x.clone();
                 let tkn = self.bump();
-                Ok(TypeNode::Help(Tokenized(tkn, data)))
+                Ok(TypeExpr::Help(Tokenized(tkn, data)))
             }
             _ => self.unexpected(),
         }
@@ -453,7 +453,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_atom_kind(&mut self) -> Result<ExprKind> {
         match &self.get().data {
-            TokenKind::LowerId(_) => Ok(ExprKind::Var(Box::new(self.parse_var()?))),
+            TokenKind::LowerId(_) => Ok(ExprKind::Local(Box::new(self.parse_var()?))),
             TokenKind::LPar => {
                 let paren = self.parse_paren(|this| this.parse_expr())?;
                 Ok(ExprKind::Paren(Box::new(paren)))
