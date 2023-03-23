@@ -32,7 +32,7 @@ pub enum Either<A, B> {
 
 // Compounds
 #[derive(Debug)]
-pub struct Parenthesis<T>(pub Token, pub T, pub Token);
+pub struct Paren<T>(pub Token, pub T, pub Token);
 
 #[derive(Debug)]
 pub struct Bracket<T>(pub Token, pub T, pub Token);
@@ -52,7 +52,7 @@ pub struct Colon<T>(pub Token, pub T);
 #[derive(Debug)]
 pub struct Tokenized<T>(pub Token, pub T);
 
-impl<T> Parenthesis<T> {
+impl<T> Paren<T> {
     pub fn span(&self) -> Span {
         self.0.span.mix(&self.2.span)
     }
@@ -146,7 +146,7 @@ pub struct TypeBinding {
     pub typ: Colon<Box<Expr>>,
 }
 
-pub type ArgumentBinding = Either<AngleBracket<Param>, Parenthesis<Param>>;
+pub type ArgumentBinding = Either<AngleBracket<Param>, Paren<Param>>;
 
 /// An argument of a type signature.
 pub struct Argument {
@@ -175,7 +175,7 @@ pub struct ConstructorExpr {
 /// x
 /// ```
 pub enum Param {
-    Named(Parenthesis<TypeBinding>),
+    Named(Paren<TypeBinding>),
     Expr(Box<Expr>),
 }
 
@@ -207,7 +207,7 @@ pub struct LambdaExpr {
 pub struct Rename(pub Ident, pub Equal<Box<Expr>>);
 
 pub enum NamedBinding {
-    Named(Parenthesis<Rename>),
+    Named(Paren<Rename>),
     Expr(Box<Expr>),
 }
 
@@ -486,7 +486,7 @@ pub enum ExprKind {
     Open(Box<OpenExpr>),
     Access(Box<AccessExpr>),
     Type(Box<TypeExpr>),
-    Paren(Box<Parenthesis<Expr>>),
+    Paren(Box<Paren<Expr>>),
     Error,
 }
 

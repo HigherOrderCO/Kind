@@ -171,11 +171,8 @@ impl<'a> Parser<'a> {
     }
 
     /// Parses parenthesis around another parser defined in the argument `fun`.
-    pub(crate) fn parse_paren<T>(
-        &mut self,
-        fun: fn(&mut Self) -> Result<T>,
-    ) -> Result<Parenthesis<T>> {
-        Ok(Parenthesis(
+    pub(crate) fn parse_paren<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Paren<T>> {
+        Ok(Paren(
             self.expect(TokenKind::LPar)?,
             fun(self)?,
             self.expect(TokenKind::RPar)?,
