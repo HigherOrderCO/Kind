@@ -38,7 +38,7 @@ pub enum TokenKind {
     /// "=>"
     FatArrow,
     /// "$"
-    Dollar,
+    Sign,
     /// ","
     Comma,
     /// "->"
@@ -129,7 +129,7 @@ pub enum TokenKind {
 
 /// WARNING: Can't compare TokenKind properly because of the f64.
 /// NaNs sometimes cause the equality to fail.
-impl Eq for TokenKind { }
+impl Eq for TokenKind {}
 
 /// A comment token that can be attached to any other token.
 #[derive(Debug, Clone)]
