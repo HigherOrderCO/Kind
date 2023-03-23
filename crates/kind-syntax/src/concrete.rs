@@ -307,7 +307,7 @@ pub struct ListNode<T> {
 }
 
 /// A Case is a single case in a match node.
-pub struct Case {
+pub struct CaseNode {
     pub name: Ident,
     pub r#arrow: lexemes::FatArrow,
     pub value: Box<Expr>,
@@ -327,7 +327,7 @@ pub struct MatchExpr {
     pub typ: Option<Ident>,
     pub with: Option<(lexemes::With, ThinVec<Param>)>,
     pub scrutinee: Box<Expr>,
-    pub cases: Brace<ThinVec<Case>>,
+    pub cases: Brace<ThinVec<CaseNode>>,
     pub motive: Option<Colon<Box<Expr>>>,
 }
 
