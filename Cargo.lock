@@ -221,6 +221,8 @@ name = "kind-query"
 version = "0.1.0"
 dependencies = [
  "fxhash",
+ "kind-span",
+ "kind-syntax",
  "petgraph",
 ]
 
