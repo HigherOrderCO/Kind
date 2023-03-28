@@ -294,7 +294,7 @@ pub struct PairNode<T> {
 pub struct SubstExpr {
     pub r#specialize: lexemes::Specialize,
     pub name: Ident,
-    pub r#into: lexemes::Into,
+    pub r#into: Token,
     pub r#hash: lexemes::Hash,
     pub num: u64,
     pub r#in: Token,

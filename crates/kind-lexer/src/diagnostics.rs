@@ -31,7 +31,7 @@ impl LexerDiagnosticKind {
 }
 
 impl From<LexerDiagnostic> for Diagnostic {
-    fn from(val: LexerDiagnostic) -> Self {
+    fn from(_val: LexerDiagnostic) -> Self {
         todo!()
     }
 }
