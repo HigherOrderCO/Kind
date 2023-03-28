@@ -259,7 +259,7 @@ impl<'a> Parser<'a> {
             }
             TokenKind::LBracket => {
                 let bracket = self.parse_bracket(&|this| {
-                    this.parse_separated_by_comma(Parser::parse_attribute_style)
+                    this.parse_separated_by_comma(Self::parse_attribute_style)
                 })?;
                 Ok(Item::new(bracket.span(), AttributeStyleKind::List(bracket)))
             }
