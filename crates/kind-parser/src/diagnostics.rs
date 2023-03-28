@@ -22,7 +22,7 @@ impl SyntaxDiagnosticKind {
 }
 
 impl From<SyntaxDiagnostic> for Diagnostic {
-    fn from(val: SyntaxDiagnostic) -> Self {
+    fn from(_val: SyntaxDiagnostic) -> Self {
         todo!()
     }
 }

@@ -1,14 +1,14 @@
 use std::collections::VecDeque;
 
 use diagnostics::{SyntaxDiagnostic, SyntaxDiagnosticKind};
+use thin_vec::ThinVec;
+
 use kind_diagnostic::Diagnostic;
 use kind_lexer::tokens::{Token, TokenKind};
 use kind_lexer::Lexer;
 use kind_span::Span;
 use kind_syntax::concrete::*;
-
-use kind_syntax::lexemes;
-use thin_vec::ThinVec;
+use kind_syntax::lexemes::*;
 
 mod diagnostics;
 
@@ -111,10 +111,27 @@ impl<'a> Parser<'a> {
         Err(SyntaxDiagnosticKind::UnexpectedToken(tkn).with(span))
     }
 
+    pub(crate) fn span(&mut self) -> Span {
+        self.get().span.clone()
+    }
+
+    pub(crate) fn last_span(&mut self) -> Span {
+        self.prev_span.clone()
+    }
+
     /// Checks if the next token is the expected one and returns the consumed token.
-    pub fn expect(&mut self, expect: TokenKind) -> Result<Token> {
+    pub(crate) fn expect(&mut self, expect: TokenKind) -> Result<Token> {
         if self.is(expect) {
             Ok(self.bump())
+        } else {
+            self.unexpected()
+        }
+    }
+
+    pub(crate) fn expect_match<U>(&mut self, expect: fn(&Token) -> Option<U>) -> Result<U> {
+        if let Some(token) = expect(self.get()) {
+            self.bump();
+            Ok(token)
         } else {
             self.unexpected()
         }
@@ -137,14 +154,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_any_name(&mut self) -> Result<lexemes::Ident> {
+    pub fn parse_any_name(&mut self) -> Result<Ident> {
         if let TokenKind::UpperId(str) | TokenKind::LowerId(str) = &self.get().data {
             let str = str.clone();
             let tkn = self.bump();
             let span = tkn.span.clone();
-            Ok(lexemes::Ident(lexemes::Item {
+            Ok(Ident(Item {
                 span,
-                data: lexemes::Tokenized(tkn, str),
+                data: Tokenized(tkn, str),
             }))
         } else {
             self.unexpected()
@@ -155,19 +172,16 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_bracket<T>(
         &mut self,
         fun: &dyn Fn(&mut Self) -> Result<T>,
-    ) -> Result<lexemes::Bracket<T>> {
-        Ok(lexemes::Bracket(
+    ) -> Result<Bracket<T>> {
+        Ok(Bracket(
             self.expect(TokenKind::LBracket)?,
             fun(self)?,
             self.expect(TokenKind::RBracket)?,
         ))
     }
 
-    pub(crate) fn parse_brace<T>(
-        &mut self,
-        fun: fn(&mut Self) -> Result<T>,
-    ) -> Result<lexemes::Brace<T>> {
-        Ok(lexemes::Brace(
+    pub(crate) fn parse_brace<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Brace<T>> {
+        Ok(Brace(
             self.expect(TokenKind::LBrace)?,
             fun(self)?,
             self.expect(TokenKind::RBrace)?,
@@ -175,11 +189,8 @@ impl<'a> Parser<'a> {
     }
 
     /// Parses parenthesis around another parser defined in the argument `fun`.
-    pub(crate) fn parse_paren<T>(
-        &mut self,
-        fun: fn(&mut Self) -> Result<T>,
-    ) -> Result<lexemes::Paren<T>> {
-        Ok(lexemes::Paren(
+    pub(crate) fn parse_paren<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Paren<T>> {
+        Ok(Paren(
             self.expect(TokenKind::LPar)?,
             fun(self)?,
             self.expect(TokenKind::RPar)?,
@@ -203,21 +214,29 @@ impl<'a> Parser<'a> {
         Ok(vec)
     }
 
-    pub fn parse_string(&mut self) -> Result<lexemes::Tokenized<String>> {
+    pub fn parse_item<T>(&mut self, fun: fn(&mut Self) -> Result<T>) -> Result<Item<T>> {
+        let start = self.span();
+        let data = fun(self)?;
+        let end = self.last_span();
+        let span = start.mix(&end);
+        Ok(Item { data, span })
+    }
+
+    pub fn parse_string(&mut self) -> Result<Tokenized<String>> {
         if let TokenKind::Str(str) = &self.get().data {
             let str = str.clone();
             let tkn = self.bump();
-            Ok(lexemes::Tokenized(tkn, str))
+            Ok(Tokenized(tkn, str))
         } else {
             self.unexpected()
         }
     }
 
-    pub fn parse_u60(&mut self) -> Result<lexemes::Tokenized<u64>> {
+    pub fn parse_u60(&mut self) -> Result<Tokenized<u64>> {
         if let TokenKind::Num60(n) = &self.get().data {
             let n = *n;
             let tkn = self.bump();
-            Ok(lexemes::Tokenized(tkn, n))
+            Ok(Tokenized(tkn, n))
         } else {
             self.unexpected()
         }
@@ -228,33 +247,21 @@ impl<'a> Parser<'a> {
             TokenKind::UpperId(_) | TokenKind::LowerId(_) => {
                 let name = self.parse_any_name()?;
                 let span = name.0.span.clone();
-                Ok(lexemes::Item::new(
-                    span,
-                    AttributeStyleKind::Identifier(name),
-                ))
+                Ok(Item::new(span, AttributeStyleKind::Identifier(name)))
             }
             TokenKind::Str(_) => {
                 let token = self.parse_string()?;
-                Ok(lexemes::Item::new(
-                    token.span(),
-                    AttributeStyleKind::String(token),
-                ))
+                Ok(Item::new(token.span(), AttributeStyleKind::String(token)))
             }
             TokenKind::Num60(_) => {
                 let token = self.parse_u60()?;
-                Ok(lexemes::Item::new(
-                    token.span(),
-                    AttributeStyleKind::Number(token),
-                ))
+                Ok(Item::new(token.span(), AttributeStyleKind::Number(token)))
             }
             TokenKind::LBracket => {
                 let bracket = self.parse_bracket(&|this| {
-                    this.parse_separated_by_comma(|this| this.parse_attribute_style())
+                    this.parse_separated_by_comma(Self::parse_attribute_style)
                 })?;
-                Ok(lexemes::Item::new(
-                    bracket.span(),
-                    AttributeStyleKind::List(bracket),
-                ))
+                Ok(Item::new(bracket.span(), AttributeStyleKind::List(bracket)))
             }
             _ => self.unexpected(),
         }
@@ -265,13 +272,11 @@ impl<'a> Parser<'a> {
         let name = self.parse_any_name()?;
 
         let arguments = self.try_with(|this| {
-            this.parse_bracket(&|this| {
-                this.parse_separated_by_comma(|this| this.parse_attribute_style())
-            })
+            this.parse_bracket(&|this| this.parse_separated_by_comma(Self::parse_attribute_style))
         })?;
 
         let value = self.try_with(|this| {
-            Ok(lexemes::Equal(
+            Ok(Equal(
                 this.expect(TokenKind::Eq)?,
                 this.parse_attribute_style()?,
             ))
@@ -296,10 +301,10 @@ impl<'a> Parser<'a> {
     pub fn parse_type_binding(&mut self) -> Result<TypeBinding> {
         let name = self.parse_any_name()?;
         let colon = self.expect(TokenKind::Colon)?;
-        let ty = self.parse_expr()?;
+        let ty = self.parse_boxed_expr()?;
         Ok(TypeBinding {
             name,
-            typ: lexemes::Colon(colon, Box::new(ty)),
+            typ: Colon(colon, ty),
         })
     }
 
@@ -311,10 +316,10 @@ impl<'a> Parser<'a> {
 
     pub fn parse_param(&mut self) -> Result<Param> {
         if self.is_param() {
-            let paren = self.parse_paren(|this| this.parse_type_binding())?;
+            let paren = self.parse_paren(Self::parse_type_binding)?;
             Ok(Param::Named(paren))
         } else {
-            let expr = Box::new(self.parse_expr()?);
+            let expr = self.parse_boxed_expr()?;
             Ok(Param::Expr(expr))
         }
     }
@@ -332,8 +337,8 @@ impl<'a> Parser<'a> {
             let rename = self.parse_paren(|this| {
                 let name = this.parse_any_name()?;
                 let eq = this.expect(TokenKind::Eq)?;
-                let expr = this.parse_expr()?;
-                Ok(Rename(name, lexemes::Equal(eq, Box::new(expr))))
+                let expr = this.parse_boxed_expr()?;
+                Ok(Rename(name, Equal(eq, expr)))
             })?;
 
             NamedBinding::Named(rename)
@@ -344,13 +349,13 @@ impl<'a> Parser<'a> {
         Ok(Binding { tilde, value })
     }
 
-    pub fn parse_lower_id(&mut self) -> Result<lexemes::Ident> {
+    pub fn parse_lower_id(&mut self) -> Result<Ident> {
         if let TokenKind::LowerId(name) = &self.get().data {
             let name = name.clone();
             let tkn = self.bump();
-            Ok(lexemes::Ident(lexemes::Item {
+            Ok(Ident(Item {
                 span: tkn.span.clone(),
-                data: lexemes::Tokenized(tkn, name),
+                data: Tokenized(tkn, name),
             }))
         } else {
             // TODO: Improve this error message for upper cased identifiers.
@@ -362,30 +367,30 @@ impl<'a> Parser<'a> {
         let r#let = self.expect(TokenKind::Let)?;
         let name = self.parse_lower_id()?;
         let eq = self.expect(TokenKind::Eq)?;
-        let val = self.parse_expr()?;
-        let semi = self.eat(TokenKind::Semi);
-        let next = self.parse_expr()?;
+        let value = self.parse_boxed_expr()?;
+        let r#semi = self.eat(TokenKind::Semi);
+        let next = self.parse_boxed_expr()?;
 
         Ok(LetExpr {
             r#let,
             name,
-            value: lexemes::Equal(eq, Box::new(val)),
-            semi,
-            next: Box::new(next),
+            value: Equal(eq, value),
+            r#semi,
+            next,
         })
     }
 
     pub fn parse_if(&mut self) -> Result<IfExpr> {
-        let if_ = self.expect_keyword("if")?;
-        let cond = self.parse_expr()?;
-        let then = self.parse_brace(|this| this.parse_boxed_expr())?;
-        let else_ = self.expect_keyword("else")?;
-        let else_cond = self.parse_brace(|this| this.parse_boxed_expr())?;
+        let r#if = self.expect_keyword("if")?;
+        let cond = self.parse_boxed_expr()?;
+        let then = self.parse_brace(Self::parse_boxed_expr)?;
+        let otherwise = self.expect_keyword("else")?;
+        let otherwise_cond = self.parse_brace(Self::parse_boxed_expr)?;
 
         Ok(IfExpr {
-            cond: lexemes::Tokenized(if_, Box::new(cond)),
+            cond: Tokenized(r#if, cond),
             then,
-            otherwise: lexemes::Tokenized(else_, else_cond),
+            otherwise: Tokenized(otherwise, otherwise_cond),
         })
     }
 
@@ -426,30 +431,39 @@ impl<'a> Parser<'a> {
         match &tkn.data {
             TokenKind::Num60(n60) => {
                 let data = *n60;
-                Ok(Literal::U60(lexemes::Tokenized(tkn, data)))
+                Ok(Literal::U60(Tokenized(tkn, data)))
             }
             TokenKind::Float(float) => {
                 let data = *float;
-                Ok(Literal::F60(lexemes::Tokenized(tkn, data)))
+                Ok(Literal::F60(Tokenized(tkn, data)))
             }
             TokenKind::Num120(n120) => {
                 let data = *n120;
-                Ok(Literal::U120(lexemes::Tokenized(tkn, data)))
+                Ok(Literal::U120(Tokenized(tkn, data)))
             }
             TokenKind::Nat(nat) => {
                 let data = nat.clone();
-                Ok(Literal::Nat(lexemes::Tokenized(tkn, data)))
+                Ok(Literal::Nat(Tokenized(tkn, data)))
             }
             TokenKind::Str(str) => {
                 let data = str.clone();
-                Ok(Literal::String(lexemes::Tokenized(tkn, data)))
+                Ok(Literal::String(Tokenized(tkn, data)))
             }
             TokenKind::Char(char) => {
                 let data = *char;
-                Ok(Literal::Char(lexemes::Tokenized(tkn, data)))
+                Ok(Literal::Char(Tokenized(tkn, data)))
             }
             _ => self.unexpected(),
         }
+    }
+
+    pub fn parse_help(&mut self) -> Result<TypeExpr> {
+        let data = self.expect_match(|x| match &x.data {
+            TokenKind::Help(x) => Some(x.clone()),
+            _ => None,
+        })?;
+
+        Ok(TypeExpr::Help(Tokenized(self.bump(), data)))
     }
 
     pub fn parse_atom_type(&mut self) -> Result<TypeExpr> {
@@ -458,47 +472,40 @@ impl<'a> Parser<'a> {
             TokenKind::U60 => Ok(TypeExpr::TypeU60(self.bump())),
             TokenKind::U120 => Ok(TypeExpr::TypeU120(self.bump())),
             TokenKind::F60 => Ok(TypeExpr::TypeF60(self.bump())),
-            TokenKind::Help(x) => {
-                let data = x.clone();
-                let tkn = self.bump();
-                Ok(TypeExpr::Help(lexemes::Tokenized(tkn, data)))
-            }
+            TokenKind::Help(_) => self.parse_help(),
             _ => self.unexpected(),
         }
     }
 
     pub fn parse_atom_kind(&mut self) -> Result<ExprKind> {
+        use ExprKind::*;
+
         match &self.get().data {
-            TokenKind::LowerId(_) => Ok(ExprKind::Local(Box::new(self.parse_var()?))),
-            TokenKind::LPar => {
-                let paren = self.parse_paren(|this| this.parse_expr())?;
-                Ok(ExprKind::Paren(Box::new(paren)))
-            }
-            TokenKind::LBracket => {
-                let list = self.parse_list(|this| this.parse_atom())?;
-                Ok(ExprKind::List(Box::new(list)))
-            }
-            _ => Ok(ExprKind::Type(Box::new(self.parse_atom_type()?))),
+            TokenKind::LPar => self
+                .parse_paren(Self::parse_expr)
+                .map(|x| Paren(Box::new(x))),
+            TokenKind::LBracket => self.parse_list(Self::parse_atom).map(|x| List(Box::new(x))),
+            TokenKind::LowerId(_) => self.parse_var().map(|x| Local(Box::new(x))),
+            _ => Ok(Type(Box::new(self.parse_atom_type()?))),
         }
     }
 
     pub fn parse_atom(&mut self) -> Result<Expr> {
-        let start = self.get().span.clone();
-        let kind = self.parse_atom_kind()?;
-        let end = self.prev_span.clone();
-        Ok(lexemes::Item {
-            data: kind,
-            span: start.mix(&end),
-        })
+        self.parse_item(Self::parse_atom_kind)
+    }
+
+    pub fn parse_expr_kind(&mut self) -> Result<ExprKind> {
+        todo!()
     }
 
     pub fn parse_expr(&mut self) -> Result<Expr> {
-        todo!()
+        self.parse_item(Self::parse_expr_kind)
     }
 
     pub fn parse_boxed_expr(&mut self) -> Result<Box<Expr>> {
         Ok(Box::new(self.parse_expr()?))
     }
+
 }
 
 #[cfg(test)]

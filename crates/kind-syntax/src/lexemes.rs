@@ -17,7 +17,6 @@ pub type Ask = Token;
 pub type Return = Token;
 pub type Sign = Token;
 pub type Specialize = Token;
-pub type Into = Token;
 pub type In = Token;
 pub type Match = Token;
 pub type Open = Token;
