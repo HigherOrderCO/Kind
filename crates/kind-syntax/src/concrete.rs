@@ -215,7 +215,6 @@ pub struct LetStmt {
 pub struct ReturnStmt {
     pub r#return: lexemes::Return,
     pub value: Box<Expr>,
-    pub next: Box<Stmt>,
 }
 
 /// An expression without the "pure" function.
