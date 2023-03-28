@@ -221,7 +221,6 @@ pub struct ReturnStmt {
 /// An expression without the "pure" function.
 pub struct ReturnExprStmt {
     pub value: Box<Expr>,
-    pub next: Box<Expr>,
 }
 
 /// An statement is a "single line" of code inside the
