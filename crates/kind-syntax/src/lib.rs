@@ -2,4 +2,5 @@
 //! the [concrete::Item] that adds some metadata into some parts of the tree.
 
 pub mod concrete;
+pub mod core;
 pub mod lexemes;
