@@ -1,18 +1,13 @@
-use std::cell::RefCell;
-use std::mem::transmute;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use intmap::Entry;
-use refl::Id;
+use refl::{refl, Id};
 use thin_vec::ThinVec;
 
 use kind_syntax::concrete;
 use kind_syntax::core;
 
-use crate::build::{Compiler, Telemetry};
-use crate::loader::FileLoader;
-use crate::metadata::{IntoStorage, Source, Storage};
+use crate::metadata::Source;
 
 /// A query is a request for a rule.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -24,7 +19,7 @@ pub enum Query<A> {
 
     Module(Id<Rc<concrete::Module>, A>, PathBuf), // CST
     TopLevel(Id<Rc<concrete::TopLevel>, A>, String), // CST
-    AbstractModule(Id<Rc<core::Module>, A>, String), // AST
+    AbstractModule(Id<Rc<core::Module>, A>, PathBuf), // AST
     AbstractTopLevel(Id<Rc<core::TopLevel>, A>, String), // AST
 }
 
@@ -34,75 +29,36 @@ pub enum Fail {
     UnboundTopLevel(String),
 }
 
-impl<F: FileLoader, T: Telemetry> Compiler<F, T> {
-    pub fn query<A>(&mut self, query: Query<A>) -> Result<A, Fail>
-    where
-        T: Telemetry,
-        A: std::hash::Hash,
-        A: Clone,
-        A: IntoStorage,
-    {
-        let storage = self.get_metadata(fxhash::hash64(&query));
-        if let Some(storage) = storage.borrow().as_ref() {
-            return Ok(storage.clone().extract());
-        }
-
-        match query {
-            Query::Module(_, _) => todo!(),
-            Query::TopLevel(_, _) => todo!(),
-            Query::AbstractModule(_, _) => todo!(),
-            Query::AbstractTopLevel(_, _) => todo!(),
-            Query::SourceDirectories(_, _) => todo!(),
-            Query::Source(refl, ref path) => {
-                let content = self
-                    .loader
-                    .load_file(path.clone())
-                    .ok_or(Fail::UnboundModule(path.to_string_lossy().to_string()))?;
-
-                let source = Source(content);
-
-                storage
-                    .borrow_mut()
-                    .replace(Storage::Source(refl, source.clone()));
-
-                Ok(refl.cast(source))
-            }
-            Query::Dependencies(_, _) => todo!(),
-            Query::TransitiveDependencies(_, _) => todo!(),
-        }
+impl Query<()> {
+    pub fn source_directories(path: String) -> Query<ThinVec<PathBuf>> {
+        Query::SourceDirectories(refl(), path)
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use refl::refl;
+    pub fn source(path: PathBuf) -> Query<Source> {
+        Query::Source(refl(), path)
+    }
 
-    use crate::build::{Options, Target};
-    use crate::loader::FsFileLoader;
+    pub fn dependencies(path: PathBuf) -> Query<ThinVec<PathBuf>> {
+        Query::Dependencies(refl(), path)
+    }
 
-    use super::*;
+    pub fn transitive_dependencies(path: PathBuf) -> Query<ThinVec<PathBuf>> {
+        Query::TransitiveDependencies(refl(), path)
+    }
 
-    #[test]
-    fn it_works() {
-        let mut compiler = Compiler {
-            telemetry: (),
-            loader: FsFileLoader::default(),
-            tree: Default::default(),
-            config: Options {
-                target: Some(Target::HVM),
-            },
-        };
+    pub fn module(path: PathBuf) -> Query<Rc<concrete::Module>> {
+        Query::Module(refl(), path)
+    }
 
-        compiler
-            .query(Query::Source(refl(), PathBuf::from("Cargo.toml")))
-            .unwrap();
+    pub fn top_level(name: String) -> Query<Rc<concrete::TopLevel>> {
+        Query::TopLevel(refl(), name)
+    }
 
-        compiler
-            .query(Query::Source(refl(), PathBuf::from("Cargo.toml")))
-            .unwrap();
+    pub fn abstract_module(path: PathBuf) -> Query<Rc<core::Module>> {
+        Query::AbstractModule(refl(), path)
+    }
 
-        compiler
-            .query(Query::Source(refl(), PathBuf::from("Cargo.toml")))
-            .unwrap();
+    pub fn abstract_top_level(name: String) -> Query<Rc<core::TopLevel>> {
+        Query::AbstractTopLevel(refl(), name)
     }
 }
