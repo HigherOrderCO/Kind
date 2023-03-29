@@ -18,3 +18,7 @@ pub struct Compiler<T: Telemetry> {
     pub tree: DependencyTree<String>,
     pub telemetry: T,
 }
+
+impl Telemetry for () {
+    fn compiling(&mut self, _str: String) {}
+}
