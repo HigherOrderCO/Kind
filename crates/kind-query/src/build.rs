@@ -1,3 +1,5 @@
+use specs::{Builder, System, World, WorldExt};
+
 use crate::dependency::DependencyTree;
 
 pub enum Target {
@@ -15,6 +17,13 @@ pub trait Telemetry {
 
 pub struct Compiler<T: Telemetry> {
     pub config: Options,
-    pub tree: DependencyTree<String>,
+    pub tree: DependencyTree,
     pub telemetry: T,
+}
+
+impl<'a, T: Telemetry> System<'a> for Compiler<T> {
+    type SystemData = ();
+
+    fn run(&mut self, data: Self::SystemData) {
+    }
 }
