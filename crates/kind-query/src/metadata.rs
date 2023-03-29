@@ -1,11 +1,16 @@
+use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::sync::Arc;
 
+use intmap::Entry;
 use refl::{refl, Id};
 
 use kind_syntax::concrete;
 use kind_syntax::core;
+
+use crate::build::{Compiler, Telemetry};
+use crate::loader::FileLoader;
 
 #[derive(Clone, Debug, Hash)]
 pub struct Source(pub Arc<String>);
@@ -62,5 +67,20 @@ impl Deref for Metadata {
 impl DerefMut for Metadata {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
+    }
+}
+
+impl<F: FileLoader, T: Telemetry> Compiler<F, T> {
+    pub fn get_metadata<A>(&mut self, hash: u64) -> Rc<RefCell<Option<Storage<A>>>>
+    where
+        A: std::hash::Hash,
+        A: IntoStorage,
+    {
+        match self.tree.storage.entry(hash) {
+            Entry::Occupied(entry) => unsafe { std::mem::transmute(entry.get().clone()) },
+            Entry::Vacant(entry) => unsafe {
+                std::mem::transmute(entry.insert(Rc::new(RefCell::new(None))).clone())
+            },
+        }
     }
 }

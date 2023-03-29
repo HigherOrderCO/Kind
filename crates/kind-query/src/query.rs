@@ -71,19 +71,6 @@ impl<F: FileLoader, T: Telemetry> Compiler<F, T> {
             Query::TransitiveDependencies(_, _) => todo!(),
         }
     }
-
-    fn get_metadata<A>(&mut self, hash: u64) -> Rc<RefCell<Option<Storage<A>>>>
-    where
-        A: std::hash::Hash,
-        A: IntoStorage,
-    {
-        match self.tree.storage.entry(hash) {
-            Entry::Occupied(entry) => unsafe { transmute(entry.get().clone()) },
-            Entry::Vacant(entry) => unsafe {
-                transmute(entry.insert(Rc::new(RefCell::new(None))).clone())
-            },
-        }
-    }
 }
 
 #[cfg(test)]
