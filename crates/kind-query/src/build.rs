@@ -11,7 +11,7 @@ pub struct Options {
 }
 
 pub trait Telemetry {
-    fn compiling(&mut self, str: String);
+    fn compiling(&mut self, message: String);
 }
 
 pub struct Compiler<F: FileLoader, T: Telemetry> {

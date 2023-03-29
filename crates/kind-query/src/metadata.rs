@@ -45,7 +45,7 @@ pub trait IntoStorage {
 
 impl IntoStorage for Source {
     fn into_storage(self) -> Storage {
-        Storage::Source(unsafe { std::mem::transmute(refl::<Source>()) }, self)
+        Storage::Source(existential(), self)
     }
 }
 
@@ -83,4 +83,8 @@ impl<F: FileLoader, T: Telemetry> Compiler<F, T> {
             },
         }
     }
+}
+
+fn existential<A, B>() -> Id<A, B> {
+    unsafe { std::mem::transmute(refl::<A>()) }
 }
