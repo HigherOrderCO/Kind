@@ -224,6 +224,7 @@ dependencies = [
  "kind-span",
  "kind-syntax",
  "petgraph",
+ "refl",
  "thin-vec",
 ]
 
@@ -441,6 +442,12 @@ dependencies = [
  "redox_syscall",
  "thiserror",
 ]
+
+[[package]]
+name = "refl"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5fe2c8ee36d7d4f60a0574c7116a0614e3bf48bfa249062698b228bddee5026"
 
 [[package]]
 name = "regex"

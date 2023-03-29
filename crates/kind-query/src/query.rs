@@ -1,32 +1,28 @@
 use std::path::PathBuf;
 
-use crate::fetch::Is;
-use kind_syntax::concrete;
-use kind_syntax::core;
+use refl::Id;
 use thin_vec::ThinVec;
 
-/// A query is a request for a rule.
-pub enum Query<A> {
-    SourceDirectories(Is<A, ThinVec<PathBuf>>, String), // File System
-    Source(Is<A, String>, PathBuf),                     // Text
-    Dependencies(Is<A, ThinVec<PathBuf>>, PathBuf),     // Dependencies
-    TransitiveDependencies(Is<A, ThinVec<PathBuf>>, PathBuf), // Dependencies
+use kind_syntax::concrete;
+use kind_syntax::core;
 
-    Module(Is<A, concrete::Module>, PathBuf),        // CST
-    TopLevel(Is<A, concrete::TopLevel>, String),     // CST
-    AbstractModule(Is<A, core::Module>, String),     // AST
-    AbstractTopLevel(Is<A, core::TopLevel>, String), // AST
+/// A query is a request for a rule.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Query<A> {
+    SourceDirectories(Id<ThinVec<PathBuf>, A>, String), // File System
+    Source(Id<String, A>, PathBuf),                     // Text
+    Dependencies(Id<ThinVec<PathBuf>, A>, PathBuf),     // Dependencies
+    TransitiveDependencies(Id<ThinVec<PathBuf>, A>, PathBuf), // Dependencies
+
+    Module(Id<concrete::Module, A>, PathBuf),        // CST
+    TopLevel(Id<concrete::TopLevel, A>, String),     // CST
+    AbstractModule(Id<core::Module, A>, String),     // AST
+    AbstractTopLevel(Id<core::TopLevel, A>, String), // AST
 }
 
 pub enum Fail {
     UnboundModule(String),
     UnboundTopLevel(String),
-}
-
-impl<A: std::hash::Hash> std::hash::Hash for Query<A> {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        std::mem::discriminant(self).hash(state);
-    }
 }
 
 impl<A: std::hash::Hash> Query<A> {
@@ -37,7 +33,12 @@ impl<A: std::hash::Hash> Query<A> {
             Query::AbstractModule(_, _) => todo!(),
             Query::AbstractTopLevel(_, _) => todo!(),
             Query::SourceDirectories(_, _) => todo!(),
-            Query::Source(_, _) => todo!(),
+            Query::Source(refl, path) => {
+                let content = std::fs::read_to_string(path)
+                    .map_err(|_| Fail::UnboundModule(path.to_string_lossy().to_string()))?;
+
+                Ok(refl.cast(content))
+            }
             Query::Dependencies(_, _) => todo!(),
             Query::TransitiveDependencies(_, _) => todo!(),
         }
