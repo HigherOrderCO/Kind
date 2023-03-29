@@ -19,7 +19,7 @@ pub struct Source(pub Arc<String>);
 pub struct Metadata(pub Vec<Storage>);
 
 #[derive(Clone)]
-pub enum Storage<A = Box<dyn std::any::Any>> {
+pub enum Storage<A = Box<()>> {
     Source(Id<Source, A>, Source),
     Module(Id<Rc<concrete::Module>, A>, Rc<concrete::Module>),
     TopLevel(Id<Rc<concrete::TopLevel>, A>, Rc<concrete::TopLevel>),

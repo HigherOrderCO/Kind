@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use crate::build::{Compiler, Telemetry};
 use crate::loader::FileLoader;
 use crate::metadata::{IntoStorage, Source, Storage};
@@ -7,7 +8,7 @@ impl<F: FileLoader, T: Telemetry> Compiler<F, T> {
     pub fn query<A>(&mut self, query: Query<A>) -> Result<A, Fail>
     where
         T: Telemetry,
-        A: std::hash::Hash,
+        A: Hash,
         A: Clone,
         A: IntoStorage,
     {
