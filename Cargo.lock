@@ -224,6 +224,7 @@ dependencies = [
  "kind-span",
  "kind-syntax",
  "petgraph",
+ "thin-vec",
 ]
 
 [[package]]
