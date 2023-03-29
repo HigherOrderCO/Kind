@@ -195,4 +195,8 @@ impl Token {
     pub fn is(&self, tkn: TokenKind) -> bool {
         self.data == tkn
     }
+
+    pub fn is_soft_keyword(&self, t: &str) -> bool {
+        matches!(&self.data, TokenKind::LowerId(x) if x == t)
+    }
 }

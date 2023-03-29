@@ -200,6 +200,7 @@ pub struct AskStmt {
     pub r#ask: lexemes::Ask,
     pub name: Ident,
     pub value: Equal<Box<Expr>>,
+    pub r#semi: Option<lexemes::Semi>,
     pub next: Box<Stmt>,
 }
 
@@ -208,6 +209,7 @@ pub struct LetStmt {
     pub r#let: lexemes::Let,
     pub name: Ident,
     pub value: Equal<Box<Expr>>,
+    pub r#semi: Option<lexemes::Semi>,
     pub next: Box<Stmt>,
 }
 
@@ -261,7 +263,7 @@ pub type Stmt = Item<StmtKind>;
 /// ```
 pub struct DoNode {
     pub r#do: lexemes::Do,
-    pub typ: Option<Ident>,
+    pub typ: Option<QualifiedIdent>,
     pub value: Brace<Stmt>,
 }
 

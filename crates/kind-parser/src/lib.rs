@@ -104,6 +104,11 @@ impl<'a> Parser<'a> {
         self.queue.get(0).unwrap().is(token)
     }
 
+    /// Checks if the next token is a soft keyword
+    pub(crate) fn is_keyword(&mut self, text: &str) -> bool {
+        self.queue.get(0).unwrap().is_soft_keyword(text)
+    }
+
     /// Removes a token and report an "unexpected token" error diagnostic.
     pub(crate) fn unexpected<T>(&mut self) -> Result<T> {
         let tkn = self.get().clone();
@@ -494,8 +499,119 @@ impl<'a> Parser<'a> {
         self.parse_item(Self::parse_atom_kind)
     }
 
+    pub fn parse_upper_id(&mut self) -> Result<QualifiedIdent> {
+        let tkn = self.parse_item(|this| {
+            this.expect_match(|x| match &x.data {
+                TokenKind::UpperId(str) => Some(Tokenized(x.clone(), str.clone())),
+                _ => None,
+            })
+        })?;
+
+        Ok(QualifiedIdent(tkn))
+    }
+
+    pub fn parse_let_stmt(&mut self) -> Result<LetStmt> {
+        let r#let = self.expect_keyword("let")?;
+        let name = self.parse_lower_id()?;
+        let eq = self.expect(TokenKind::Eq)?;
+        let value = self.parse_boxed_expr()?;
+        let r#semi = self.eat(TokenKind::Semi);
+        let next = self.parse_boxed_stmt()?;
+
+        Ok(LetStmt {
+            r#let,
+            name,
+            value: Equal(eq, value),
+            r#semi,
+            next,
+        })
+    }
+
+    pub fn parse_ask_sttm(&mut self) -> Result<AskStmt> {
+        let ask = self.expect_keyword("ask")?;
+        let name = self.parse_lower_id()?;
+        let eq = self.expect(TokenKind::Eq)?;
+        let value = self.parse_boxed_expr()?;
+        let r#semi = self.eat(TokenKind::Semi);
+        let next = self.parse_boxed_stmt()?;
+
+        Ok(AskStmt {
+            ask,
+            name,
+            value: Equal(eq, value),
+            r#semi,
+            next,
+        })
+    }
+
+    pub fn parse_return_stmt(&mut self) -> Result<ReturnStmt> {
+        let r#return = self.expect_keyword("return")?;
+        let value = self.parse_boxed_expr()?;
+
+        Ok(ReturnStmt {
+            r#return,
+            value,
+        })
+    }
+
+    pub fn parse_stmt_kind(&mut self) -> Result<StmtKind> {
+        if self.is_keyword("let") {
+            self.parse_let_stmt().map(StmtKind::Let)
+        } else if self.is_keyword("ask") {
+            self.parse_ask_sttm().map(StmtKind::Ask)
+        } else if self.is_keyword("return") {
+            self.parse_return_stmt().map(StmtKind::Return)
+        } else {
+            let left = self.parse_boxed_expr()?;
+            if self.is(TokenKind::RBrace) {
+                Ok(StmtKind::ReturnExpr(ReturnExprStmt { value: left }))
+            } else {
+                let r#semi = self.eat(TokenKind::Semi);
+                let next = self.parse_boxed_stmt()?;
+                Ok(StmtKind::Next(NextStmt { left, r#semi, next }))
+            }
+        }
+    }
+
+    pub fn parse_stmt(&mut self) -> Result<Stmt> {
+        self.parse_item(Self::parse_stmt_kind)
+    }
+
+    pub fn parse_boxed_stmt(&mut self) -> Result<Box<Stmt>> {
+        Ok(Box::new(self.parse_stmt()?))
+    }
+
+    pub fn parse_do(&mut self) -> Result<DoNode> {
+        let r#do = self.expect_keyword("do")?;
+        let typ = self.parse_upper_id()?;
+        let value = self.parse_brace(Self::parse_stmt)?;
+
+        Ok(DoNode {
+            r#do,
+            typ: Some(typ),
+            value,
+        })
+    }
+
     pub fn parse_expr_kind(&mut self) -> Result<ExprKind> {
-        todo!()
+        if self.is_keyword("do") {
+            self.parse_do().map(|x| ExprKind::Do(Box::new(x)))
+        } else if self.is_keyword("match") {
+            todo!()
+        } else if self.is_keyword("let") {
+            todo!()
+        } else if self.is_keyword("open") {
+            todo!()
+        } else if self.is_keyword("specialize") {
+            todo!()
+        } else if self.is(TokenKind::Sign) {
+            let pair = self.parse_pair(Self::parse_atom)?;
+            Ok(ExprKind::Pair(Box::new(pair)))
+        } else if self.is(TokenKind::Tilde) {
+            todo!()
+        } else {
+            todo!()
+        }
     }
 
     pub fn parse_expr(&mut self) -> Result<Expr> {
@@ -505,7 +621,6 @@ impl<'a> Parser<'a> {
     pub fn parse_boxed_expr(&mut self) -> Result<Box<Expr>> {
         Ok(Box::new(self.parse_expr()?))
     }
-
 }
 
 #[cfg(test)]
