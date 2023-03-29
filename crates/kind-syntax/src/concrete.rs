@@ -311,6 +311,7 @@ pub struct CaseNode {
     pub name: Ident,
     pub r#arrow: lexemes::FatArrow,
     pub value: Box<Expr>,
+    pub r#semi: Option<lexemes::Semi>,
 }
 
 /// A match expression is a case analysis on a value (dependent eliminator)
@@ -324,7 +325,7 @@ pub struct CaseNode {
 /// ```
 pub struct MatchExpr {
     pub r#match: lexemes::Match,
-    pub typ: Option<Ident>,
+    pub typ: Option<QualifiedIdent>,
     pub with: Option<(lexemes::With, ThinVec<Param>)>,
     pub scrutinee: Box<Expr>,
     pub cases: Brace<ThinVec<CaseNode>>,
@@ -342,14 +343,10 @@ pub struct MatchExpr {
 ///
 pub struct OpenExpr {
     pub r#open: lexemes::Open,
-    pub typ: Ident,
-
-    /// The concrete syntax tree allows some more flexibility in order
-    /// to improve error messages. So, the name should be an identifier
-    /// but the parser will allow any expression.
+    pub typ: Option<QualifiedIdent>,
     pub name: Box<Expr>,
-    pub motive: Option<Colon<Box<Expr>>>,
-    pub body: Brace<ThinVec<Stmt>>,
+    pub r#semi: Option<lexemes::Semi>,
+    pub next: Box<Expr>,
 }
 
 /// A node that express the operation after accessing fields

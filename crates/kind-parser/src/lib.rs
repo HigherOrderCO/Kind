@@ -593,15 +593,93 @@ impl<'a> Parser<'a> {
         })
     }
 
+    pub fn parse_match_case(&mut self) -> Result<CaseNode> {
+        let name = self.parse_lower_id()?;
+        let r#arrow = self.expect(TokenKind::FatArrow)?;
+        let value = self.parse_boxed_expr()?;
+        let r#semi = self.eat(TokenKind::Semi);
+
+        Ok(CaseNode {
+            name,
+            r#arrow,
+            value,
+            semi,
+        })
+    }
+
+    pub fn parse_match(&mut self) -> Result<MatchExpr> {
+        let r#match = self.expect_keyword("match")?;
+        let typ = self.parse_upper_id().ok();
+
+        let scrutinee = self.parse_boxed_expr()?;
+        // TODO: need to check if the scrutinee is a variable.
+
+        let with = if self.is_keyword("with") {
+            let r#with = self.expect_keyword("with")?;
+            let mut params = ThinVec::new();
+
+            while !self.is(TokenKind::LBrace) {
+                params.push(self.parse_param()?)
+            }
+
+            Some((r#with, params))
+        } else {
+            None
+        };
+
+        let cases = self.parse_brace(|this| {
+            let mut cases = ThinVec::new();
+
+            while !this.is(TokenKind::RBrace) {
+                cases.push(this.parse_match_case()?)
+            }
+
+            Ok(cases)
+        })?;
+
+        let motive = if self.is(TokenKind::Colon) {
+            let colon = self.expect(TokenKind::Colon)?;
+            let typ = self.parse_boxed_expr()?;
+            Some(Colon(colon, typ))
+        } else {
+            None
+        };
+
+        Ok(MatchExpr {
+            r#match,
+            typ,
+            scrutinee,
+            with,
+            cases,
+            motive,
+        })
+    }
+
+    pub fn parse_open(&mut self) -> Result<OpenExpr> {
+        let r#open = self.expect_keyword("open")?;
+        let typ = self.parse_upper_id()?;
+        let name = self.parse_boxed_expr()?;
+        let r#semi = self.eat(TokenKind::Semi);
+        let next = self.parse_boxed_expr()?;
+
+        Ok(OpenExpr {
+            open,
+            typ: Some(typ),
+            name,
+            semi,
+            next,
+        })
+    }
+
     pub fn parse_expr_kind(&mut self) -> Result<ExprKind> {
         if self.is_keyword("do") {
             self.parse_do().map(|x| ExprKind::Do(Box::new(x)))
         } else if self.is_keyword("match") {
-            todo!()
+            self.parse_match().map(|x| ExprKind::Match(Box::new(x)))
         } else if self.is_keyword("let") {
-            todo!()
+            self.parse_let().map(|x| ExprKind::Let(Box::new(x)))
         } else if self.is_keyword("open") {
-            todo!()
+            self.parse_open().map(|x| ExprKind::Open(Box::new(x)))
         } else if self.is_keyword("specialize") {
             todo!()
         } else if self.is(TokenKind::Sign) {
