@@ -1,25 +1,21 @@
-use fxhash::FxHashMap;
-use petgraph::{stable_graph::NodeIndex, Directed, Graph};
+use std::cell::RefCell;
 use std::hash::Hash;
+use std::rc::Rc;
+
+use fxhash::FxHashMap;
+use intmap::IntMap;
+use petgraph::{stable_graph::NodeIndex, Directed, Graph};
+
+use crate::metadata::Storage;
 
 #[derive(Default)]
-pub struct DependencyTree<Name, Data> {
-    loaded_modules: Vec<Data>,
-    loaded_names: FxHashMap<Name, (NodeIndex, usize)>,
-    graph: Graph<usize, (), Directed>,
+pub struct DependencyTree<K> {
+    pub storage: IntMap<Rc<RefCell<Option<Storage>>>>,
+    pub names: FxHashMap<K, (NodeIndex, usize)>,
+    pub graph: Graph<usize, (), Directed>,
 }
 
-impl<Name: Hash + PartialEq + Eq, Data> DependencyTree<Name, Data> {
-    pub fn add(&mut self, name: Name, data: Data) -> NodeIndex {
-        let place = self.loaded_modules.len();
-        let id = self.graph.add_node(place);
-
-        self.loaded_modules.push(data);
-        self.loaded_names.insert(name, (id, place));
-
-        id
-    }
-
+impl<K: Hash + PartialEq + Eq> DependencyTree<K> {
     pub fn connect(&mut self, parent: NodeIndex, child: NodeIndex) {
         self.graph.add_edge(parent, child, ());
     }
