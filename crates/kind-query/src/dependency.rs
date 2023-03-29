@@ -1,14 +1,16 @@
+use std::cell::RefCell;
 use std::hash::Hash;
+use std::rc::Rc;
 
 use fxhash::FxHashMap;
 use intmap::IntMap;
 use petgraph::{stable_graph::NodeIndex, Directed, Graph};
 
-use crate::metadata::Metadata;
+use crate::metadata::Storage;
 
 #[derive(Default)]
 pub struct DependencyTree<K> {
-    pub storage: IntMap<Metadata>,
+    pub storage: IntMap<Rc<RefCell<Option<Storage>>>>,
     pub names: FxHashMap<K, (NodeIndex, usize)>,
     pub graph: Graph<usize, (), Directed>,
 }

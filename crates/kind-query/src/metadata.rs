@@ -1,6 +1,8 @@
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
+use refl::{refl, Id};
+
 use kind_syntax::concrete;
 use kind_syntax::core;
 
@@ -10,12 +12,25 @@ pub struct Source(pub Rc<String>);
 #[derive(Default)]
 pub struct Metadata(pub Vec<Storage>);
 
-pub enum Storage {
-    Source(Source),
-    Module(Rc<concrete::Module>),
-    TopLevel(Rc<concrete::TopLevel>),
-    AbstractModule(Rc<core::Module>),
-    AbstractTopLevel(Rc<core::TopLevel>),
+#[derive(Clone)]
+pub enum Storage<A = Box<dyn std::any::Any>> {
+    Source(Id<Source, A>, Source),
+    Module(Id<Rc<concrete::Module>, A>, Rc<concrete::Module>),
+    TopLevel(Id<Rc<concrete::TopLevel>, A>, Rc<concrete::TopLevel>),
+    AbstractModule(Id<Rc<core::Module>, A>, Rc<core::Module>),
+    AbstractTopLevel(Id<Rc<core::TopLevel>, A>, Rc<core::TopLevel>),
+}
+
+impl<A> Storage<A> {
+    pub fn extract(self) -> A {
+        match self {
+            Storage::Source(refl, value) => refl.cast(value),
+            Storage::Module(refl, value) => refl.cast(value),
+            Storage::TopLevel(refl, value) => refl.cast(value),
+            Storage::AbstractModule(refl, value) => refl.cast(value),
+            Storage::AbstractTopLevel(refl, value) => refl.cast(value),
+        }
+    }
 }
 
 pub trait IntoStorage {
@@ -24,7 +39,7 @@ pub trait IntoStorage {
 
 impl IntoStorage for Source {
     fn into_storage(self) -> Storage {
-        Storage::Source(self)
+        Storage::Source(unsafe { std::mem::transmute(refl::<Source>()) }, self)
     }
 }
 
