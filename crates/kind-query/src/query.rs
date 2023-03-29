@@ -6,6 +6,8 @@ use thin_vec::ThinVec;
 use kind_syntax::concrete;
 use kind_syntax::core;
 
+use crate::build::{Compiler, Telemetry};
+
 /// A query is a request for a rule.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Query<A> {
@@ -26,7 +28,10 @@ pub enum Fail {
 }
 
 impl<A: std::hash::Hash> Query<A> {
-    pub fn rules(&self) -> Result<A, Fail> {
+    pub fn run_query<T>(&self, compiler: Compiler<T>) -> Result<A, Fail>
+    where
+        T: Telemetry,
+    {
         match self {
             Query::Module(_, _) => todo!(),
             Query::TopLevel(_, _) => todo!(),

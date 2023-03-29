@@ -1,3 +1,5 @@
+use crate::dependency::DependencyTree;
+
 pub enum Target {
     HVM,
     KDL,
@@ -11,10 +13,8 @@ pub trait Telemetry {
     fn compiling(&mut self, str: String);
 }
 
-pub trait Loader<FileIO> {}
-
-pub struct Compiler<Telemetry, Loader> {
+pub struct Compiler<T: Telemetry> {
     pub config: Options,
-    pub loader: Loader,
-    pub telemetry: Telemetry,
+    pub tree: DependencyTree<String>,
+    pub telemetry: T,
 }
