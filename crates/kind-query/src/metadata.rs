@@ -1,5 +1,6 @@
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
+use std::sync::Arc;
 
 use refl::{refl, Id};
 
@@ -7,7 +8,7 @@ use kind_syntax::concrete;
 use kind_syntax::core;
 
 #[derive(Clone, Debug, Hash)]
-pub struct Source(pub Rc<String>);
+pub struct Source(pub Arc<String>);
 
 #[derive(Default)]
 pub struct Metadata(pub Vec<Storage>);

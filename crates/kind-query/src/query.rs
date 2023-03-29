@@ -11,6 +11,7 @@ use kind_syntax::concrete;
 use kind_syntax::core;
 
 use crate::build::{Compiler, Telemetry};
+use crate::loader::FileLoader;
 use crate::metadata::{IntoStorage, Source, Storage};
 
 /// A query is a request for a rule.
@@ -33,7 +34,7 @@ pub enum Fail {
     UnboundTopLevel(String),
 }
 
-impl<T: Telemetry> Compiler<T> {
+impl<F: FileLoader, T: Telemetry> Compiler<F, T> {
     pub fn query<A>(&mut self, query: Query<A>) -> Result<A, Fail>
     where
         T: Telemetry,
@@ -53,10 +54,12 @@ impl<T: Telemetry> Compiler<T> {
             Query::AbstractTopLevel(_, _) => todo!(),
             Query::SourceDirectories(_, _) => todo!(),
             Query::Source(refl, ref path) => {
-                let content = std::fs::read_to_string(path)
-                    .map_err(|_| Fail::UnboundModule(path.to_string_lossy().to_string()))?;
+                let content = self
+                    .loader
+                    .load_file(path.clone())
+                    .ok_or(Fail::UnboundModule(path.to_string_lossy().to_string()))?;
 
-                let source = Source(content.into());
+                let source = Source(content);
 
                 storage
                     .borrow_mut()
@@ -69,14 +72,16 @@ impl<T: Telemetry> Compiler<T> {
         }
     }
 
-    fn get_metadata<A>(&mut self, hash: u64) -> &Rc<RefCell<Option<Storage<A>>>>
+    fn get_metadata<A>(&mut self, hash: u64) -> Rc<RefCell<Option<Storage<A>>>>
     where
         A: std::hash::Hash,
         A: IntoStorage,
     {
         match self.tree.storage.entry(hash) {
-            Entry::Occupied(entry) => unsafe { transmute(entry.get()) },
-            Entry::Vacant(entry) => unsafe { transmute(entry.insert(Rc::new(RefCell::new(None)))) },
+            Entry::Occupied(entry) => unsafe { transmute(entry.get().clone()) },
+            Entry::Vacant(entry) => unsafe {
+                transmute(entry.insert(Rc::new(RefCell::new(None))).clone())
+            },
         }
     }
 }
@@ -86,6 +91,7 @@ mod tests {
     use refl::refl;
 
     use crate::build::{Options, Target};
+    use crate::loader::FsFileLoader;
 
     use super::*;
 
@@ -93,6 +99,7 @@ mod tests {
     fn it_works() {
         let mut compiler = Compiler {
             telemetry: (),
+            loader: FsFileLoader::default(),
             tree: Default::default(),
             config: Options {
                 target: Some(Target::HVM),
