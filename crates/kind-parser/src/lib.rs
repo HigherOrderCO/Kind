@@ -671,6 +671,147 @@ impl<'a> Parser<'a> {
         })
     }
 
+    pub fn parse_specialize(&mut self) -> Result<SubstExpr> {
+        let r#specialize = self.expect_keyword("specialize")?;
+        let name = self.parse_lower_id()?;
+        let r#into = self.expect_keyword("into")?;
+        let r#hash = self.expect(TokenKind::Hash)?;
+        let num = self.parse_u60()?;
+        let r#in = self.expect_keyword("in")?;
+        let value = self.parse_boxed_expr()?;
+
+        Ok(SubstExpr {
+            r#specialize,
+            name,
+            r#into,
+            r#hash,
+            num,
+            r#in,
+            value,
+        })
+    }
+
+    pub fn parse_pi_or_lambda_end(&mut self, param: Param, r#tilde: Option<Tilde>) -> Result<ExprKind> {
+        if self.is(TokenKind::FatArrow) {
+            let r#arrow = self.bump();
+            let body = self.parse_boxed_expr()?;
+
+            Ok(ExprKind::Lambda(Box::new(LambdaExpr {
+                param,
+                r#arrow,
+                r#tilde,
+                body,
+            })))
+        } else if self.is(TokenKind::RightArrow) {
+            let r#arrow = self.bump();
+            let body = self.parse_boxed_expr()?;
+            Ok(ExprKind::Pi(Box::new(PiExpr {
+                param,
+                r#arrow,
+                r#tilde,
+                body,
+            })))
+        } else {
+            // TODO: improve this error I guess?
+            self.unexpected()
+        }
+    }
+
+    pub fn parse_rename(&mut self) -> Result<Rename> {
+        let name = self.parse_lower_id()?;
+        let r#eq = self.expect(TokenKind::Eq)?;
+        let expr = self.parse_boxed_expr()?;
+
+        Ok(Rename(name, Equal(r#eq, expr)))
+    }
+    pub fn is_named_binding(&mut self) -> bool {
+        self.peek(0).is(TokenKind::LPar) && self.peek(1).is_lower_id() && self.peek(2).is(TokenKind::Eq)
+    }
+
+    pub fn is_binding(&mut self) -> bool {
+        self.peek(0).is(TokenKind::LPar) && self.peek(1).is_lower_id() && self.peek(2).is(TokenKind::Colon)
+    }
+
+    pub fn parse_named_binding(&mut self) -> Result<NamedBinding> {
+        if self.is_named_binding() {
+            Ok(NamedBinding::Named(self.parse_paren(Self::parse_rename)?))
+        } else {
+            Ok(NamedBinding::Expr(Box::new(self.parse_atom()?)))
+        }
+    }
+
+    pub fn parse_app_binding(&mut self) -> Result<Binding> {
+        let tilde = self.eat(TokenKind::Tilde);
+        let value = self.parse_named_binding()?;
+        Ok(Binding { tilde, value })
+    }
+
+    pub fn parse_app(&mut self, multiline: bool) -> Result<ExprKind> {
+        let fun = self.parse_atom()?;
+
+        let mut args = ThinVec::new();
+
+        while (!self.get().after_newline || multiline) && !self.get().is(TokenKind::EOF) {
+            if let Some(atom) = self.try_with(Self::parse_app_binding)? {
+                args.push(atom)
+            } else {
+                break
+            }
+        }
+
+        if args.is_empty() {
+            Ok(fun.data)
+        } else {
+            Ok(ExprKind::App(Box::new(AppExpr {
+                fun: Box::new(fun),
+                args,
+            })))
+        }
+    }
+
+    pub fn parse_arrow(&mut self) -> Result<ExprKind> {
+        let left = self.parse_item(|this| this.parse_app(false))?;
+
+        if let TokenKind::FatArrow | TokenKind::RightArrow = self.get().data {
+            self.parse_pi_or_lambda_end(Param::Expr(Box::new(left)), None)
+        } else {
+            Ok(left.data)
+        }
+    }
+
+    pub fn parse_ann(&mut self) -> Result<ExprKind> {
+        let value = self.parse_item(Self::parse_arrow)?;
+
+        if self.is(TokenKind::ColonColon) {
+            let r#colon = self.bump();
+            let typ = self.parse_item(Self::parse_ann)?;
+
+            Ok(ExprKind::Ann(Box::new(AnnExpr {
+                value: Box::new(value),
+                r#colon,
+                typ: Box::new(typ),
+            })))
+        } else {
+            Ok(value.data)
+        }
+    }
+
+    pub fn parse_erased(&mut self) -> Result<ExprKind> {
+        let tilde = self.bump();
+        let param = self.parse_param()?;
+        self.parse_pi_or_lambda_end(param, Some(tilde))
+    }
+
+    pub fn parse_pi_or_lambda(&mut self) -> Result<ExprKind> {
+        let param = self.parse_param()?;
+        self.parse_pi_or_lambda_end(param, None)
+    }
+
+    pub fn parse_pair_expr(&mut self) -> Result<ExprKind> {
+        let pair = self.parse_pair(Self::parse_atom)?;
+        Ok(ExprKind::Pair(Box::new(pair)))
+    }
+
     pub fn parse_expr_kind(&mut self) -> Result<ExprKind> {
         if self.is_keyword("do") {
             self.parse_do().map(|x| ExprKind::Do(Box::new(x)))
@@ -681,14 +822,15 @@ impl<'a> Parser<'a> {
         } else if self.is_keyword("open") {
             self.parse_open().map(|x| ExprKind::Open(Box::new(x)))
         } else if self.is_keyword("specialize") {
-            todo!()
+            self.parse_specialize().map(|x| ExprKind::Subst(Box::new(x)))
         } else if self.is(TokenKind::Sign) {
-            let pair = self.parse_pair(Self::parse_atom)?;
-            Ok(ExprKind::Pair(Box::new(pair)))
+            self.parse_pair_expr()
         } else if self.is(TokenKind::Tilde) {
-            todo!()
+            self.parse_erased()
+        } else if self.is_binding() {
+            self.parse_pi_or_lambda()
         } else {
-            todo!()
+            self.parse_ann()
         }
     }
 
@@ -706,9 +848,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parser() {
+    fn test_parser_attribute() {
         let mut parser = Parser::new(Lexer::new("#foo\n//ata\n[a, b] = c"));
+        assert!(parser.parse_attribute().is_ok())
+    }
 
-        println!("{:#?}", parser.parse_attribute());
+    #[test]
+    fn test_parse_expr() {
+        let mut parser = Parser::new(Lexer::new("a => (b : d) -> c"));
+        assert!(parser.parse_attribute().is_ok())
     }
 }

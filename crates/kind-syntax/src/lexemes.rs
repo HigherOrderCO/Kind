@@ -23,11 +23,6 @@ pub type Open = Token;
 pub type Do = Token;
 pub type Dot = Token;
 
-pub enum Either<A, B> {
-    Left(A),
-    Right(B),
-}
-
 // Compounds
 #[derive(Debug)]
 pub struct Paren<T>(pub Token, pub T, pub Token);

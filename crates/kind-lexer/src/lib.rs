@@ -358,9 +358,9 @@ impl<'a> Lexer<'a> {
 
     /// Removes all the line breaks from the input before a token.
     fn lex_linebreak(&mut self) -> bool {
-        self.reset();
-
         self.eat_while(&is_useless);
+
+        self.reset();
         let count = self.eat_while(&|x| x == '\n');
 
         !count.is_empty()

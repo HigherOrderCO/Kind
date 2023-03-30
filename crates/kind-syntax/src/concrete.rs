@@ -8,11 +8,7 @@ use thin_vec::ThinVec;
 
 use kind_lexer::tokens::Token;
 
-use crate::lexemes;
-use crate::lexemes::{
-    AngleBracket, Brace, Bracket, Colon, Either, Equal, Ident, Item, Paren, QualifiedIdent,
-    Tokenized,
-};
+use crate::lexemes::*;
 
 #[derive(Debug)]
 pub enum AttributeStyleKind {
@@ -34,7 +30,7 @@ pub type AttributeStyle = Item<AttributeStyleKind>;
 
 #[derive(Debug)]
 pub struct AttributeKind {
-    pub r#hash: lexemes::Hash,
+    pub r#hash: Hash,
     pub name: Ident,
     pub value: Option<Equal<AttributeStyle>>,
     pub arguments: Option<Bracket<ThinVec<AttributeStyle>>>,
@@ -44,28 +40,36 @@ pub struct AttributeKind {
 pub type Attribute = Item<AttributeKind>;
 
 /// A type binding is a type annotation for a variable.
+#[derive(Debug)]
 pub struct TypeBinding {
     pub name: Ident,
     pub typ: Colon<Box<Expr>>,
 }
 
-pub type ArgumentBinding = Either<AngleBracket<Param>, Paren<Param>>;
+#[derive(Debug)]
+pub enum ArgumentBinding {
+    Angle(AngleBracket<Param>),
+    Paren(Paren<Param>)
+}
 
 /// An argument of a type signature.
+#[derive(Debug)]
 pub struct Argument {
-    pub minus: Option<lexemes::Minus>,
-    pub plus: Option<lexemes::Plus>,
+    pub minus: Option<Minus>,
+    pub plus: Option<Plus>,
     pub binding: ArgumentBinding,
 }
 
 /// A local expression is a reference atom to a local declaration.
 /// * Always starts with a lower case letter.
+#[derive(Debug)]
 pub struct LocalExpr {
     pub name: Ident,
 }
 
 /// A constructor expression is a reference atom to a top level declaration.
 /// * Always starts with an upper case letter.
+#[derive(Debug)]
 pub struct ConstructorExpr {
     pub name: QualifiedIdent,
 }
@@ -77,71 +81,82 @@ pub struct ConstructorExpr {
 /// // or
 /// x
 /// ```
+#[derive(Debug)]
 pub enum Param {
     Named(Paren<TypeBinding>),
     Expr(Box<Expr>),
 }
 
 /// A all node is a dependent function type.
+#[derive(Debug)]
 pub struct PiExpr {
-    pub r#tilde: lexemes::Tilde,
+    pub r#tilde: Option<Tilde>,
     pub param: Param,
-    pub r#arrow: lexemes::RightArrow,
+    pub r#arrow: RightArrow,
     pub body: Box<Expr>,
 }
 
 /// A sigma node is a dependent pair type. It express
 /// the dependency of the type of the second element
 /// of the pair on the first one.
+#[derive(Debug)]
 pub struct SigmaExpr {
     pub param: Bracket<TypeBinding>,
-    pub r#arrow: lexemes::RightArrow,
+    pub r#arrow: RightArrow,
     pub body: Box<Expr>,
 }
 
 /// A lambda expression (an anonymous function).
+#[derive(Debug)]
 pub struct LambdaExpr {
-    pub r#tilde: Option<lexemes::Tilde>,
+    pub r#tilde: Option<Tilde>,
     pub param: Param,
-    pub r#arrow: lexemes::FatArrow,
+    pub r#arrow: FatArrow,
     pub body: Box<Expr>,
 }
 
+#[derive(Debug)]
 pub struct Rename(pub Ident, pub Equal<Box<Expr>>);
 
+#[derive(Debug)]
 pub enum NamedBinding {
     Named(Paren<Rename>),
     Expr(Box<Expr>),
 }
 
+#[derive(Debug)]
 pub struct Binding {
-    pub r#tilde: Option<lexemes::Tilde>,
+    pub r#tilde: Option<Tilde>,
     pub value: NamedBinding,
 }
 
 /// Application of a function to a sequence of arguments.
+#[derive(Debug)]
 pub struct AppExpr {
     pub fun: Box<Expr>,
-    pub arg: ThinVec<Binding>,
+    pub args: ThinVec<Binding>,
 }
 
 /// Let binding expression.
+#[derive(Debug)]
 pub struct LetExpr {
-    pub r#let: lexemes::Let,
+    pub r#let: Let,
     pub name: Ident,
     pub value: Equal<Box<Expr>>,
-    pub r#semi: Option<lexemes::Semi>,
+    pub r#semi: Option<Semi>,
     pub next: Box<Expr>,
 }
 
 /// A type annotation.
+#[derive(Debug)]
 pub struct AnnExpr {
     pub value: Box<Expr>,
-    pub r#colon: lexemes::ColonColon,
+    pub r#colon: ColonColon,
     pub typ: Box<Expr>,
 }
 
 /// A literal is a constant value that can be used in the program.
+#[derive(Debug)]
 pub enum Literal {
     U60(Tokenized<u64>),
     F60(Tokenized<f64>),
@@ -152,14 +167,16 @@ pub enum Literal {
 }
 
 // TODO: Rename
+#[derive(Debug)]
 pub enum TypeExpr {
     Help(Tokenized<String>),
-    Type(lexemes::Type),
+    Type(Type),
     TypeU60(Token),
     TypeU120(Token),
     TypeF60(Token),
 }
 
+#[derive(Debug)]
 pub enum Operation {
     Add,
     Sub,
@@ -181,6 +198,7 @@ pub enum Operation {
 }
 
 /// A binary operation.
+#[derive(Debug)]
 pub struct BinaryExpr {
     pub left: Box<Expr>,
     pub op: Tokenized<Operation>,
@@ -188,38 +206,43 @@ pub struct BinaryExpr {
 }
 
 /// Monadic binding without a variable name.
+#[derive(Debug)]
 pub struct NextStmt {
     pub left: Box<Expr>,
-    pub r#semi: Option<lexemes::Semi>,
+    pub r#semi: Option<Semi>,
     pub next: Box<Stmt>,
 }
 
 /// An ask statement is a monadic binding inside the `do` notation
 /// with a name.
+#[derive(Debug)]
 pub struct AskStmt {
-    pub r#ask: lexemes::Ask,
+    pub r#ask: Ask,
     pub name: Ident,
     pub value: Equal<Box<Expr>>,
-    pub r#semi: Option<lexemes::Semi>,
+    pub r#semi: Option<Semi>,
     pub next: Box<Stmt>,
 }
 
 /// A let binding inside the `do` notation.
+#[derive(Debug)]
 pub struct LetStmt {
-    pub r#let: lexemes::Let,
+    pub r#let: Let,
     pub name: Ident,
     pub value: Equal<Box<Expr>>,
-    pub r#semi: Option<lexemes::Semi>,
+    pub r#semi: Option<Semi>,
     pub next: Box<Stmt>,
 }
 
 /// The "pure" function of the `A` monad.
+#[derive(Debug)]
 pub struct ReturnStmt {
-    pub r#return: lexemes::Return,
+    pub r#return: Return,
     pub value: Box<Expr>,
 }
 
 /// An expression without the "pure" function.
+#[derive(Debug)]
 pub struct ReturnExprStmt {
     pub value: Box<Expr>,
 }
@@ -236,6 +259,7 @@ pub struct ReturnExprStmt {
 ///    return a + 2   // The "pure" functoin of the `A` monad
 /// }
 /// ```
+#[derive(Debug)]
 pub enum StmtKind {
     /// Monadic binding without a variable name.
     Next(NextStmt),
@@ -261,13 +285,15 @@ pub type Stmt = Item<StmtKind>;
 ///     return a + b;
 /// }
 /// ```
+#[derive(Debug)]
 pub struct DoNode {
-    pub r#do: lexemes::Do,
+    pub r#do: Do,
     pub typ: Option<QualifiedIdent>,
     pub value: Brace<Stmt>,
 }
 
 /// Conditional expression.
+#[derive(Debug)]
 pub struct IfExpr {
     pub cond: Tokenized<Box<Expr>>,
     pub then: Brace<Box<Expr>>,
@@ -279,8 +305,9 @@ pub struct IfExpr {
 /// ```kind
 /// $ a b
 /// ```
+#[derive(Debug)]
 pub struct PairNode<T> {
-    pub r#sign: lexemes::Sign,
+    pub r#sign: Sign,
     pub left: Box<T>,
     pub right: Box<T>,
 }
@@ -291,27 +318,30 @@ pub struct PairNode<T> {
 /// ```kind
 /// specialize a into #0 in a
 /// ```
+#[derive(Debug)]
 pub struct SubstExpr {
-    pub r#specialize: lexemes::Specialize,
+    pub r#specialize: Specialize,
     pub name: Ident,
     pub r#into: Token,
-    pub r#hash: lexemes::Hash,
-    pub num: u64,
+    pub r#hash: Hash,
+    pub num: Tokenized<u64>,
     pub r#in: Token,
     pub value: Box<Expr>,
 }
 
 /// A List expression represents a list of values.
+#[derive(Debug)]
 pub struct ListNode<T> {
     pub bracket: Bracket<ThinVec<T>>,
 }
 
 /// A Case is a single case in a match node.
+#[derive(Debug)]
 pub struct CaseNode {
     pub name: Ident,
-    pub r#arrow: lexemes::FatArrow,
+    pub r#arrow: FatArrow,
     pub value: Box<Expr>,
-    pub r#semi: Option<lexemes::Semi>,
+    pub r#semi: Option<Semi>,
 }
 
 /// A match expression is a case analysis on a value (dependent eliminator)
@@ -323,10 +353,11 @@ pub struct CaseNode {
 ///     cons => a.head
 /// }
 /// ```
+#[derive(Debug)]
 pub struct MatchExpr {
-    pub r#match: lexemes::Match,
+    pub r#match: Match,
     pub typ: Option<QualifiedIdent>,
-    pub with: Option<(lexemes::With, ThinVec<Param>)>,
+    pub with: Option<(With, ThinVec<Param>)>,
     pub scrutinee: Box<Expr>,
     pub cases: Brace<ThinVec<CaseNode>>,
     pub motive: Option<Colon<Box<Expr>>>,
@@ -341,16 +372,18 @@ pub struct MatchExpr {
 /// a.head
 /// ```
 ///
+#[derive(Debug)]
 pub struct OpenExpr {
-    pub r#open: lexemes::Open,
+    pub r#open: Open,
     pub typ: Option<QualifiedIdent>,
     pub name: Box<Expr>,
-    pub r#semi: Option<lexemes::Semi>,
+    pub r#semi: Option<Semi>,
     pub next: Box<Expr>,
 }
 
 /// A node that express the operation after accessing fields
 /// of a record.
+#[derive(Debug)]
 pub enum AccessOperation {
     Set(Token, Box<Expr>),
     Mut(Token, Box<Expr>),
@@ -358,14 +391,16 @@ pub enum AccessOperation {
 }
 
 /// A node for accessing and modifying fields of a record.
+#[derive(Debug)]
 pub struct AccessExpr {
     pub typ: Box<Expr>,
     pub expr: Box<Expr>,
-    pub fields: ThinVec<(lexemes::Dot, Ident)>,
+    pub fields: ThinVec<(Dot, Ident)>,
     pub operation: AccessOperation,
 }
 
 /// An expression is a piece of code that can be evaluated.
+#[derive(Debug)]
 pub enum ExprKind {
     Local(Box<LocalExpr>),
     Pi(Box<PiExpr>),
@@ -393,12 +428,14 @@ pub enum ExprKind {
 pub type Expr = Item<ExprKind>;
 
 /// A constructor node is the name of a global function.
+#[derive(Debug)]
 pub struct ConstructorPat {
     pub name: QualifiedIdent,
     pub args: ThinVec<Argument>,
 }
 
 /// A pattern is part of a rule. It is a structure that matches an expression.
+#[derive(Debug)]
 pub enum PatKind {
     Ident(Ident),
     Pair(PairNode<Pat>),
@@ -415,6 +452,7 @@ pub type Pat = Item<PatKind>;
 /// ```kind
 /// Add (n: Nat) (m: Nat) : Nat
 /// ```
+#[derive(Debug)]
 pub struct Signature {
     pub name: Ident,
     pub arguments: ThinVec<Argument>,
@@ -427,6 +465,7 @@ pub struct Signature {
 /// ```kind
 /// Add Nat.zero m = m
 /// ```
+#[derive(Debug)]
 pub struct Rule {
     pub name: Ident,
     pub patterns: ThinVec<Pat>,
@@ -441,6 +480,7 @@ pub struct Rule {
 ///    n + m
 /// }
 /// ```
+#[derive(Debug)]
 pub struct Function {
     pub name: Ident,
     pub arguments: ThinVec<Argument>,
@@ -455,6 +495,7 @@ pub struct Function {
 /// ```kind
 /// @eval (+ 1 1)
 /// ```
+#[derive(Debug)]
 pub struct Command {
     pub at: Token,
     pub name: Ident,
@@ -467,6 +508,7 @@ pub struct Command {
 /// ```kind
 ///    some (value: a) : Maybe a
 /// ```
+#[derive(Debug)]
 pub struct Constructor {
     pub name: Ident,
     pub arguments: ThinVec<Argument>,
@@ -475,6 +517,7 @@ pub struct Constructor {
 
 /// A type definition is a top-level structure that defines a type family
 /// with multiple constructors that named fields, indices and parameters.
+#[derive(Debug)]
 pub struct TypeDef {
     pub name: QualifiedIdent,
     pub constructors: ThinVec<Constructor>,
@@ -484,6 +527,7 @@ pub struct TypeDef {
 
 /// A record definition is a top-level structure that defines a type with
 /// a single constructor that has named fields with named fields.
+#[derive(Debug)]
 pub struct RecordDef {
     pub name: QualifiedIdent,
     pub fields: ThinVec<TypeBinding>,
@@ -493,6 +537,7 @@ pub struct RecordDef {
 
 /// A top-level item is a item that is on the outermost level of a
 /// program. It includes functions, commands, signatures and rules.
+#[derive(Debug)]
 pub enum TopLevelKind {
     Function(Function),
     Commmand(Command),
@@ -502,6 +547,7 @@ pub enum TopLevelKind {
     Rule(Rule),
 }
 
+#[derive(Debug)]
 pub struct Attributed<T> {
     pub attributes: ThinVec<Attribute>,
     pub data: T,
@@ -512,6 +558,8 @@ pub type TopLevel = Attributed<Item<TopLevelKind>>;
 
 /// A collection of top-level items. This is the root of the CST and
 /// is the result of parsing a module.
+
+#[derive(Debug)]
 pub struct Module {
     pub shebang: Option<String>,
     pub items: ThinVec<TopLevel>,
