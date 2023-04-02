@@ -1,16 +1,16 @@
 [package]
-name = "kind-checker"
-version = "0.1.1"
+description = "Type checker for the kind compiler"
 edition = "2021"
 license = "MIT"
-description = "Type checker for the kind compiler"
+name = "kind-checker"
+version = "0.1.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-tree = { path = "../kind-tree", version = "0.1.1" }
-kind-span = { path = "../kind-span", version = "0.1.1" }
-kind-report = { path = "../kind-report", version = "0.1.1" }
+kind-report = {path = "../kind-report", version = "0.1.2"}
+kind-span = {path = "../kind-span", version = "0.1.2"}
+kind-tree = {path = "../kind-tree", version = "0.1.2"}
 
 hvm = "1.0.6"
 

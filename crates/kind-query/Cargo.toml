@@ -1,20 +1,20 @@
 [package]
-name = "kind-query"
-version = "0.1.1"
+description = "Query module for the kind compiler"
 edition = "2021"
 license = "MIT"
-description = "Query module for the kind compiler"
+name = "kind-query"
+version = "0.1.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-parser = { path = "../kind-parser", version = "0.1.1" }
-kind-tree = { path = "../kind-tree", version = "0.1.1" }
-kind-span = { path = "../kind-span", version = "0.1.1" }
-kind-report = { path = "../kind-report", version = "0.1.1" }
-kind-checker = { path = "../kind-checker", version = "0.1.1"  }
-kind-pass = { path = "../kind-pass", version = "0.1.1"  }
-kind-target-hvm = { path = "../kind-target-hvm", version = "0.1.1"  }
+kind-checker = {path = "../kind-checker", version = "0.1.2"}
+kind-parser = {path = "../kind-parser", version = "0.1.2"}
+kind-pass = {path = "../kind-pass", version = "0.1.2"}
+kind-report = {path = "../kind-report", version = "0.1.2"}
+kind-span = {path = "../kind-span", version = "0.1.2"}
+kind-target-hvm = {path = "../kind-target-hvm", version = "0.1.2"}
+kind-tree = {path = "../kind-tree", version = "0.1.2"}
 
 fxhash = "0.2.1"
 pathdiff = "0.2.1"
