@@ -5,7 +5,7 @@ keywords = ["functional", "language", "type-theory", "proof-assistant"]
 license = "MIT"
 name = "kind2"
 repository = "https://github.com/Kindelia/Kind2"
-version = "0.3.8"
+version = "0.3.9"
 
 [[bin]]
 name = "kind2"
