@@ -62,5 +62,5 @@ pub enum Log {
 pub trait Diagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex>;
     fn get_severity(&self) -> Severity;
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame;
+    fn to_diagnostic_frame(&self, explicit: bool) -> DiagnosticFrame;
 }

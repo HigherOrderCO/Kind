@@ -40,7 +40,7 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
                 let res = run(&PathBuf::from(path), &mut session);
 
                 let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
-                let render = RenderConfig::ascii(2);
+                let render = RenderConfig::ascii(2, true);
 
                 kind_report::check_if_colors_are_supported(true);
 
@@ -67,7 +67,7 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
 fn test_checker() -> Result<(), Error> {
     test_kind2(Path::new("./suite/checker"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
-        let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
+        let check = driver::type_check_book(true, session, path, entrypoints, Some(1), true);
         check.map(|_| "Ok!".to_string()).ok()
     })?;
     Ok(())
@@ -78,7 +78,7 @@ fn test_checker() -> Result<(), Error> {
 fn test_checker_issues() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/checker"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
-        let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
+        let check = driver::type_check_book(true, session, path, entrypoints, Some(1), true);
         check.map(|_| "Ok!".to_string()).ok()
     })?;
     Ok(())
@@ -165,7 +165,7 @@ fn test_erasure() -> Result<(), Error> {
 fn test_coverage() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/coverage"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
-        let check = driver::type_check_book(session, path, entrypoints, Some(1), true);
+        let check = driver::type_check_book(true, session, path, entrypoints, Some(1), true);
         check.map(|_| "Ok!".to_string()).ok()
     })?;
     Ok(())

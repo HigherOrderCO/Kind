@@ -97,7 +97,7 @@ impl<'a> DesugarState<'a> {
                         {
                             for (i, parameter) in sum_type.parameters.iter().enumerate() {
                                 match &args[i].data {
-                                    ExprKind::Var { name }
+                                    ExprKind::Var { name, .. }
                                         if name.to_string() == parameter.name.to_string() => {}
                                     _ => {
                                         self.send_err(PassDiagnostic::ShouldBeAParameter(
@@ -282,7 +282,7 @@ impl<'a> DesugarState<'a> {
                     for i in 0..entry.arguments.len() {
                         if entry.arguments[i].hidden {
                             let name = self.gen_name(entry.arguments[i].range);
-                            new_spine.push(desugared::Expr::var(name))
+                            new_spine.push(desugared::Expr::gen_var(name))
                         } else {
                             new_spine.push(self.desugar_pat(&spine[count]));
                             count += 1;
@@ -305,7 +305,7 @@ impl<'a> DesugarState<'a> {
             }
             PatKind::Hole => {
                 let name = self.gen_name(pat.range);
-                desugared::Expr::var(name)
+                desugared::Expr::gen_var(name)
             }
             PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
             PatKind::U60(n) => desugared::Expr::num_u60(pat.range, *n),
@@ -343,7 +343,7 @@ impl<'a> DesugarState<'a> {
             let mut pat_iter = pats.iter();
             for arg in args.iter() {
                 if arg.hidden {
-                    res_pats.push(desugared::Expr::var(self.gen_name(arg.range)))
+                    res_pats.push(desugared::Expr::gen_var(self.gen_name(arg.range)))
                 } else {
                     res_pats.push(pat_iter.next().unwrap().to_owned());
                 }

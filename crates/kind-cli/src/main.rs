@@ -46,6 +46,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub ascii: bool,
 
+    /// Make implicit arguments explicit
+    #[arg(long)]
+    pub explicit: bool,
+
     /// Entrypoint of the file that makes the erasure checker
     /// not remove the entry.
     #[arg(short, long)]
@@ -199,7 +203,7 @@ pub fn compile_in_session<T>(
 pub fn run_cli(config: Cli) -> anyhow::Result<()> {
     kind_report::check_if_colors_are_supported(config.no_color);
 
-    let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2);
+    let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2, config.explicit);
     let root = config.root.unwrap_or_else(|| PathBuf::from("."));
 
     let mut entrypoints = vec!["Main".to_string()];
@@ -212,6 +216,7 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
         Command::Check { file, coverage } => {
             compile_in_session(&render_config, root, file.clone(), false, &mut |session| {
                 let (_, rewrites) = driver::type_check_book(
+                    config.explicit,
                     session,
                     &PathBuf::from(file.clone()),
                     entrypoints.clone(),

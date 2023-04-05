@@ -414,7 +414,7 @@ impl Report for Box<dyn Diagnostic> {
     ) -> std::fmt::Result {
         write!(fmt, " ")?;
 
-        let frame = self.to_diagnostic_frame();
+        let frame = self.to_diagnostic_frame(config.explicit);
 
         render_tag(&frame.severity, fmt)?;
         writeln!(fmt, "{}", Paint::new(&frame.title).bold())?;

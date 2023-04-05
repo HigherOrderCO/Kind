@@ -28,7 +28,7 @@ pub struct AppBinding {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ExprKind {
     /// Name of a variable
-    Var { name: Ident },
+    Var { name: Ident, generated: bool },
     /// The dependent function space (e.g. (x : Int) -> y)
     All {
         param: Ident,
@@ -104,7 +104,14 @@ impl Expr {
     pub fn var(name: Ident) -> Box<Expr> {
         Box::new(Expr {
             range: name.range,
-            data: ExprKind::Var { name },
+            data: ExprKind::Var { name, generated: false },
+        })
+    }
+
+    pub fn gen_var(name: Ident) -> Box<Expr> {
+        Box::new(Expr {
+            range: name.range,
+            data: ExprKind::Var { name, generated: true },
         })
     }
 
@@ -361,7 +368,7 @@ impl Expr {
     pub fn new_var(name: Ident) -> Expr {
         Expr {
             range: name.range,
-            data: ExprKind::Var { name },
+            data: ExprKind::Var { name, generated: false },
         }
     }
 
@@ -422,7 +429,7 @@ impl Display for Expr {
             NumU60 { numb } => write!(f, "{}", numb),
             NumF60 { numb: _ } => todo!(),
             All { .. } => write!(f, "({})", self.traverse_pi_types()),
-            Var { name } => write!(f, "{}", name),
+            Var { name, .. } => write!(f, "{}", name),
             Lambda {
                 param,
                 body,

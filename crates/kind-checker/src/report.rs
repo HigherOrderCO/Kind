@@ -81,11 +81,13 @@ fn parse_qualified(term: &Term) -> Result<QualifiedIdent, String> {
     }
 }
 
-fn parse_expr(term: &Term) -> Result<Box<desugared::Expr>, String> {
-    parse_all_expr(Default::default(), term)
+fn parse_expr(explicit_args: bool, book: &desugared::Book, term: &Term) -> Result<Box<desugared::Expr>, String> {
+    parse_all_expr(explicit_args, book, Default::default(), term)
 }
 
 fn parse_all_expr(
+    explicit_args: bool,
+    book: &desugared::Book,
     names: im_rc::HashMap<String, String>,
     term: &Term,
 ) -> Result<Box<desugared::Expr>, String> {
@@ -94,77 +96,102 @@ fn parse_all_expr(
             "Kind.Term.Quoted.all" => Ok(Expr::all(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
-                parse_all_expr(names.clone(), &args[2])?,
-                parse_all_expr(names, &args[3])?,
+                parse_all_expr(explicit_args, book, names.clone(), &args[2])?,
+                parse_all_expr(explicit_args, book, names, &args[3])?,
                 false, // TODO: Fix
             )),
             "Kind.Term.Quoted.lam" => Ok(Expr::lambda(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
-                parse_all_expr(names, &args[2])?,
+                parse_all_expr(explicit_args, book, names, &args[2])?,
                 false, // TODO: Fix
             )),
             "Kind.Term.Quoted.let" => Ok(Expr::let_(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
-                parse_all_expr(names.clone(), &args[2])?,
-                parse_all_expr(names, &args[3])?,
+                parse_all_expr(explicit_args, book, names.clone(), &args[2])?,
+                parse_all_expr(explicit_args, book, names, &args[3])?,
             )),
             "Kind.Term.Quoted.typ" => Ok(Expr::typ(parse_orig(&args[0])?)),
-            "Kind.Term.Quoted.var" => Ok(Expr::var(Ident::new(
-                parse_name(&args[1])?,
-                parse_orig(&args[0])?,
-            ))),
+            "Kind.Term.Quoted.var" => {
+                let name = parse_name(&args[1])?;
+
+                let name = if name.starts_with("__") {
+                    name[2..].to_string()
+                } else {
+                    name
+                };
+
+                Ok(Expr::var(Ident::new(
+                    name,
+                    parse_orig(&args[0])?,
+                )))
+            },
             "Kind.Term.Quoted.hol" => Ok(Expr::hole(parse_orig(&args[0])?, parse_num(&args[1])?)),
             "Kind.Term.Quoted.ann" => Ok(Expr::ann(
                 parse_orig(&args[0])?,
-                parse_all_expr(names.clone(), &args[1])?,
-                parse_all_expr(names, &args[2])?,
+                parse_all_expr(explicit_args, book, names.clone(), &args[1])?,
+                parse_all_expr(explicit_args, book, names, &args[2])?,
             )),
             "Kind.Term.Quoted.sub" => Ok(Expr::sub(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_num(&args[2])? as usize,
                 parse_num(&args[3])? as usize,
-                parse_all_expr(names, &args[4])?,
+                parse_all_expr(explicit_args, book, names, &args[4])?,
             )),
             "Kind.Term.Quoted.app" => Ok(Expr::app(
                 parse_orig(&args[0])?,
-                parse_all_expr(names.clone(), &args[1])?,
+                parse_all_expr(explicit_args, book, names.clone(), &args[1])?,
                 vec![desugared::AppBinding {
-                    data: parse_all_expr(names, &args[2])?,
+                    data: parse_all_expr(explicit_args, book, names, &args[2])?,
                     erased: false,
                 }],
             )),
             "Kind.Term.Quoted.ctr" => {
                 let name = parse_qualified(&args[0])?;
+
+                let entr = book.entrs.get(name.to_str()).unwrap();
+
                 let orig = parse_orig(&args[1])?;
                 let mut res = Vec::new();
-                for arg in parse_list(&args[2])? {
-                    res.push(parse_all_expr(names.clone(), &arg)?);
+
+                let args = parse_list(&args[2])?;
+
+                for (arg, param) in args.iter().zip(&entr.args) {
+                    if explicit_args || !param.hidden {
+                        res.push(parse_all_expr(explicit_args, book, names.clone(), &arg)?);
+                    }
                 }
                 Ok(Expr::ctr(orig, name, res))
             }
-            "Kind.Term.Quoted.fun" => Ok(Expr::fun(
-                parse_orig(&args[1])?,
-                parse_qualified(&args[0])?,
-                {
-                    let mut res = Vec::new();
-                    for arg in parse_list(&args[2])? {
-                        res.push(parse_all_expr(names.clone(), &arg)?);
+            "Kind.Term.Quoted.fun" => {
+                let orig = parse_orig(&args[1])?;
+                let name = parse_qualified(&args[0])?;
+
+                let entr = book.entrs.get(name.to_str()).unwrap();
+                let mut res = Vec::new();
+
+                for (param, arg) in entr.args.iter().zip(parse_list(&args[2])?) {
+                    if explicit_args || !param.hidden {
+                        let name = parse_all_expr(explicit_args, book, names.clone(), &arg)?;
+                        res.push(name);
                     }
-                    res
-                },
-            )),
+                }
+
+                Ok(Expr::fun(orig, name, res))
+            }
             "Kind.Term.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
             "Kind.Term.Quoted.u60" => Ok(Expr::type_u60(parse_orig(&args[0])?)),
-            "Kind.Term.Quoted.num" => Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?)),
+            "Kind.Term.Quoted.num" => {
+                Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?))
+            }
             // TODO: Change quoting to support floats
             "Kind.Term.Quoted.op2" => Ok(Expr::binary(
                 parse_orig(&args[0])?,
                 parse_op(&args[1])?,
-                parse_all_expr(names.clone(), &args[2])?,
-                parse_all_expr(names, &args[3])?,
+                parse_all_expr(explicit_args, book, names.clone(), &args[2])?,
+                parse_all_expr(explicit_args, book, names, &args[3])?,
             )),
             tag => Err(format!(
                 "Unexpected tag on transforming quoted term {:?}",
@@ -197,15 +224,15 @@ fn parse_list(term: &Term) -> Result<Vec<Box<Term>>, String> {
 }
 
 /// Transforms a HVM quoted entry into a easy to manipulate structure.
-pub fn transform_entry(term: &Term) -> Result<Entry, String> {
+pub fn transform_entry(explicit_args: bool, book: &desugared::Book, term: &Term) -> Result<Entry, String> {
     match term {
         Term::Ctr { name, args } if name == "Pair.new" => {
             let fst = parse_name(&args[0])?;
             match &*args[1] {
                 Term::Ctr { name, args } if name == "Pair.new" => {
-                    let snd = parse_expr(&args[0])?;
+                    let snd = parse_expr(explicit_args, book, &args[0])?;
                     let trd = parse_list(&args[1])?;
-                    let trd = trd.iter().flat_map(|x| parse_expr(x)).collect();
+                    let trd = trd.iter().flat_map(|x| parse_expr(explicit_args, book, x)).collect();
                     Ok((fst, snd, trd))
                 }
                 _ => Err("Unexpected value on entry second pair".to_string()),
@@ -215,39 +242,45 @@ pub fn transform_entry(term: &Term) -> Result<Entry, String> {
     }
 }
 
-fn parse_type_error(expr: &Term) -> Result<TypeDiagnostic, String> {
+fn parse_type_error(explicit_args: bool, book: &desugared::Book, expr: &Term) -> Result<TypeDiagnostic, String> {
     match expr {
         Term::Ctr { name, args } => {
             if args.len() < 2 {
                 return Err("Invalid argument length for constructor".to_string());
             }
             let ls = parse_list(&args[0])?;
-            let entries = ls.iter().flat_map(|x| transform_entry(x));
+            let entries = ls.iter().flat_map(|x| transform_entry(explicit_args, book, x));
             let ctx = Context(entries.collect());
             let orig = match_opt!(*args[1], Term::U6O { numb } => EncodedRange(numb).to_range())?;
             match name.as_str() {
-                "Kind.Error.Quoted.uncovered_pattern" => Ok(TypeDiagnostic::UncoveredPattern(ctx, orig, {
-                    let args = parse_list(&args[2])?;
-                    let mut new_args = Vec::with_capacity(args.len());
-                    for arg in &args {
-                        new_args.push(parse_all_expr(im_rc::HashMap::new(), arg)?);
-                    }
-                    new_args
-                })),
-                "Kind.Error.Quoted.unbound_variable" => Ok(TypeDiagnostic::UnboundVariable(ctx, orig)),
+                "Kind.Error.Quoted.uncovered_pattern" => {
+                    Ok(TypeDiagnostic::UncoveredPattern(ctx, orig, {
+                        let args = parse_list(&args[2])?;
+                        let mut new_args = Vec::with_capacity(args.len());
+                        for arg in &args {
+                            new_args.push(parse_all_expr(explicit_args, book, im_rc::HashMap::new(), arg)?);
+                        }
+                        new_args
+                    }))
+                }
+                "Kind.Error.Quoted.unbound_variable" => {
+                    Ok(TypeDiagnostic::UnboundVariable(ctx, orig))
+                }
                 "Kind.Error.Quoted.cant_infer_hole" => Ok(TypeDiagnostic::CantInferHole(ctx, orig)),
-                "Kind.Error.Quoted.cant_infer_lambda" => Ok(TypeDiagnostic::CantInferLambda(ctx, orig)),
+                "Kind.Error.Quoted.cant_infer_lambda" => {
+                    Ok(TypeDiagnostic::CantInferLambda(ctx, orig))
+                }
                 "Kind.Error.Quoted.invalid_call" => Ok(TypeDiagnostic::InvalidCall(ctx, orig)),
                 "Kind.Error.Quoted.impossible_case" => Ok(TypeDiagnostic::ImpossibleCase(
                     ctx,
                     orig,
-                    parse_all_expr(im_rc::HashMap::new(), &args[2])?,
-                    parse_all_expr(im_rc::HashMap::new(), &args[3])?,
+                    parse_all_expr(explicit_args, book, im_rc::HashMap::new(), &args[2])?,
+                    parse_all_expr(explicit_args, book, im_rc::HashMap::new(), &args[3])?,
                 )),
                 "Kind.Error.Quoted.inspection" => Ok(TypeDiagnostic::Inspection(
                     ctx,
                     orig,
-                    parse_all_expr(im_rc::HashMap::new(), &args[2])?,
+                    parse_all_expr(explicit_args, book, im_rc::HashMap::new(), &args[2])?,
                 )),
                 "Kind.Error.Quoted.too_many_arguments" => {
                     Ok(TypeDiagnostic::TooManyArguments(ctx, orig))
@@ -255,8 +288,8 @@ fn parse_type_error(expr: &Term) -> Result<TypeDiagnostic, String> {
                 "Kind.Error.Quoted.type_mismatch" => Ok(TypeDiagnostic::TypeMismatch(
                     ctx,
                     orig,
-                    parse_all_expr(im_rc::HashMap::new(), &args[2])?,
-                    parse_all_expr(im_rc::HashMap::new(), &args[3])?,
+                    parse_all_expr(explicit_args, book, im_rc::HashMap::new(), &args[2])?,
+                    parse_all_expr(explicit_args, book, im_rc::HashMap::new(), &args[3])?,
                 )),
                 _ => Err("Unexpected tag on quoted value".to_string()),
             }
@@ -265,12 +298,16 @@ fn parse_type_error(expr: &Term) -> Result<TypeDiagnostic, String> {
     }
 }
 
-pub(crate) fn parse_report(expr: &Term) -> Result<Vec<TypeDiagnostic>, String> {
+pub(crate) fn parse_report(
+    explicit_args: bool,
+    book: &desugared::Book,
+    expr: &Term,
+) -> Result<Vec<TypeDiagnostic>, String> {
     let args = parse_list(expr)?;
     let mut errs = Vec::new();
 
     for arg in args {
-        errs.push(parse_type_error(&arg)?);
+        errs.push(parse_type_error(explicit_args, book, &arg)?);
     }
 
     Ok(errs)

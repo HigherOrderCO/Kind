@@ -16,7 +16,7 @@ impl Diagnostic for DeriveDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: bool) -> DiagnosticFrame {
         match self {
             DeriveDiagnostic::CannotUseNamedVariable(range) => DiagnosticFrame {
                 code: 103,

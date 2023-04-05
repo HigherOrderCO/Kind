@@ -96,7 +96,7 @@ impl Diagnostic for PassDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: bool) -> DiagnosticFrame {
         match self {
             PassDiagnostic::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,

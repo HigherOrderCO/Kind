@@ -162,7 +162,7 @@ fn codegen_all_expr(
             vec![range_to_num(lhs, expr.range)],
         ),
         NumTypeF60 => todo!(),
-        Var { name } => {
+        Var { name, .. } => {
             if quote && !lhs {
                 set_origin(name)
             } else if lhs_rule {

@@ -29,7 +29,7 @@ impl<'a> DesugarState<'a> {
             for arg in entry.arguments.iter() {
                 if arg.hidden {
                     if create_var {
-                        arguments.push(desugared::Expr::var(self.gen_name(arg.range)))
+                        arguments.push(desugared::Expr::gen_var(self.gen_name(arg.range)))
                     } else {
                         arguments.push(self.gen_hole_expr(arg.range))
                     }

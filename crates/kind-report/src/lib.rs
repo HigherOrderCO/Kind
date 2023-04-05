@@ -48,19 +48,22 @@ impl Chars {
 pub struct RenderConfig<'a> {
     pub chars: &'a Chars,
     pub indent: usize,
+    pub explicit: bool
 }
 
 impl<'a> RenderConfig<'a> {
-    pub fn unicode(indent: usize) -> RenderConfig<'a> {
+    pub fn unicode(indent: usize, explicit: bool) -> RenderConfig<'a> {
         RenderConfig {
             chars: Chars::unicode(),
             indent,
+            explicit
         }
     }
-    pub fn ascii(indent: usize) -> RenderConfig<'a> {
+    pub fn ascii(indent: usize, explicit: bool) -> RenderConfig<'a> {
         RenderConfig {
             chars: Chars::ascii(),
             indent,
+            explicit
         }
     }
 }
@@ -71,10 +74,10 @@ pub fn check_if_colors_are_supported(disable: bool) {
     }
 }
 
-pub fn check_if_utf8_is_supported<'a>(disable: bool, indent: usize) -> RenderConfig<'a> {
+pub fn check_if_utf8_is_supported<'a>(disable: bool, indent: usize, explicit: bool) -> RenderConfig<'a> {
     if disable || (cfg!(windows) && !Paint::enable_windows_ascii()) {
-        RenderConfig::ascii(indent)
+        RenderConfig::ascii(indent, explicit)
     } else {
-        RenderConfig::unicode(indent)
+        RenderConfig::unicode(indent, explicit)
     }
 }

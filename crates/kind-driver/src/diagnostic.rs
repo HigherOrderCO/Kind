@@ -38,7 +38,7 @@ impl Diagnostic for DriverDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: bool) -> DiagnosticFrame {
         match self {
             DriverDiagnostic::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,

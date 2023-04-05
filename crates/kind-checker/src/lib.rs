@@ -56,6 +56,7 @@ pub fn gen_checker(book: &Book, check_coverage: bool, functions_to_check: Vec<St
 /// Type checks a dessugared book. It spawns an HVM instance in order
 /// to run a compiled version of the book
 pub fn type_check(
+    explicit_args: bool,
     book: &Book,
     tx: Sender<Box<dyn Diagnostic>>,
     functions_to_check: Vec<String>,
@@ -66,7 +67,7 @@ pub fn type_check(
 
     match eval(&file, "Main", false, tids) {
         Ok((term, rewrites)) => {
-            let errs = parse_report(&term).unwrap_or_else(|_| {
+            let errs = parse_report(explicit_args, book, &term).unwrap_or_else(|_| {
                 panic!(
                     "Internal Error: Cannot parse the report message from the type checker: {}",
                     term

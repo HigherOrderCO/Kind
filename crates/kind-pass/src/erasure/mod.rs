@@ -290,7 +290,7 @@ impl<'a> ErasureState<'a> {
         use desugared::ExprKind::*;
 
         match &expr.data {
-            Var { name } => {
+            Var { name, .. } => {
                 self.ctx.insert(
                     name.to_string(),
                     if relevance == Ambient::Irrelevant {
@@ -471,7 +471,7 @@ impl<'a> ErasureState<'a> {
 
                 untyped::Expr::ctr(expr.range, name.clone(), args)
             }
-            Var { name } => {
+            Var { name, .. } => {
                 let var_rev = self
                     .ctx
                     .get(&name.to_string())

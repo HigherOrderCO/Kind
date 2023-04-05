@@ -67,7 +67,7 @@ impl Diagnostic for SyntaxDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: bool) -> DiagnosticFrame {
         match self {
             SyntaxDiagnostic::UnfinishedString(range) => DiagnosticFrame {
                 code: 1,

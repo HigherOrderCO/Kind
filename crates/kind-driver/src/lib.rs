@@ -24,6 +24,7 @@ impl FileCache for Session {
 }
 
 pub fn type_check_book(
+    explicit_args: bool,
     session: &mut Session,
     path: &PathBuf,
     entrypoints: Vec<String>,
@@ -36,6 +37,7 @@ pub fn type_check_book(
     let all = desugared_book.entrs.iter().map(|x| x.0).cloned().collect();
 
     let result = checker::type_check(
+        explicit_args,
         &desugared_book,
         session.diagnostic_sender.clone(),
         all,

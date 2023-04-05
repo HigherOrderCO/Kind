@@ -19,7 +19,7 @@ pub(crate) enum TypeDiagnostic {
     UncoveredPattern(Context, Range, Vec<Box<Expr>>)
 }
 
-fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
+fn context_to_subtitles(explicit: bool, ctx: &Context, subtitles: &mut Vec<Subtitle>) {
     subtitles.push(Subtitle::LineBreak);
 
     if !ctx.0.is_empty() {
@@ -37,6 +37,17 @@ fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
         .unwrap_or(0);
 
     for (name, typ, vals) in &ctx.0 {
+
+        if !explicit && name.starts_with("__") {
+            continue;
+        }
+
+        let name = if name.starts_with("__") {
+            &name[2..]
+        } else {
+            &name[..]
+        };
+
         subtitles.push(Subtitle::Phrase(
             Color::Snd,
             vec![
@@ -73,7 +84,7 @@ impl Diagnostic for TypeDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, explicit: bool) -> DiagnosticFrame {
         match self {
             TypeDiagnostic::TypeMismatch(ctx, range, detected, expected) => {
                 let mut subtitles = vec![
@@ -92,7 +103,7 @@ impl Diagnostic for TypeDiagnostic {
                         ],
                     ),
                 ];
-                context_to_subtitles(ctx, &mut subtitles);
+                context_to_subtitles(explicit, ctx, &mut subtitles);
                 DiagnosticFrame {
                     code: 101,
                     severity: Severity::Error,
@@ -117,7 +128,7 @@ impl Diagnostic for TypeDiagnostic {
                     ],
                 )];
 
-                context_to_subtitles(ctx, &mut subtitles);
+                context_to_subtitles(explicit, ctx, &mut subtitles);
 
                 DiagnosticFrame {
                     code: 101,

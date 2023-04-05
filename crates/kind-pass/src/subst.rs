@@ -9,7 +9,7 @@ fn subst(bindings: im_rc::HashSet<String>, expr: &mut Expr, substs: &FxHashMap<S
     use ExprKind::*;
 
     match &mut expr.data {
-        Var { name } => {
+        Var { name, .. } => {
             if !bindings.contains(name.to_str()) {
                 if let Some(res) = substs.get(name.to_str()) {
                     *expr = *res.clone();

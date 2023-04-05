@@ -20,7 +20,7 @@ impl Diagnostic for KdlDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> kind_report::data::DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: bool) -> kind_report::data::DiagnosticFrame {
         match self {
             KdlDiagnostic::InvalidVarName(s, range) => DiagnosticFrame {
                 code: 600,
