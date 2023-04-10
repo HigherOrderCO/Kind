@@ -13,7 +13,7 @@ pkgs.stdenv.mkDerivation {
     chmod +x bin/kind-scm
   '';
   installPhase = ''
-    mkdir $out
-    mv bin/kind-scm $out/kind-scm
+    mkdir -p $out/bin
+    mv bin/kind-scm $out/bin/kind-scm
   '';
 }
