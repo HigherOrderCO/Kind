@@ -1,5 +1,16 @@
-pub struct Token;
+#[derive(Debug, Clone)]
+pub struct Token {
+    pub span: Span,
+}
+
+#[derive(Debug, Clone)]
 pub struct Span;
+
+impl Span {
+    pub fn mix(&self, _other: &Span) -> Span {
+        self.clone()
+    }
+}
 
 pub type Hash = Token;
 pub type Minus = Token;
