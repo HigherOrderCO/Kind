@@ -1,12 +1,5 @@
 [workspace]
-members = [
-  "crates/kind-syntax",
-  "crates/kind-span",
-  "crates/kind-parser",
-  "crates/kind-lexer",
-  "crates/kind-query",
-  "crates/kind-diagnostic",
-]
+members = ["crates/kind-syntax"]
 
 # [profile.test.package.hvm]
 # opt-level = 3

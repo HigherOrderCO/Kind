@@ -6,11 +6,9 @@
 use num_bigint::BigUint;
 use thin_vec::ThinVec;
 
-use kind_lexer::tokens::Token;
-
 use crate::lexemes;
 use crate::lexemes::{
-    AngleBracket, Brace, Bracket, Colon, Either, Equal, Ident, Item, Paren, QualifiedIdent,
+    AngleBracket, Brace, Bracket, Colon, Either, Equal, Ident, Item, Paren, QualifiedIdent, Token,
     Tokenized,
 };
 

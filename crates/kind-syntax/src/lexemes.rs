@@ -1,5 +1,5 @@
-use kind_lexer::tokens::Token;
-use kind_span::Span;
+pub struct Token;
+pub struct Span;
 
 pub type Hash = Token;
 pub type Minus = Token;
