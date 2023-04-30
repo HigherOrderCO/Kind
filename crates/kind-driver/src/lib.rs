@@ -1,7 +1,7 @@
 use checker::eval;
 use diagnostic::{DriverDiagnostic, GenericDriverError};
 use kind_pass::{desugar, erasure, inline::inline_book};
-use kind_report::report::FileCache;
+use kind_report::data::FileCache;
 use kind_span::SyntaxCtxIndex;
 
 use hvm::language::{syntax as backend};

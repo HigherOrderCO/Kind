@@ -500,9 +500,9 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.3"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f1fc0af0e1b783f072678cd4b557bee147e5c8653930778f5c0c333e6ac0849"
+checksum = "35672d6ee046e8ebd6373a48aad5b926b4920cee27cb4f45e74643e7388c7a9e"
 dependencies = [
  "HOPA",
  "backtrace",
@@ -631,7 +631,7 @@ dependencies = [
 
 [[package]]
 name = "kind-checker"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "hvm",
@@ -643,7 +643,7 @@ dependencies = [
 
 [[package]]
 name = "kind-derive"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "im-rc",
@@ -654,7 +654,7 @@ dependencies = [
 
 [[package]]
 name = "kind-driver"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "dashmap",
@@ -673,7 +673,7 @@ dependencies = [
 
 [[package]]
 name = "kind-parser"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "kind-report",
@@ -683,7 +683,7 @@ dependencies = [
 
 [[package]]
 name = "kind-pass"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "fxhash",
@@ -697,7 +697,7 @@ dependencies = [
 
 [[package]]
 name = "kind-query"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "kind-checker",
@@ -712,7 +712,7 @@ dependencies = [
 
 [[package]]
 name = "kind-report"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "kind-span",
@@ -724,11 +724,11 @@ dependencies = [
 
 [[package]]
 name = "kind-span"
-version = "0.1.1"
+version = "0.1.2"
 
 [[package]]
 name = "kind-target-hvm"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "hvm",
  "kind-derive",
@@ -739,7 +739,7 @@ dependencies = [
 
 [[package]]
 name = "kind-target-kdl"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "im-rc",
@@ -754,7 +754,7 @@ dependencies = [
 
 [[package]]
 name = "kind-tests"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "kind-checker",
  "kind-driver",
@@ -772,7 +772,7 @@ dependencies = [
 
 [[package]]
 name = "kind-tree"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fxhash",
  "hvm",
@@ -782,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "kind2"
-version = "0.3.7"
+version = "0.3.9"
 dependencies = [
  "anyhow",
  "clap 4.0.29",

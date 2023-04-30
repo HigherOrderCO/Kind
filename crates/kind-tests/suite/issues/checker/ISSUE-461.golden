@@ -1,14 +1,14 @@
-   INFO  Inspection.
+   INFO  Inspection
 
-      * Expected: U60 
+      * Hole: U60 
 
-      * Context: 
-      *   awoo     : Type 
-      *   awoo     = U60 
-      *   uuuhuuul : (List awoo) 
-      *   uuuhuuul = (List.nil awoo) 
-      *   ooooooo  : (List U60) 
-      *   ooooooo  = uuuhuuul 
+      * Context
+      * awoo     : Type 
+      * awoo     = U60 
+      * uuuhuuul : (List awoo) 
+      * uuuhuuul = (List.nil awoo) 
+      * ooooooo  : (List U60) 
+      * ooooooo  = uuuhuuul 
 
       /--[suite/issues/checker/ISSUE-461.kind2:11:5]
       |

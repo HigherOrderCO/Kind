@@ -1,6 +1,9 @@
 //! Errors created by the type checker.
 
-use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word};
+use kind_report::{
+    data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word},
+    RenderConfig,
+};
 use kind_span::Range;
 use kind_tree::desugared::Expr;
 
@@ -16,40 +19,43 @@ pub(crate) enum TypeDiagnostic {
     Inspection(Context, Range, Box<Expr>),
     TooManyArguments(Context, Range),
     TypeMismatch(Context, Range, Box<Expr>, Box<Expr>),
-    UncoveredPattern(Context, Range, Vec<Box<Expr>>)
+    UncoveredPattern(Context, Range, Vec<Box<Expr>>),
 }
 
-fn context_to_subtitles(ctx: &Context, subtitles: &mut Vec<Subtitle>) {
+fn context_to_subtitles(config: &RenderConfig, ctx: &Context, subtitles: &mut Vec<Subtitle>) {
     subtitles.push(Subtitle::LineBreak);
 
     if !ctx.0.is_empty() {
-        subtitles.push(Subtitle::Phrase(
-            Color::Snd,
-            vec![Word::White("Context:".to_string())],
-        ));
+        subtitles.push(Subtitle::Field(Color::Snd, "Context".to_string()));
     }
 
-    let biggest = ctx
-        .0
-        .iter()
-        .max_by_key(|p| p.0.len())
-        .map(|x| x.0.len())
-        .unwrap_or(0);
+    let biggest = if config.not_align {
+        0
+    } else {
+        ctx.0
+            .iter()
+            .max_by_key(|p| p.0.len())
+            .map(|x| x.0.len())
+            .unwrap_or(0)
+    };
 
     for (name, typ, vals) in &ctx.0 {
         subtitles.push(Subtitle::Phrase(
             Color::Snd,
             vec![
-                Word::Dimmed(" ".to_string()),
                 Word::White(format!("{:<width$} :", name, width = biggest)),
                 Word::Painted(Color::Snd, typ.to_string()),
             ],
         ));
+
+        if config.hide_vals {
+            continue;
+        }
+
         for val in vals {
             subtitles.push(Subtitle::Phrase(
                 Color::Snd,
                 vec![
-                    Word::Dimmed(" ".to_string()),
                     Word::Dimmed(format!("{:<width$} =", name, width = biggest)),
                     Word::Dimmed(val.to_string()),
                 ],
@@ -73,7 +79,7 @@ impl Diagnostic for TypeDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, config: &RenderConfig) -> DiagnosticFrame {
         match self {
             TypeDiagnostic::TypeMismatch(ctx, range, detected, expected) => {
                 let mut subtitles = vec![
@@ -92,7 +98,7 @@ impl Diagnostic for TypeDiagnostic {
                         ],
                     ),
                 ];
-                context_to_subtitles(ctx, &mut subtitles);
+                context_to_subtitles(config, ctx, &mut subtitles);
                 DiagnosticFrame {
                     code: 101,
                     severity: Severity::Error,
@@ -112,17 +118,17 @@ impl Diagnostic for TypeDiagnostic {
                 let mut subtitles = vec![Subtitle::Phrase(
                     Color::Snd,
                     vec![
-                        Word::White("Expected:".to_string()),
+                        Word::White("Hole:".to_string()),
                         Word::Painted(Color::Snd, expected.to_string()),
                     ],
                 )];
 
-                context_to_subtitles(ctx, &mut subtitles);
+                context_to_subtitles(config, ctx, &mut subtitles);
 
                 DiagnosticFrame {
                     code: 101,
                     severity: Severity::Info,
-                    title: "Inspection.".to_string(),
+                    title: "Inspection".to_string(),
                     subtitles,
                     hints: vec![],
                     positions: vec![Marker {
@@ -199,9 +205,16 @@ impl Diagnostic for TypeDiagnostic {
                     Color::For,
                     vec![
                         Word::White("Missing case :".to_string()),
-                        Word::Painted(Color::For, terms.iter().map(|x| format!("{}", x)).collect::<Vec<_>>().join(" ")),
+                        Word::Painted(
+                            Color::For,
+                            terms
+                                .iter()
+                                .map(|x| format!("{}", x))
+                                .collect::<Vec<_>>()
+                                .join(" "),
+                        ),
                     ],
-                ),],
+                )],
                 hints: vec![],
                 positions: vec![Marker {
                     position: *range,
