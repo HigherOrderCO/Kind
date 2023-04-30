@@ -2,6 +2,7 @@ use yansi::Paint;
 
 /// Data structures
 pub mod data;
+
 /// Render
 pub mod report;
 
@@ -30,6 +31,7 @@ impl Chars {
             bullet: '•',
         }
     }
+
     pub fn ascii() -> &'static Chars {
         &Chars {
             vbar: '|',
@@ -48,6 +50,7 @@ impl Chars {
 pub struct RenderConfig<'a> {
     pub chars: &'a Chars,
     pub indent: usize,
+
 }
 
 impl<'a> RenderConfig<'a> {
@@ -57,6 +60,7 @@ impl<'a> RenderConfig<'a> {
             indent,
         }
     }
+
     pub fn ascii(indent: usize) -> RenderConfig<'a> {
         RenderConfig {
             chars: Chars::ascii(),

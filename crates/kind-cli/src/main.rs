@@ -6,11 +6,11 @@ use clap::{Parser, Subcommand};
 use driver::resolution::ResolutionError;
 use kind_driver::session::Session;
 
-use kind_report::data::{Diagnostic, Log, Severity};
-use kind_report::report::{FileCache, Report};
+use kind_report::data::{Diagnostic, Log, Severity, FileCache};
 use kind_report::RenderConfig;
 
 use kind_driver as driver;
+use kind_report::report::mode::{Renderable, Classic};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -122,16 +122,16 @@ where
     }
 }
 
-pub fn render_to_stderr<T, E>(render_config: &RenderConfig, session: &T, err: &E)
+pub fn render_to_stderr<C, T, E>(render_config: &RenderConfig, session: &T, err: &E)
 where
     T: FileCache,
-    E: Report,
+    E: Renderable<C>,
 {
-    Report::render(
+    E::render(
         err,
+        &mut ToWriteFmt(std::io::stderr()),
         session,
         render_config,
-        &mut ToWriteFmt(std::io::stderr()),
     )
     .unwrap();
 }
@@ -168,7 +168,7 @@ pub fn compile_in_session<T>(
             contains_error = true;
         }
 
-        render_to_stderr(render_config, &session, &diagnostic)
+        render_to_stderr::<Classic, _, _>(render_config, &session, &diagnostic)
     }
 
     if !contains_error {
