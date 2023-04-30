@@ -2,11 +2,10 @@ use super::CodeBlock;
 use super::{Classic, Renderable, Res};
 use crate::data::*;
 use crate::report::code::{count_width, group_markers, LineGuide, Spaces};
-use crate::report::code::{FileMarkers, Point};
+use crate::report::code::Point;
 use crate::RenderConfig;
 use crate::report::group_marker_lines;
 
-use fxhash::{FxHashMap, FxHashSet};
 use pathdiff::diff_paths;
 use std::fmt::Write;
 use std::path::PathBuf;
