@@ -6,11 +6,14 @@ use clap::{Parser, Subcommand};
 use driver::resolution::ResolutionError;
 use kind_driver::session::Session;
 
-use kind_report::data::{Diagnostic, Log, Severity, FileCache};
+use kind_report::data::{Diagnostic, FileCache, Log, Severity};
 use kind_report::RenderConfig;
 
 use kind_driver as driver;
-use kind_report::report::mode::{Renderable, Classic};
+
+use kind_report::report::{Classic, Mode, Report};
+
+pub type CO = Classic;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -45,6 +48,14 @@ pub struct Cli {
     /// Only ascii characters in error messages
     #[arg(short, long)]
     pub ascii: bool,
+
+    /// Compact error messages
+    #[arg(long)]
+    pub compact: bool,
+
+    /// Show values in error messages
+    #[arg(long)]
+    pub hide_vals: bool,
 
     /// Entrypoint of the file that makes the erasure checker
     /// not remove the entry.
@@ -88,7 +99,7 @@ pub enum Command {
     GenChecker {
         #[arg(short, long)]
         coverage: bool,
-      
+
         file: String,
     },
 
@@ -122,12 +133,12 @@ where
     }
 }
 
-pub fn render_to_stderr<C, T, E>(render_config: &RenderConfig, session: &T, err: &E)
+pub fn render_to_stderr<T, E>(render_config: &RenderConfig, session: &T, err: &E)
 where
     T: FileCache,
-    E: Renderable<C>,
+    E: Report,
 {
-    E::render(
+    Report::render(
         err,
         &mut ToWriteFmt(std::io::stderr()),
         session,
@@ -168,7 +179,7 @@ pub fn compile_in_session<T>(
             contains_error = true;
         }
 
-        render_to_stderr::<Classic, _, _>(render_config, &session, &diagnostic)
+        render_to_stderr(render_config, &session, &diagnostic)
     }
 
     if !contains_error {
@@ -199,7 +210,13 @@ pub fn compile_in_session<T>(
 pub fn run_cli(config: Cli) -> anyhow::Result<()> {
     kind_report::check_if_colors_are_supported(config.no_color);
 
-    let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2);
+    let mode = if config.compact {
+        Mode::Compact
+    } else {
+        Mode::Classic
+    };
+
+    let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2, config.hide_vals, mode);
     let root = config.root.unwrap_or_else(|| PathBuf::from("."));
 
     let mut entrypoints = vec!["Main".to_string()];

@@ -4,6 +4,7 @@ use crate::data::*;
 use crate::report::code::{count_width, group_markers, LineGuide, Spaces};
 use crate::report::code::{FileMarkers, Point};
 use crate::RenderConfig;
+use crate::report::group_marker_lines;
 
 use fxhash::{FxHashMap, FxHashSet};
 use pathdiff::diff_paths;
@@ -127,56 +128,6 @@ fn mark_inlined<T: Write + Sized>(
     Ok(())
 }
 
-fn group_marker_lines<'a>(
-    guide: &'a LineGuide,
-    markers: &'a FileMarkers,
-) -> (
-    FxHashSet<usize>,
-    FxHashMap<usize, Vec<(Point, Point, &'a Marker)>>,
-    Vec<(Point, Point, &'a Marker)>,
-) {
-    let mut lines_set = FxHashSet::default();
-    let mut markers_by_line: FxHashMap<usize, Vec<(Point, Point, &Marker)>> = FxHashMap::default();
-    let mut multi_line_markers: Vec<(Point, Point, &Marker)> = Vec::new();
-
-    for marker in &markers.0 {
-        let start = guide.find(marker.position.start);
-        let end = guide.find(marker.position.end);
-
-        if let Some(row) = markers_by_line.get_mut(&start.line) {
-            row.push((start.clone(), end.clone(), &marker))
-        } else {
-            markers_by_line.insert(start.line, vec![(start.clone(), end.clone(), &marker)]);
-        }
-
-        if end.line != start.line {
-            multi_line_markers.push((start.clone(), end.clone(), &marker));
-        } else if marker.main {
-            // Just to make errors a little bit better
-            let start = start.line.saturating_sub(1);
-            let end = if start + 2 >= guide.len() {
-                guide.len() - 1
-            } else {
-                start + 2
-            };
-            for i in start..=end {
-                lines_set.insert(i);
-            }
-        }
-
-        if end.line - start.line <= 3 {
-            for i in start.line..=end.line {
-                lines_set.insert(i);
-            }
-        } else {
-            lines_set.insert(start.line);
-            lines_set.insert(end.line);
-        }
-    }
-
-    (lines_set, markers_by_line, multi_line_markers)
-}
-
 fn paint_line<T>(data: T) -> Paint<T> {
     Paint::new(data).fg(yansi::Color::Cyan).dimmed()
 }
@@ -213,7 +164,7 @@ impl Renderable<Classic> for Severity {
 
 impl<'a> Renderable<Classic> for Header<'a> {
     fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
-        self.severity.render(fmt, cache, config)?;
+        Renderable::<Classic>::render(self.severity, fmt, cache, config)?;
         fmt.write_str(&Paint::new(&self.title).bold().to_string())?;
         fmt.write_char('\n')
     }
@@ -222,7 +173,7 @@ impl<'a> Renderable<Classic> for Header<'a> {
 impl Renderable<Classic> for Subtitle {
     fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
         match self {
-            Subtitle::Normal(color, phr) => {
+            Subtitle::Normal(color, phr) | Subtitle::Field(color, phr) => {
                 let bullet = color.colorize(config.chars.bullet);
                 writeln!(fmt, "{:>5} {} {}", "", bullet, Paint::new(phr))
             }
@@ -233,7 +184,7 @@ impl Renderable<Classic> for Subtitle {
             Subtitle::Phrase(color, words) => {
                 let bullet = color.colorize(config.chars.bullet);
                 write!(fmt, "{:>5} {} ", "", bullet)?;
-                words.render(fmt, cache, config)?;
+                Renderable::<Classic>::render(words, fmt, cache, config)?;
                 writeln!(fmt)
             }
             Subtitle::LineBreak => {
@@ -260,7 +211,7 @@ impl<'a> Renderable<Classic> for Subtitles<'a> {
             writeln!(fmt)?;
         }
 
-        self.0.render(fmt, cache, config)
+        Renderable::<Classic>::render(self.0, fmt, cache, config)
     }
 }
 
@@ -456,7 +407,7 @@ impl<'a> Renderable<Classic> for Markers<'a> {
                 markers,
             };
 
-            block.render(fmt, cache, config)?;
+            Renderable::<Classic>::render(&block, fmt, cache, config)?;
         }
 
         if !is_empty {
@@ -487,18 +438,11 @@ impl Renderable<Classic> for DiagnosticFrame {
     fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
         write!(fmt, " ")?;
 
-        self.header().render(fmt, cache, config)?;
-        self.subtitles().render(fmt, cache, config)?;
-        self.markers().render(fmt, cache, config)?;
-
-        self.hints().render(fmt, cache, config)?;
+        Renderable::<Classic>::render(&self.header(), fmt, cache, config)?;
+        Renderable::<Classic>::render(&self.subtitles(), fmt, cache, config)?;
+        Renderable::<Classic>::render(&self.markers(), fmt, cache, config)?;
+        Renderable::<Classic>::render(&self.hints(), fmt, cache, config)?;
 
         Ok(())
-    }
-}
-
-impl<T> Renderable<T> for Box<dyn Diagnostic> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
-        self.to_diagnostic_frame().render(fmt, cache, config)
     }
 }

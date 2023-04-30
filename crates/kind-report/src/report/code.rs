@@ -1,4 +1,4 @@
-use fxhash::FxHashMap;
+use fxhash::{FxHashMap, FxHashSet};
 use kind_span::{Pos, SyntaxCtxIndex};
 use std::{collections::hash_map::Iter, fmt::Display};
 use unicode_width::UnicodeWidthStr;
@@ -104,4 +104,54 @@ pub fn group_markers(markers: &[Marker]) -> SortedMarkers {
             .map(|(x, y)| (x, FileMarkers(y)))
             .collect(),
     )
+}
+
+pub fn group_marker_lines<'a>(
+    guide: &'a LineGuide,
+    markers: &'a FileMarkers,
+) -> (
+    FxHashSet<usize>,
+    FxHashMap<usize, Vec<(Point, Point, &'a Marker)>>,
+    Vec<(Point, Point, &'a Marker)>,
+) {
+    let mut lines_set = FxHashSet::default();
+    let mut markers_by_line: FxHashMap<usize, Vec<(Point, Point, &Marker)>> = FxHashMap::default();
+    let mut multi_line_markers: Vec<(Point, Point, &Marker)> = Vec::new();
+
+    for marker in &markers.0 {
+        let start = guide.find(marker.position.start);
+        let end = guide.find(marker.position.end);
+
+        if let Some(row) = markers_by_line.get_mut(&start.line) {
+            row.push((start.clone(), end.clone(), &marker))
+        } else {
+            markers_by_line.insert(start.line, vec![(start.clone(), end.clone(), &marker)]);
+        }
+
+        if end.line != start.line {
+            multi_line_markers.push((start.clone(), end.clone(), &marker));
+        } else if marker.main {
+            // Just to make errors a little bit better
+            let start = start.line.saturating_sub(1);
+            let end = if start + 2 >= guide.len() {
+                guide.len() - 1
+            } else {
+                start + 2
+            };
+            for i in start..=end {
+                lines_set.insert(i);
+            }
+        }
+
+        if end.line - start.line <= 3 {
+            for i in start.line..=end.line {
+                lines_set.insert(i);
+            }
+        } else {
+            lines_set.insert(start.line);
+            lines_set.insert(end.line);
+        }
+    }
+
+    (lines_set, markers_by_line, multi_line_markers)
 }

@@ -1,6 +1,6 @@
 use std::{fmt::Display, error::Error};
 
-use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
+use kind_report::{data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity}, RenderConfig};
 use kind_span::{Range, SyntaxCtxIndex};
 use kind_tree::symbol::Ident;
 
@@ -96,7 +96,7 @@ impl Diagnostic for PassDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: &RenderConfig) -> DiagnosticFrame {
         match self {
             PassDiagnostic::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,

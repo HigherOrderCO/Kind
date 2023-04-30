@@ -1,6 +1,8 @@
-use std::{time::Duration, path::PathBuf, ops::Sub};
+use std::{time::Duration, path::PathBuf};
 
 use kind_span::{Range, SyntaxCtxIndex};
+
+use crate::RenderConfig;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Severity {
@@ -28,6 +30,7 @@ pub enum Word {
 
 #[derive(Debug, Clone)]
 pub enum Subtitle {
+    Field(Color, String),
     Normal(Color, String),
     Bold(Color, String),
     Phrase(Color, Vec<Word>),
@@ -71,10 +74,16 @@ pub enum Log {
     Rewrites(u64),
     Failed(Duration),
 }
+
+pub struct DiagnosticConfig {
+    hide_vals: bool,
+    indent_ctx_vars: bool
+}
+
 pub trait Diagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex>;
     fn get_severity(&self) -> Severity;
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame;
+    fn to_diagnostic_frame(&self, config: &RenderConfig) -> DiagnosticFrame;
 }
 
 pub trait FileCache {

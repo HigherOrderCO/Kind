@@ -1,4 +1,4 @@
-use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
+use kind_report::{data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity}, RenderConfig};
 use kind_span::Range;
 
 pub(crate) enum DeriveDiagnostic {
@@ -16,7 +16,7 @@ impl Diagnostic for DeriveDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: &RenderConfig) -> DiagnosticFrame {
         match self {
             DeriveDiagnostic::CannotUseNamedVariable(range) => DiagnosticFrame {
                 code: 103,

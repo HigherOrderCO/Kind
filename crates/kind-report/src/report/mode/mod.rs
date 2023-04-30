@@ -1,10 +1,12 @@
 use std::{fmt::Write, path::Path};
 
-use crate::{data::FileCache, RenderConfig};
+use refl::Id;
 
+use crate::{data::{FileCache, Diagnostic, DiagnosticFrame, Log}, RenderConfig};
 use super::code::FileMarkers;
 
 pub mod classic;
+pub mod compact;
 
 // Just a type synonym to make it easier to read.
 pub type Res = std::fmt::Result;
@@ -21,6 +23,13 @@ pub enum Classic {}
 /// Compact mode is made to be more compact and easy to parse by some
 /// LLM.
 pub enum Compact {}
+
+/// The enum of all of the modes so we can choose
+#[derive(Debug, Clone, Copy)]
+pub enum Mode {
+    Classic,
+    Compact,
+}
 
 // Utilities
 
@@ -45,3 +54,21 @@ impl<'a, T, E> Renderable<T> for Vec<E> where E : Renderable<T> {
         Ok(())
     }
 }
+
+impl<T> Renderable<T> for Box<dyn Diagnostic> where DiagnosticFrame: Renderable<T> {
+    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+        Renderable::<T>::render(&self.to_diagnostic_frame(config), fmt, cache, config)
+    }
+}
+
+pub trait Report where Self : Renderable<Classic> + Renderable<Compact> {
+    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+        match config.mode {
+            Mode::Classic => Renderable::<Classic>::render(self, fmt, cache, config),
+            Mode::Compact => Renderable::<Compact>::render(self, fmt, cache, config),
+        }
+    }
+}
+
+impl Report for Box<dyn Diagnostic> {}
+impl Report for Log {}

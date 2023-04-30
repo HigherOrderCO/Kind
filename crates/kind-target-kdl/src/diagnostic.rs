@@ -1,4 +1,4 @@
-use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
+use kind_report::{data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity}, RenderConfig};
 use kind_span::Range;
 
 pub enum KdlDiagnostic {
@@ -20,7 +20,7 @@ impl Diagnostic for KdlDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> kind_report::data::DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: &RenderConfig) -> kind_report::data::DiagnosticFrame {
         match self {
             KdlDiagnostic::InvalidVarName(s, range) => DiagnosticFrame {
                 code: 600,
