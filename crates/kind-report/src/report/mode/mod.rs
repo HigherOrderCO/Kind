@@ -1,7 +1,5 @@
 use std::{fmt::Write, path::Path};
 
-use refl::Id;
-
 use crate::{data::{FileCache, Diagnostic, DiagnosticFrame, Log}, RenderConfig};
 use super::code::FileMarkers;
 

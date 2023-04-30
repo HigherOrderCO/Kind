@@ -75,11 +75,6 @@ pub enum Log {
     Failed(Duration),
 }
 
-pub struct DiagnosticConfig {
-    hide_vals: bool,
-    indent_ctx_vars: bool
-}
-
 pub trait Diagnostic {
     fn get_syntax_ctx(&self) -> Option<SyntaxCtxIndex>;
     fn get_severity(&self) -> Severity;
