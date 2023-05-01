@@ -7,7 +7,7 @@ use crate::{report::*, RenderConfig};
 
 use super::{CodeBlock, Compact, Renderable, Res};
 
-fn colorize_code<T: Write + Sized>(
+fn mark_code<T: Write + Sized>(
     markers: &mut [&(Point, Point, &Marker)],
     code_line: &str,
     fmt: &mut T,
@@ -34,7 +34,7 @@ fn colorize_code<T: Write + Sized>(
     }
 
     if start < code_line.len() {
-        write!(fmt, "{}}}}}", &code_line[start..code_line.len()])?;
+        write!(fmt, "{}", &code_line[start..code_line.len()])?;
     }
 
     writeln!(fmt)?;
@@ -94,7 +94,7 @@ impl Renderable<Compact> for Severity {
 
 impl<'a> Renderable<Compact> for Header<'a> {
     fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
-        fmt.write_str(&self.title.to_lowercase())
+        writeln!(fmt, "{}", &self.title.to_lowercase())
     }
 }
 
@@ -122,7 +122,7 @@ impl<'a> Renderable<Compact> for CodeBlock<'a> {
                 row.iter().filter(|x| x.0.line == x.1.line).collect();
 
             if !inline_markers.is_empty() {
-                colorize_code(&mut inline_markers, code_lines[line], fmt)?;
+                mark_code(&mut inline_markers, code_lines[line], fmt)?;
             } else {
                 writeln!(fmt, "{}", code_lines[line])?;
             }
