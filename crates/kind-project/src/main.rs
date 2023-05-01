@@ -155,7 +155,7 @@ fn run_cli(args: CliArgs) -> anyhow::Result<()> {
                 let kind_cli = args.as_kind_cli(src_root)?;
                 kind2::run_cli(kind_cli)
             } else {
-                todo!(); // Throw some error
+              Err(ProjectError::NotInProject.into())
             }
         }
     }
