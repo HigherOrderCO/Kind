@@ -30,6 +30,14 @@ struct CliArgs {
     #[arg(short, long)]
     pub ascii: bool,
 
+    /// Compact error messages
+    #[arg(long)]
+    pub compact: bool,
+
+    /// Show values in error messages
+    #[arg(long)]
+    pub hide_vals: bool,
+
     #[command(subcommand)]
     pub command: Command,
 }

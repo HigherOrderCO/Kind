@@ -1,7 +1,7 @@
 //! All of the sintatic erros both from the
 //! lexer and the parser.
 
-use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity};
+use kind_report::{data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity}, RenderConfig};
 use kind_span::{Range, SyntaxCtxIndex};
 
 use crate::lexer::tokens::Token;
@@ -67,7 +67,7 @@ impl Diagnostic for SyntaxDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: &RenderConfig) -> DiagnosticFrame {
         match self {
             SyntaxDiagnostic::UnfinishedString(range) => DiagnosticFrame {
                 code: 1,

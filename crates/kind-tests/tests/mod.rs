@@ -2,7 +2,7 @@
 
 use kind_driver::session::Session;
 use kind_report::data::Diagnostic;
-use kind_report::report::Report;
+use kind_report::report::{Renderable, Classic};
 use kind_report::RenderConfig;
 
 use std::fs::{self, File};
@@ -40,7 +40,7 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
                 let res = run(&PathBuf::from(path), &mut session);
 
                 let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
-                let render = RenderConfig::ascii(2);
+                let render = RenderConfig::ascii(2, false);
 
                 kind_report::check_if_colors_are_supported(true);
 
@@ -50,7 +50,7 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
                         let mut res_string = String::new();
 
                         for diag in diagnostics {
-                            diag.render(&session, &render, &mut res_string).unwrap();
+                            Renderable::<Classic>::render(&diag, &mut res_string, &session, &render).unwrap();
                         }
 
                         res_string

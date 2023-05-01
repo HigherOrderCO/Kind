@@ -1,6 +1,6 @@
-   INFO  Inspection.
+   INFO  Inspection
 
-      * Expected: (Equal _ 2n 5n) 
+      * Hole: (Equal _ 2n 5n) 
 
 
       /--[suite/issues/checker/U60ToNatDoesNotReduce.kind2:30:17]

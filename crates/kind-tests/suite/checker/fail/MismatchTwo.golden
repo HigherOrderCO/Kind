@@ -3,8 +3,8 @@
       * Got      : Type 
       * Expected : U60 
 
-      * Context: 
-      *   a : U60 
+      * Context
+      * a : U60 
 
       /--[suite/checker/fail/MismatchTwo.kind2:2:10]
       |

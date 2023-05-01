@@ -3,7 +3,7 @@
 
 use std::{path::PathBuf, fmt::Display, error::Error};
 
-use kind_report::data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word};
+use kind_report::{data::{Color, Diagnostic, DiagnosticFrame, Marker, Severity, Subtitle, Word}, RenderConfig};
 use kind_tree::symbol::{Ident, QualifiedIdent};
 
 #[derive(Debug)]
@@ -38,7 +38,7 @@ impl Diagnostic for DriverDiagnostic {
         }
     }
 
-    fn to_diagnostic_frame(&self) -> DiagnosticFrame {
+    fn to_diagnostic_frame(&self, _: &RenderConfig) -> DiagnosticFrame {
         match self {
             DriverDiagnostic::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,

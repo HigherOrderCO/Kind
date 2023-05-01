@@ -1,9 +1,9 @@
-   INFO  Inspection.
+   INFO  Inspection
 
-      * Expected: (Assert (Nat.count_layers n 1)) 
+      * Hole: (Assert (Nat.count_layers n 1)) 
 
-      * Context: 
-      *   n : Nat 
+      * Context
+      * n : Nat 
 
       /--[suite/issues/checker/HvmReducesTooMuch.kind2:14:29]
       |
