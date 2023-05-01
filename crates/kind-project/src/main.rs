@@ -163,11 +163,9 @@ fn run_cli(args: CliArgs) -> anyhow::Result<()> {
 
 pub fn main() {
     let args = CliArgs::parse();
-    println!("{:?}", args);
     match run_cli(args) {
         Ok(()) => std::process::exit(0),
-        Err(e) => {
-            println!("Err: {}", e);
+        Err(_) => {
             std::process::exit(1)
         }
     }

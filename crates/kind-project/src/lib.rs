@@ -25,7 +25,6 @@ pub struct ProjectConfig {
 pub fn search_project_config_file() -> anyhow::Result<Option<PathBuf>> {
     let mut path = PathBuf::from(Path::new(".")).canonicalize()?;
     loop {
-        println!("debug: searching in {:?}", path);
         // TODO: We shouldn't expect to have read access to all parent dirs
         let files = path.read_dir().with_context(|| {
             format!(
