@@ -53,6 +53,8 @@ impl CliArgs {
             trace,
             ascii,
             command,
+            compact,
+            hide_vals,
         } = self;
         let kind_cli = kind2::Cli {
             config: None,
@@ -65,6 +67,8 @@ impl CliArgs {
             entrypoint: Some("Main".into()),
             command: command.as_kind_command(&root)?,
             root: Some(root),
+            compact,
+            hide_vals,
         };
         Ok(kind_cli)
     }
