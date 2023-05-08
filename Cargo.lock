@@ -500,9 +500,9 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "1.0.6"
+version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35672d6ee046e8ebd6373a48aad5b926b4920cee27cb4f45e74643e7388c7a9e"
+checksum = "c7b8fc0ca6cceaffa4d4587bea27db3c6126771d1dfd0b8dce0504e6d4833b7c"
 dependencies = [
  "HOPA",
  "backtrace",
@@ -717,6 +717,7 @@ dependencies = [
  "fxhash",
  "kind-span",
  "pathdiff",
+ "refl",
  "termsize",
  "unicode-width",
  "yansi",
@@ -782,7 +783,7 @@ dependencies = [
 
 [[package]]
 name = "kind2"
-version = "0.3.9"
+version = "0.3.10"
 dependencies = [
  "anyhow",
  "clap 4.0.29",
@@ -1308,6 +1309,12 @@ checksum = "8440d8acb4fd3d277125b4bd01a6f38aee8d814b3b5fc09b3f2b825d37d3fe8f"
 dependencies = [
  "redox_syscall",
 ]
+
+[[package]]
+name = "refl"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5fe2c8ee36d7d4f60a0574c7116a0614e3bf48bfa249062698b228bddee5026"
 
 [[package]]
 name = "rustc-demangle"

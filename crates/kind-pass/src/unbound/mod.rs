@@ -169,7 +169,11 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
-        debug_assert!(ident.get_aux().is_none());
+
+        if !ident.get_aux().is_none() {
+            panic!("problem with 'use' desugaring")
+        }
+
         if !self.top_level_defs.contains_key(&ident.get_root()) {
             let entry = self.unbound_top_level.entry(ident.get_root()).or_default();
             entry.insert(ident.clone());

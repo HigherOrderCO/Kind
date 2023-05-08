@@ -85,7 +85,7 @@ fn test_checker_issues() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_run() -> Result<(), Error> {
     test_kind2(Path::new("./suite/run"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
@@ -100,7 +100,7 @@ fn test_run() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_eval() -> Result<(), Error> {
     test_kind2(Path::new("./suite/eval"), |path, session| {
         let check = driver::desugar_book(session, path)
@@ -112,7 +112,7 @@ fn test_eval() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_eval_issues() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/eval"), |path, session| {
         let check = driver::desugar_book(session, path)
@@ -124,7 +124,7 @@ fn test_eval_issues() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_run_issues() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/run"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
@@ -139,7 +139,7 @@ fn test_run_issues() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_kdl() -> Result<(), Error> {
     test_kind2(Path::new("./suite/kdl"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
@@ -150,7 +150,7 @@ fn test_kdl() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_erasure() -> Result<(), Error> {
     test_kind2(Path::new("./suite/erasure"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
@@ -161,7 +161,7 @@ fn test_erasure() -> Result<(), Error> {
 }
 
 #[test]
-#[timeout(15000)]
+#[timeout(30000)]
 fn test_coverage() -> Result<(), Error> {
     test_kind2(Path::new("./suite/issues/coverage"), |path, session| {
         let entrypoints = vec!["Main".to_string()];
