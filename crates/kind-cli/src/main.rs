@@ -57,6 +57,10 @@ pub struct Cli {
     #[arg(long)]
     pub hide_vals: bool,
 
+    /// Show only the first error message
+    #[arg(long)]
+    pub hide_deps: bool,
+
     /// Entrypoint of the file that makes the erasure checker
     /// not remove the entry.
     #[arg(short, long)]
@@ -174,9 +178,22 @@ pub fn compile_in_session<T>(
 
     let mut contains_error = false;
 
+    let mut hidden = 0;
+    let total = diagnostics.len() as u64;
+
     for diagnostic in diagnostics {
         if diagnostic.get_severity() == Severity::Error {
             contains_error = true;
+        }
+
+        let is_root = diagnostic
+            .get_syntax_ctx()
+            .map(|x| x.is_root())
+            .unwrap_or_default();
+
+        if render_config.only_main && !is_root {
+            hidden += 1;
+            continue;
         }
 
         render_to_stderr(render_config, &session, &diagnostic)
@@ -197,7 +214,7 @@ pub fn compile_in_session<T>(
 
         res
     } else {
-        render_to_stderr(render_config, &session, &Log::Failed(start.elapsed()));
+        render_to_stderr(render_config, &session, &Log::Failed(start.elapsed(), total, hidden));
         eprintln!();
 
         match res {
@@ -216,7 +233,14 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
         Mode::Classic
     };
 
-    let render_config = kind_report::check_if_utf8_is_supported(config.ascii, 2, config.hide_vals, mode);
+    let render_config = kind_report::check_if_utf8_is_supported(
+        config.ascii,
+        2,
+        config.hide_vals,
+        mode,
+        config.hide_deps,
+    );
+
     let root = config.root.unwrap_or_else(|| PathBuf::from("."));
 
     let mut entrypoints = vec!["Main".to_string()];
