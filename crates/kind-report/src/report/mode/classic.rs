@@ -371,15 +371,15 @@ impl Renderable<Classic> for Log {
             Log::Failed(duration, total, hidden) => {
                 writeln!(
                     fmt,
-                    "    {} Took {:.1}s, {}{} total",
+                    "    {} Took {:.1}s, {} errors{}",
                     Paint::new(" FAILED ").bg(yansi::Color::Red).bold(),
                     duration.as_secs_f32(),
+                    total,
                     if *hidden == 0 {
                         "".to_string()
                     } else {
-                        format!("{} hidden errors, ", hidden)
+                        format!(", {} hidden", hidden)
                     },
-                    total
                 )
             }
             Log::Rewrites(u64) => {
