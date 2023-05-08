@@ -40,7 +40,7 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
                 let res = run(&PathBuf::from(path), &mut session);
 
                 let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
-                let render = RenderConfig::ascii(2, false);
+                let render = RenderConfig::ascii(2, false, false);
 
                 kind_report::check_if_colors_are_supported(true);
 

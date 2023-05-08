@@ -54,36 +54,40 @@ pub struct RenderConfig<'a> {
     pub hide_vals: bool,
     pub mode: Mode,
     pub not_align: bool,
+    pub only_main: bool,
 }
 
 impl<'a> RenderConfig<'a> {
-    pub fn unicode(indent: usize, hide_vals: bool) -> RenderConfig<'a> {
+    pub fn unicode(indent: usize, hide_vals: bool, only_main: bool) -> RenderConfig<'a> {
         RenderConfig {
             chars: Chars::unicode(),
             indent,
             hide_vals,
             mode: Mode::Classic,
             not_align: false,
+            only_main
         }
     }
 
-    pub fn ascii(indent: usize, hide_vals: bool) -> RenderConfig<'a> {
+    pub fn ascii(indent: usize, hide_vals: bool, only_main: bool) -> RenderConfig<'a> {
         RenderConfig {
             chars: Chars::ascii(),
             indent,
             hide_vals,
             mode: Mode::Classic,
             not_align: false,
+            only_main
         }
     }
 
-    pub fn compact(indent: usize) -> RenderConfig<'a> {
+    pub fn compact(indent: usize, only_main: bool) -> RenderConfig<'a> {
         RenderConfig {
             chars: Chars::ascii(),
             indent,
             hide_vals: true,
             mode: Mode::Compact,
             not_align: true,
+            only_main
         }
     }
 }
@@ -94,15 +98,15 @@ pub fn check_if_colors_are_supported(disable: bool) {
     }
 }
 
-pub fn check_if_utf8_is_supported<'a>(disable: bool, indent: usize, hide_vals: bool, mode: Mode) -> RenderConfig<'a> {
+pub fn check_if_utf8_is_supported<'a>(disable: bool, indent: usize, hide_vals: bool, mode: Mode, only_main: bool) -> RenderConfig<'a> {
     match mode {
         Mode::Classic => {
             if disable || (cfg!(windows) && !Paint::enable_windows_ascii()) {
-                RenderConfig::ascii(indent, hide_vals)
+                RenderConfig::ascii(indent, hide_vals, only_main)
             } else {
-                RenderConfig::unicode(indent, hide_vals)
+                RenderConfig::unicode(indent, hide_vals, only_main)
             }
         },
-        Mode::Compact => RenderConfig::compact(0),
+        Mode::Compact => RenderConfig::compact(0, only_main),
     }
 }

@@ -1,10 +1,10 @@
 use super::CodeBlock;
 use super::{Classic, Renderable, Res};
 use crate::data::*;
-use crate::report::code::{count_width, group_markers, LineGuide, Spaces};
 use crate::report::code::Point;
-use crate::RenderConfig;
+use crate::report::code::{count_width, group_markers, LineGuide, Spaces};
 use crate::report::group_marker_lines;
+use crate::RenderConfig;
 
 use pathdiff::diff_paths;
 use std::fmt::Write;
@@ -368,12 +368,18 @@ impl Renderable<Classic> for Log {
                     duration.as_secs_f32()
                 )
             }
-            Log::Failed(duration) => {
+            Log::Failed(duration, total, hidden) => {
                 writeln!(
                     fmt,
-                    "    {} Took {}s",
+                    "    {} Took {:.1}s, {}{} total",
                     Paint::new(" FAILED ").bg(yansi::Color::Red).bold(),
-                    duration.as_secs()
+                    duration.as_secs_f32(),
+                    if *hidden == 0 {
+                        "".to_string()
+                    } else {
+                        format!("{} hidden errors, ", hidden)
+                    },
+                    total
                 )
             }
             Log::Rewrites(u64) => {
