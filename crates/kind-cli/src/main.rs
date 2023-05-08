@@ -1,3 +1,5 @@
+#![feature(panic_info_message)]
+
 use std::path::PathBuf;
 use std::time::Instant;
 use std::{fmt, io};
@@ -8,6 +10,7 @@ use kind_driver::session::Session;
 
 use kind_report::data::{Diagnostic, FileCache, Log, Severity};
 use kind_report::RenderConfig;
+use std::panic;
 
 use kind_driver as driver;
 
@@ -354,6 +357,13 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
 }
 
 pub fn main() {
+
+    panic::set_hook(Box::new(|e| {
+        println!("\n[Error]: internal compiler error '{:?}' at {}", e.message().unwrap(), e.location().unwrap());
+        println!("Please submit a full report about this error at: https://github.com/HigherOrderCO/Kind/issues/new");
+        println!("It would help us a lot :)\n");
+    }));
+
     match run_cli(Cli::parse()) {
         Ok(_) => std::process::exit(0),
         Err(_) => std::process::exit(1),
