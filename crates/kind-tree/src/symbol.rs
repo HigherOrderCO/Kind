@@ -21,6 +21,10 @@ impl Symbol {
             data: str,
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
 }
 
 impl PartialEq for Symbol {
