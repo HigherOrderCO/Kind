@@ -1,4 +1,5 @@
 pub mod error;
+pub mod fetcher;
 
 use anyhow::Context;
 use serde::{Deserialize, Serialize};

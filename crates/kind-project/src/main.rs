@@ -167,7 +167,7 @@ fn run_cli(args: CliArgs) -> anyhow::Result<()> {
                 let kind_cli = args.as_kind_cli(src_root)?;
                 kind2::run_cli(kind_cli)
             } else {
-              Err(ProjectError::NotInProject.into())
+                Err(ProjectError::NotInProject.into())
             }
         }
     }
@@ -177,8 +177,6 @@ pub fn main() {
     let args = CliArgs::parse();
     match run_cli(args) {
         Ok(()) => std::process::exit(0),
-        Err(_) => {
-            std::process::exit(1)
-        }
+        Err(_) => std::process::exit(1),
     }
 }

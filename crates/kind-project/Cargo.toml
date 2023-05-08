@@ -17,3 +17,8 @@ anyhow = "1.0.66"
 toml = "0.7.3"
 serde = "1.0.160"
 clap = {version = "4.0.10", features = ["derive"]}
+# May want to change to gix in the future, but not ready right now
+git2 = "0.17.1"
+fd-lock = "3.0.12"
+tiny-keccak = {version = "2.0.2", features = ['sha3']}
+hex = "0.4.3"
