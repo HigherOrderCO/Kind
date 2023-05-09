@@ -1,14 +1,12 @@
 #![feature(panic_info_message)]
 
 use std::path::PathBuf;
-use std::time::Instant;
 use std::{fmt, io};
 
 use clap::{Parser, Subcommand};
-use driver::resolution::ResolutionError;
 use kind_driver::session::Session;
 
-use kind_report::data::{Diagnostic, FileCache, Log, Severity};
+use kind_report::data::{FileCache, Log};
 use kind_report::RenderConfig;
 use std::panic;
 
@@ -146,7 +144,7 @@ where
 pub fn render_to_stderr<T, E>(render_config: &RenderConfig, session: &T, err: &E)
 where
     T: FileCache,
-    E: Report,
+    E: Report + ?Sized,
 {
     Report::render(
         err,
@@ -157,77 +155,16 @@ where
     .unwrap();
 }
 
-pub fn compile_in_session<T>(
+pub fn run_in_session<T>(
     render_config: &RenderConfig,
     root: PathBuf,
     file: String,
     compiled: bool,
-    fun: &mut dyn FnMut(&mut Session) -> anyhow::Result<T>,
+    action: &mut dyn FnMut(&mut Session) -> anyhow::Result<T>,
 ) -> anyhow::Result<T> {
-    let (rx, tx) = std::sync::mpsc::channel();
-
-    let mut session = Session::new(root, rx, render_config.show_immediate_deps);
-
-    eprintln!();
-
-    render_to_stderr(
-        render_config,
-        &session,
-        &Log::Checking(format!("The file '{}'", file)),
-    );
-
-    let start = Instant::now();
-
-    let res = fun(&mut session);
-
-    let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
-
-    let mut contains_error = false;
-
-    let mut hidden = 0;
-    let total = diagnostics.len() as u64;
-
-    for diagnostic in diagnostics {
-        if diagnostic.get_severity() == Severity::Error {
-            contains_error = true;
-        }
-
-        let is_root = diagnostic
-            .get_syntax_ctx()
-            .map(|x| x.is_root())
-            .unwrap_or_default();
-
-        if render_config.only_main && !is_root {
-            hidden += 1;
-            continue;
-        }
-
-        render_to_stderr(render_config, &session, &diagnostic)
-    }
-
-    if !contains_error {
-        render_to_stderr(
-            render_config,
-            &session,
-            &if compiled {
-                Log::Compiled(start.elapsed())
-            } else {
-                Log::Checked(start.elapsed())
-            },
-        );
-
-        eprintln!();
-
-        res
-    } else {
-        render_to_stderr(render_config, &session, &Log::Failed(start.elapsed(), total, hidden));
-        eprintln!();
-
-        match res {
-            Ok(_) => Err(ResolutionError.into()),
-            Err(res) => Err(res),
-        }
-    }
+    let log =
+        |session: &Session, report: &dyn Report| render_to_stderr(render_config, session, report);
+    driver::run_in_session(render_config, root, file, compiled, action, &log)
 }
 
 pub fn run_cli(config: Cli) -> anyhow::Result<()> {
@@ -258,7 +195,7 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
 
     match config.command {
         Command::Check { file, coverage } => {
-            compile_in_session(&render_config, root, file.clone(), false, &mut |session| {
+            run_in_session(&render_config, root, file.clone(), false, &mut |session| {
                 let (_, rewrites) = driver::type_check_book(
                     session,
                     &PathBuf::from(file.clone()),
@@ -274,7 +211,7 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
         }
         Command::ToHVM { file } => {
             let result =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                run_in_session(&render_config, root, file.clone(), true, &mut |session| {
                     let book = driver::erase_book(
                         session,
                         &PathBuf::from(file.clone()),
@@ -286,22 +223,21 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
             println!("{}", result);
         }
         Command::Run { file } => {
-            let res =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
-                    let path = PathBuf::from(file.clone());
-                    let book = driver::erase_book(session, &path, entrypoints.clone())?;
-                    driver::check_main_entry(session, &book)?;
-                    let book = driver::compile_book_to_hvm(book, config.trace);
-                    let (result, rewrites) = driver::execute_file(&book.to_string(), config.tids)?;
+            let res = run_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                let path = PathBuf::from(file.clone());
+                let book = driver::erase_book(session, &path, entrypoints.clone())?;
+                driver::check_main_entry(session, &book)?;
+                let book = driver::compile_book_to_hvm(book, config.trace);
+                let (result, rewrites) = driver::execute_file(&book.to_string(), config.tids)?;
 
-                    render_to_stderr(&render_config, session, &Log::Rewrites(rewrites));
+                render_to_stderr(&render_config, session, &Log::Rewrites(rewrites));
 
-                    Ok(result)
-                })?;
+                Ok(result)
+            })?;
             println!("{}", res);
         }
         Command::Show { file } => {
-            compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
+            run_in_session(&render_config, root, file.clone(), true, &mut |session| {
                 driver::to_book(session, &PathBuf::from(file.clone()))
             })
             .map(|res| {
@@ -310,49 +246,44 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
             })?;
         }
         Command::ToKindCore { file } => {
-            let res =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
-                    driver::desugar_book(session, &PathBuf::from(file.clone()))
-                })?;
+            let res = run_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                driver::desugar_book(session, &PathBuf::from(file.clone()))
+            })?;
             print!("{}", res);
         }
         Command::Erase { file } => {
-            let res =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
-                    driver::erase_book(session, &PathBuf::from(file.clone()), entrypoints.clone())
-                })?;
+            let res = run_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                driver::erase_book(session, &PathBuf::from(file.clone()), entrypoints.clone())
+            })?;
             print!("{}", res);
         }
         Command::GenChecker { file, coverage } => {
-            let res =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
-                    driver::check_erasure_book(session, &PathBuf::from(file.clone()))
-                })?;
+            let res = run_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                driver::check_erasure_book(session, &PathBuf::from(file.clone()))
+            })?;
             print!("{}", driver::generate_checker(&res, coverage));
         }
         Command::Eval { file } => {
-            let res =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
-                    let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
-                    driver::check_main_desugared_entry(session, &book)?;
-                    let (res, rewrites) = driver::eval_in_checker(&book);
+            let res = run_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                let book = driver::desugar_book(session, &PathBuf::from(file.clone()))?;
+                driver::check_main_desugared_entry(session, &book)?;
+                let (res, rewrites) = driver::eval_in_checker(&book);
 
-                    render_to_stderr(&render_config, session, &Log::Rewrites(rewrites));
+                render_to_stderr(&render_config, session, &Log::Rewrites(rewrites));
 
-                    Ok(res)
-                })?;
+                Ok(res)
+            })?;
             println!("{}", res);
         }
         Command::ToKDL { file, namespace } => {
-            let res =
-                compile_in_session(&render_config, root, file.clone(), true, &mut |session| {
-                    driver::compile_book_to_kdl(
-                        &PathBuf::from(file.clone()),
-                        session,
-                        &namespace.clone().unwrap_or("".to_string()),
-                        entrypoints.clone(),
-                    )
-                })?;
+            let res = run_in_session(&render_config, root, file.clone(), true, &mut |session| {
+                driver::compile_book_to_kdl(
+                    &PathBuf::from(file.clone()),
+                    session,
+                    &namespace.clone().unwrap_or("".to_string()),
+                    entrypoints.clone(),
+                )
+            })?;
             println!("{}", res);
         }
     }
@@ -361,9 +292,12 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
 }
 
 pub fn main() {
-
     panic::set_hook(Box::new(|e| {
-        println!("\n[Error]: internal compiler error '{:?}' at {}", e.message().unwrap(), e.location().unwrap());
+        println!(
+            "\n[Error]: internal compiler error '{:?}' at {}",
+            e.message().unwrap(),
+            e.location().unwrap()
+        );
         println!("Please submit a full report about this error at: https://github.com/HigherOrderCO/Kind/issues/new");
         println!("It would help us a lot :)\n");
     }));
