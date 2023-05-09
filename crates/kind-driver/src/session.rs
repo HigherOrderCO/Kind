@@ -24,10 +24,12 @@ pub struct Session {
     pub root: PathBuf,
 
     pub book_counter: usize,
+
+    pub show_immediate_deps: bool,
 }
 
 impl Session {
-    pub fn new(root: PathBuf, sender: Sender<Box<dyn Diagnostic>>) -> Session {
+    pub fn new(root: PathBuf, sender: Sender<Box<dyn Diagnostic>>, show_immediate_deps: bool) -> Session {
         Session {
             loaded_paths: Vec::new(),
             loaded_sources: Vec::new(),
@@ -36,6 +38,7 @@ impl Session {
             root,
             book_counter: 0,
             diagnostic_sender: sender,
+            show_immediate_deps
         }
     }
     pub fn add_path(&mut self, path: Rc<PathBuf>, code: String) -> usize {

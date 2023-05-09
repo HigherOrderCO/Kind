@@ -15,7 +15,7 @@ fn new_session() -> Session {
     
     let root = PathBuf::from("./suite/lib").canonicalize().unwrap();
     
-    Session::new(root, rx)
+    Session::new(root, rx, false)
 }
 
 fn exp_paths() -> Vec<&'static str> {
