@@ -20,6 +20,8 @@ pub mod diagnostic;
 pub mod resolution;
 pub mod session;
 
+pub use resolution::get_unbound_variables;
+
 impl FileCache for Session {
     fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(PathBuf, &String)> {
         let path = self.loaded_paths[ctx.0].as_ref().to_owned();

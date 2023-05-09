@@ -1,4 +1,4 @@
-   ERROR  Incorrect arity.
+   ERROR  This function expects exactly 1 arguments but got 0
 
       /--[suite/issues/checker/ArityOnLet.kind2:6:13]
       |
@@ -8,5 +8,4 @@
       |                \This function requires a fixed number of arguments
     7 |        2
 
-      Hint: This function expects 1 arguments but got 0
 
