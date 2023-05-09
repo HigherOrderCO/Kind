@@ -1,0 +1,9 @@
+Dia : Type // Dia é um Tipo
+
+Dia.segunda : Dia  // Segunda é um Dia
+Dia.terca   : Dia  // Terça   é um Dia
+Dia.quarta  : Dia  // Quarta  é um Dia
+Dia.quinta  : Dia  // Quinta  é um Dia
+Dia.sexta   : Dia  // Sexta   é um Dia
+Dia.sabado  : Dia  // Sábado  é um Dia
+Dia.domingo : Dia  // Domingo é um Dia

@@ -47,7 +47,7 @@ black_friday_theorem Nat.zero     = Equal.refl
 black_friday_theorem (Nat.succ n) = Equal.apply (x => Nat.succ x) (black_friday_theorem n)
 ```
 
-For more examples, check the [Wikind](https://github.com/kindelia/wikind).
+For more examples, check the [Kindex](https://github.com/higherorderco/kindex).
 
 Usage
 -----

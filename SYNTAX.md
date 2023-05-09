@@ -32,7 +32,7 @@ Fib.go n f1 f2 = Fib.go (- n 1) f2 (+ f1 f2)
 
 Not all programs are necessarily made to be run. Proofs for example may only exist to be type-checked, which already validates the thing they're proving.
 
-For many more real code examples, check the Wikind repository.
+For many more real code examples, check the Kindex repository.
 
 Top-level definition
 --------------------
@@ -127,7 +127,7 @@ List.tail List.nil = List.nil
 List.tail (List.cons _ xs) = xs
 ```
 
-This is how this function is defined in the Wikind repository, which contains a wide collection of Kind definitions.
+This is how this function is defined in the Kindex repository, which contains a wide collection of Kind definitions.
 
 For functions that have only one rule that doesn't do any pattern matching at all on the arguments, there is a concise syntax to define them:
 
@@ -220,7 +220,7 @@ A `let` expression introduces a new variable in the context. That variable will 
 
 Since a `let` is a normal expression like all others, it may be used anywhere an expression is expected. This can be useful for example, for defining very complex return types for proofs. For example, the following type can be made more readable by adding some `let` expressions:
 
-#### TODO: Find an example. I know we have one somewhere either on Wikind or on Kind1's base.
+#### TODO: Find an example. I know we have one somewhere either on Kindex or on Kind1's base.
 
 #### TODO: Write a warning about dups
 
@@ -566,7 +566,7 @@ Less equal     | (<= a b)
 Equal          | (== a b)
 Not equal      | (!= a b)
 
-Note that all of these are of type `U60 -> U60 -> U60`, that is, they all return a number. For example, `(== 2 2)` returns `1` and `(<= 30 4)` returns `0`. If you need functions that return a boolean, check the Wikind repository for things like `U60.equal (a: U60) (b: U60) : Bool`.
+Note that all of these are of type `U60 -> U60 -> U60`, that is, they all return a number. For example, `(== 2 2)` returns `1` and `(<= 30 4)` returns `0`. If you need functions that return a boolean, check the Kindex repository for things like `U60.equal (a: U60) (b: U60) : Bool`.
 
 #### TODO: Write about U120 compilation for kindelia
 
@@ -610,7 +610,7 @@ expanded to:
 Sigma type (name => body)
 ```
 
-With `Sigma` in Wikind defined as `Sigma (a: Type) (b: a -> Type) : Type
+With `Sigma` in Kindex defined as `Sigma (a: Type) (b: a -> Type) : Type
 `.
 In the same way that forall (aka Pi, aka the dependent function type) can be read as "forall", `Sigma`s can be read as "there exists". So, for example, the program below:
 
@@ -640,7 +640,7 @@ expanded to:
 (Sigma.new _ _ val_a val_b)
 ```
 
-With `Sigma.new` defined as `Sigma.new <a: Type> <b: a -> Type> (fst: a) (snd: b fst) : Sigma a b` in Wikind.
+With `Sigma.new` defined as `Sigma.new <a: Type> <b: a -> Type> (fst: a) (snd: b fst) : Sigma a b` in Kindex.
 
 List literal
 ------------
