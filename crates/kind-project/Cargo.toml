@@ -1,5 +1,5 @@
 [package]
-description = "Module for creating and managing kind repositories"
+description = "Module for creating and managing kind projects"
 edition = "2021"
 license = "MIT"
 name = "kind-project"
@@ -12,6 +12,8 @@ path = "src/main.rs"
 [dependencies]
 kind2 = {path = "../kind-cli", version = "0.3.9"}
 kind-report = {path = "../kind-report", version = "0.1.2"}
+kind-pass = {path = "../kind-pass", version = "0.1.2"}
+kind-tree = {path = "../kind-tree", version = "0.1.2"}
 
 anyhow = "1.0.66"
 toml = "0.7.3"
@@ -21,3 +23,4 @@ clap = {version = "4.0.10", features = ["derive"]}
 git2 = "0.17.1"
 fd-lock = "3.0.12"
 hex = "0.4.3"
+directories = "5.0.1"

@@ -1,7 +1,12 @@
 pub mod error;
 pub mod fetcher;
 
-use anyhow::Context;
+use kind_pass::unbound::get_book_unbound;
+use kind_tree::concrete::Book;
+
+use anyhow::{anyhow, Context};
+use directories::ProjectDirs;
+use fetcher::{Fetcher, GitFetcher};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -89,5 +94,22 @@ fn create_src_dir(root: PathBuf, name: String) -> anyhow::Result<()> {
     let main_path = src_dir.join(Path::new(MAIN_FILE_NAME));
     std::fs::write(main_path, MAIN_TEMPLATE)
         .with_context(|| format!("Failed to write Main file"))?;
+    Ok(())
+}
+
+fn make_git_fetcher(config: &ProjectConfig) -> anyhow::Result<GitFetcher> {
+    let src_path = PathBuf::from(format!("./{}", config.name)).canonicalize()?;
+    let dirs =
+        ProjectDirs::from("com", "HigherOrderCO", "Kind").ok_or(anyhow!("Failed to find HOME"))?;
+    let store_path = dirs.data_dir();
+    let remote_url = config.remote_url.clone();
+    let version = config.remote_version.clone();
+    let fetcher = *fetcher::GitFetcher::new(src_path, store_path.into(), remote_url, version)?;
+    Ok(fetcher)
+}
+
+fn get_unbound_top_levels(fetcher: impl Fetcher, book: &mut Book) -> anyhow::Result<()> {
+    let (_, unbound_tops) = get_book_unbound(session.diagnostic_sender.clone(), book, true);
+
     Ok(())
 }
