@@ -57,7 +57,7 @@ For more examples, check the [Kindex](https://github.com/HigherOrderCO/Kindex).
 First, install [Rust](https://www.rust-lang.org/tools/install) first, then enter:
 
 ```
-cargo install kind2
+cargo +nightly install kind2
 ```
 
 Then, use any of the commands below:
