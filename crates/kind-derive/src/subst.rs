@@ -214,7 +214,7 @@ impl<'a> Visitor for Subst<'a> {
                 snd,
             } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_static(
-                    "Sigma", None, expr.range,
+                    "Data.Sigma", None, expr.range,
                 ));
                 self.visit_expr(fst);
                 self.visit_expr(snd);
@@ -225,7 +225,7 @@ impl<'a> Visitor for Subst<'a> {
                 snd,
             } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_static(
-                    "Sigma", None, expr.range,
+                    "Data.Sigma", None, expr.range,
                 ));
                 self.visit_expr(fst);
                 self.context_vars.push((ident.range, ident.to_string()));
@@ -257,7 +257,7 @@ impl<'a> Visitor for Subst<'a> {
             }
             ExprKind::If { cond, then_, else_ } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "Bool", "if", expr.range,
+                    "Data.Bool", "if", expr.range,
                 ));
                 self.visit_expr(cond);
                 self.visit_expr(then_);
@@ -265,17 +265,17 @@ impl<'a> Visitor for Subst<'a> {
             }
             ExprKind::Pair { fst, snd } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "Pair", "new", expr.range,
+                    "Data.Pair", "new", expr.range,
                 ));
                 self.visit_expr(fst);
                 self.visit_expr(snd);
             }
             ExprKind::List { args } => {
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "List", "nil", expr.range,
+                    "Data.List", "nil", expr.range,
                 ));
                 self.visit_qualified_ident(&mut QualifiedIdent::new_sugared(
-                    "List", "cons", expr.range,
+                    "Data.List", "cons", expr.range,
                 ));
                 visit_vec!(args.iter_mut(), arg => self.visit_expr(arg));
             }

@@ -218,12 +218,12 @@ impl Diagnostic for PassDiagnostic {
                 subtitles: vec![],
                 hints: vec![match sugar {
                     Sugar::DoNotation => "You must implement 'bind' and 'pure' for this type in order to use the do notation.".to_string(),
-                    Sugar::List => "You must implement 'List', 'List.cons' and 'List.nil' for this type in order to use the list notation.".to_string(),
-                    Sugar::Sigma => "You must implement 'Sigma' in order to use the sigma notation.".to_string(),
-                    Sugar::Pair => "You must implement 'Sigma' and 'Sigma.new' in order to use the sigma notation.".to_string(),
-                    Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
-                    Sugar::String => "You must implement 'String.cons' in order to use the string notation.".to_string(),
-                    Sugar::U120 => "You must implement 'U120.new' in order to use the u120 notation.".to_string(),
+                    Sugar::List => "You must implement 'Data.List', 'Data.List.cons' and 'Data.List.nil' for this type in order to use the list notation.".to_string(),
+                    Sugar::Sigma => "You must implement 'Data.Sigma' in order to use the sigma notation.".to_string(),
+                    Sugar::Pair => "You must implement 'Data.Sigma' and 'Data.Sigma.new' in order to use the sigma notation.".to_string(),
+                    Sugar::BoolIf => "You must implement 'Data.Bool.if' in order to use the if notation.".to_string(),
+                    Sugar::String => "You must implement 'Data.String.cons' in order to use the string notation.".to_string(),
+                    Sugar::U120 => "You must implement 'Data.U120.new' in order to use the u120 notation.".to_string(),
                     Sugar::Match(_) => "You must implement 'match' in order to use the match notation (or derive match with #derive[match]).".to_string(),
                     Sugar::Mutter(typ) => format!("You must derive 'mutters' for '{}' in order to use this syntax", typ),
                     Sugar::Getter(typ) => format!("You must derive 'getters' for '{}' in order to use this syntax", typ)

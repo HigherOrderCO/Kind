@@ -35,22 +35,22 @@ fn parse_num(term: &Term) -> Result<u64, String> {
 fn parse_op(term: &Term) -> Result<Operator, String> {
     match term {
         Term::Ctr { name, args: _ } => match name.as_str() {
-            "Kind.Operator.add" => Ok(Operator::Add),
-            "Kind.Operator.sub" => Ok(Operator::Sub),
-            "Kind.Operator.mul" => Ok(Operator::Mul),
-            "Kind.Operator.div" => Ok(Operator::Div),
-            "Kind.Operator.mod" => Ok(Operator::Mod),
-            "Kind.Operator.and" => Ok(Operator::And),
-            "Kind.Operator.or" => Ok(Operator::Or),
-            "Kind.Operator.xor" => Ok(Operator::Xor),
-            "Kind.Operator.shl" => Ok(Operator::Shl),
-            "Kind.Operator.shr" => Ok(Operator::Shr),
-            "Kind.Operator.ltn" => Ok(Operator::Ltn),
-            "Kind.Operator.lte" => Ok(Operator::Lte),
-            "Kind.Operator.eql" => Ok(Operator::Eql),
-            "Kind.Operator.gte" => Ok(Operator::Gte),
-            "Kind.Operator.gtn" => Ok(Operator::Gtn),
-            "Kind.Operator.neq" => Ok(Operator::Neq),
+            "Apps.Kind.Operator.add" => Ok(Operator::Add),
+            "Apps.Kind.Operator.sub" => Ok(Operator::Sub),
+            "Apps.Kind.Operator.mul" => Ok(Operator::Mul),
+            "Apps.Kind.Operator.div" => Ok(Operator::Div),
+            "Apps.Kind.Operator.mod" => Ok(Operator::Mod),
+            "Apps.Kind.Operator.and" => Ok(Operator::And),
+            "Apps.Kind.Operator.or" => Ok(Operator::Or),
+            "Apps.Kind.Operator.xor" => Ok(Operator::Xor),
+            "Apps.Kind.Operator.shl" => Ok(Operator::Shl),
+            "Apps.Kind.Operator.shr" => Ok(Operator::Shr),
+            "Apps.Kind.Operator.ltn" => Ok(Operator::Ltn),
+            "Apps.Kind.Operator.lte" => Ok(Operator::Lte),
+            "Apps.Kind.Operator.eql" => Ok(Operator::Eql),
+            "Apps.Kind.Operator.gte" => Ok(Operator::Gte),
+            "Apps.Kind.Operator.gtn" => Ok(Operator::Gtn),
+            "Apps.Kind.Operator.neq" => Ok(Operator::Neq),
             _ => Err("Cannot recognized operator".to_string()),
         },
         _ => Err("Error parsing operator".to_string()),
@@ -91,44 +91,44 @@ fn parse_all_expr(
 ) -> Result<Box<desugared::Expr>, String> {
     match term {
         Term::Ctr { name, args } => match name.as_str() {
-            "Kind.Term.Quoted.all" => Ok(Expr::all(
+            "Apps.Kind.Term.Quoted.all" => Ok(Expr::all(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
                 false, // TODO: Fix
             )),
-            "Kind.Term.Quoted.lam" => Ok(Expr::lambda(
+            "Apps.Kind.Term.Quoted.lam" => Ok(Expr::lambda(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names, &args[2])?,
                 false, // TODO: Fix
             )),
-            "Kind.Term.Quoted.let" => Ok(Expr::let_(
+            "Apps.Kind.Term.Quoted.let" => Ok(Expr::let_(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_all_expr(names.clone(), &args[2])?,
                 parse_all_expr(names, &args[3])?,
             )),
-            "Kind.Term.Quoted.typ" => Ok(Expr::typ(parse_orig(&args[0])?)),
-            "Kind.Term.Quoted.var" => Ok(Expr::var(Ident::new(
+            "Apps.Kind.Term.Quoted.typ" => Ok(Expr::typ(parse_orig(&args[0])?)),
+            "Apps.Kind.Term.Quoted.var" => Ok(Expr::var(Ident::new(
                 parse_name(&args[1])?,
                 parse_orig(&args[0])?,
             ))),
-            "Kind.Term.Quoted.hol" => Ok(Expr::hole(parse_orig(&args[0])?, parse_num(&args[1])?)),
-            "Kind.Term.Quoted.ann" => Ok(Expr::ann(
+            "Apps.Kind.Term.Quoted.hol" => Ok(Expr::hole(parse_orig(&args[0])?, parse_num(&args[1])?)),
+            "Apps.Kind.Term.Quoted.ann" => Ok(Expr::ann(
                 parse_orig(&args[0])?,
                 parse_all_expr(names.clone(), &args[1])?,
                 parse_all_expr(names, &args[2])?,
             )),
-            "Kind.Term.Quoted.sub" => Ok(Expr::sub(
+            "Apps.Kind.Term.Quoted.sub" => Ok(Expr::sub(
                 parse_orig(&args[0])?,
                 Ident::generate(&parse_name(&args[1])?),
                 parse_num(&args[2])? as usize,
                 parse_num(&args[3])? as usize,
                 parse_all_expr(names, &args[4])?,
             )),
-            "Kind.Term.Quoted.app" => Ok(Expr::app(
+            "Apps.Kind.Term.Quoted.app" => Ok(Expr::app(
                 parse_orig(&args[0])?,
                 parse_all_expr(names.clone(), &args[1])?,
                 vec![desugared::AppBinding {
@@ -136,7 +136,7 @@ fn parse_all_expr(
                     erased: false,
                 }],
             )),
-            "Kind.Term.Quoted.ctr" => {
+            "Apps.Kind.Term.Quoted.ctr" => {
                 let name = parse_qualified(&args[0])?;
                 let orig = parse_orig(&args[1])?;
                 let mut res = Vec::new();
@@ -145,7 +145,7 @@ fn parse_all_expr(
                 }
                 Ok(Expr::ctr(orig, name, res))
             }
-            "Kind.Term.Quoted.fun" => Ok(Expr::fun(
+            "Apps.Kind.Term.Quoted.fun" => Ok(Expr::fun(
                 parse_orig(&args[1])?,
                 parse_qualified(&args[0])?,
                 {
@@ -156,11 +156,11 @@ fn parse_all_expr(
                     res
                 },
             )),
-            "Kind.Term.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
-            "Kind.Term.Quoted.u60" => Ok(Expr::type_u60(parse_orig(&args[0])?)),
-            "Kind.Term.Quoted.num" => Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?)),
+            "Apps.Kind.Term.Quoted.hlp" => Ok(Expr::hlp(parse_orig(&args[0])?, Ident::generate("?"))),
+            "Apps.Kind.Term.Quoted.u60" => Ok(Expr::type_u60(parse_orig(&args[0])?)),
+            "Apps.Kind.Term.Quoted.num" => Ok(Expr::num_u60(parse_orig(&args[0])?, parse_num(&args[1])?)),
             // TODO: Change quoting to support floats
-            "Kind.Term.Quoted.op2" => Ok(Expr::binary(
+            "Apps.Kind.Term.Quoted.op2" => Ok(Expr::binary(
                 parse_orig(&args[0])?,
                 parse_op(&args[1])?,
                 parse_all_expr(names.clone(), &args[2])?,
@@ -181,9 +181,9 @@ fn parse_list(term: &Term) -> Result<Vec<Box<Term>>, String> {
     loop {
         match cur {
             Term::Ctr { name, args } => {
-                if name == "List.nil" {
+                if name == "Data.List.nil" {
                     break;
-                } else if name == "List.cons" {
+                } else if name == "Data.List.cons" {
                     vec.push(args[0].clone());
                     cur = &args[1];
                 } else {
@@ -199,10 +199,10 @@ fn parse_list(term: &Term) -> Result<Vec<Box<Term>>, String> {
 /// Transforms a HVM quoted entry into a easy to manipulate structure.
 pub fn transform_entry(term: &Term) -> Result<Entry, String> {
     match term {
-        Term::Ctr { name, args } if name == "Pair.new" => {
+        Term::Ctr { name, args } if name == "Data.Pair.new" => {
             let fst = parse_name(&args[0])?;
             match &*args[1] {
-                Term::Ctr { name, args } if name == "Pair.new" => {
+                Term::Ctr { name, args } if name == "Data.Pair.new" => {
                     let snd = parse_expr(&args[0])?;
                     let trd = parse_list(&args[1])?;
                     let trd = trd.iter().flat_map(|x| parse_expr(x)).collect();
@@ -226,7 +226,7 @@ fn parse_type_error(expr: &Term) -> Result<TypeDiagnostic, String> {
             let ctx = Context(entries.collect());
             let orig = match_opt!(*args[1], Term::U6O { numb } => EncodedRange(numb).to_range())?;
             match name.as_str() {
-                "Kind.Error.Quoted.uncovered_pattern" => Ok(TypeDiagnostic::UncoveredPattern(ctx, orig, {
+                "Apps.Kind.Error.Quoted.uncovered_pattern" => Ok(TypeDiagnostic::UncoveredPattern(ctx, orig, {
                     let args = parse_list(&args[2])?;
                     let mut new_args = Vec::with_capacity(args.len());
                     for arg in &args {
@@ -234,25 +234,25 @@ fn parse_type_error(expr: &Term) -> Result<TypeDiagnostic, String> {
                     }
                     new_args
                 })),
-                "Kind.Error.Quoted.unbound_variable" => Ok(TypeDiagnostic::UnboundVariable(ctx, orig)),
-                "Kind.Error.Quoted.cant_infer_hole" => Ok(TypeDiagnostic::CantInferHole(ctx, orig)),
-                "Kind.Error.Quoted.cant_infer_lambda" => Ok(TypeDiagnostic::CantInferLambda(ctx, orig)),
-                "Kind.Error.Quoted.invalid_call" => Ok(TypeDiagnostic::InvalidCall(ctx, orig)),
-                "Kind.Error.Quoted.impossible_case" => Ok(TypeDiagnostic::ImpossibleCase(
+                "Apps.Kind.Error.Quoted.unbound_variable" => Ok(TypeDiagnostic::UnboundVariable(ctx, orig)),
+                "Apps.Kind.Error.Quoted.cant_infer_hole" => Ok(TypeDiagnostic::CantInferHole(ctx, orig)),
+                "Apps.Kind.Error.Quoted.cant_infer_lambda" => Ok(TypeDiagnostic::CantInferLambda(ctx, orig)),
+                "Apps.Kind.Error.Quoted.invalid_call" => Ok(TypeDiagnostic::InvalidCall(ctx, orig)),
+                "Apps.Kind.Error.Quoted.impossible_case" => Ok(TypeDiagnostic::ImpossibleCase(
                     ctx,
                     orig,
                     parse_all_expr(im_rc::HashMap::new(), &args[2])?,
                     parse_all_expr(im_rc::HashMap::new(), &args[3])?,
                 )),
-                "Kind.Error.Quoted.inspection" => Ok(TypeDiagnostic::Inspection(
+                "Apps.Kind.Error.Quoted.inspection" => Ok(TypeDiagnostic::Inspection(
                     ctx,
                     orig,
                     parse_all_expr(im_rc::HashMap::new(), &args[2])?,
                 )),
-                "Kind.Error.Quoted.too_many_arguments" => {
+                "Apps.Kind.Error.Quoted.too_many_arguments" => {
                     Ok(TypeDiagnostic::TooManyArguments(ctx, orig))
                 }
-                "Kind.Error.Quoted.type_mismatch" => Ok(TypeDiagnostic::TypeMismatch(
+                "Apps.Kind.Error.Quoted.type_mismatch" => Ok(TypeDiagnostic::TypeMismatch(
                     ctx,
                     orig,
                     parse_all_expr(im_rc::HashMap::new(), &args[2])?,
