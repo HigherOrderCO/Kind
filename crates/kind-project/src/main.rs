@@ -43,36 +43,6 @@ struct CliArgs {
 }
 
 // TODO: Think of a better way to interface the 2 applciations
-impl CliArgs {
-    fn as_kind_cli(self, root: PathBuf) -> anyhow::Result<kind2::Cli> {
-        let CliArgs {
-            debug,
-            warning,
-            no_color,
-            tids,
-            trace,
-            ascii,
-            command,
-            compact,
-            hide_vals,
-        } = self;
-        let kind_cli = kind2::Cli {
-            config: None,
-            debug,
-            warning,
-            no_color,
-            tids,
-            trace,
-            ascii,
-            entrypoint: Some("Main".into()),
-            command: command.as_kind_command(&root)?,
-            root: Some(root),
-            compact,
-            hide_vals,
-        };
-        Ok(kind_cli)
-    }
-}
 
 #[derive(Subcommand, Debug)]
 enum Command {
@@ -124,30 +94,6 @@ enum Command {
     ToHVM,
 }
 
-impl Command {
-    fn as_kind_command(self, root: &Path) -> anyhow::Result<kind2::Command> {
-        // TODO: handle non-utf8 paths properly
-        let file: String = root
-            .join(Path::new("Main.kind"))
-            .to_str()
-            .unwrap()
-            .to_string();
-        let kind_command = match self {
-            Command::Init { .. } => unreachable!(),
-            Command::Check { coverage } => kind2::Command::Check { coverage, file },
-            Command::Eval => kind2::Command::Eval { file },
-            Command::ToKindCore => kind2::Command::ToKindCore { file },
-            Command::Erase => kind2::Command::Erase { file },
-            Command::Run => kind2::Command::Run { file },
-            Command::GenChecker { coverage } => kind2::Command::GenChecker { coverage, file },
-            Command::Show => kind2::Command::Show { file },
-            Command::ToKDL { namespace } => kind2::Command::ToKDL { file, namespace },
-            Command::ToHVM => kind2::Command::ToHVM { file },
-        };
-        Ok(kind_command)
-    }
-}
-
 fn run_cli(args: CliArgs) -> anyhow::Result<()> {
     let root = kind_project::search_project_config_file()?;
     match &args.command {
@@ -158,17 +104,42 @@ fn run_cli(args: CliArgs) -> anyhow::Result<()> {
                 init_project(PathBuf::from("."), name.clone())
             }
         }
-        _ => {
-            if let Some(root) = root {
-                let cfg_path = root.join(Path::new(PROJECT_CONFIG_FILE_NAME));
-                let cfg_data = String::from_utf8(std::fs::read(cfg_path)?)?;
-                let project_cfg: ProjectConfig = toml::from_str(&cfg_data)?;
-                let src_root = root.join(Path::new(&project_cfg.name));
-                let kind_cli = args.as_kind_cli(src_root)?;
-                kind2::run_cli(kind_cli)
-            } else {
-                Err(ProjectError::NotInProject.into())
-            }
+        Command::Erase => {
+            // if let Some(root) = root {
+            //     let cfg_path = root.join(Path::new(PROJECT_CONFIG_FILE_NAME));
+            //     let cfg_data = String::from_utf8(std::fs::read(cfg_path)?)?;
+            //     let project_cfg: ProjectConfig = toml::from_str(&cfg_data)?;
+            //     let src_root = root.join(Path::new(&project_cfg.name));
+            //     let kind_cli = args.as_kind_cli(src_root)?;
+            //     kind2::run_cli(kind_cli)
+            // } else {
+            //     Err(ProjectError::NotInProject.into())
+            // }
+            todo!()
+        }
+        Command::Check { coverage } => {
+            todo!()
+        }
+        Command::Eval => {
+            todo!()
+        }
+        Command::ToKindCore => {
+            todo!()
+        }
+        Command::Run => {
+            todo!()
+        }
+        Command::GenChecker { coverage } => {
+            todo!()
+        }
+        Command::Show => {
+            todo!()
+        }
+        Command::ToKDL { namespace } => {
+            todo!()
+        }
+        Command::ToHVM => {
+            todo!()
         }
     }
 }

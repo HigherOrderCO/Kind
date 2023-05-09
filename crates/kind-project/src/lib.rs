@@ -1,8 +1,10 @@
 pub mod error;
 pub mod fetcher;
 
+use fxhash::FxHashSet;
+use kind_driver::session::Session;
 use kind_pass::unbound::get_book_unbound;
-use kind_tree::concrete::Book;
+use kind_tree::{concrete::Book, symbol::QualifiedIdent};
 
 use anyhow::{anyhow, Context};
 use directories::ProjectDirs;
@@ -108,8 +110,22 @@ fn make_git_fetcher(config: &ProjectConfig) -> anyhow::Result<GitFetcher> {
     Ok(fetcher)
 }
 
-fn get_unbound_top_levels(fetcher: impl Fetcher, book: &mut Book) -> anyhow::Result<()> {
+fn get_unbound_top_levels(
+    session: &Session,
+    fetcher: impl Fetcher,
+    book: &mut Book,
+) -> anyhow::Result<()> {
     let (_, unbound_tops) = get_book_unbound(session.diagnostic_sender.clone(), book, true);
-
+    let unbound_tops: FxHashSet<QualifiedIdent> = unbound_tops
+        .iter()
+        .map(|(_, x)| x)
+        .flatten()
+        .cloned()
+        .collect();
+    let missing_files = get_files_from_top_levels(unbound_tops.iter());
     Ok(())
+}
+
+fn get_files_from_top_levels(tops: impl Iterator<QualifiedIdent>) -> FxHashSet<PathBuf> {
+    todo!()
 }
