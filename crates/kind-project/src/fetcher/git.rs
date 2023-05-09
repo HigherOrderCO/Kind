@@ -104,7 +104,7 @@ fn get_remote_name(remote_url: &str) -> String {
 fn open_repo(store_path: &Path) -> anyhow::Result<git2::Repository> {
     let repo = match git2::Repository::open(store_path) {
         Ok(repo) => repo,
-        Err(_) => git2::Repository::init("/path/to/a/repo")?,
+        Err(_) => git2::Repository::init(store_path)?,
     };
     Ok(repo)
 }
