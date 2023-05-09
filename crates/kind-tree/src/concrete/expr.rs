@@ -140,7 +140,7 @@ pub struct Sttm {
 pub enum SeqOperation {
     Set(Box<Expr>),
     Mut(Box<Expr>),
-    Get
+    Get,
 }
 
 #[derive(Clone, Debug)]
@@ -148,7 +148,7 @@ pub struct SeqRecord {
     pub typ: Box<Expr>,
     pub expr: Box<Expr>,
     pub fields: Vec<Ident>,
-    pub operation: SeqOperation
+    pub operation: SeqOperation,
 }
 
 #[derive(Clone, Debug)]
@@ -225,10 +225,10 @@ pub enum ExprKind {
         type_name: QualifiedIdent,
         var_name: Ident,
         motive: Option<Box<Expr>>,
-        next: Box<Expr>
+        next: Box<Expr>,
     },
 
-    SeqRecord(SeqRecord)
+    SeqRecord(SeqRecord),
 }
 
 /// Describes a single expression inside Kind2.
@@ -241,7 +241,7 @@ pub struct Expr {
 impl Expr {
     pub fn var(name: Ident) -> Box<Expr> {
         Box::new(Expr {
-            range: name.range.clone(),
+            range: name.range,
             data: ExprKind::Var { name },
         })
     }
@@ -309,7 +309,6 @@ impl Expr {
             range,
         })
     }
-
 }
 
 impl Locatable for Binding {
@@ -573,8 +572,18 @@ impl Display for Expr {
                 args.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
-            Open { type_name, var_name, motive: Some(motive), next } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
-            Open { type_name, var_name, motive: None, next } => write!(f, "(open {} {}; {})", type_name, var_name, next),
+            Open {
+                type_name,
+                var_name,
+                motive: Some(motive),
+                next,
+            } => write!(f, "(open {} {} : {motive}; {})", type_name, var_name, next),
+            Open {
+                type_name,
+                var_name,
+                motive: None,
+                next,
+            } => write!(f, "(open {} {}; {})", type_name, var_name, next),
             If { cond, then_, else_ } => {
                 write!(f, "(if {} {{{}}} else {{{}}})", cond, then_, else_)
             }
@@ -593,13 +602,23 @@ impl Display for Expr {
             Hole => write!(f, "_"),
             SeqRecord(rec) => {
                 use SeqOperation::*;
-                write!(f, "(!({}) {} {}", rec.typ, rec.expr, rec.fields.iter().map(|x| format!(".{}", x.to_str())).collect::<Vec<_>>().join(","))?;
+                write!(
+                    f,
+                    "(!({}) {} {}",
+                    rec.typ,
+                    rec.expr,
+                    rec.fields
+                        .iter()
+                        .map(|x| format!(".{}", x.to_str()))
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )?;
                 match &rec.operation {
                     Set(expr) => write!(f, "+= {})", expr),
                     Mut(expr) => write!(f, "@= {})", expr),
-                    Get => write!(f, ")")
+                    Get => write!(f, ")"),
                 }
-            },
+            }
         }
     }
 }
@@ -607,17 +626,13 @@ impl Display for Expr {
 impl Binding {
     pub fn to_app_binding(&self) -> AppBinding {
         match self {
-            Binding::Positional(expr) => {
-                AppBinding {
-                    data: expr.clone(),
-                    erased: false,
-                }
+            Binding::Positional(expr) => AppBinding {
+                data: expr.clone(),
+                erased: false,
             },
-            Binding::Named(_, _, expr) => {
-                AppBinding {
-                    data: expr.clone(),
-                    erased: false,
-                }
+            Binding::Named(_, _, expr) => AppBinding {
+                data: expr.clone(),
+                erased: false,
             },
         }
     }

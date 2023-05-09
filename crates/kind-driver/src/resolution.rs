@@ -182,7 +182,7 @@ fn parse_and_store_book_by_identifier(
     }
 
     match ident_to_path(&session.root, ident, true) {
-        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
+        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book, false),
         Ok(None) => false,
         Err(err) => {
             session.diagnostic_sender.send(err).unwrap();
@@ -191,7 +191,7 @@ fn parse_and_store_book_by_identifier(
     }
 }
 
-fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mut Book) -> bool {
+fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mut Book, immediate: bool) -> bool {
     if !path.exists() {
         let err = Box::new(DriverDiagnostic::CannotFindFile(
             path.to_str().unwrap().to_string(),
@@ -237,6 +237,11 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
 
     for idents in state.unbound_top_level.values() {
         let fst = idents.iter().next().unwrap();
+
+        if immediate && session.show_immediate_deps {
+            println!("{}", fst);
+        }
+
         if !book.names.contains_key(&fst.to_string()) {
             failed |= parse_and_store_book_by_identifier(session, fst, book);
         }
@@ -265,7 +270,7 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
 
 pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> anyhow::Result<Book> {
     let mut book = Book::default();
-    if parse_and_store_book_by_path(session, path, &mut book) {
+    if parse_and_store_book_by_path(session, path, &mut book, true) {
         Err(ResolutionError.into())
     } else {
         Ok(book)

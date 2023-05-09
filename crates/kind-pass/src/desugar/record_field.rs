@@ -7,7 +7,7 @@ use kind_tree::{
     telescope::Telescope,
 };
 
-use crate::{subst::subst_on_expr, diagnostic::PassDiagnostic};
+use crate::{diagnostic::PassDiagnostic, subst::subst_on_expr};
 
 use super::DesugarState;
 
@@ -55,7 +55,7 @@ impl<'a> DesugarState<'a> {
             return true;
         }
 
-        if let Some((name, params, record_fields, args)) = self.specialize_on_field(typ.clone()) {
+        if let Some((name, params, record_fields, args)) = self.specialize_on_field(typ) {
             if let Some(field) = record_fields
                 .iter()
                 .find(|x| x.name.to_str() == fields[0].to_str())
@@ -82,13 +82,13 @@ impl<'a> DesugarState<'a> {
             } else {
                 self.send_err(PassDiagnostic::CannotFindTheField(
                     fields[0].range,
-                    fields[0].to_string()
+                    fields[0].to_string(),
                 ));
             }
         } else {
             self.send_err(PassDiagnostic::CannotAccessType(
                 fields[0].range,
-                fields[0].to_string()
+                fields[0].to_string(),
             ));
         }
 

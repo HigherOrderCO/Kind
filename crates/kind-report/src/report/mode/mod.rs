@@ -1,7 +1,10 @@
 use std::{fmt::Write, path::Path};
 
-use crate::{data::{FileCache, Diagnostic, DiagnosticFrame, Log}, RenderConfig};
 use super::code::FileMarkers;
+use crate::{
+    data::{Diagnostic, DiagnosticFrame, FileCache, Log},
+    RenderConfig,
+};
 
 pub mod classic;
 pub mod compact;
@@ -35,17 +38,20 @@ pub enum Mode {
 pub(crate) struct CodeBlock<'a> {
     pub code: &'a str,
     pub path: &'a Path,
-    pub markers: &'a FileMarkers
+    pub markers: &'a FileMarkers,
 }
 
 /// A type class for renderable error reports and messages. It's useful
 /// to change easily things without problems.
 pub trait Renderable<T> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res;
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res;
 }
 
-impl<'a, T, E> Renderable<T> for Vec<E> where E : Renderable<T> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+impl<T, E> Renderable<T> for Vec<E>
+where
+    E: Renderable<T>,
+{
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         for elem in self {
             elem.render(fmt, cache, config)?;
         }
@@ -53,14 +59,20 @@ impl<'a, T, E> Renderable<T> for Vec<E> where E : Renderable<T> {
     }
 }
 
-impl<T> Renderable<T> for Box<dyn Diagnostic> where DiagnosticFrame: Renderable<T> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+impl<T> Renderable<T> for Box<dyn Diagnostic>
+where
+    DiagnosticFrame: Renderable<T>,
+{
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         Renderable::<T>::render(&self.to_diagnostic_frame(config), fmt, cache, config)
     }
 }
 
-pub trait Report where Self : Renderable<Classic> + Renderable<Compact> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+pub trait Report
+where
+    Self: Renderable<Classic> + Renderable<Compact>,
+{
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         match config.mode {
             Mode::Classic => Renderable::<Classic>::render(self, fmt, cache, config),
             Mode::Compact => Renderable::<Compact>::render(self, fmt, cache, config),

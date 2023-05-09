@@ -12,6 +12,11 @@ impl SyntaxCtxIndex {
     pub fn new(size: usize) -> SyntaxCtxIndex {
         SyntaxCtxIndex(size)
     }
+
+    /// WARNING: Probably ghost ranges cause problems with it
+    pub fn is_root(&self) -> bool {
+        self.0 == 0
+    }
 }
 
 /// A span in the encoded format that is required by

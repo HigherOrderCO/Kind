@@ -33,6 +33,10 @@ impl Visitor for Expand {
             }
         };
         match &ident.get_aux() {
+            Some(post) if post.is_empty() => {
+                ident.change_root(alias.to_string());
+                ident.reset_aux()
+            }
             Some(post) => {
                 ident.change_root(format!("{}.{}", alias, post));
                 ident.reset_aux()

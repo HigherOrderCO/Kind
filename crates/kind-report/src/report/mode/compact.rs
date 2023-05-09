@@ -7,10 +7,10 @@ use crate::{report::*, RenderConfig};
 
 use super::{CodeBlock, Compact, Renderable, Res};
 
-fn mark_code<T: Write + Sized>(
+fn mark_code(
     markers: &mut [&(Point, Point, &Marker)],
     code_line: &str,
-    fmt: &mut T,
+    fmt: &mut dyn Write,
 ) -> std::fmt::Result {
     markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
@@ -41,8 +41,8 @@ fn mark_code<T: Write + Sized>(
     Ok(())
 }
 
-impl<'a> Renderable<Compact> for Word {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+impl Renderable<Compact> for Word {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         match self {
             Word::Normal(str) => write!(fmt, "{} ", str),
             Word::Dimmed(str) => write!(fmt, "{} ", str),
@@ -53,7 +53,7 @@ impl<'a> Renderable<Compact> for Word {
 }
 
 impl Renderable<Compact> for Subtitle {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         match self {
             Subtitle::Field(_, phr) => writeln!(fmt, "{}", phr.to_lowercase()),
             Subtitle::Normal(_, phr) => writeln!(fmt, "- {}", phr),
@@ -69,7 +69,7 @@ impl Renderable<Compact> for Subtitle {
 }
 
 impl<'a> Renderable<Compact> for Subtitles<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         if !self.0.is_empty() {
             writeln!(fmt)?;
         }
@@ -79,7 +79,7 @@ impl<'a> Renderable<Compact> for Subtitles<'a> {
 }
 
 impl Renderable<Compact> for Severity {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         use Severity::*;
 
         let painted = match self {
@@ -93,13 +93,13 @@ impl Renderable<Compact> for Severity {
 }
 
 impl<'a> Renderable<Compact> for Header<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         writeln!(fmt, "{}", &self.title.to_lowercase())
     }
 }
 
 impl<'a> Renderable<Compact> for CodeBlock<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _8778: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         writeln!(fmt, "location")?;
         let guide = LineGuide::get(self.code);
 
@@ -133,8 +133,8 @@ impl<'a> Renderable<Compact> for CodeBlock<'a> {
 }
 
 impl<'a> Renderable<Compact> for Markers<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
-        let groups = group_markers(&self.0);
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
+        let groups = group_markers(self.0);
         let current = PathBuf::from(".").canonicalize().unwrap();
 
         for (ctx, markers) in groups.iter() {
@@ -155,12 +155,7 @@ impl<'a> Renderable<Compact> for Markers<'a> {
 }
 
 impl Renderable<Compact> for DiagnosticFrame {
-    fn render<U: std::fmt::Write, C: crate::data::FileCache>(
-        &self,
-        fmt: &mut U,
-        cache: &C,
-        config: &crate::RenderConfig,
-    ) -> super::Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         Renderable::<Compact>::render(&self.header(), fmt, cache, config)?;
         Renderable::<Compact>::render(&self.subtitles(), fmt, cache, config)?;
         Renderable::<Compact>::render(&self.markers(), fmt, cache, config)?;
@@ -170,7 +165,7 @@ impl Renderable<Compact> for DiagnosticFrame {
 }
 
 impl Renderable<Compact> for Log {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         match self {
             Log::Compiled(_) => writeln!(fmt, "compiled"),
             Log::Checked(_) => writeln!(fmt, "checked"),

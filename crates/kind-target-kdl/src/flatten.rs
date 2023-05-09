@@ -178,10 +178,10 @@ fn split_rule(
                     (ExprKind::U60 { .. }, ExprKind::U60 { .. }) => (),
                     (ExprKind::F60 { .. }, ExprKind::F60 { .. }) => (),
                     (ExprKind::U60 { .. }, ExprKind::Var { name }) => {
-                        subst(&mut new_rule_body, &name, rule_pat);
+                        subst(&mut new_rule_body, name, rule_pat);
                     }
                     (ExprKind::F60 { .. }, ExprKind::Var { name }) => {
-                        subst(&mut new_rule_body, &name, rule_pat);
+                        subst(&mut new_rule_body, name, rule_pat);
                     }
                     _ => {
                         panic!("Internal error. Please report."); // not possible since it matches

@@ -83,7 +83,7 @@ pub fn derive_setters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
         .map(|arg| {
             (
                 arg.name.clone(),
-                arg.typ.clone().unwrap_or_else(|| typ(arg.range.clone())),
+                arg.typ.clone().unwrap_or_else(|| typ(arg.range)),
             )
         })
         .collect();
