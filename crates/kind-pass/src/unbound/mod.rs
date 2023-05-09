@@ -169,8 +169,7 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_qualified_ident(&mut self, ident: &mut QualifiedIdent) {
-
-        if !ident.get_aux().is_none() {
+        if ident.get_aux().is_some() {
             panic!("problem with 'use' desugaring")
         }
 
@@ -260,7 +259,7 @@ impl Visitor for UnboundCollector {
                     match repeated_names.get(&cons.name.to_string()) {
                         None => {
                             repeated_names.insert(cons.name.to_string(), cons.name.range);
-                        },
+                        }
                         Some(_) => {
                             failed = true;
                         }
@@ -648,8 +647,7 @@ impl Visitor for UnboundCollector {
                     Mut(expr) => self.visit_expr(expr),
                     Get => (),
                 }
-
-            },
+            }
         }
     }
 }

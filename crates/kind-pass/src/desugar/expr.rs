@@ -87,27 +87,33 @@ impl<'a> DesugarState<'a> {
         self.desugar_record_field_sequence(range, &mut value, typ, &sub.fields);
 
         if self.failed {
-            return Expr::err(range)
+            return Expr::err(range);
         }
 
         match &sub.operation {
             Set(expr) => {
                 let value_ident = Ident::generate("_value");
-                let expr = self.desugar_expr(&expr);
+                let expr = self.desugar_expr(expr);
 
                 let mut result = value.iter().rfold(expr, |acc, (typ, field)| {
                     let name = typ.add_segment(field.to_str()).add_segment("mut");
 
-                    if self.failed || !self.check_implementation(name.to_str(), range, Sugar::Mutter(typ.to_string())) {
+                    if self.failed
+                        || !self.check_implementation(
+                            name.to_str(),
+                            range,
+                            Sugar::Mutter(typ.to_string()),
+                        )
+                    {
                         return desugared::Expr::err(range);
                     }
-    
+
                     self.mk_desugared_ctr(
                         range,
                         name,
                         vec![
                             Expr::var(value_ident.clone()),
-                            Expr::lambda(range.clone(), value_ident.clone(), acc, false),
+                            Expr::lambda(range, value_ident.clone(), acc, false),
                         ],
                         false,
                     )
@@ -121,17 +127,23 @@ impl<'a> DesugarState<'a> {
             }
             Mut(expr) => {
                 let value_ident = Ident::generate("_value");
-                let expr = self.desugar_expr(&expr);
+                let expr = self.desugar_expr(expr);
 
                 let result = value.iter().rfold(expr, |acc, (typ, field)| {
                     let name = typ.add_segment(field.to_str()).add_segment("mut");
 
-                    if self.failed || !self.check_implementation(name.to_str(), range, Sugar::Mutter(typ.to_string())) {
+                    if self.failed
+                        || !self.check_implementation(
+                            name.to_str(),
+                            range,
+                            Sugar::Mutter(typ.to_string()),
+                        )
+                    {
                         return desugared::Expr::err(range);
                     }
 
                     Expr::lambda(
-                        name.range.clone(),
+                        name.range,
                         value_ident.clone(),
                         self.mk_desugared_ctr(
                             range,
@@ -144,23 +156,18 @@ impl<'a> DesugarState<'a> {
                 });
 
                 if self.failed {
-                    return Expr::err(range)
+                    return Expr::err(range);
                 }
 
                 let mut result = if let desugared::ExprKind::Lambda { body, .. } = result.data {
                     body
                 } else {
-                    self.send_err(PassDiagnostic::NeedsAField(
-                        sub.expr.range.clone()
-                    ));
-                    return Expr::err(range)
+                    self.send_err(PassDiagnostic::NeedsAField(sub.expr.range));
+                    return Expr::err(range);
                 };
 
-                match &mut result.data {
-                    desugared::ExprKind::Ctr { args, .. } => {
-                        args[0] = self.desugar_expr(&sub.expr);
-                    }
-                    _ => (),
+                if let desugared::ExprKind::Ctr { args, .. } = &mut result.data {
+                    args[0] = self.desugar_expr(&sub.expr);
                 }
 
                 result
@@ -170,7 +177,13 @@ impl<'a> DesugarState<'a> {
                 .fold(self.desugar_expr(&sub.expr), |acc, (typ, field)| {
                     let name = typ.add_segment(field.to_str()).add_segment("get");
 
-                    if self.failed || !self.check_implementation(name.to_str(), range, Sugar::Getter(typ.to_string())) {
+                    if self.failed
+                        || !self.check_implementation(
+                            name.to_str(),
+                            range,
+                            Sugar::Getter(typ.to_string()),
+                        )
+                    {
                         return desugared::Expr::err(range);
                     }
 
@@ -487,7 +500,7 @@ impl<'a> DesugarState<'a> {
                 var_name,
                 motive,
                 next,
-            } => self.desugar_open(expr.range, type_name, var_name, motive, &next),
+            } => self.desugar_open(expr.range, type_name, var_name, motive, next),
             SeqRecord(sec) => self.desugar_seq(expr.range, sec),
         }
     }

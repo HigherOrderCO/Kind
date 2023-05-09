@@ -41,7 +41,7 @@ fn mark_code(
     Ok(())
 }
 
-impl<'a> Renderable<Compact> for Word {
+impl Renderable<Compact> for Word {
     fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         match self {
             Word::Normal(str) => write!(fmt, "{} ", str),
@@ -134,7 +134,7 @@ impl<'a> Renderable<Compact> for CodeBlock<'a> {
 
 impl<'a> Renderable<Compact> for Markers<'a> {
     fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
-        let groups = group_markers(&self.0);
+        let groups = group_markers(self.0);
         let current = PathBuf::from(".").canonicalize().unwrap();
 
         for (ctx, markers) in groups.iter() {

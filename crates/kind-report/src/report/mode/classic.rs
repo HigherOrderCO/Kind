@@ -193,7 +193,7 @@ impl Renderable<Classic> for Subtitle {
     }
 }
 
-impl<'a> Renderable<Classic> for Word {
+impl Renderable<Classic> for Word {
     fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         match self {
             Word::Normal(str) => write!(fmt, "{} ", Paint::new(str)),
@@ -390,14 +390,14 @@ impl Renderable<Classic> for Log {
                     u64
                 )
             }
-            Log::Empty => writeln!(fmt, ""),
+            Log::Empty => writeln!(fmt),
         }
     }
 }
 
 impl<'a> Renderable<Classic> for Markers<'a> {
     fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
-        let groups = group_markers(&self.0);
+        let groups = group_markers(self.0);
         let is_empty = groups.is_empty();
         let current = PathBuf::from(".").canonicalize().unwrap();
 

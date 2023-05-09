@@ -16,14 +16,14 @@ const U60_MAX: kdl::U120 = kdl::U120(0xFFFFFFFFFFFFFFF);
 
 fn char_to_code(chr: char) -> Result<u128, String> {
     let num = match chr {
-      '.' => 0,
-      '0'..='9' => 1 + chr as u128 - '0' as u128,
-      'A'..='Z' => 11 + chr as u128 - 'A' as u128,
-      'a'..='z' => 37 + chr as u128 - 'a' as u128,
-      '_' => 63,
-      _ => {
-        return Err(format!("Invalid Kindelia Name letter '{}'.", chr));
-      }
+        '.' => 0,
+        '0'..='9' => 1 + chr as u128 - '0' as u128,
+        'A'..='Z' => 11 + chr as u128 - 'A' as u128,
+        'a'..='z' => 37 + chr as u128 - 'a' as u128,
+        '_' => 63,
+        _ => {
+            return Err(format!("Invalid Kindelia Name letter '{}'.", chr));
+        }
     };
     Ok(num)
 }
@@ -32,7 +32,7 @@ pub fn from_str(name_txt: &str) -> Result<Name, String> {
     let mut num: u128 = 0;
     for (i, chr) in name_txt.chars().enumerate() {
         if i >= Name::MAX_CHARS {
-            return Err("Too big".to_string())
+            return Err("Too big".to_string());
         }
         num = (num << 6) + char_to_code(chr)?;
     }
@@ -140,7 +140,10 @@ pub fn compile_book(
         if let Ok(new_name) = from_str(&new_name) {
             ctx.kdl_names.insert(name.clone(), new_name);
         } else {
-            ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(entry.name.to_string(), entry.name.range)));
+            ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(
+                entry.name.to_string(),
+                entry.name.range,
+            )));
         }
     }
 
@@ -185,7 +188,10 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             if let Ok(name) = res_name {
                 To::Var { name }
             } else {
-                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(name.to_string(), name.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(
+                    name.to_string(),
+                    name.range,
+                )));
                 err_term()
             }
         }
@@ -203,7 +209,11 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             let body = Box::new(compile_expr(ctx, body));
 
             let not_used_now = ctx.kdl_used_names.contains(param.to_str());
-            let name = if not_used_now { Ok(from_str("").unwrap()) } else { name };
+            let name = if not_used_now {
+                Ok(from_str("").unwrap())
+            } else {
+                name
+            };
 
             if not_used_now {
                 ctx.kdl_used_names.remove(param.to_str());
@@ -216,11 +226,18 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
             if let Ok(name) = name {
                 To::Lam { name, body }
             } else {
-                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(param.to_string(), param.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(
+                    param.to_string(),
+                    param.range,
+                )));
                 err_term()
             }
         }
-        From::Let { name: param, val, next } => {
+        From::Let {
+            name: param,
+            val,
+            next,
+        } => {
             let res_name = from_str(param.to_str());
 
             let not_used = ctx.kdl_used_names.contains(param.to_str());
@@ -241,13 +258,16 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
                 ctx.kdl_used_names.insert(param.to_string());
             }
 
-            let argm = Box::new(compile_expr(ctx, &val));
+            let argm = Box::new(compile_expr(ctx, val));
 
             if let Ok(name) = res_name {
                 let func = Box::new(To::Lam { name, body: expr });
                 To::App { func, argm }
             } else {
-                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(param.to_string(), param.range)));
+                ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(
+                    param.to_string(),
+                    param.range,
+                )));
                 err_term()
             }
         }
@@ -314,8 +334,8 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
                     return To::Num { numb };
                 }
             }
-            let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
-            let args = args.iter().map(|x| compile_expr(ctx, &x)).collect();
+            let name = *ctx.kdl_names.get(name.to_str()).unwrap();
+            let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
             To::Ctr { name, args }
         }
         From::Fun { name, args } => {
@@ -420,7 +440,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
                 _ => {
-                    let name = ctx.kdl_names.get(name.to_str()).unwrap().clone();
+                    let name = *ctx.kdl_names.get(name.to_str()).unwrap();
                     let args = args.iter().map(|x| compile_expr(ctx, x)).collect();
                     To::Fun { name, args }
                 }
@@ -488,7 +508,10 @@ fn compile_common_function(ctx: &mut CompileCtx, entry: &untyped::Entry) {
         if let Ok(name) = from_str(name) {
             args.push(name)
         } else {
-            ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(name.to_string(), *range)));
+            ctx.send_err(Box::new(KdlDiagnostic::InvalidVarName(
+                name.to_string(),
+                *range,
+            )));
         }
     }
 
@@ -545,17 +568,13 @@ fn compile_u120_new(ctx: &mut CompileCtx, entry: &untyped::Entry) {
     // U120.new hi lo = (hi << 60) | lo
     let hi_name = from_str("hi").unwrap();
     let lo_name = from_str("lo").unwrap();
-    let hi_var = kdl::Term::Var {
-        name: hi_name.clone(),
-    };
-    let lo_var = kdl::Term::Var {
-        name: lo_name.clone(),
-    };
+    let hi_var = kdl::Term::Var { name: hi_name };
+    let lo_var = kdl::Term::Var { name: lo_name };
     let name = ctx.kdl_names.get(entry.name.to_str()).cloned().unwrap();
     let args = vec![hi_name, lo_name];
     let rules = vec![kdl::Rule {
         lhs: kdl::Term::Fun {
-            name: name.clone(),
+            name,
             args: vec![hi_var.clone(), lo_var.clone()],
         },
         rhs: kdl::Term::Op2 {

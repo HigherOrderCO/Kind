@@ -6,7 +6,7 @@ use kind_tree::concrete::expr::Expr;
 use kind_tree::concrete::pat::{Pat, PatIdent};
 use kind_tree::concrete::*;
 use kind_tree::concrete::{self};
-use kind_tree::symbol::{Ident};
+use kind_tree::symbol::Ident;
 use kind_tree::telescope::Telescope;
 
 pub fn derive_mutters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
@@ -27,7 +27,7 @@ pub fn derive_mutters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
             .cloned()
             .map(|x| Binding::Positional(Expr::var(x.name)))
             .collect(),
-        range
+        range,
     );
 
     // Sccrutinzies
@@ -56,7 +56,7 @@ pub fn derive_mutters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
         .map(|arg| {
             (
                 arg.name.clone(),
-                arg.typ.clone().unwrap_or_else(|| Expr::typ(arg.range.clone())),
+                arg.typ.clone().unwrap_or_else(|| Expr::typ(arg.range)),
             )
         })
         .collect();
@@ -90,7 +90,13 @@ pub fn derive_mutters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
             hidden: false,
             erased: false,
             name: Ident::generate("mut"),
-            typ: Some(Expr::all(Ident::generate("_"), cons_typ.clone(), cons_typ.clone(), false, range)),
+            typ: Some(Expr::all(
+                Ident::generate("_"),
+                cons_typ.clone(),
+                cons_typ.clone(),
+                false,
+                range,
+            )),
             range,
         });
 
@@ -109,7 +115,11 @@ pub fn derive_mutters(range: Range, rec: &RecordDecl) -> Vec<concrete::Entry> {
             .map(|x| Binding::Positional(Expr::var(x.0)))
             .collect();
 
-        args[place] = Binding::Positional(Expr::app(Expr::var(new_var), vec![args[place].to_app_binding()], range));
+        args[place] = Binding::Positional(Expr::app(
+            Expr::var(new_var),
+            vec![args[place].to_app_binding()],
+            range,
+        ));
 
         let body = Box::new(Expr {
             data: ExprKind::Constr {

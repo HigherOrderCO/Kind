@@ -587,7 +587,7 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
                 "Kind.Axiom.Family.Constructors".to_owned(),
                 vec![mk_ctr_name(&family.name)],
             ),
-            rhs: mk_ctr("Maybe.some".to_string(), vec![codegen_vec(family.constructors.iter().map(|x| mk_ctr_name(x)))]),
+            rhs: mk_ctr("Maybe.some".to_string(), vec![codegen_vec(family.constructors.iter().map(mk_ctr_name))]),
         });
 
         file.rules.push(lang::Rule {
@@ -643,7 +643,7 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
                 lhs: mk_ctr(
                     "Kind.Coverage.Maker.Mk".to_owned(),
                     vec![
-                        mk_ctr_name(&constructor),
+                        mk_ctr_name(constructor),
                         mk_var("orig"),
                         mk_lifted_ctr(
                             eval_ctr(true, TermTag::Ctr(args.len())),
@@ -661,7 +661,7 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
             file.rules.push(lang::Rule {
                 lhs: mk_ctr(
                     "Kind.Axiom.Compare".to_owned(),
-                    vec![mk_ctr_name(&constructor), mk_ctr_name(&constructor)],
+                    vec![mk_ctr_name(constructor), mk_ctr_name(constructor)],
                 ),
                 rhs: mk_single_ctr("Bool.true".to_string()),
             });
@@ -669,7 +669,7 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
             file.rules.push(lang::Rule {
                 lhs: mk_ctr(
                     "Kind.Axiom.ArgsCount".to_owned(),
-                    vec![mk_ctr_name(&constructor)],
+                    vec![mk_ctr_name(constructor)],
                 ),
                 rhs: mk_u60(entry.args.len() as u64),
             });
@@ -677,7 +677,7 @@ pub fn codegen_coverage(file: &mut lang::File, book: &Book) {
             file.rules.push(lang::Rule {
                 lhs: mk_ctr(
                     "Kind.Axiom.Compare".to_owned(),
-                    vec![mk_ctr_name(&constructor), mk_ctr_name(&constructor)],
+                    vec![mk_ctr_name(constructor), mk_ctr_name(constructor)],
                 ),
                 rhs: mk_single_ctr("Bool.true".to_string()),
             });

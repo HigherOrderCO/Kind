@@ -47,7 +47,7 @@ pub trait Renderable<T> {
     fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res;
 }
 
-impl<'a, T, E> Renderable<T> for Vec<E>
+impl<T, E> Renderable<T> for Vec<E>
 where
     E: Renderable<T>,
 {

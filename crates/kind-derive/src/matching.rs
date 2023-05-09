@@ -24,7 +24,9 @@ pub fn to_app_binding(errs: &mut Errs, binding: &Binding) -> AppBinding {
             data: expr.clone(),
         },
         Binding::Named(_, name, expr) => {
-            errs.push(Box::new(DeriveDiagnostic::CannotUseNamedVariable(name.range)));
+            errs.push(Box::new(DeriveDiagnostic::CannotUseNamedVariable(
+                name.range,
+            )));
             AppBinding::explicit(expr.clone())
         }
     }
@@ -195,7 +197,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> (concrete::Entry, Errs) 
 
     let scrutinee_ident = Expr::var(Ident::generate("scrutinee"));
 
-    let mut return_args = indice_names.clone();
+    let mut return_args = indice_names;
     return_args.push(AppBinding::explicit(scrutinee_ident));
 
     let return_type = Expr::app(Expr::var(motive_ident.clone()), return_args, range);
@@ -329,7 +331,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> (concrete::Entry, Errs) 
         rules,
         range,
         attrs: Vec::new(),
-        generated_by: Some(sum.name.to_string().clone()),
+        generated_by: Some(sum.name.to_string()),
     };
 
     (entry, errs)

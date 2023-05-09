@@ -123,13 +123,13 @@ pub fn group_marker_lines<'a>(
         let end = guide.find(marker.position.end);
 
         if let Some(row) = markers_by_line.get_mut(&start.line) {
-            row.push((start.clone(), end.clone(), &marker))
+            row.push((start, end, marker))
         } else {
-            markers_by_line.insert(start.line, vec![(start.clone(), end.clone(), &marker)]);
+            markers_by_line.insert(start.line, vec![(start, end, marker)]);
         }
 
         if end.line != start.line {
-            multi_line_markers.push((start.clone(), end.clone(), &marker));
+            multi_line_markers.push((start, end, marker));
         } else if marker.main {
             // Just to make errors a little bit better
             let start = start.line.saturating_sub(1);

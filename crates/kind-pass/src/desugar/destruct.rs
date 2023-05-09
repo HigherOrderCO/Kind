@@ -199,7 +199,10 @@ impl<'a> DesugarState<'a> {
             };
 
             if let Some((range, _, _)) = cases_args[index] {
-                self.send_err(PassDiagnostic::DuplicatedNamed(range, case.constructor.range));
+                self.send_err(PassDiagnostic::DuplicatedNamed(
+                    range,
+                    case.constructor.range,
+                ));
             } else {
                 let sum_constructor = &constructors[index];
 
@@ -220,7 +223,8 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg.1 {
                         arguments.push(name)
                     } else {
-                        let mut id = Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
+                        let mut id =
+                            Ident::generate(&format!("{}.{}", matcher.scrutinee.to_str(), arg.0));
                         id.range = case.constructor.range;
                         arguments.push(id);
                     }
@@ -267,7 +271,7 @@ impl<'a> DesugarState<'a> {
             self.gen_hole_expr(matcher.typ.range)
         };
 
-        let desugared_value = matcher.value.as_ref().map(|f| self.desugar_expr(&f));
+        let desugared_value = matcher.value.as_ref().map(|f| self.desugar_expr(f));
 
         let irrelev = matcher.with_vars.iter().map(|_| false).collect::<Vec<_>>();
 
@@ -277,7 +281,8 @@ impl<'a> DesugarState<'a> {
             .map(|x| {
                 (
                     x.0.clone(),
-                    x.1.clone().map(|x| self.desugar_expr(&x))
+                    x.1.clone()
+                        .map(|x| self.desugar_expr(&x))
                         .unwrap_or_else(|| self.gen_hole_expr(range)),
                 )
             })

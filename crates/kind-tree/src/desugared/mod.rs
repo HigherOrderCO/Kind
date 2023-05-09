@@ -11,7 +11,8 @@ pub use crate::Operator;
 
 use crate::{
     symbol::{Ident, QualifiedIdent},
-    Attributes, telescope::Telescope,
+    telescope::Telescope,
+    Attributes,
 };
 
 /// Just a vector of expressions. It is called spine because
@@ -170,8 +171,11 @@ impl Expr {
             })
     }
 
-
-    pub fn unfold_all(irrelev: &[bool], idents: &[(Ident, Box<Expr>)], body: Box<Expr>) -> Box<Expr> {
+    pub fn unfold_all(
+        irrelev: &[bool],
+        idents: &[(Ident, Box<Expr>)],
+        body: Box<Expr>,
+    ) -> Box<Expr> {
         idents
             .iter()
             .rev()
@@ -345,7 +349,7 @@ pub struct Entry {
 pub struct Family {
     pub name: QualifiedIdent,
     pub parameters: Telescope<Argument>,
-    pub constructors: Vec<QualifiedIdent>
+    pub constructors: Vec<QualifiedIdent>,
 }
 
 /// A book is a collection of desugared entries.
@@ -397,17 +401,13 @@ impl Display for AppBinding {
 }
 
 pub fn try_desugar_to_nat(name: &QualifiedIdent, spine: &[Box<Expr>], acc: u128) -> Option<u128> {
-    match name.to_str() {
-        "Nat.zero" if spine.len() == 0 => {
-            Some(acc)
-        }
-        "Nat.succ" if spine.len() == 1 => {
-            match &spine[0].data {
-                ExprKind::Ctr { name, args } => try_desugar_to_nat(name, args, acc + 1),
-                _ => None
-            }
-        }
-        _ => None
+    match (name.to_str(), spine) {
+        ("Nat.zero", []) => Some(acc),
+        ("Nat.succ", [spine]) => match &spine.data {
+            ExprKind::Ctr { name, args } => try_desugar_to_nat(name, args, acc + 1),
+            _ => None,
+        },
+        _ => None,
     }
 }
 
@@ -445,17 +445,15 @@ impl Display for Expr {
             Fun { name, args } | Ctr { name, args } => {
                 if let Some(res) = try_desugar_to_nat(name, args, 0) {
                     write!(f, "{res}n")
+                } else if args.is_empty() {
+                    write!(f, "{}", name)
                 } else {
-                    if args.is_empty() {
-                        write!(f, "{}", name)
-                    } else {
-                        write!(
-                            f,
-                            "({}{})",
-                            name,
-                            args.iter().map(|x| format!(" {}", x)).collect::<String>()
-                        )
-                    }
+                    write!(
+                        f,
+                        "({}{})",
+                        name,
+                        args.iter().map(|x| format!(" {}", x)).collect::<String>()
+                    )
                 }
             }
             Let { name, val, next } => write!(f, "(let {} = {}; {})", name, val, next),
