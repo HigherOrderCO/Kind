@@ -55,7 +55,7 @@ Usage
 First, install [Rust](https://www.rust-lang.org/tools/install) first, then enter:
 
 ```
-cargo install kind2
+cargo +nightly install kind2
 ```
 
 ### Warning:
