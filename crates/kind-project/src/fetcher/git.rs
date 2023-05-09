@@ -1,6 +1,5 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-use tiny_keccak::{Hasher, Sha3};
 
 use super::Fetcher;
 
@@ -99,11 +98,7 @@ impl Drop for GitFetcher {
 }
 
 fn get_remote_name(remote_url: &str) -> String {
-    let mut sha3 = Sha3::v256();
-    let mut hash = [0u8; 32];
-    sha3.update(remote_url.as_bytes());
-    sha3.finalize(&mut hash);
-    hex::encode(hash)
+    hex::encode(remote_url)
 }
 
 fn open_repo(store_path: &Path) -> anyhow::Result<git2::Repository> {

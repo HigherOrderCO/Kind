@@ -782,7 +782,6 @@ dependencies = [
  "kind-report",
  "kind2",
  "serde",
- "tiny-keccak",
  "toml 0.7.3",
 ]
 
