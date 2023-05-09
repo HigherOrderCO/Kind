@@ -73,6 +73,7 @@ pub enum Log {
     Compiled(Duration),
     Rewrites(u64),
     Failed(Duration, u64, u64),
+    Empty,
 }
 
 pub trait Diagnostic {

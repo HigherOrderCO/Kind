@@ -11,11 +11,11 @@ use std::fmt::Write;
 use std::path::PathBuf;
 use yansi::Paint;
 
-fn colorize_code<T: Write + Sized>(
+fn colorize_code(
     markers: &mut [&(Point, Point, &Marker)],
     code_line: &str,
     modify: &dyn Fn(&str) -> String,
-    fmt: &mut T,
+    fmt: &mut dyn Write,
 ) -> std::fmt::Result {
     markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
@@ -47,12 +47,12 @@ fn colorize_code<T: Write + Sized>(
     Ok(())
 }
 
-fn mark_inlined<T: Write + Sized>(
+fn mark_inlined(
     prefix: &str,
     code: &str,
     config: &RenderConfig,
     inline_markers: &mut [&(Point, Point, &Marker)],
-    fmt: &mut T,
+    fmt: &mut dyn Write,
 ) -> std::fmt::Result {
     inline_markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
@@ -148,7 +148,7 @@ impl Color {
 }
 
 impl Renderable<Classic> for Severity {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         use Severity::*;
 
         let painted = match self {
@@ -162,7 +162,7 @@ impl Renderable<Classic> for Severity {
 }
 
 impl<'a> Renderable<Classic> for Header<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         Renderable::<Classic>::render(self.severity, fmt, cache, config)?;
         fmt.write_str(&Paint::new(&self.title).bold().to_string())?;
         fmt.write_char('\n')
@@ -170,7 +170,7 @@ impl<'a> Renderable<Classic> for Header<'a> {
 }
 
 impl Renderable<Classic> for Subtitle {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         match self {
             Subtitle::Normal(color, phr) | Subtitle::Field(color, phr) => {
                 let bullet = color.colorize(config.chars.bullet);
@@ -194,7 +194,7 @@ impl Renderable<Classic> for Subtitle {
 }
 
 impl<'a> Renderable<Classic> for Word {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         match self {
             Word::Normal(str) => write!(fmt, "{} ", Paint::new(str)),
             Word::Dimmed(str) => write!(fmt, "{} ", Paint::new(str).dimmed()),
@@ -205,7 +205,7 @@ impl<'a> Renderable<Classic> for Word {
 }
 
 impl<'a> Renderable<Classic> for Subtitles<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         if !self.0.is_empty() {
             writeln!(fmt)?;
         }
@@ -215,7 +215,7 @@ impl<'a> Renderable<Classic> for Subtitles<'a> {
 }
 
 impl<'a> Renderable<Classic> for CodeBlock<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, config: &RenderConfig) -> Res {
         let guide = LineGuide::get(self.code);
         let point = guide.find(self.markers.0[0].position.start);
 
@@ -342,7 +342,7 @@ impl<'a> Renderable<Classic> for CodeBlock<'a> {
 }
 
 impl Renderable<Classic> for Log {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         match self {
             Log::Checking(file) => {
                 writeln!(
@@ -390,12 +390,13 @@ impl Renderable<Classic> for Log {
                     u64
                 )
             }
+            Log::Empty => writeln!(fmt, ""),
         }
     }
 }
 
 impl<'a> Renderable<Classic> for Markers<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         let groups = group_markers(&self.0);
         let is_empty = groups.is_empty();
         let current = PathBuf::from(".").canonicalize().unwrap();
@@ -424,7 +425,7 @@ impl<'a> Renderable<Classic> for Markers<'a> {
 }
 
 impl<'a> Renderable<Classic> for Hints<'a> {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, _: &C, _: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, _: &dyn FileCache, _: &RenderConfig) -> Res {
         for hint in self.0 {
             writeln!(
                 fmt,
@@ -440,7 +441,7 @@ impl<'a> Renderable<Classic> for Hints<'a> {
 }
 
 impl Renderable<Classic> for DiagnosticFrame {
-    fn render<U: Write, C: FileCache>(&self, fmt: &mut U, cache: &C, config: &RenderConfig) -> Res {
+    fn render(&self, fmt: &mut dyn Write, cache: &dyn FileCache, config: &RenderConfig) -> Res {
         write!(fmt, " ")?;
 
         Renderable::<Classic>::render(&self.header(), fmt, cache, config)?;

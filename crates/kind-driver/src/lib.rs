@@ -1,14 +1,18 @@
 use checker::eval;
 use diagnostic::{DriverDiagnostic, GenericDriverError};
 use kind_pass::{desugar, erasure, inline::inline_book};
-use kind_report::data::FileCache;
+use kind_report::{
+    data::{FileCache, Log, Severity},
+    report::Report,
+    RenderConfig,
+};
 use kind_span::SyntaxCtxIndex;
 
-use hvm::language::{syntax as backend};
+use hvm::language::syntax as backend;
 use kind_tree::{concrete, desugared, untyped};
 use resolution::ResolutionError;
 use session::Session;
-use std::{path::PathBuf};
+use std::{path::PathBuf, time::Instant};
 
 use kind_checker as checker;
 
@@ -147,9 +151,7 @@ pub fn check_main_desugared_entry(
 
 pub fn execute_file(file: &str, tids: Option<usize>) -> anyhow::Result<(String, u64)> {
     match eval(file, "Main", false, tids) {
-        Ok((res, rewrites)) => {
-            Ok((res.to_string(), rewrites))
-        },
+        Ok((res, rewrites)) => Ok((res.to_string(), rewrites)),
         Err(_) => anyhow::Result::Err(GenericDriverError.into()),
     }
 }
@@ -160,4 +162,70 @@ pub fn eval_in_checker(book: &desugared::Book) -> (String, u64) {
 
 pub fn generate_checker(book: &desugared::Book, check_coverage: bool) -> String {
     checker::gen_checker(book, check_coverage, book.entrs.keys().cloned().collect())
+}
+
+pub fn run_in_session<T>(
+    render_config: &RenderConfig,
+    root: PathBuf,
+    file: String,
+    compiled: bool,
+    action: &mut dyn FnMut(&mut Session) -> anyhow::Result<T>,
+    log: &dyn Fn(&Session, &dyn Report),
+) -> anyhow::Result<T> {
+    let (rx, tx) = std::sync::mpsc::channel();
+
+    let mut session = Session::new(root, rx);
+
+    log(&session, &Log::Empty);
+    log(&session, &Log::Checking(format!("The file '{}'", file)));
+
+    let start = Instant::now();
+
+    let res = action(&mut session);
+
+    let diagnostics = tx.try_iter().collect::<Vec<_>>();
+
+    let mut contains_error = false;
+
+    let mut hidden = 0;
+    let total = diagnostics.len() as u64;
+
+    for diagnostic in diagnostics {
+        if diagnostic.get_severity() == Severity::Error {
+            contains_error = true;
+        }
+
+        let is_root = diagnostic
+            .get_syntax_ctx()
+            .map(|x| x.is_root())
+            .unwrap_or_default();
+
+        if render_config.only_main && !is_root {
+            hidden += 1;
+            continue;
+        }
+        log(&session, &diagnostic);
+    }
+
+    if !contains_error {
+        log(
+            &session,
+            &if compiled {
+                Log::Compiled(start.elapsed())
+            } else {
+                Log::Checked(start.elapsed())
+            },
+        );
+        log(&session, &Log::Empty);
+
+        res
+    } else {
+        log(&session, &Log::Failed(start.elapsed(), total, hidden));
+        log(&session, &Log::Empty);
+
+        match res {
+            Ok(_) => Err(ResolutionError.into()),
+            Err(res) => Err(res),
+        }
+    }
 }
