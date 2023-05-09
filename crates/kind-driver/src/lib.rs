@@ -174,7 +174,7 @@ pub fn run_in_session<T>(
 ) -> anyhow::Result<T> {
     let (rx, tx) = std::sync::mpsc::channel();
 
-    let mut session = Session::new(root, rx);
+    let mut session = Session::new(root, rx, render_config.show_immediate_deps);
 
     log(&session, &Log::Empty);
     log(&session, &Log::Checking(format!("The file '{}'", file)));

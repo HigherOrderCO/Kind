@@ -62,6 +62,9 @@ pub struct Cli {
     #[arg(long)]
     pub hide_deps: bool,
 
+    #[arg(long)]
+    pub get_deps: bool,
+
     /// Entrypoint of the file that makes the erasure checker
     /// not remove the entry.
     #[arg(short, long)]
@@ -179,6 +182,7 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
         config.hide_vals,
         mode,
         config.hide_deps,
+        config.get_deps
     );
 
     let root = config.root.unwrap_or_else(|| PathBuf::from("."));

@@ -35,12 +35,12 @@ fn test_kind2(path: &Path, run: fn(&PathBuf, &mut Session) -> Option<String>) ->
             golden_test(path, &|path| {
                 let (rx, tx) = std::sync::mpsc::channel();
                 let root = PathBuf::from("./suite/lib").canonicalize().unwrap();
-                let mut session = Session::new(root, rx);
+                let mut session = Session::new(root, rx, false);
 
                 let res = run(&PathBuf::from(path), &mut session);
 
                 let diagnostics = tx.try_iter().collect::<Vec<Box<dyn Diagnostic>>>();
-                let render = RenderConfig::ascii(2, false, false);
+                let render = RenderConfig::ascii(2, false, false, false);
 
                 kind_report::check_if_colors_are_supported(true);
 
