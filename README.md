@@ -50,7 +50,7 @@ BlackFridayTheorem Nat.zero     = Equal.refl
 BlackFridayTheorem (Nat.succ n) = Equal.apply (x => Nat.succ x) (BlackFridayTheorem n)
 ```
 
-For more examples, check the [Wikind](https://github.com/kindelia/wikind).
+For more examples, check the [Kindex](https://github.com/HigherOrderCO/Kindex).
 
 # Installation
 
@@ -67,8 +67,8 @@ Command    | Usage                     | Note
 Check      | `kind2 check  file.kind2` | Checks all definitions.
 Eval       | `kind2 eval   file.kind2` | Runs using the type-checker's evaluator.
 Run        | `kind2 run    file.kind2` | Runs using HVM's evaluator, on Rust-mode.
-To-HVM     | `kind2 to-hvm file.kind2` | Generates a [.hvm](https://github.com/kindelia/hvm) file. Can then be compiled to a rust crate using HVM.
-To-KDL     | `kind2 to-kdl file.kind2` | Generates a [.kdl](https://github.com/kindelia/kindelia) file. Can then be deployed to [Kindelia](https://github.com/kindelia/kindelia).
+To-HVM     | `kind2 to-hvm file.kind2` | Generates a [.hvm](https://github.com/higherorderco/hvm) file. Can then be compiled to a rust crate using HVM.
+To-KDL     | `kind2 to-kdl file.kind2` | Generates a [.kdl](https://github.com/higherorderco/kindelia) file. Can then be deployed to [Kindelia](https://github.com/higherorderco/kindelia).
 
 The rust crate can be generated via HVM:
 
