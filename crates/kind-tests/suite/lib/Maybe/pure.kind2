@@ -1,2 +1,2 @@
-Maybe.pure <a: Type> (x: a) : Maybe a
-Maybe.pure a x = Maybe.some x
+Data.Maybe.pure <a: Type> (x: a) : Data.Maybe a
+Data.Maybe.pure a x = Data.Maybe.some x

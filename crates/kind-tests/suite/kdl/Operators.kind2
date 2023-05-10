@@ -1,5 +1,5 @@
 #kdl_run
-Main : U60
+Main : Data.U60
 Main =
   (+ 2
     (- 3

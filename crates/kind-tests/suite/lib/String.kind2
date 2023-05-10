@@ -1,4 +1,4 @@
-type String {
-    cons (x: U60) (xs: String)
+type Data.String {
+    cons (x: Data.U60) (xs: Data.String)
     nil
 }

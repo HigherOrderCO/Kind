@@ -1,28 +1,28 @@
-Char : Type
-Char = U60
+Data.Char : Type
+Data.Char = Data.U60
 
 #kdl_name = T2
 #kdl_erase
 #derive[match]
-record Pair (a) (b) {
+record Data.Pair (a) (b) {
   constructor new
   fst : a 
   snd : b 
 }
 
 #derive[match]
-type String {
+type Data.String {
   nil
-  cons (head: (Char)) (tail: (String))
+  cons (head: (Data.Char)) (tail: (Data.String))
 }
 
 #keep
-Test (n: U60) : U60
+Test (n: Data.U60) : Data.U60
 Test n = 
-  let state = Pair.new "Teste" 0
-  match Pair state {
+  let state = Data.Pair.new "Teste" 0
+  match Data.Pair state {
     new => 
-      match String state.fst {
+      match Data.String state.fst {
         nil => 
           1
         cons => 

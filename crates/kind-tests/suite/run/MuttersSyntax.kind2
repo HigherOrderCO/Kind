@@ -11,7 +11,7 @@ record Identity (t: Type) {
 
 #derive[mutters]
 record NoTypeVar {
-    some_thing: Identity (Identity U60)
+    some_thing: Identity (Identity Data.U60)
 }
 
 Main : NoTypeVar

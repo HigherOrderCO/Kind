@@ -1,10 +1,10 @@
 #keep
-CoolFn : U60 -> U60 {
-  (x: U60) => (* 2 x)
+CoolFn : Data.U60 -> Data.U60 {
+  (x: Data.U60) => (* 2 x)
 }
 
 #keep
-CoolFnApp (n: U60) : U60 {
-  let lam = (x: U60) => ((CoolFn) x)
+CoolFnApp (n: Data.U60) : Data.U60 {
+  let lam = (x: Data.U60) => ((CoolFn) x)
   (lam n)
 }

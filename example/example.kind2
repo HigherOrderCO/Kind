@@ -1,9 +1,9 @@
-// U60
+// Data.U60
 // ---
 
-U60.to_nat (x: U60) : Nat
-U60.to_nat 0 = Nat.zero
-U60.to_nat n  = (Nat.succ (U60.to_nat (- n 1)))
+Data.U60.to_nat (x: Data.U60) : Data.Nat
+Data.U60.to_nat 0 = Data.Nat.zero
+Data.U60.to_nat n  = (Data.Nat.succ (Data.U60.to_nat (- n 1)))
 
 // Empty
 // -----
@@ -16,120 +16,120 @@ Empty : Type
 Unit : Type
 Unit.new : Unit
 
-// Bool
+// Data.Bool
 // ----
 
-type Bool {
-  true : Bool
-  false : Bool
+type Data.Bool {
+  true : Data.Bool
+  false : Data.Bool
 }
 
-Bool.not (a: Bool) : Bool
-Bool.not Bool.true  = Bool.false
-Bool.not Bool.false = Bool.true
+Data.Bool.not (a: Data.Bool) : Data.Bool
+Data.Bool.not Data.Bool.true  = Data.Bool.false
+Data.Bool.not Data.Bool.false = Data.Bool.true
 
-Bool.and (a: Bool) (b: Bool) : Bool
-Bool.and Bool.true  Bool.true  = Bool.true
-Bool.and Bool.true  Bool.false = Bool.false
-Bool.and Bool.false Bool.true  = Bool.false
-Bool.and Bool.false Bool.false = Bool.false
+Data.Bool.and (a: Data.Bool) (b: Data.Bool) : Data.Bool
+Data.Bool.and Data.Bool.true  Data.Bool.true  = Data.Bool.true
+Data.Bool.and Data.Bool.true  Data.Bool.false = Data.Bool.false
+Data.Bool.and Data.Bool.false Data.Bool.true  = Data.Bool.false
+Data.Bool.and Data.Bool.false Data.Bool.false = Data.Bool.false
 
-Bool.if <r: Type> (b: Bool) (if_t: r) (if_f: r) : r
-Bool.if r Bool.true  if_t if_f = if_t
-Bool.if r Bool.false if_t if_f = if_f
+Data.Bool.if <r: Type> (b: Data.Bool) (if_t: r) (if_f: r) : r
+Data.Bool.if r Data.Bool.true  if_t if_f = if_t
+Data.Bool.if r Data.Bool.false if_t if_f = if_f
 
-Bool.not_not_theorem (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
-Bool.not_not_theorem Bool.true  = (Equal.refl Bool Bool.true)
-Bool.not_not_theorem Bool.false = (Equal.refl Bool Bool.false)
+Data.Bool.not_not_theorem (a: Data.Bool) : (Equal Data.Bool a (Data.Bool.not (Data.Bool.not a)))
+Data.Bool.not_not_theorem Data.Bool.true  = (Equal.refl Data.Bool Data.Bool.true)
+Data.Bool.not_not_theorem Data.Bool.false = (Equal.refl Data.Bool Data.Bool.false)
 
-Bool.true_not_false (e: (Equal Bool Bool.true Bool.false)) : Empty
-Bool.true_not_false e = (Equal.rewrite e (x => (Bool.if Type x Unit Empty)) Unit.new)
+Data.Bool.true_not_false (e: (Equal Data.Bool Data.Bool.true Data.Bool.false)) : Empty
+Data.Bool.true_not_false e = (Equal.rewrite e (x => (Data.Bool.if Type x Unit Empty)) Unit.new)
 
-// Nat
+// Data.Nat
 // ---
 
-type Nat {
-  zero : Nat
-  succ (pred: Nat) : Nat
+type Data.Nat {
+  zero : Data.Nat
+  succ (pred: Data.Nat) : Data.Nat
 }
 
-Nat.double (x: Nat) : Nat
-Nat.double (Nat.succ x) = (Nat.succ (Nat.succ (Nat.double x)))
-Nat.double (Nat.zero)   = (Nat.zero)
+Data.Nat.double (x: Data.Nat) : Data.Nat
+Data.Nat.double (Data.Nat.succ x) = (Data.Nat.succ (Data.Nat.succ (Data.Nat.double x)))
+Data.Nat.double (Data.Nat.zero)   = (Data.Nat.zero)
 
-Nat.add (a: Nat) (b: Nat) : Nat
-Nat.add (Nat.succ a) b = (Nat.succ (Nat.add a b))
-Nat.add Nat.zero     b = b
+Data.Nat.add (a: Data.Nat) (b: Data.Nat) : Data.Nat
+Data.Nat.add (Data.Nat.succ a) b = (Data.Nat.succ (Data.Nat.add a b))
+Data.Nat.add Data.Nat.zero     b = b
 
-Nat.comm.a (a: Nat) : (Equal Nat a (Nat.add a Nat.zero))
-Nat.comm.a Nat.zero     = Equal.refl
-Nat.comm.a (Nat.succ a) = (Equal.apply (x => (Nat.succ x)) (Nat.comm.a a))
+Data.Nat.comm.a (a: Data.Nat) : (Equal Data.Nat a (Data.Nat.add a Data.Nat.zero))
+Data.Nat.comm.a Data.Nat.zero     = Equal.refl
+Data.Nat.comm.a (Data.Nat.succ a) = (Equal.apply (x => (Data.Nat.succ x)) (Data.Nat.comm.a a))
 
-Nat.comm.b (a: Nat) (b: Nat): (Equal Nat (Nat.add a (Nat.succ b)) (Nat.succ (Nat.add a b)))
-Nat.comm.b Nat.zero     b = Equal.refl
-Nat.comm.b (Nat.succ a) b = (Equal.apply (x => (Nat.succ x)) (Nat.comm.b a b))
+Data.Nat.comm.b (a: Data.Nat) (b: Data.Nat): (Equal Data.Nat (Data.Nat.add a (Data.Nat.succ b)) (Data.Nat.succ (Data.Nat.add a b)))
+Data.Nat.comm.b Data.Nat.zero     b = Equal.refl
+Data.Nat.comm.b (Data.Nat.succ a) b = (Equal.apply (x => (Data.Nat.succ x)) (Data.Nat.comm.b a b))
 
-Nat.comm (a: Nat) (b: Nat) : (Equal Nat (Nat.add a b) (Nat.add b a))
-Nat.comm Nat.zero     b = (Nat.comm.a b)
-Nat.comm (Nat.succ a) b =
-  let e0 = (Equal.apply (x => (Nat.succ x)) (Nat.comm a b))
-  let e1 = (Equal.mirror (Nat.comm.b b a))
+Data.Nat.comm (a: Data.Nat) (b: Data.Nat) : (Equal Data.Nat (Data.Nat.add a b) (Data.Nat.add b a))
+Data.Nat.comm Data.Nat.zero     b = (Data.Nat.comm.a b)
+Data.Nat.comm (Data.Nat.succ a) b =
+  let e0 = (Equal.apply (x => (Data.Nat.succ x)) (Data.Nat.comm a b))
+  let e1 = (Equal.mirror (Data.Nat.comm.b b a))
   (Equal.chain e0 e1)
 
-Nat.to_u60 (n: Nat) : U60
-Nat.to_u60 Nat.zero     = 0
-Nat.to_u60 (Nat.succ n) = (+ 1 (Nat.to_u60 n))
+Data.Nat.to_u60 (n: Data.Nat) : Data.U60
+Data.Nat.to_u60 Data.Nat.zero     = 0
+Data.Nat.to_u60 (Data.Nat.succ n) = (+ 1 (Data.Nat.to_u60 n))
   
-Nat.mul (a: Nat) (b: Nat) : Nat
-Nat.mul (Nat.succ a) b = (Nat.add (Nat.mul a b) b) // (a + 1) * b = a*b + b
-Nat.mul Nat.zero     b = Nat.zero                  // 0b = 0
+Data.Nat.mul (a: Data.Nat) (b: Data.Nat) : Data.Nat
+Data.Nat.mul (Data.Nat.succ a) b = (Data.Nat.add (Data.Nat.mul a b) b) // (a + 1) * b = a*b + b
+Data.Nat.mul Data.Nat.zero     b = Data.Nat.zero                  // 0b = 0
  
-Nat.mul.comm.a (x: Nat): (Equal (Nat.mul x Nat.zero) Nat.zero)
-Nat.mul.comm.a Nat.zero = Equal.refl
-Nat.mul.comm.a (Nat.succ x) =
-  let e0 = (Nat.mul.comm.a x)
-  let e1 = (Equal.apply (y => (Nat.add y Nat.zero)) e0)
+Data.Nat.mul.comm.a (x: Data.Nat): (Equal (Data.Nat.mul x Data.Nat.zero) Data.Nat.zero)
+Data.Nat.mul.comm.a Data.Nat.zero = Equal.refl
+Data.Nat.mul.comm.a (Data.Nat.succ x) =
+  let e0 = (Data.Nat.mul.comm.a x)
+  let e1 = (Equal.apply (y => (Data.Nat.add y Data.Nat.zero)) e0)
   e1
 
-// List
+// Data.List
 // ----
 
-List (a: Type) : Type
-List.nil <a> : (List a)
-List.cons <a> (x: a) (xs: (List a)) : (List a)
+Data.List (a: Type) : Type
+Data.List.nil <a> : (Data.List a)
+Data.List.cons <a> (x: a) (xs: (Data.List a)) : (Data.List a)
 
-List.negate (xs: (List Bool)) : (List Bool)
-List.negate (List.cons Bool x xs) = (List.cons Bool (Bool.not x) (List.negate xs))
-List.negate (List.nil Bool)       = (List.nil Bool)
+Data.List.negate (xs: (Data.List Data.Bool)) : (Data.List Data.Bool)
+Data.List.negate (Data.List.cons Data.Bool x xs) = (Data.List.cons Data.Bool (Data.Bool.not x) (Data.List.negate xs))
+Data.List.negate (Data.List.nil Data.Bool)       = (Data.List.nil Data.Bool)
 
-List.tail <a> (xs: (List a)) : (List a)
-List.tail a (List.cons t x xs) = xs
+Data.List.tail <a> (xs: (Data.List a)) : (Data.List a)
+Data.List.tail a (Data.List.cons t x xs) = xs
 
-List.map <a> <b> (x: (List a)) (f: (x: a) -> b) : (List b)
-List.map a b (List.nil t)       f = List.nil
-List.map a b (List.cons t x xs) f = (List.cons (f x) (List.map xs f))
+Data.List.map <a> <b> (x: (Data.List a)) (f: (x: a) -> b) : (Data.List b)
+Data.List.map a b (Data.List.nil t)       f = Data.List.nil
+Data.List.map a b (Data.List.cons t x xs) f = (Data.List.cons (f x) (Data.List.map xs f))
 
-List.concat <a> (xs: (List a)) (ys: (List a)) : (List a)
-List.concat a (List.cons u x xs) ys = (List.cons u x (List.concat a xs ys))
-List.concat a (List.nil u)       ys = ys
+Data.List.concat <a> (xs: (Data.List a)) (ys: (Data.List a)) : (Data.List a)
+Data.List.concat a (Data.List.cons u x xs) ys = (Data.List.cons u x (Data.List.concat a xs ys))
+Data.List.concat a (Data.List.nil u)       ys = ys
 
-List.flatten <a> (xs: (List (List a))) : (List a)
-List.flatten a (List.cons u x xs) = (List.concat x (List.flatten xs))
-List.flatten a (List.nil u)       = List.nil
+Data.List.flatten <a> (xs: (Data.List (Data.List a))) : (Data.List a)
+Data.List.flatten a (Data.List.cons u x xs) = (Data.List.concat x (Data.List.flatten xs))
+Data.List.flatten a (Data.List.nil u)       = Data.List.nil
 
-List.bind <a: Type> <b: Type> (xs: (List a)) (f: a -> (List b)) : (List b)
-List.bind a b xs f = (List.flatten b (List.map xs f))
+Data.List.bind <a: Type> <b: Type> (xs: (Data.List a)) (f: a -> (Data.List b)) : (Data.List b)
+Data.List.bind a b xs f = (Data.List.flatten b (Data.List.map xs f))
 
-List.pure <t: Type> (x: t) : (List t)
-List.pure t x = (List.cons t x (List.nil t))
+Data.List.pure <t: Type> (x: t) : (Data.List t)
+Data.List.pure t x = (Data.List.cons t x (Data.List.nil t))
 
-List.range.go (lim: Nat) (res: (List Nat)) : (List Nat)
-List.range.go Nat.zero     res = res
-List.range.go (Nat.succ n) res = (List.range.go n (List.cons n res))
+Data.List.range.go (lim: Data.Nat) (res: (Data.List Data.Nat)) : (Data.List Data.Nat)
+Data.List.range.go Data.Nat.zero     res = res
+Data.List.range.go (Data.Nat.succ n) res = (Data.List.range.go n (Data.List.cons n res))
 
-List.sum (xs: (List Nat)) : Nat
-List.sum (List.nil t)       = Nat.zero
-List.sum (List.cons t x xs) = (Nat.add x (List.sum xs))
+Data.List.sum (xs: (Data.List Data.Nat)) : Data.Nat
+Data.List.sum (Data.List.nil t)       = Data.Nat.zero
+Data.List.sum (Data.List.cons t x xs) = (Data.Nat.add x (Data.List.sum xs))
 
 // Equal
 // -----
@@ -161,9 +161,9 @@ Monad.new (f: Type -> Type)
 // Variadic
 // --------
 
-Variadic (r: Type) (n: Nat) : Type
-Variadic r Nat.zero     = r
-Variadic r (Nat.succ n) = r -> (Variadic r n)
+Variadic (r: Type) (n: Data.Nat) : Type
+Variadic r Data.Nat.zero     = r
+Variadic r (Data.Nat.succ n) = r -> (Variadic r n)
 
 // Examples
 // --------

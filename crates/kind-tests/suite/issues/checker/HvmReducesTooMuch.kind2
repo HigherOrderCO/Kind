@@ -1,14 +1,14 @@
-type Nat {
-    succ (pred: Nat)
+type Data.Nat {
+    succ (pred: Data.Nat)
     zero
 }
 
-Nat.count_layers (n: Nat) (m: U60) : U60
-Nat.count_layers (Nat.succ n) m = Nat.count_layers n (+ m 1)
-Nat.count_layers n     m = (+ m 1)
+Data.Nat.count_layers (n: Data.Nat) (m: Data.U60) : Data.U60
+Data.Nat.count_layers (Data.Nat.succ n) m = Data.Nat.count_layers n (+ m 1)
+Data.Nat.count_layers n     m = (+ m 1)
 
-Assert (num: U60) : Type
+Assert (num: Data.U60) : Type
 
 #partial
-Beq_nat_refl (n: Nat) : Assert (Nat.count_layers n 0)
-Beq_nat_refl (Nat.succ n) = ?
+Beq_nat_refl (n: Data.Nat) : Assert (Data.Nat.count_layers n 0)
+Beq_nat_refl (Data.Nat.succ n) = ?

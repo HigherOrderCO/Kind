@@ -1,7 +1,7 @@
 // A lot of thing here is just to test the substition
 
-type List (t: Type) {
-  Cons (head: t) (tail: List t)
+type Data.List (t: Type) {
+  Cons (head: t) (tail: Data.List t)
   Nil
 }
 
@@ -17,49 +17,49 @@ record JustATest (t: Type) {
 }
 
 // Generates a random list
-Randoms (s: U60) (n: U60) : List U60
-Randoms s 0 = List.Nil
-Randoms s l = List.Cons s (Randoms (% (+ (* s 1664525) 1013904223) 4294967296) (- l 1))
+Randoms (s: Data.U60) (n: Data.U60) : Data.List Data.U60
+Randoms s 0 = Data.List.Nil
+Randoms s l = Data.List.Cons s (Randoms (% (+ (* s 1664525) 1013904223) 4294967296) (- l 1))
 
 // Sums all elements in a concatenation tree
-Sum (tree: Tree U60) : U60
+Sum (tree: Tree Data.U60) : Data.U60
 Sum (Tree.Empty t)      = 0
 Sum (Tree.Single t a)   = a
 Sum (Tree.Concat t a b) = (+ (Sum a) (Sum b))
 
 //// The initial pivot
-Pivot : U60
+Pivot : Data.U60
 Pivot = 2147483648
 
-QSort (p: U60) (s: U60) (l: List U60): Tree U60
-QSort p s List.Nil               = Tree.Empty
-QSort p s (List.Cons x List.Nil) = Tree.Single x
-QSort p s (List.Cons x xs)       = Split p s (List.Cons x xs) List.Nil List.Nil
+QSort (p: Data.U60) (s: Data.U60) (l: Data.List Data.U60): Tree Data.U60
+QSort p s Data.List.Nil               = Tree.Empty
+QSort p s (Data.List.Cons x Data.List.Nil) = Tree.Single x
+QSort p s (Data.List.Cons x xs)       = Split p s (Data.List.Cons x xs) Data.List.Nil Data.List.Nil
 
 //// Splits list in two partitions
-Split (p: U60) (s: U60) (l: List U60) (min: List U60) (max: List U60) : Tree U60
-Split p s List.Nil min max =
+Split (p: Data.U60) (s: Data.U60) (l: Data.List Data.U60) (min: Data.List Data.U60) (max: Data.List Data.U60) : Tree Data.U60
+Split p s Data.List.Nil min max =
   let s   = (>> s 1)
   let min = (QSort (- p s) s min)
   let max = (QSort (+ p s) s max)
   Tree.Concat min max
 
-Split p s (List.Cons x xs) min max =
+Split p s (Data.List.Cons x xs) min max =
   Place p s (< p x) x xs min max
 
 //// Moves element to its partition
 
-Place (p: U60) (s: U60) (y: U60) (x: U60) (xs: List U60) (min: List U60) (max: List U60) : Tree U60
-Place p s 0 x xs min max = Split p s xs (List.Cons x min) max
-Place p s _ x xs min max = Split p s xs min (List.Cons x max)
+Place (p: Data.U60) (s: Data.U60) (y: Data.U60) (x: Data.U60) (xs: Data.List Data.U60) (min: Data.List Data.U60) (max: Data.List Data.U60) : Tree Data.U60
+Place p s 0 x xs min max = Split p s xs (Data.List.Cons x min) max
+Place p s _ x xs min max = Split p s xs min (Data.List.Cons x max)
 
 //// Sorts and sums n random numbers
-Main : U60
+Main : Data.U60
 Main =
   let list = Randoms 1 254
   Sum (QSort Pivot Pivot list)
 
-Entry : U60
+Entry : Data.U60
 Entry =
     let a = 2
     let b = 4
