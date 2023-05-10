@@ -1,15 +1,15 @@
    INFO  Inspection
 
-      * Hole: U60 
+      * Hole: Data.U60 
 
       * Context
-      * n     : (Pair U60 U60) 
-      * n.fst : U60 
-      * n.snd : U60 
+      * n     : (Data.Pair Data.U60 Data.U60) 
+      * n.fst : Data.U60 
+      * n.snd : Data.U60 
 
       /--[suite/issues/checker/ISSUE-457.kind2:10:16]
       |
-    9 |        match Pair n {
+    9 |        match Data.Pair n {
    10 |            new => ?
       |                   v
       |                   \Here!
@@ -18,16 +18,16 @@
 
    INFO  Inspection
 
-      * Hole: U60 
+      * Hole: Data.U60 
 
       * Context
-      * n     : (Pair U60 U60) 
-      * n.fst : U60 
-      * n.snd : U60 
+      * n     : (Data.Pair Data.U60 Data.U60) 
+      * n.fst : Data.U60 
+      * n.snd : Data.U60 
 
       /--[suite/issues/checker/ISSUE-457.kind2:17:5]
       |
-   16 |        open Pair n
+   16 |        open Data.Pair n
    17 |        ?
       |        v
       |        \Here!
@@ -36,16 +36,16 @@
 
    INFO  Inspection
 
-      * Hole: U60 
+      * Hole: Data.U60 
 
       * Context
-      * n   : (Pair U60 U60) 
-      * fst : U60 
-      * snd : U60 
+      * n   : (Data.Pair Data.U60 Data.U60) 
+      * fst : Data.U60 
+      * snd : Data.U60 
 
       /--[suite/issues/checker/ISSUE-457.kind2:22:5]
       |
-   21 |        let Pair.new fst snd = n
+   21 |        let Data.Pair.new fst snd = n
    22 |        ?
       |        v
       |        \Here!
