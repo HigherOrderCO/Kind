@@ -322,20 +322,20 @@ impl Diagnostic for PassDiagnostic {
                 DiagnosticFrame {
                     code: 210,
                     severity: Severity::Error,
-                    title: "Incorrect arity.".to_string(),
-                    subtitles: vec![],
-                    hints: vec![if *expected == 0 {
+                    title: if *expected == 0 {
                         format!("This function expects no arguments but got {}", got.len())
                     } else if *hidden == 0 {
-                        format!("This function expects {} arguments but got {}", expected, got.len())
+                        format!("This function expects exactly {} arguments but got {}", expected, got.len())
                     } else {
                         format!(
-                            "This function expects {} arguments or {} (without hidden ones) but got {}.",
+                            "This function expects exactly {} arguments or {} (without hidden ones) but got {}.",
                             expected,
                             expected - hidden,
                             got.len()
                         )
-                    }],
+                    },
+                    subtitles: vec![],
+                    hints: vec![],
                     positions,
                 }
             }

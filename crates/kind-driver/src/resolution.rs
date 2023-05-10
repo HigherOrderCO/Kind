@@ -191,6 +191,21 @@ fn parse_and_store_book_by_identifier(
     }
 }
 
+fn read_file(session: &mut Session, path: &Path) -> Option<String> {
+    match fs::read_to_string(path) {
+        Ok(res) => Some(res),
+        Err(_) => {
+            session
+                .diagnostic_sender
+                .send(Box::new(DriverDiagnostic::CannotFindFile(
+                    path.to_str().unwrap().to_string(),
+                )))
+                .unwrap();
+            None
+        }
+    }
+}
+
 fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mut Book, immediate: bool) -> bool {
     if !path.exists() {
         let err = Box::new(DriverDiagnostic::CannotFindFile(
@@ -207,18 +222,7 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
         return false;
     }
 
-    let input = match fs::read_to_string(path) {
-        Ok(res) => res,
-        Err(_) => {
-            session
-                .diagnostic_sender
-                .send(Box::new(DriverDiagnostic::CannotFindFile(
-                    path.to_str().unwrap().to_string(),
-                )))
-                .unwrap();
-            return true;
-        }
-    };
+    let Some(input) = read_file(session, path) else { return true };
 
     let ctx_id = session.book_counter;
     session.add_path(Rc::new(fs::canonicalize(path).unwrap()), input.clone());
@@ -249,6 +253,23 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
 
     failed
 }
+
+pub fn get_unbound_variables(session: &mut Session, path: &Path) -> Option<Vec<String>> {
+    let tx = session.diagnostic_sender.clone();
+
+    let Some(input) = read_file(session, path) else { return None };
+
+    let (mut module, _) = kind_parser::parse_book(tx.clone(), 0, &input);
+
+    expand_uses(&mut module, tx.clone());
+    expand_module(tx.clone(), &mut module);
+
+    let mut state = UnboundCollector::new(tx.clone(), false);
+    state.visit_module(&mut module);
+
+    Some(state.unbound_top_level.keys().cloned().collect())
+}
+
 
 fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
     let mut similar_names = book
