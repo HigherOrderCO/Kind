@@ -241,10 +241,10 @@ impl<'a> Parser<'a> {
         let id = self.parse_upper_id()?;
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit { lit: Literal::Type },
-            "U60" => ExprKind::Lit {
+            "Data.U60" => ExprKind::Lit {
                 lit: Literal::NumTypeU60,
             },
-            "F60" => ExprKind::Lit {
+            "Data.F60" => ExprKind::Lit {
                 lit: Literal::NumTypeF60,
             },
             _ => ExprKind::Constr {
@@ -263,10 +263,10 @@ impl<'a> Parser<'a> {
         let mut range = id.range;
         let data = match id.to_string().as_str() {
             "Type" => ExprKind::Lit { lit: Literal::Type },
-            "U60" => ExprKind::Lit {
+            "Data.U60" => ExprKind::Lit {
                 lit: Literal::NumTypeU60,
             },
-            "F60" => ExprKind::Lit {
+            "Data.F60" => ExprKind::Lit {
                 lit: Literal::NumTypeF60,
             },
             _ => {

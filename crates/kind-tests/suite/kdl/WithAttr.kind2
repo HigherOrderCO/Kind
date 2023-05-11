@@ -1,9 +1,9 @@
 #kdl_state = MyFn.state
-MyFn : U60 {
+MyFn : Data.U60 {
   1
 }
 
 #kdl_run
-MyFn.state : U60 {
+MyFn.state : Data.U60 {
   0
 }

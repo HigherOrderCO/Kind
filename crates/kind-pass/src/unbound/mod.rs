@@ -376,7 +376,7 @@ impl Visitor for UnboundCollector {
         match &mut pat.data {
             PatKind::Var(ident) => self.visit_pat_ident(ident),
             PatKind::Str(_) => {
-                let string = &mut QualifiedIdent::new_static("String", None, pat.range);
+                let string = &mut QualifiedIdent::new_static("Data.String", None, pat.range);
                 self.visit_qualified_ident(&mut string.add_segment("cons").to_generated());
                 self.visit_qualified_ident(&mut string.add_segment("nil").to_generated());
             }
@@ -475,7 +475,7 @@ impl Visitor for UnboundCollector {
         use kind_tree::concrete::Literal::*;
 
         if let String(_) = lit {
-            let string = &mut QualifiedIdent::new_static("String", None, range);
+            let string = &mut QualifiedIdent::new_static("Data.String", None, range);
             self.visit_qualified_ident(&mut string.add_segment("cons").to_generated());
             self.visit_qualified_ident(&mut string.add_segment("nil").to_generated());
         }
@@ -545,7 +545,7 @@ impl Visitor for UnboundCollector {
                 snd,
             } => {
                 self.visit_qualified_ident(
-                    &mut QualifiedIdent::new_static("Sigma", None, expr.range).to_generated(),
+                    &mut QualifiedIdent::new_static("Data.Sigma", None, expr.range).to_generated(),
                 );
                 self.visit_expr(fst);
                 self.visit_expr(snd);
@@ -556,7 +556,7 @@ impl Visitor for UnboundCollector {
                 snd,
             } => {
                 self.visit_qualified_ident(
-                    &mut QualifiedIdent::new_static("Sigma", None, expr.range).to_generated(),
+                    &mut QualifiedIdent::new_static("Data.Sigma", None, expr.range).to_generated(),
                 );
                 self.visit_expr(fst);
                 self.context_vars.push((ident.range, ident.to_string()));
@@ -587,20 +587,20 @@ impl Visitor for UnboundCollector {
                 self.visit_sttm(sttm)
             }
             ExprKind::If { cond, then_, else_ } => {
-                let typ = QualifiedIdent::new_static("Bool", None, expr.range);
+                let typ = QualifiedIdent::new_static("Data.Bool", None, expr.range);
                 self.visit_qualified_ident(&mut typ.add_segment("if").to_generated());
                 self.visit_expr(cond);
                 self.visit_expr(then_);
                 self.visit_expr(else_);
             }
             ExprKind::Pair { fst, snd } => {
-                let typ = QualifiedIdent::new_static("Pair", None, expr.range);
+                let typ = QualifiedIdent::new_static("Data.Pair", None, expr.range);
                 self.visit_qualified_ident(&mut typ.add_segment("new").to_generated());
                 self.visit_expr(fst);
                 self.visit_expr(snd);
             }
             ExprKind::List { args } => {
-                let mut typ = QualifiedIdent::new_static("List", None, expr.range);
+                let mut typ = QualifiedIdent::new_static("Data.List", None, expr.range);
 
                 self.visit_qualified_ident(&mut typ);
                 self.visit_qualified_ident(&mut typ.add_segment("nil").to_generated());

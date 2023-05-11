@@ -1,8 +1,8 @@
-Kek (a: U60) : U60
+Kek (a: Data.U60) : Data.U60
 Kek a = a
 
-Main : U60
+Main : Data.U60
 Main = (Kuk) ~(20)
 
-Kuk : ~(a : U60) -> U60
+Kuk : ~(a : Data.U60) -> Data.U60
 Kuk = ~x => Kek 3

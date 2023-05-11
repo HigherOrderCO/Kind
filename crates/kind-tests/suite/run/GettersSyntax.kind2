@@ -11,10 +11,10 @@ record Identity (t: Type) {
 
 #derive[getters]
 record NoTypeVar {
-    some_thing: Identity (Identity U60)
+    some_thing: Identity (Identity Data.U60)
 }
 
-Main : U60
+Main : Data.U60
 Main =
     let f = NoTypeVar.new (Identity.new (Identity.new 100))
     !NoTypeVar f .some_thing .value .value

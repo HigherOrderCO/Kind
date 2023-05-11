@@ -1,13 +1,13 @@
    WARN  This function does not cover all the possibilities!
 
-      * Missing case : (String.cons _ _) 
+      * Missing case : (Data.String.cons _ _) 
 
       /--[suite/issues/coverage/ISSUE-463.kind2:8:1]
       |
     7 |    
-    8 |    Bits.from_hex (x: String) : U60
+    8 |    Bits.from_hex (x: Data.String) : Data.U60
       |    v------------
       |    \Here!
-    9 |    Bits.from_hex (String.cons '0' xs) = 2
+    9 |    Bits.from_hex (Data.String.cons '0' xs) = 2
 
 

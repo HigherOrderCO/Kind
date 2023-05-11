@@ -1,24 +1,24 @@
 #derive[match]
-record Pair (a: Type) (b: Type) {
+record Data.Pair (a: Type) (b: Type) {
     fst : a
     snd : b
 }
 
-A (n: Pair U60 U60) : U60
+A (n: Data.Pair Data.U60 Data.U60) : Data.U60
 A n =
-    match Pair n {
+    match Data.Pair n {
         new => ?
     }
 
 
-B (n: Pair U60 U60) : U60
+B (n: Data.Pair Data.U60 Data.U60) : Data.U60
 B n =
-    open Pair n
+    open Data.Pair n
     ?
 
-C (n: Pair U60 U60) : U60
+C (n: Data.Pair Data.U60 Data.U60) : Data.U60
 C n =
-    let Pair.new fst snd = n
+    let Data.Pair.new fst snd = n
     ?
 
 

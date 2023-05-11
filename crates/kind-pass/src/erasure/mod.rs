@@ -348,8 +348,8 @@ impl<'a> ErasureState<'a> {
             NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
             NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
             Str { val } => {
-                let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
-                let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
+                let nil = QualifiedIdent::new_static("Data.String.nil", None, expr.range);
+                let cons = QualifiedIdent::new_static("Data.String.cons", None, expr.range);
 
                 self.connect_with(edge, &nil, relevance);
                 self.connect_with(edge, &cons, relevance);
@@ -491,8 +491,8 @@ impl<'a> ErasureState<'a> {
             NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
             NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
             Str { val } => {
-                let nil = QualifiedIdent::new_static("String.nil", None, expr.range);
-                let cons = QualifiedIdent::new_static("String.cons", None, expr.range);
+                let nil = QualifiedIdent::new_static("Data.String.nil", None, expr.range);
+                let cons = QualifiedIdent::new_static("Data.String.cons", None, expr.range);
                 self.connect_with(edge, &nil, ambient);
                 self.connect_with(edge, &cons, ambient);
 

@@ -2,7 +2,7 @@
 
       /--[suite/erasure/fail/ShouldErr.kind2:2:9]
       |
-    1 |    Kek <a: U60> : U60
+    1 |    Kek <a: Data.U60> : Data.U60
     2 |    Kek a = a
       |            v
       |            \It's in relevant position!

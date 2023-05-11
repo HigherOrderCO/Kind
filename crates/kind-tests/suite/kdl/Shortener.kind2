@@ -1,4 +1,4 @@
 #keep
-FunctionWithAVeryLongName : U60 {
+FunctionWithAVeryLongName : Data.U60 {
     0
 }

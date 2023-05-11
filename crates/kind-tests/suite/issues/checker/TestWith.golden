@@ -1,19 +1,19 @@
    ERROR  Type mismatch
 
       * Got      : (Run n) 
-      * Expected : U60 
+      * Expected : Data.U60 
 
       * Context
       * t1 : Type 
-      * n  : Nat 
+      * n  : Data.Nat 
       * f  : (Run n) 
 
-      /--[suite/issues/checker/TestWith.kind2:14:22]
+      /--[suite/issues/checker/TestWith.kind2:14:27]
       |
    13 |    Lero t1 n f =
-   14 |        match Nat n with f {
-      |                         v
-      |                         \Here!
+   14 |        match Data.Nat n with f {
+      |                              v
+      |                              \Here!
    15 |            succ => (+ f 2)
 
 

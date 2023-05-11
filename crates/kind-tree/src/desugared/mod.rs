@@ -249,7 +249,7 @@ impl Expr {
     }
 
     pub fn num_u120(range: Range, numb: u128) -> Box<Expr> {
-        let name = QualifiedIdent::new_static("U120.new", None, range);
+        let name = QualifiedIdent::new_static("Data.U120.new", None, range);
         let lo = Expr::num_u60(range, (numb & 0xFFFFFFFFFFFFFFF) as u64);
         let hi = Expr::num_u60(range, (numb >> 60) as u64);
         Box::new(Expr {
@@ -402,8 +402,8 @@ impl Display for AppBinding {
 
 pub fn try_desugar_to_nat(name: &QualifiedIdent, spine: &[Box<Expr>], acc: u128) -> Option<u128> {
     match (name.to_str(), spine) {
-        ("Nat.zero", []) => Some(acc),
-        ("Nat.succ", [spine]) => match &spine.data {
+        ("Data.Nat.zero", []) => Some(acc),
+        ("Data.Nat.succ", [spine]) => match &spine.data {
             ExprKind::Ctr { name, args } => try_desugar_to_nat(name, args, acc + 1),
             _ => None,
         },
@@ -416,8 +416,8 @@ impl Display for Expr {
         use ExprKind::*;
         match &self.data {
             Typ => write!(f, "Type"),
-            NumTypeU60 => write!(f, "U60"),
-            NumTypeF60 => write!(f, "F60"),
+            NumTypeU60 => write!(f, "Data.U60"),
+            NumTypeF60 => write!(f, "Data.F60"),
             Str { val } => write!(f, "\"{}\"", val),
             NumU60 { numb } => write!(f, "{}", numb),
             NumF60 { numb: _ } => todo!(),
