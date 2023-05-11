@@ -1,0 +1,27 @@
+[package]
+description = "Module for creating and managing kind projects"
+edition = "2021"
+license = "MIT"
+name = "kind-project"
+version = "0.1.0"
+
+[[bin]]
+name = "kind-project"
+path = "src/main.rs"
+
+[dependencies]
+kind-driver = {path = "../kind-driver", version = "0.1.2"}
+kind-report = {path = "../kind-report", version = "0.1.2"}
+kind-pass = {path = "../kind-pass", version = "0.1.2"}
+kind-tree = {path = "../kind-tree", version = "0.1.2"}
+
+anyhow = "1.0.66"
+toml = "0.7.3"
+serde = "1.0.160"
+clap = {version = "4.0.10", features = ["derive"]}
+# May want to change to gix in the future, but not ready right now
+git2 = "0.17.1"
+fd-lock = "3.0.12"
+hex = "0.4.3"
+directories = "5.0.1"
+fxhash = "0.2.1"
