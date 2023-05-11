@@ -1,11 +1,11 @@
 #derive[match]
 record Pudim {
-    owo : U60
-    uwu : U60
+    owo : Data.U60
+    uwu : Data.U60
 }
 
 #keep
-Ok (n: Pudim) : U60
+Ok (n: Pudim) : Data.U60
 Ok n =
     open Pudim n
     n.owo

@@ -1,12 +1,12 @@
 
 #kdl_run
-Main : U60
-Main = Teste List.nil
+Main : Data.U60
+Main = Teste Data.List.nil
 
-type List (t: Type) {
-    cons (x: t) (xs: List t)
+type Data.List (t: Type) {
+    cons (x: t) (xs: Data.List t)
     nil
 }
 
-Teste (n: List U60) : U60
-Teste (List.cons 2 xs) = 2
+Teste (n: Data.List Data.U60) : Data.U60
+Teste (Data.List.cons 2 xs) = 2

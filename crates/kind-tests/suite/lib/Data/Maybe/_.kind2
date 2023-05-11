@@ -1,5 +1,5 @@
 #derive[match]
-type Maybe (a: Type) {
+type Data.Maybe (a: Type) {
     some (val: a)
     none
 }

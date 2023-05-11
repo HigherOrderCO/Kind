@@ -2,10 +2,10 @@ type Eq <t: Type> (a: t) ~ (b: t) {
     rfl: Eq t a a
 }
 
-record U120 {
+record Data.U120 {
     constructor new
-    low : U60
-    high : U60
+    low : Data.U60
+    high : Data.U60
 }
 
 Teste : Eq 123u120 124u120

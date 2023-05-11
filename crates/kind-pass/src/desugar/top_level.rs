@@ -223,7 +223,7 @@ impl<'a> DesugarState<'a> {
         fst: &concrete::pat::Pat,
         snd: &concrete::pat::Pat,
     ) -> Box<desugared::Expr> {
-        let sigma_new = QualifiedIdent::new_static("Sigma", Some("new".to_string()), range);
+        let sigma_new = QualifiedIdent::new_static("Data.Sigma", Some("new".to_string()), range);
 
         let entry = self.old_book.entries.get(sigma_new.to_string().as_str());
         if entry.is_none() {
@@ -241,7 +241,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[concrete::pat::Pat],
     ) -> Box<desugared::Expr> {
-        let list_ident = QualifiedIdent::new_static("List", None, range);
+        let list_ident = QualifiedIdent::new_static("Data.List", None, range);
         let cons_ident = list_ident.add_segment("cons");
         let nil_ident = list_ident.add_segment("nil");
 

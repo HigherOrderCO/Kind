@@ -1,14 +1,14 @@
-List <a> : Type
-  List.nil <a> : List
-  List.cons <a> (head: a) (tail: List a) : List
+Data.List <a> : Type
+  Data.List.nil <a> : Data.List
+  Data.List.cons <a> (head: a) (tail: Data.List a) : Data.List
 
 /*
 #keep
-Ora.Ora.ora (h: List U60) : List U60
-Ora.Ora.ora (List.cons x xs) =
+Ora.Ora.ora (h: Data.List Data.U60) : Data.List Data.U60
+Ora.Ora.ora (Data.List.cons x xs) =
   let aaa = 2
   let bbb = 3
   let ccc = 4
   let ddd = (+ ccc bbb)
-  List.cons aaa xs
+  Data.List.cons aaa xs
 */

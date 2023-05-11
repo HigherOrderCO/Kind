@@ -326,7 +326,7 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
         From::Ctr { name, args } => {
             // Convert U120 numbers into the native kindelia representation
             // Only possible if both U60s are U60 terms
-            if name.to_str() == "U120.new" {
+            if name.to_str() == "Data.U120.new" {
                 if let (From::U60 { numb: hi }, From::U60 { numb: lo }) =
                     (&args[0].data, &args[1].data)
                 {
@@ -344,97 +344,97 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
                 // some numeric function applications
 
                 // Add with no boundary check is just a normal add
-                "U60.add_unsafe" => To::Op2 {
+                "Data.U60.add_unsafe" => To::Op2 {
                     oper: kdl::Oper::Add,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
                 // U60s are already stored in 120 bits
-                "U60.to_u120" => compile_expr(ctx, &args[0]),
+                "Data.U60.to_u120" => compile_expr(ctx, &args[0]),
 
                 // Truncate to 60 bits
-                "U120.to_u60" => To::Op2 {
+                "Data.U120.to_u60" => To::Op2 {
                     oper: kdl::Oper::And,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(To::Num { numb: U60_MAX }),
                 },
                 // Compilation for U120 numeric operations
-                "U120.add" => To::Op2 {
+                "Data.U120.add" => To::Op2 {
                     oper: kdl::Oper::Add,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.sub" => To::Op2 {
+                "Data.U120.sub" => To::Op2 {
                     oper: kdl::Oper::Add,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.mul" => To::Op2 {
+                "Data.U120.mul" => To::Op2 {
                     oper: kdl::Oper::Mul,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.div" => To::Op2 {
+                "Data.U120.div" => To::Op2 {
                     oper: kdl::Oper::Div,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.mod" => To::Op2 {
+                "Data.U120.mod" => To::Op2 {
                     oper: kdl::Oper::Mod,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.num_equal" => To::Op2 {
+                "Data.U120.num_equal" => To::Op2 {
                     oper: kdl::Oper::Eql,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.num_not_equal" => To::Op2 {
+                "Data.U120.num_not_equal" => To::Op2 {
                     oper: kdl::Oper::Neq,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.shift_left" => To::Op2 {
+                "Data.U120.shift_left" => To::Op2 {
                     oper: kdl::Oper::Shl,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.shift_right" => To::Op2 {
+                "Data.U120.shift_right" => To::Op2 {
                     oper: kdl::Oper::Shr,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.num_less_than" => To::Op2 {
+                "Data.U120.num_less_than" => To::Op2 {
                     oper: kdl::Oper::Ltn,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.num_less_equal" => To::Op2 {
+                "Data.U120.num_less_equal" => To::Op2 {
                     oper: kdl::Oper::Lte,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.num_greater_than" => To::Op2 {
+                "Data.U120.num_greater_than" => To::Op2 {
                     oper: kdl::Oper::Gtn,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.num_greater_equal" => To::Op2 {
+                "Data.U120.num_greater_equal" => To::Op2 {
                     oper: kdl::Oper::Gte,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.bitwise_and" => To::Op2 {
+                "Data.U120.bitwise_and" => To::Op2 {
                     oper: kdl::Oper::And,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.bitwise_or" => To::Op2 {
+                "Data.U120.bitwise_or" => To::Op2 {
                     oper: kdl::Oper::Or,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
                 },
-                "U120.bitwise_xor" => To::Op2 {
+                "Data.U120.bitwise_xor" => To::Op2 {
                     oper: kdl::Oper::Xor,
                     val0: Box::new(compile_expr(ctx, &args[0])),
                     val1: Box::new(compile_expr(ctx, &args[1])),
@@ -455,11 +455,11 @@ pub fn compile_expr(ctx: &mut CompileCtx, expr: &untyped::Expr) -> kdl::Term {
         }
         From::Str { val } => {
             let nil = kdl::Term::Ctr {
-                name: *ctx.kdl_names.get("String.nil").unwrap(),
+                name: *ctx.kdl_names.get("Data.String.nil").unwrap(),
                 args: vec![],
             };
 
-            let cons_name = *ctx.kdl_names.get("String.cons").unwrap();
+            let cons_name = *ctx.kdl_names.get("Data.String.cons").unwrap();
 
             let cons = |numb: u128, next| kdl::Term::Ctr {
                 name: cons_name,
@@ -494,7 +494,7 @@ pub fn compile_entry(ctx: &mut CompileCtx, entry: &untyped::Entry) {
         }
     } else {
         match entry.name.to_str() {
-            "U120.new" => compile_u120_new(ctx, entry),
+            "Data.U120.new" => compile_u120_new(ctx, entry),
             _ => compile_common_function(ctx, entry),
         }
     }

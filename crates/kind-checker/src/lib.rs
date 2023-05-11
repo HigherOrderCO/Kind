@@ -110,7 +110,7 @@ pub fn eval_api(book: &Book) -> (String, u64) {
     runtime::link(
         &heap,
         0,
-        runtime::Fun(*book.name_to_id.get("Kind.API.eval_main").unwrap(), 0),
+        runtime::Fun(*book.name_to_id.get("Apps.Kind.API.eval_main").unwrap(), 0),
     );
     let host = 0;
 

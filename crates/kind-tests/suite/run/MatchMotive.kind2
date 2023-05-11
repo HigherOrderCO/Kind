@@ -1,5 +1,5 @@
 #derive[match]
-type Maybe (a: Type) {
+type Data.Maybe (a: Type) {
     some (val: a)
     none
 }
@@ -7,13 +7,13 @@ type Maybe (a: Type) {
 Str : Type
 Str.nil : Str
 
-MotiveGen (n: Maybe U60) : Type
-MotiveGen (Maybe.some _) = U60
-MotiveGen Maybe.none     = Str
+MotiveGen (n: Data.Maybe Data.U60) : Type
+MotiveGen (Data.Maybe.some _) = Data.U60
+MotiveGen Data.Maybe.none     = Str
 
-Main : U60
+Main : Data.U60
 Main =
-    match Maybe t = Maybe.some 3 {
+    match Data.Maybe t = Data.Maybe.some 3 {
         some => t.val
         none => Str.nil
     } : (x => MotiveGen x)
