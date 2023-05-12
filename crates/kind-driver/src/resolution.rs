@@ -1,7 +1,5 @@
-//! Transforms a single book into a book by
-//! reading it and it's dependencies. In the end
-//! it returns a desugared book of all of the
-//! depedencies.
+//! Module for finding the required files and their dependencies,
+//! loading them into a `concrete::Book`.
 
 use core::fmt;
 use fxhash::FxHashSet;
@@ -14,7 +12,6 @@ use std::rc::Rc;
 use strsim::jaro;
 
 use kind_pass::unbound::{self, UnboundCollector};
-use kind_report::data::Diagnostic;
 use kind_tree::concrete::visitor::Visitor;
 use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
@@ -23,6 +20,10 @@ use crate::{diagnostic::DriverDiagnostic, session::Session};
 
 /// The extension of kind2 files.
 const EXT: &str = "kind2";
+const DIR_FILE: &str = "_.kind2";
+/// Whether names can be searched on the parent level files.
+/// Eg: Searching for Data.Bool.True only on Data/Bool/True.kind or also on Data/Bool.kind
+const SEARCH_IDENT_ON_PARENT: bool = true;
 
 #[derive(Debug)]
 pub struct ResolutionError;
@@ -35,62 +36,144 @@ impl fmt::Display for ResolutionError {
 
 impl Error for ResolutionError {}
 
-/// Tries to accumulate on a buffer all of the
-/// paths that exists (so we can just throw an
-/// error about ambiguous resolution to the user)
-fn accumulate_neighbour_paths(
-    ident: &QualifiedIdent,
-    raw_path: &Path,
-) -> Result<Option<PathBuf>, Box<dyn Diagnostic>> {
-    let mut canon_path = raw_path.to_path_buf();
-    let mut dir_file_path = canon_path.clone();
-    let dir_path = canon_path.clone();
-
-    canon_path.set_extension(EXT);
-
-    dir_file_path.push("_");
-    dir_file_path.set_extension(EXT);
-
-    if canon_path.exists() && dir_path.exists() && canon_path.is_file() && dir_path.is_dir() {
-        Err(Box::new(DriverDiagnostic::MultiplePaths(
-            ident.clone(),
-            vec![canon_path, dir_path],
-        )))
-    } else if canon_path.is_file() {
-        Ok(Some(canon_path))
-    } else if dir_file_path.is_file() {
-        Ok(Some(dir_file_path))
+/// Loads the module at `path` and all its dependencies into a new `concrete::Book`.
+/// Returns the constructed `Book`.
+///
+/// On failure, sends any intermediate error diagnostics through `Session`
+/// and returns a `ResolutionError`.
+pub fn new_book_from_entry_file(session: &mut Session, entry: &PathBuf) -> anyhow::Result<Book> {
+    let mut book = Book::default();
+    if load_file_to_book(session, entry, &mut book, true) {
+        Err(ResolutionError.into())
     } else {
-        Ok(None)
+        Ok(book)
     }
 }
 
-/// Gets an identifier and tries to get all of the
-/// paths that it can refer into a single path. If
-/// multiple paths are found then we just throw an
-/// error about ambiguous paths.
+pub fn update_book_with_entry_file(
+    session: &mut Session,
+    book: &mut Book,
+    entry: &PathBuf,
+) -> anyhow::Result<()> {
+    if load_file_to_book(session, entry, book, true) {
+        Err(ResolutionError.into())
+    } else {
+        Ok(())
+    }
+}
+
+/// Returns a list of all unbound top levels required in a file.
+///
+/// Returns `None` if it fails to read the file.
+pub fn get_unbound_top_levels_in_file(session: &mut Session, path: &Path) -> Option<Vec<String>> {
+    let tx = session.diagnostic_sender.clone();
+
+    let input = read_file(session, path)?;
+
+    let (mut module, _) = kind_parser::parse_book(tx.clone(), 0, &input);
+
+    expand_uses(&mut module, tx.clone());
+    expand_module(tx.clone(), &mut module);
+
+    let mut state = UnboundCollector::new(tx.clone(), false);
+    state.visit_module(&mut module);
+
+    Some(state.unbound_top_level.keys().cloned().collect())
+}
+
+/// Checks for unbound variables and top levels in a book.
+/// If any are found, returns `ResolutionError` and sends
+/// diagnostics to `session`.
+pub fn check_unbounds(session: &mut Session, book: &mut Book) -> anyhow::Result<()> {
+    let mut failed = false;
+
+    let (unbound_names, unbound_tops) =
+        unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
+
+    for unbound in unbound_tops.values() {
+        let res: Vec<Ident> = unbound
+            .iter()
+            .filter(|x| !x.generated)
+            .map(|x| x.to_ident())
+            .collect();
+
+        if !res.is_empty() {
+            send_unbound_variable_err(session, book, &res);
+            failed = true;
+        }
+    }
+
+    for unbound in unbound_names.values() {
+        send_unbound_variable_err(session, book, unbound);
+        failed = true;
+    }
+
+    if failed {
+        Err(ResolutionError.into())
+    } else {
+        Ok(())
+    }
+}
+
+/// Returns the path to the file that contains a given
+/// identifier, or `None` if no available options were found.
+///
+/// In case more than one path is available, return
+/// an `Err` and send a diagnostic to `session`.
 fn ident_to_path(
+    session: &Session,
     root: &Path,
     ident: &QualifiedIdent,
-    search_on_parent: bool,
-) -> Result<Option<PathBuf>, Box<dyn Diagnostic>> {
-    let name = ident.to_string();
-    let segments = name.as_str().split('.').collect::<Vec<&str>>();
-    let mut raw_path = root.to_path_buf();
+) -> Result<Option<PathBuf>, ()> {
+    // Data/Bool
+    let relative_path = PathBuf::from(ident.to_str().replace('.', "/"));
+    // root/Data/Bool
+    let base_path = root.join(relative_path);
 
-    raw_path.push(PathBuf::from(segments.join("/")));
-
-    match accumulate_neighbour_paths(ident, &raw_path) {
-        Ok(None) if search_on_parent => {
-            raw_path.pop();
-            accumulate_neighbour_paths(ident, &raw_path)
+    match search_ident_path(session, &base_path, ident) {
+        Ok(None) if SEARCH_IDENT_ON_PARENT => {
+            // Also accept files on parent scope
+            search_ident_path(session, base_path.parent().unwrap(), ident)
         }
-        rest => rest,
+        res => res,
     }
 }
 
+/// Given a `base_path` resulting from a conversion of an identifier,
+/// return the paths that could contain the identifier, relative to `base_path`.
+///
+/// Returns `None` if there are no matching files available.
+///
+/// Returns `Err` in case there is more than one file available,
+/// sending an error diagnostic to `session'.
+fn search_ident_path(
+    session: &Session,
+    base_path: &Path,
+    ident: &QualifiedIdent,
+) -> Result<Option<PathBuf>, ()> {
+    // root/Data/Bool.kind2
+    // root/Data/Bool/_.kind2
+    let file = base_path.with_extension(EXT);
+    let dir = base_path.join(DIR_FILE);
+    let search_options = vec![file, dir];
+
+    let available_paths: Vec<_> = search_options.into_iter().filter(|p| p.is_file()).collect();
+    match available_paths.len() {
+        0 => Ok(None),
+        1 => Ok(Some(available_paths.into_iter().next().unwrap())),
+        _ => {
+            let diag = DriverDiagnostic::MultiplePaths(ident.clone(), available_paths);
+            session.diagnostic_sender.send(Box::new(diag)).unwrap();
+            Err(())
+        }
+    }
+}
+
+/// Tries to add `ident` to the list of names in `book`.
+///
+/// Fails in case `ident` was already present in `book`,
+/// returning `false` and sending a `Diagnostic` to `session`.
 fn try_to_insert_new_name<'a>(
-    failed: &mut bool,
     session: &'a Session,
     ident: QualifiedIdent,
     book: &'a mut Book,
@@ -102,7 +185,6 @@ fn try_to_insert_new_name<'a>(
         ));
 
         session.diagnostic_sender.send(err).unwrap();
-        *failed = true;
         false
     } else {
         book.names.insert(ident.to_string(), ident);
@@ -110,12 +192,18 @@ fn try_to_insert_new_name<'a>(
     }
 }
 
+/// Add `module` to the preexisting `book`.
+///
+/// Returns a set of all public names defined in the module
+/// and whether the operation failed.
+///
+/// Sends diagnostics of any errors to `session`.
 fn module_to_book<'a>(
-    failed: &mut bool,
     session: &'a Session,
     module: Module,
     book: &'a mut Book,
-) -> FxHashSet<String> {
+) -> (FxHashSet<String>, bool) {
+    let mut failed = false;
     let mut public_names = FxHashSet::default();
 
     for entry in module.entries {
@@ -128,16 +216,20 @@ fn module_to_book<'a>(
                 for cons in &sum.constructors {
                     let mut cons_ident = sum.name.add_segment(cons.name.to_str());
                     cons_ident.range = cons.name.range;
-                    if try_to_insert_new_name(failed, session, cons_ident.clone(), book) {
+                    if try_to_insert_new_name(session, cons_ident.clone(), book) {
                         let cons_name = cons_ident.to_string();
                         public_names.insert(cons_name.clone());
                         book.meta.insert(cons_name, cons.extract_book_info(&sum));
+                    } else {
+                        failed = true;
                     }
                 }
 
-                if try_to_insert_new_name(failed, session, sum.name.clone(), book) {
+                if try_to_insert_new_name(session, sum.name.clone(), book) {
                     book.meta.insert(name.clone(), sum.extract_book_info());
                     book.entries.insert(name, TopLevel::SumType(sum));
+                } else {
+                    failed = true;
                 }
             }
             TopLevel::RecordType(rec) => {
@@ -145,7 +237,7 @@ fn module_to_book<'a>(
                 public_names.insert(name.clone());
                 book.meta.insert(name.clone(), rec.extract_book_info());
 
-                try_to_insert_new_name(failed, session, rec.name.clone(), book);
+                failed |= !try_to_insert_new_name(session, rec.name.clone(), book);
 
                 let cons_ident = rec.name.add_segment(rec.constructor.to_str());
                 public_names.insert(cons_ident.to_string());
@@ -154,14 +246,14 @@ fn module_to_book<'a>(
                     rec.extract_book_info_of_constructor(),
                 );
 
-                try_to_insert_new_name(failed, session, cons_ident, book);
+                failed |= !try_to_insert_new_name(session, cons_ident, book);
 
                 book.entries.insert(name.clone(), TopLevel::RecordType(rec));
             }
             TopLevel::Entry(entr) => {
                 let name = entr.name.to_string();
 
-                try_to_insert_new_name(failed, session, entr.name.clone(), book);
+                failed |= !try_to_insert_new_name(session, entr.name.clone(), book);
                 public_names.insert(name.clone());
                 book.meta.insert(name.clone(), entr.extract_book_info());
                 book.entries.insert(name, TopLevel::Entry(entr));
@@ -169,10 +261,18 @@ fn module_to_book<'a>(
         }
     }
 
-    public_names
+    (public_names, failed)
 }
 
-fn parse_and_store_book_by_identifier(
+/// Finds the file containing `ident` and loads it `book`.
+/// Also loads all its dependencies recursively.
+///
+/// Returns `true` if any errors occur, sending diagnostics to `session`.
+///
+/// Returns `false` if there weren't any errors, even if the identifier
+/// was already in book or no files were found to provide it or one of
+/// its dependencies.
+fn load_file_to_book_by_identifier(
     session: &mut Session,
     ident: &QualifiedIdent,
     book: &mut Book,
@@ -180,17 +280,15 @@ fn parse_and_store_book_by_identifier(
     if book.entries.contains_key(ident.to_string().as_str()) {
         return false;
     }
-
-    match ident_to_path(&session.root, ident, true) {
-        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book, false),
+    match ident_to_path(session, &session.root, ident) {
+        Ok(Some(path)) => load_file_to_book(session, &path, book, false),
         Ok(None) => false,
-        Err(err) => {
-            session.diagnostic_sender.send(err).unwrap();
-            true
-        }
+        Err(()) => true,
     }
 }
 
+/// Wrapper around `fs::read_to_string`
+/// that consumes any errors and sends a `Diagnostic` to `session` instead.
 fn read_file(session: &mut Session, path: &Path) -> Option<String> {
     match fs::read_to_string(path) {
         Ok(res) => Some(res),
@@ -206,7 +304,22 @@ fn read_file(session: &mut Session, path: &Path) -> Option<String> {
     }
 }
 
-fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mut Book, immediate: bool) -> bool {
+/// Parses the file given by `path`, adds the module to `book` and also
+/// loads all its dependencies recursively. `immediate` indicates whether
+/// this is running on the first recursion, and should be initially set
+/// to `true`.
+///
+/// Returns `true` if any errors occur, sending diagnostics to `session`.
+///
+/// Returns `false` if there weren't any errors, even if the identifier
+/// was already in book or no files were found to provide it or one of
+/// its dependencies.
+fn load_file_to_book(
+    session: &mut Session,
+    path: &PathBuf,
+    book: &mut Book,
+    immediate: bool,
+) -> bool {
     if !path.exists() {
         let err = Box::new(DriverDiagnostic::CannotFindFile(
             path.to_str().unwrap().to_string(),
@@ -237,7 +350,8 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
     let mut state = UnboundCollector::new(tx.clone(), false);
     state.visit_module(&mut module);
 
-    module_to_book(&mut failed, session, module, book);
+    let (_, module_failed) = module_to_book(session, module, book);
+    failed |= module_failed;
 
     for idents in state.unbound_top_level.values() {
         let fst = idents.iter().next().unwrap();
@@ -247,31 +361,16 @@ fn parse_and_store_book_by_path(session: &mut Session, path: &PathBuf, book: &mu
         }
 
         if !book.names.contains_key(&fst.to_string()) {
-            failed |= parse_and_store_book_by_identifier(session, fst, book);
+            failed |= load_file_to_book_by_identifier(session, fst, book);
         }
     }
 
     failed
 }
 
-pub fn get_unbound_variables(session: &mut Session, path: &Path) -> Option<Vec<String>> {
-    let tx = session.diagnostic_sender.clone();
-
-    let Some(input) = read_file(session, path) else { return None };
-
-    let (mut module, _) = kind_parser::parse_book(tx.clone(), 0, &input);
-
-    expand_uses(&mut module, tx.clone());
-    expand_module(tx.clone(), &mut module);
-
-    let mut state = UnboundCollector::new(tx.clone(), false);
-    state.visit_module(&mut module);
-
-    Some(state.unbound_top_level.keys().cloned().collect())
-}
-
-
-fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
+/// Sends an unbound variable error to `session`
+/// relating the found unbound names to similar names that they could be a misspelling of.
+fn send_unbound_variable_err(session: &mut Session, book: &Book, idents: &[Ident]) {
     let mut similar_names = book
         .names
         .keys()
@@ -287,44 +386,4 @@ fn unbound_variable(session: &mut Session, book: &Book, idents: &[Ident]) {
     ));
 
     session.diagnostic_sender.send(err).unwrap();
-}
-
-pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> anyhow::Result<Book> {
-    let mut book = Book::default();
-    if parse_and_store_book_by_path(session, path, &mut book, true) {
-        Err(ResolutionError.into())
-    } else {
-        Ok(book)
-    }
-}
-
-pub fn check_unbound_top_level(session: &mut Session, book: &mut Book) -> anyhow::Result<()> {
-    let mut failed = false;
-
-    let (unbound_names, unbound_tops) =
-        unbound::get_book_unbound(session.diagnostic_sender.clone(), book, true);
-
-    for unbound in unbound_tops.values() {
-        let res: Vec<Ident> = unbound
-            .iter()
-            .filter(|x| !x.generated)
-            .map(|x| x.to_ident())
-            .collect();
-
-        if !res.is_empty() {
-            unbound_variable(session, book, &res);
-            failed = true;
-        }
-    }
-
-    for unbound in unbound_names.values() {
-        unbound_variable(session, book, unbound);
-        failed = true;
-    }
-
-    if failed {
-        Err(ResolutionError.into())
-    } else {
-        Ok(())
-    }
 }

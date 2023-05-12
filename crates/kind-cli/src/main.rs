@@ -364,7 +364,7 @@ pub fn run_cli(config: Cli) -> anyhow::Result<()> {
                 true,
                 true,
                 &mut |session| {
-                    Ok(driver::get_unbound_variables(
+                    Ok(driver::get_unbound_top_levels_in_file(
                         session,
                         &PathBuf::from(file.clone()),
                     ))

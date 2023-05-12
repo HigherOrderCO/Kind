@@ -20,7 +20,7 @@ pub mod diagnostic;
 pub mod resolution;
 pub mod session;
 
-pub use resolution::get_unbound_variables;
+pub use resolution::get_unbound_top_levels_in_file;
 
 impl FileCache for Session {
     fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(PathBuf, &String)> {
@@ -64,9 +64,9 @@ pub fn type_check_book(
 }
 
 pub fn to_book(session: &mut Session, path: &PathBuf) -> anyhow::Result<concrete::Book> {
-    let mut concrete_book = resolution::parse_and_store_book(session, path)?;
+    let mut concrete_book = resolution::new_book_from_entry_file(session, path)?;
 
-    resolution::check_unbound_top_level(session, &mut concrete_book)?;
+    resolution::check_unbounds(session, &mut concrete_book)?;
 
     Ok(concrete_book)
 }
