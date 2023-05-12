@@ -1,7 +1,7 @@
 pub mod error;
 pub mod fetcher;
 
-use fxhash::FxHashSet;
+use fxhash::{FxHashSet, FxHashMap};
 use kind_driver::session::Session;
 use kind_pass::unbound::get_book_unbound;
 use kind_tree::{concrete::Book, symbol::QualifiedIdent};
@@ -99,33 +99,22 @@ fn create_src_dir(root: PathBuf, name: String) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn make_git_fetcher(config: &ProjectConfig) -> anyhow::Result<GitFetcher> {
+fn make_git_fetcher<'a>(session: &'a Session, config: &ProjectConfig) -> anyhow::Result<GitFetcher<'a>> {
     let src_path = PathBuf::from(format!("./{}", config.name)).canonicalize()?;
     let dirs =
         ProjectDirs::from("com", "HigherOrderCO", "Kind").ok_or(anyhow!("Failed to find HOME"))?;
     let store_path = dirs.data_dir();
     let remote_url = config.remote_url.clone();
     let version = config.remote_version.clone();
-    let fetcher = *fetcher::GitFetcher::new(src_path, store_path.into(), remote_url, version)?;
+    let fetcher = *fetcher::GitFetcher::new(session, src_path, store_path.into(), remote_url, version)?;
     Ok(fetcher)
 }
 
-fn get_unbound_top_levels(
-    session: &Session,
-    fetcher: impl Fetcher,
-    book: &mut Book,
-) -> anyhow::Result<()> {
-    let (_, unbound_tops) = get_book_unbound(session.diagnostic_sender.clone(), book, true);
-    let unbound_tops: FxHashSet<QualifiedIdent> = unbound_tops
-        .iter()
-        .map(|(_, x)| x)
-        .flatten()
-        .cloned()
-        .collect();
-    let missing_files = get_files_from_top_levels(unbound_tops.iter());
-    Ok(())
-}
-
-fn get_files_from_top_levels(tops: impl Iterator<QualifiedIdent>) -> FxHashSet<PathBuf> {
-    todo!()
-}
+/*
+    Find all unbounds for current book
+    each top leads to a set of possible paths
+    download all possible paths
+    for each missing top check if it's now available
+    for each acquired top, check their unbounds
+    loop
+ */

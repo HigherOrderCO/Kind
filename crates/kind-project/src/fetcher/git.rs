@@ -1,13 +1,18 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use kind_driver::session::Session;
+use kind_tree::concrete::Module;
+use kind_tree::symbol::QualifiedIdent;
+
 use super::Fetcher;
 
 /// A git-based downloader.
 /// Creates a connection and downloads repo on creation.
 /// Uses a single shared repo for all instances of kind-project,
 /// so we lock it during use so that we don't have any conflicts.
-pub struct GitFetcher {
+pub struct GitFetcher<'a> {
+    session: &'a Session,
     src_path: PathBuf,
     store_path: PathBuf,
     remote_url: String,
@@ -16,7 +21,7 @@ pub struct GitFetcher {
     repo: git2::Repository,
 }
 
-impl GitFetcher {
+impl GitFetcher<'_> {
     fn fetch(&mut self) -> anyhow::Result<()> {
         // Get/Add remote
         let mut remote = match self.repo.find_remote(&self.remote_name) {
@@ -52,8 +57,9 @@ impl GitFetcher {
     }
 }
 
-impl Fetcher for GitFetcher {
+impl<'a> Fetcher<'a> for GitFetcher<'a> {
     fn new(
+        session: &'a Session,
         src_path: PathBuf,
         store_path: PathBuf,
         remote_url: String,
@@ -63,6 +69,7 @@ impl Fetcher for GitFetcher {
 
         let repo = open_repo(&store_path)?;
         let mut dl = Self {
+            session,
             src_path,
             store_path,
             remote_name: get_remote_name(&remote_url),
@@ -88,9 +95,13 @@ impl Fetcher for GitFetcher {
         }
         Ok(())
     }
+
+    fn fetch_top_level(&self, ident: &QualifiedIdent) -> anyhow::Result<Module> {
+        todo!()
+    }
 }
 
-impl Drop for GitFetcher {
+impl Drop for GitFetcher<'_> {
     fn drop(&mut self) {
         // Release the git repo at the end of the lifetime
         // TODO: release a lock here

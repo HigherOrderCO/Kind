@@ -803,6 +803,7 @@ dependencies = [
  "git2",
  "hex",
  "kind-driver",
+ "kind-parser",
  "kind-pass",
  "kind-report",
  "kind-tree",

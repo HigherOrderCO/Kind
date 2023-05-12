@@ -14,6 +14,7 @@ kind-driver = {path = "../kind-driver", version = "0.1.2"}
 kind-report = {path = "../kind-report", version = "0.1.2"}
 kind-pass = {path = "../kind-pass", version = "0.1.2"}
 kind-tree = {path = "../kind-tree", version = "0.1.2"}
+kind-parser = {path = "../kind-parser", version = "0.1.2"}
 
 anyhow = "1.0.66"
 toml = "0.7.3"
