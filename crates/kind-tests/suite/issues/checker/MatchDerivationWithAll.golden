@@ -3,8 +3,8 @@
       /--[suite/issues/checker/MatchDerivationWithAll.kind2:3:10]
       |
     2 |    type WithCtx (a: Type) { 
-    3 |        new: U60 -> (WithCtx a)
-      |             v-----------------
+    3 |        new: Data.U60 -> (WithCtx a)
+      |             v----------------------
       |             \Here!
     4 |    }
 
@@ -18,8 +18,8 @@
       |         v------
       |         \This is the type that should be used instead
       :     
-    3 |        new: U60 -> (WithCtx a)
-      |             v-----------------
+    3 |        new: Data.U60 -> (WithCtx a)
+      |             v----------------------
       |             \This is not the type that is being declared
     4 |    }
 

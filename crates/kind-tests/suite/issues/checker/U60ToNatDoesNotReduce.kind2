@@ -2,31 +2,31 @@ Doit3times <x> (f: (x -> x)) (n: x) : x
 Doit3times f n = (f (f (f n)))
 
 #partial
-Nat.zero : (Nat)
+Data.Nat.zero : (Data.Nat)
 
-U60.to_nat (x: U60) : (Nat)
-U60.to_nat 0 = (Nat.zero)
-U60.to_nat n = (Nat.succ (U60.to_nat (- n 1)))
-
-#partial
-Nat.add (a: (Nat)) (b: (Nat)) : (Nat)
-Nat.add (Nat.succ a) b = (Nat.succ (Nat.add a b))
-Nat.add (Nat.zero) b = b
+Data.U60.to_nat (x: Data.U60) : (Data.Nat)
+Data.U60.to_nat 0 = (Data.Nat.zero)
+Data.U60.to_nat n = (Data.Nat.succ (Data.U60.to_nat (- n 1)))
 
 #partial
-Nat.succ (pred: (Nat)) : (Nat)
+Data.Nat.add (a: (Data.Nat)) (b: (Data.Nat)) : (Data.Nat)
+Data.Nat.add (Data.Nat.succ a) b = (Data.Nat.succ (Data.Nat.add a b))
+Data.Nat.add (Data.Nat.zero) b = b
 
-Nat : Type
+#partial
+Data.Nat.succ (pred: (Data.Nat)) : (Data.Nat)
+
+Data.Nat : Type
 
 Main : _
-Main = (let a = (Doit3times ((x => (Nat.mul x x)) :: Nat -> Nat) (U60.to_nat 2)); a)
+Main = (let a = (Doit3times ((x => (Data.Nat.mul x x)) :: Data.Nat -> Data.Nat) (Data.U60.to_nat 2)); a)
 
 #partial
-Nat.mul (a: (Nat)) (b: (Nat)) : (Nat)
-Nat.mul (Nat.succ a) b = (Nat.add (Nat.mul a b) b)
-Nat.mul (Nat.zero) b = (Nat.zero)
+Data.Nat.mul (a: (Data.Nat)) (b: (Data.Nat)) : (Data.Nat)
+Data.Nat.mul (Data.Nat.succ a) b = (Data.Nat.add (Data.Nat.mul a b) b)
+Data.Nat.mul (Data.Nat.zero) b = (Data.Nat.zero)
 
-Test_anon_fun : (Equal  (Nat.succ (Nat.succ (Nat.zero))) (U60.to_nat 5))
+Test_anon_fun : (Equal  (Data.Nat.succ (Data.Nat.succ (Data.Nat.zero))) (Data.U60.to_nat 5))
 Test_anon_fun = ?
 
 Equal <t> (a: t) (b: t) : Type

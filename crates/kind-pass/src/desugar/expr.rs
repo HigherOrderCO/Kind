@@ -24,8 +24,8 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         match literal {
             Literal::String(string) => {
-                if !self.check_implementation("String.cons", range, Sugar::String)
-                    || !self.check_implementation("String.nil", range, Sugar::String)
+                if !self.check_implementation("Data.String.cons", range, Sugar::String)
+                    || !self.check_implementation("Data.String.nil", range, Sugar::String)
                 {
                     return desugared::Expr::err(range);
                 }
@@ -37,7 +37,7 @@ impl<'a> DesugarState<'a> {
             Literal::NumTypeF60 => desugared::Expr::type_f60(range),
             Literal::NumU60(num) => desugared::Expr::num_u60(range, *num),
             Literal::Nat(num) => {
-                let list_ident = QualifiedIdent::new_static("Nat", None, range);
+                let list_ident = QualifiedIdent::new_static("Data.Nat", None, range);
                 let cons_ident = list_ident.add_segment("succ");
                 let nil_ident = list_ident.add_segment("zero");
 
@@ -50,7 +50,7 @@ impl<'a> DesugarState<'a> {
                 res
             }
             Literal::NumU120(num) => {
-                if !self.check_implementation("U120.new", range, Sugar::U120) {
+                if !self.check_implementation("Data.U120.new", range, Sugar::U120) {
                     return desugared::Expr::err(range);
                 }
                 desugared::Expr::num_u120(range, *num)
@@ -292,7 +292,7 @@ impl<'a> DesugarState<'a> {
         typ: &expr::Expr,
         body: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma = QualifiedIdent::new_static("Sigma", None, range);
+        let sigma = QualifiedIdent::new_static("Data.Sigma", None, range);
 
         if !self.check_implementation(sigma.to_str(), range, Sugar::Sigma) {
             return desugared::Expr::err(range);
@@ -316,7 +316,7 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[expr::Expr],
     ) -> Box<desugared::Expr> {
-        let list_ident = QualifiedIdent::new_static("List", None, range);
+        let list_ident = QualifiedIdent::new_static("Data.List", None, range);
         let cons_ident = list_ident.add_segment("cons");
         let nil_ident = list_ident.add_segment("nil");
 
@@ -345,7 +345,7 @@ impl<'a> DesugarState<'a> {
         if_: &expr::Expr,
         else_: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let boolean = QualifiedIdent::new_static("Bool", None, range);
+        let boolean = QualifiedIdent::new_static("Data.Bool", None, range);
         let bool_if_ident = boolean.add_segment("if");
 
         let bool_if = self.old_book.names.get(bool_if_ident.to_str());
@@ -419,7 +419,7 @@ impl<'a> DesugarState<'a> {
         fst: &expr::Expr,
         snd: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma_new = QualifiedIdent::new_sugared("Sigma", "new", range);
+        let sigma_new = QualifiedIdent::new_sugared("Data.Sigma", "new", range);
 
         if !self.check_implementation(sigma_new.to_str(), range, Sugar::Pair) {
             return desugared::Expr::err(range);

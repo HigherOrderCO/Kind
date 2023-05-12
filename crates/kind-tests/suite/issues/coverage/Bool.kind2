@@ -1,9 +1,9 @@
-type Bool {
+type Data.Bool {
     true
     false
 }
 
-Or (b: Bool) (bo: Bool) : Bool
-Or Bool.true  _          = Bool.true
-Or _          Bool.true  = Bool.true
-Or Bool.false Bool.false = Bool.false
+Or (b: Data.Bool) (bo: Data.Bool) : Data.Bool
+Or Data.Bool.true  _          = Data.Bool.true
+Or _          Data.Bool.true  = Data.Bool.true
+Or Data.Bool.false Data.Bool.false = Data.Bool.false

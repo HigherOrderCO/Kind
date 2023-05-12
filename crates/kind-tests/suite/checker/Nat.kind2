@@ -1,8 +1,8 @@
-type Nat {
-    succ (pred: Nat)
+type Data.Nat {
+    succ (pred: Data.Nat)
     zero
 }
 
-Nat.pred (n: Nat) : Nat
-Nat.pred Nat.zero     = Nat.zero
-Nat.pred (Nat.succ n) = n
+Data.Nat.pred (n: Data.Nat) : Data.Nat
+Data.Nat.pred Data.Nat.zero     = Data.Nat.zero
+Data.Nat.pred (Data.Nat.succ n) = n

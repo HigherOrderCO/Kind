@@ -3,14 +3,14 @@ description = "HVM Code generator for the kind compiler"
 edition = "2021"
 license = "MIT"
 name = "kind-target-hvm"
-version = "0.1.2"
+version = "0.1.3"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-derive = {path = "../kind-derive", version = "0.1.2"}
-kind-report = {path = "../kind-report", version = "0.1.2"}
-kind-span = {path = "../kind-span", version = "0.1.2"}
-kind-tree = {path = "../kind-tree", version = "0.1.2"}
+kind-derive = {path = "../kind-derive", version = "0.1.3"}
+kind-report = {path = "../kind-report", version = "0.1.3"}
+kind-span = {path = "../kind-span", version = "0.1.3"}
+kind-tree = {path = "../kind-tree", version = "0.1.3"}
 
-hvm = "1.0.6"
+hvm = "1.0.8"

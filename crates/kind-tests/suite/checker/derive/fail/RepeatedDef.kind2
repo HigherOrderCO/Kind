@@ -1,7 +1,7 @@
-type Nat {
+type Data.Nat {
     zero
     succ
 }
 
-Nat.zero : U60
-Nat.zero = 2
+Data.Nat.zero : Data.U60
+Data.Nat.zero = 2

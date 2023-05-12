@@ -1,20 +1,20 @@
 #derive[match]
-type Nat {
-    succ (pred: Nat)
+type Data.Nat {
+    succ (pred: Data.Nat)
     zero
 }
 
-Run (n: Nat) : Type
-Run (Nat.succ n) = U60
-Run (Nat.zero)   = U60
+Run (n: Data.Nat) : Type
+Run (Data.Nat.succ n) = Data.U60
+Run (Data.Nat.zero)   = Data.U60
 
 // Without type specification
-Lero <t> (n: Nat) (f: Run n) : U60
+Lero <t> (n: Data.Nat) (f: Run n) : Data.U60
 Lero t1 n f =
-    match Nat n with f {
+    match Data.Nat n with f {
         succ => (+ f 2)
         zero => (+ f 1)
     }
 
-Main : U60
-Main = Lero (Nat.succ Nat.zero) 1
+Main : Data.U60
+Main = Lero (Data.Nat.succ Data.Nat.zero) 1

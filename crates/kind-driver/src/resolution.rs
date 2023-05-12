@@ -12,7 +12,6 @@ use std::rc::Rc;
 use strsim::jaro;
 
 use kind_pass::unbound::{self, UnboundCollector};
-use kind_report::data::Diagnostic;
 use kind_tree::concrete::visitor::Visitor;
 use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::{Ident, QualifiedIdent};
@@ -116,43 +115,57 @@ pub fn check_unbounds(session: &mut Session, book: &mut Book) -> anyhow::Result<
     }
 }
 
-/// Returns the path to the file that contains a given identifier,
-/// or `None` if no available options were found.
+/// Returns the path to the file that contains a given
+/// identifier, or `None` if no available options were found.
 ///
-/// In case more than one path is available,
-/// return a `Diagnostic` indicating that.
+/// In case more than one path is available, return
+/// an `Err` and send a diagnostic to `session`.
 fn ident_to_path(
+    session: &Session,
     root: &Path,
     ident: &QualifiedIdent,
-) -> Result<Option<PathBuf>, Box<dyn Diagnostic>> {
-    // Data/Bool/True
+) -> Result<Option<PathBuf>, ()> {
+    // Data/Bool
     let relative_path = PathBuf::from(ident.to_str().replace('.', "/"));
-    // root/Data/Bool/True
+    // root/Data/Bool
     let base_path = root.join(relative_path);
 
-    // root/Data/Bool/True.kind2
-    let file = base_path.with_extension(EXT);
-    // root/Data/Bool/True/_.kind2
-    let dir = base_path.join(DIR_FILE);
-    let search_options = if SEARCH_IDENT_ON_PARENT {
-        // root/Data/Bool.kind2
-        let par_file = base_path.parent().unwrap().with_extension(EXT);
-        // root/Data/Bool/_.kind2
-        let par_dir = base_path.parent().unwrap().join(DIR_FILE);
-        vec![file, dir, par_file, par_dir]
-    } else {
-        vec![file, dir]
-    };
-    // All the found paths that could contain the definition of this Identifier
-    let available_paths: Vec<_> = search_options.into_iter().filter(|p| p.is_file()).collect();
+    match search_ident_path(session, &base_path, ident) {
+        Ok(None) if SEARCH_IDENT_ON_PARENT => {
+            // Also accept files on parent scope
+            search_ident_path(session, base_path.parent().unwrap(), ident)
+        }
+        res => res,
+    }
+}
 
+/// Given a `base_path` resulting from a conversion of an identifier,
+/// return the paths that could contain the identifier, relative to `base_path`.
+///
+/// Returns `None` if there are no matching files available.
+///
+/// Returns `Err` in case there is more than one file available,
+/// sending an error diagnostic to `session'.
+fn search_ident_path(
+    session: &Session,
+    base_path: &Path,
+    ident: &QualifiedIdent,
+) -> Result<Option<PathBuf>, ()> {
+    // root/Data/Bool.kind2
+    // root/Data/Bool/_.kind2
+    let file = base_path.with_extension(EXT);
+    let dir = base_path.join(DIR_FILE);
+    let search_options = vec![file, dir];
+
+    let available_paths: Vec<_> = search_options.into_iter().filter(|p| p.is_file()).collect();
     match available_paths.len() {
         0 => Ok(None),
         1 => Ok(Some(available_paths.into_iter().next().unwrap())),
-        _ => Err(Box::new(DriverDiagnostic::MultiplePaths(
-            ident.clone(),
-            available_paths,
-        ))),
+        _ => {
+            let diag = DriverDiagnostic::MultiplePaths(ident.clone(), available_paths);
+            session.diagnostic_sender.send(Box::new(diag)).unwrap();
+            Err(())
+        }
     }
 }
 
@@ -267,13 +280,10 @@ fn load_file_to_book_by_identifier(
     if book.entries.contains_key(ident.to_string().as_str()) {
         return false;
     }
-    match ident_to_path(&session.root, ident) {
+    match ident_to_path(session, &session.root, ident) {
         Ok(Some(path)) => load_file_to_book(session, &path, book, false),
         Ok(None) => false,
-        Err(err) => {
-            session.diagnostic_sender.send(err).unwrap();
-            true
-        }
+        Err(()) => true,
     }
 }
 

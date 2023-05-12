@@ -17,13 +17,13 @@ pub fn compile_book(book: untyped::Book, trace: bool) -> File {
 
 pub fn compile_str(val: &str) -> Box<Term> {
     let nil = Box::new(Term::Ctr {
-        name: String::from("String.nil"),
+        name: String::from("Data.String.nil"),
         args: vec![],
     });
 
     let cons = |numb, next| {
         Box::new(Term::Ctr {
-            name: String::from("String.cons"),
+            name: String::from("Data.String.cons"),
             args: vec![Box::new(Term::U6O { numb }), next],
         })
     };
@@ -105,7 +105,7 @@ fn compile_entry(file: &mut File, entry: Box<untyped::Entry>, trace: bool) {
                 args: args.clone(),
             }),
             rhs: Box::new(Term::Ctr {
-                name: "HVM.log".to_string(),
+                name: "Apps.HVM.log".to_string(),
                 args: vec![
                     compile_str(entry.name.to_str()),
                     Box::new(Term::Ctr {

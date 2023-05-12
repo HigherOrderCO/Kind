@@ -1,0 +1,4 @@
+type Data.String {
+    cons (x: Data.U60) (xs: Data.String)
+    nil
+}

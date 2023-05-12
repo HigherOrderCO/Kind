@@ -397,8 +397,8 @@ impl Display for Literal {
         match self {
             Literal::Help(s) => write!(f, "?{}", s),
             Literal::Type => write!(f, "Type"),
-            Literal::NumTypeU60 => write!(f, "U60"),
-            Literal::NumTypeF60 => write!(f, "F60"),
+            Literal::NumTypeU60 => write!(f, "Data.U60"),
+            Literal::NumTypeF60 => write!(f, "Data.F60"),
             Literal::Char(c) => write!(f, "'{}'", c),
             Literal::NumU60(numb) => write!(f, "{}", numb),
             Literal::Nat(numb) => write!(f, "{}numb", numb),

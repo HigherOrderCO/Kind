@@ -1,2 +1,2 @@
-Main (a: U60): U60
+Main (a: Data.U60): Data.U60
 Main a = Type

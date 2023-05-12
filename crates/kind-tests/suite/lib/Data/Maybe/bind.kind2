@@ -1,0 +1,3 @@
+Data.Maybe.bind <a> <b> (ma: Data.Maybe a) (mb: a -> Data.Maybe b) : Data.Maybe b
+Data.Maybe.bind a b (Data.Maybe.none t)     mb = Data.Maybe.none
+Data.Maybe.bind a b (Data.Maybe.some t val) mb = (mb val)

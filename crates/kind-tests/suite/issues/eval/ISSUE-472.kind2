@@ -1,23 +1,23 @@
-Char : Type
-Char = U60
+Data.Char : Type
+Data.Char = Data.U60
 
 #inline
-String.new_line : (String)
-String.new_line = (String.pure (Char.newline))
+Data.String.new_line : (Data.String)
+Data.String.new_line = (Data.String.pure (Data.Char.newline))
 
 Main : _
-Main = String.new_line
+Main = Data.String.new_line
 
 #inline
-Char.newline : (Char)
-Char.newline = 10
+Data.Char.newline : (Data.Char)
+Data.Char.newline = 10
 
 #derive[match]
-type String {
+type Data.String {
   nil
-  cons (head: (Char)) (tail: (String))
+  cons (head: (Data.Char)) (tail: (Data.String))
 }
 
 #inline
-String.pure (x: (Char)) : (String)
-String.pure x = (String.cons x (String.nil))
+Data.String.pure (x: (Data.Char)) : (Data.String)
+Data.String.pure x = (Data.String.cons x (Data.String.nil))

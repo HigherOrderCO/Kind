@@ -1,7 +1,7 @@
    ERROR  Type mismatch
 
-      * Got      : (Eq _ (U120.new 0 123) (U120.new 0 123)) 
-      * Expected : (Eq _ (U120.new 0 123) (U120.new 0 124)) 
+      * Got      : (Eq _ (Data.U120.new 0 123) (Data.U120.new 0 123)) 
+      * Expected : (Eq _ (Data.U120.new 0 123) (Data.U120.new 0 124)) 
 
 
       /--[suite/checker/derive/fail/WrongU120Eq.kind2:12:9]
