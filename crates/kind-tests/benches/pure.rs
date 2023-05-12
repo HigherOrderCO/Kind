@@ -110,7 +110,7 @@ fn bench_exp_pure_check_unbound(b: &mut Bencher) {
         .iter()
         .map(|path| {
             let mut session = new_session();
-            let book = resolution::parse_and_store_book(&mut session, &path.into()).unwrap();
+            let book = resolution::new_book_from_entry_file(&mut session, &path.into()).unwrap();
             (session, book)
         })
         .collect();
@@ -119,7 +119,7 @@ fn bench_exp_pure_check_unbound(b: &mut Bencher) {
         books
             .iter_mut()
             .map(|(session, book)| {
-                let result = resolution::check_unbound_top_level(session, book);
+                let result = resolution::check_unbounds(session, book);
                 assert!(result.is_ok());
             })
             .count()
@@ -133,8 +133,8 @@ fn bench_exp_pure_desugar(b: &mut Bencher) {
         .iter()
         .map(|path| {
             let mut session = new_session();
-            let mut book = resolution::parse_and_store_book(&mut session, &path.into()).unwrap();
-            let result = resolution::check_unbound_top_level(&mut session, &mut book);
+            let mut book = resolution::new_book_from_entry_file(&mut session, &path.into()).unwrap();
+            let result = resolution::check_unbounds(&mut session, &mut book);
             assert!(result.is_ok());
             (session, book)
         })
@@ -158,8 +158,8 @@ fn bench_exp_pure_erase(b: &mut Bencher) {
         .iter()
         .map(|path| {
             let mut session = new_session();
-            let mut book = resolution::parse_and_store_book(&mut session, &path.into()).unwrap();
-            let result = resolution::check_unbound_top_level(&mut session, &mut book);
+            let mut book = resolution::new_book_from_entry_file(&mut session, &path.into()).unwrap();
+            let result = resolution::check_unbounds(&mut session, &mut book);
             let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
             assert!(result.is_ok());
 
@@ -190,8 +190,8 @@ fn bench_exp_pure_to_hvm(b: &mut Bencher) {
         .iter()
         .map(|path| {
             let mut session = new_session();
-            let mut book = resolution::parse_and_store_book(&mut session, &path.into()).unwrap();
-            let result = resolution::check_unbound_top_level(&mut session, &mut book);
+            let mut book = resolution::new_book_from_entry_file(&mut session, &path.into()).unwrap();
+            let result = resolution::check_unbounds(&mut session, &mut book);
             let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
             assert!(result.is_ok());
 
@@ -222,8 +222,8 @@ fn bench_exp_pure_gen_checker(b: &mut Bencher) {
         .iter()
         .map(|path| {
             let mut session = new_session();
-            let mut book = resolution::parse_and_store_book(&mut session, &path.into()).unwrap();
-            let result = resolution::check_unbound_top_level(&mut session, &mut book);
+            let mut book = resolution::new_book_from_entry_file(&mut session, &path.into()).unwrap();
+            let result = resolution::check_unbounds(&mut session, &mut book);
             let book = desugar::desugar_book(session.diagnostic_sender.clone(), &book).unwrap();
             assert!(result.is_ok());
 
