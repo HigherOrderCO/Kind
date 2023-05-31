@@ -12,7 +12,7 @@ kind-report = {path = "../kind-report", version = "0.1.3"}
 kind-span = {path = "../kind-span", version = "0.1.3"}
 kind-tree = {path = "../kind-tree", version = "0.1.3"}
 
-hvm = "1.0.8"
+hvm = "1.0.9"
 
 fxhash = "0.2.1"
 im-rc = "15.1.0"

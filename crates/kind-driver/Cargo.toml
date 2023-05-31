@@ -18,7 +18,7 @@ kind-tree = {path = "../kind-tree", version = "0.1.3"}
 kind-target-hvm = {path = "../kind-target-hvm", version = "0.1.0"}
 kind-target-kdl = {path = "../kind-target-kdl", version = "0.1.0"}
 
-hvm = "1.0.8"
+hvm = "1.0.9"
 
 anyhow = "1.0.66"
 dashmap = "5.4.0"
