@@ -321,8 +321,8 @@ fn load_file_to_book(
 
     let (mut module, mut failed) = kind_parser::parse_book(tx.clone(), ctx_id, &input);
 
-    expand_uses(&mut module, tx.clone());
-    expand_module(tx.clone(), &mut module);
+    failed |= expand_uses(&mut module, tx.clone());
+    failed |= expand_module(tx.clone(), &mut module);
 
     let mut state = UnboundCollector::new(tx.clone(), false);
     state.visit_module(&mut module);
