@@ -5,7 +5,7 @@ keywords = ["functional", "language", "type-theory", "proof-assistant"]
 license = "MIT"
 name = "kind2"
 repository = "https://github.com/Kindelia/Kind2"
-version = "0.3.10"
+version = "0.3.11"
 
 [[bin]]
 name = "kind2"
@@ -14,10 +14,10 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-checker = {path = "../kind-checker", version = "0.1.3"}
-kind-driver = {path = "../kind-driver", version = "0.1.3"}
-kind-query = {path = "../kind-query", version = "0.1.3"}
-kind-report = {path = "../kind-report", version = "0.1.3"}
+kind-checker = {path = "../kind-checker", version = "0.1.4"}
+kind-driver = {path = "../kind-driver", version = "0.1.4"}
+kind-query = {path = "../kind-query", version = "0.1.4"}
+kind-report = {path = "../kind-report", version = "0.1.4"}
 
 anyhow = "1.0.66"
 clap = {version = "4.0.10", features = ["derive"]}

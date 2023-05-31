@@ -3,15 +3,15 @@ description = "A lot of compiler passes for the kind compiler"
 edition = "2021"
 license = "MIT"
 name = "kind-pass"
-version = "0.1.3"
+version = "0.1.4"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kind-derive = {path = "../kind-derive", version = "0.1.3"}
-kind-report = {path = "../kind-report", version = "0.1.3"}
-kind-span = {path = "../kind-span", version = "0.1.3"}
-kind-tree = {path = "../kind-tree", version = "0.1.3"}
+kind-derive = {path = "../kind-derive", version = "0.1.4"}
+kind-report = {path = "../kind-report", version = "0.1.4"}
+kind-span = {path = "../kind-span", version = "0.1.4"}
+kind-tree = {path = "../kind-tree", version = "0.1.4"}
 
 anyhow = "1.0.66"
 fxhash = "0.2.1"
