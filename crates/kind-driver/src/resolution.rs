@@ -263,30 +263,7 @@ fn module_to_book<'a>(
 
     (public_names, failed)
 }
-
-/// Finds the file containing `ident` and loads it `book`.
-/// Also loads all its dependencies recursively.
-///
-/// Returns `true` if any errors occur, sending diagnostics to `session`.
-///
-/// Returns `false` if there weren't any errors, even if the identifier
-/// was already in book or no files were found to provide it or one of
-/// its dependencies.
-fn load_file_to_book_by_identifier(
-    session: &mut Session,
-    ident: &QualifiedIdent,
-    book: &mut Book,
-) -> bool {
-    if book.entries.contains_key(ident.to_string().as_str()) {
-        return false;
-    }
-    match ident_to_path(session, &session.root, ident) {
-        Ok(Some(path)) => load_file_to_book(session, &path, book, false),
-        Ok(None) => false,
-        Err(()) => true,
-    }
-}
-
+ 
 /// Wrapper around `fs::read_to_string`
 /// that consumes any errors and sends a `Diagnostic` to `session` instead.
 fn read_file(session: &mut Session, path: &Path) -> Option<String> {
@@ -361,7 +338,11 @@ fn load_file_to_book(
         }
 
         if !book.names.contains_key(&fst.to_string()) {
-            failed |= load_file_to_book_by_identifier(session, fst, book);
+            failed |= match ident_to_path(session, &session.root, fst) {
+                Ok(Some(path)) => load_file_to_book(session, &path, book, false),
+                Ok(None) => false,
+                Err(()) => true,
+            };
         }
     }
 
