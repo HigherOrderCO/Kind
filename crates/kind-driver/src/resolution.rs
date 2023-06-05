@@ -324,6 +324,10 @@ fn load_file_to_book(
     failed |= expand_uses(&mut module, tx.clone());
     failed |= expand_module(tx.clone(), &mut module);
 
+    if failed {
+        return failed;
+    }
+
     let mut state = UnboundCollector::new(tx.clone(), false);
     state.visit_module(&mut module);
 
