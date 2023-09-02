@@ -153,7 +153,7 @@ Lambda
 x => body
 ```
 
-A lambda represents an inline function. It is written as a variable name, followed by `=>`, followed by a term. Currently, there are no mukti-argument lambdas in Kind, they must be written like `a => b => c => body`.
+A lambda represents an inline function. It is written as a variable name, followed by `=>`, followed by a term. Currently, there are no multi-argument lambdas in Kind, they must be written like `a => b => c => body`.
 
 Usually, the type of a lambda argument is infered, but we may optionally anotate its type to help the type-checker. For example:
 
