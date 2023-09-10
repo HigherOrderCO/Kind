@@ -79,7 +79,7 @@ hvm compile file.hvm
 
 ---
 
-- If you need support related to Kind, email [support.kind@kindelia.org](mailto:support.kind@higherorderco.com)
+- If you need support related to Kind, email [support.kind@higherorderco.com](mailto:support.kind@higherorderco.com)
 
 - For Feedbacks, email [kind@higherorderco.com](mailto:kind@higherorderco.com)
 
