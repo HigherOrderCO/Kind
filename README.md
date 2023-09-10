@@ -20,12 +20,12 @@
 
 # Getting started
 
-It is a complete rewrite of [Kind1](https://github.com/kindelia/kind-legacy), based on
-[HVM](https://github.com/kindelia/hvm), a **lazy**, **non-garbage-collected** and **massively parallel** virtual
-machine. In [our benchmarks](https://github.com/kindelia/functional-benchmarks), its type-checker outperforms every
+It is a complete rewrite of [Kind1](https://github.com/HigherOrderCO/Kind-Legacy), based on
+[HVM](https://github.com/HigherOrderCO/HVM), a **lazy**, **non-garbage-collected** and **massively parallel** virtual
+machine. In [our benchmarks](https://github.com/HigherOrderCO/Functional-Benchmarks), its type-checker outperforms every
 alternative proof assistant by a far margin, and its programs can offer exponential speedups over Haskell's GHC. Kind2
 unleashes the [inherent parallelism of the Lambda
-Calculus](https://github.com/VictorTaelin/Symmetric-Interaction-Calculus) to become the ultimate programming language of
+Calculus](https://github.com/VictorTaelin/Interaction-Calculus) to become the ultimate programming language of
 the next century.
 
 <div align="center"><b>Welcome to the inevitable parallel, functional future of computers! </b></div>
@@ -79,9 +79,9 @@ hvm compile file.hvm
 
 ---
 
-- If you need support related to Kind, email [support.kind@kindelia.org](mailto:support.kind@kindelia.org)
+- If you need support related to Kind, email [support.kind@kindelia.org](mailto:support.kind@higherorderco.com)
 
-- For Feedbacks, email [kind@kindelia.org](mailto:kind@kindelia.org)
+- For Feedbacks, email [kind@higherorderco.com](mailto:kind@higherorderco.com)
 
 - To ask questions and join our community, check our [Discord Server](https://discord.gg/kindelia).
 
