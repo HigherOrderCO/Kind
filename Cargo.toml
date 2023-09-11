@@ -13,6 +13,7 @@ members = [
   "crates/kind-target-hvm",
   "crates/kind-derive",
   "crates/kind-tests",
+  "crates/kind-project",
   # "crates/kind-optimization",
   # "crates/kind-lint",
   # "crates/kind-query",
