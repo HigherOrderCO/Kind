@@ -333,17 +333,21 @@ impl<'a> ErasureState<'a> {
                 //     self.set_relevance(edge, Relevance::Irrelevant, expr.range)
                 // }
 
-                let params = self.book.entrs.get(name.to_str()).unwrap();
+                let entr = self.book.entrs.get(name.to_str()).unwrap();
 
                 let args = args
                     .iter()
-                    .zip(&params.args)
+                    .zip(&entr.args)
                     .map(|(arg, param)| (self.erase_pat(relev(param.erased), edge, arg), param))
                     .filter(|(_, param)| !param.erased)
                     .map(|x| x.0)
                     .collect::<Vec<_>>();
 
-                untyped::Expr::ctr(expr.range, name.clone(), args)
+                if self.is_newtype(entr) {
+                    args[0].clone()
+                } else {
+                    untyped::Expr::ctr(expr.range, name.clone(), args)
+                }
             }
             NumU60 { numb } => untyped::Expr::u60(expr.range, *numb),
             NumF60 { numb } => untyped::Expr::f60(expr.range, *numb),
@@ -451,7 +455,8 @@ impl<'a> ErasureState<'a> {
             Ctr { name, args } => {
                 self.connect_with(edge, name, ambient);
 
-                let params = &self.book.entrs.get(name.to_str()).unwrap().args;
+                let entr = &self.book.entrs.get(name.to_str()).unwrap();
+                let params = &entr.args;
 
                 let relev = |hidden| {
                     if hidden {
@@ -469,7 +474,11 @@ impl<'a> ErasureState<'a> {
                     .map(|res| res.1)
                     .collect::<Vec<_>>();
 
-                untyped::Expr::ctr(expr.range, name.clone(), args)
+                if self.is_newtype(entr) {
+                    args[0].clone()
+                } else {
+                    untyped::Expr::ctr(expr.range, name.clone(), args)
+                }
             }
             Var { name } => {
                 let var_rev = self
@@ -531,5 +540,26 @@ impl<'a> ErasureState<'a> {
                 untyped::Expr::err(expr.range)
             }
         }
+    }
+
+    fn is_newtype(&self, entr: &Box<desugared::Entry>) -> bool {
+        let is_one_cons = if let desugared::ExprKind::Ctr { name: type_name, args: _ } = &entr.typ.data {
+            match self.book.families.get(&type_name.to_string()) {
+                Some(family) => family.constructors.len() == 1,
+                None => self.book.entrs
+                    .iter()
+                    .filter(|(_, ent)| {
+                        if let desugared::ExprKind::Ctr { name: ty_name, args: _ } = &ent.typ.data {
+                            ent.rules.len() == 0 && ty_name.to_string() == type_name.to_string()
+                        } else {
+                            false
+                        }
+                    })
+                    .count() == 1
+            }
+        } else {
+            false
+        };
+        is_one_cons && entr.args.len() == 1
     }
 }

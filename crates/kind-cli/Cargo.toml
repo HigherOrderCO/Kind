@@ -20,4 +20,4 @@ kind-query = {path = "../kind-query", version = "0.1.4"}
 kind-report = {path = "../kind-report", version = "0.1.4"}
 
 anyhow = "1.0.66"
-clap = {version = "4.0.10", features = ["derive"]}
+clap = {version = "4.4.8", features = ["derive"]}
