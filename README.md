@@ -54,7 +54,7 @@ For more examples, check the [Kindex](https://github.com/HigherOrderCO/Kindex).
 
 # Installation
 
-First, install [Rust](https://www.rust-lang.org/tools/install) first, then enter:
+First, install [Rust](https://www.rust-lang.org/tools/install), then enter:
 
 ```
 cargo +nightly install kind2
