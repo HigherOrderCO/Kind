@@ -20,10 +20,10 @@
 
 # Getting started
 
-It is a complete rewrite of [Kind1](https://github.com/HigherOrderCO/Kind-Legacy), based on
+It is a complete rewrite of [Kind-legacy](https://github.com/HigherOrderCO/Kind-Legacy), based on
 [HVM](https://github.com/HigherOrderCO/HVM), a **lazy**, **non-garbage-collected** and **massively parallel** virtual
 machine. In [our benchmarks](https://github.com/HigherOrderCO/Functional-Benchmarks), its type-checker outperforms every
-alternative proof assistant by a far margin, and its programs can offer exponential speedups over Haskell's GHC. Kind2
+alternative proof assistant by a far margin, and its programs can offer exponential speedups over Haskell's GHC. Kind1
 unleashes the [inherent parallelism of the Lambda
 Calculus](https://github.com/VictorTaelin/Interaction-Calculus) to become the ultimate programming language of
 the next century.
