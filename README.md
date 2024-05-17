@@ -1,3 +1,7 @@
+> DISCLAIMER: KIND IS GETTING A REFACTOR BASED ON HVM2 [HERE](https://github.com/HigherOrderCO/kind).
+>
+> THIS REPO WILL BECOME THE NEW REFACTOR IN THE FUTURE.
+
 <div align="center">
 
 ![banner]
@@ -21,7 +25,7 @@
 # Getting started
 
 It is a complete rewrite of [Kind-legacy](https://github.com/HigherOrderCO/Kind-Legacy), based on
-[HVM](https://github.com/HigherOrderCO/HVM), a **lazy**, **non-garbage-collected** and **massively parallel** virtual
+[HVM](https://github.com/HigherOrderCO/HVM1), a **lazy**, **non-garbage-collected** and **massively parallel** virtual
 machine. In [our benchmarks](https://github.com/HigherOrderCO/Functional-Benchmarks), its type-checker outperforms every
 alternative proof assistant by a far margin, and its programs can offer exponential speedups over Haskell's GHC. Kind1
 unleashes the [inherent parallelism of the Lambda
