@@ -72,7 +72,7 @@ Check      | `kind2 check  file.kind2` | Checks all definitions.
 Eval       | `kind2 eval   file.kind2` | Runs using the type-checker's evaluator.
 Run        | `kind2 run    file.kind2` | Runs using HVM's evaluator, on Rust-mode.
 To-HVM     | `kind2 to-hvm file.kind2` | Generates a [.hvm](https://github.com/higherorderco/hvm) file. Can then be compiled to a rust crate using HVM.
-To-KDL     | `kind2 to-kdl file.kind2` | Generates a [.kdl](https://github.com/higherorderco/kindelia) file. Can then be deployed to [Kindelia](https://github.com/higherorderco/kindelia).
+To-KDL     | `kind2 to-kdl file.kind2` | Generates a [.kdl](https://github.com/kindelia/kindelia) file. Can then be deployed to [Kindelia](https://github.com/kindelia/kindelia).
 
 The rust crate can be generated via HVM:
 
@@ -87,7 +87,7 @@ hvm compile file.hvm
 
 - For Feedbacks, email [kind@higherorderco.com](mailto:kind@higherorderco.com)
 
-- To ask questions and join our community, check our [Discord Server](https://discord.gg/kindelia).
+- To ask questions and join our community, check our [Discord Server](https://discord.higherorderco.com).
 
 
 [banner]: ./img/banner.png
@@ -96,6 +96,6 @@ hvm compile file.hvm
 [crates.io]: https://crates.io/crates/zoxide
 
 [discord.badge]: https://img.shields.io/discord/912426566838013994?style=flat-square
-[discord.invite]: https://discord.gg/kindelia
+[discord.invite]: https://discord.higherorderco.com
 
-[build.badge]: https://img.shields.io/github/actions/workflow/status/kindelia/kind/ci.yml?style=flat-square
+[build.badge]: https://img.shields.io/github/actions/workflow/status/higherorderco/kind1/ci.yml?style=flat-square
