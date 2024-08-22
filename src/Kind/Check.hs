@@ -1,10 +1,10 @@
-module Kind.Checking where
+module Kind.Check where
 
-import Kind.Types
-import Kind.Environment
-import Kind.Evaluation
-import Kind.Equality
-import Kind.Stringification
+import Kind.Type
+import Kind.Env
+import Kind.Reduce
+import Kind.Equal
+import Kind.Show
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

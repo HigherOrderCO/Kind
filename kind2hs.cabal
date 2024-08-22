@@ -15,13 +15,13 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Kind
-                    , Kind.Types
-                    , Kind.Environment
-                    , Kind.Evaluation
-                    , Kind.Equality
-                    , Kind.Checking
-                    , Kind.Stringification
-                    , Kind.Parsing
+                    , Kind.Type
+                    , Kind.Env
+                    , Kind.Reduce
+                    , Kind.Equal
+                    , Kind.Check
+                    , Kind.Show
+                    , Kind.Parse
                     , Kind.API
     other-modules:    
     build-depends:    base ^>=4.20.0.0

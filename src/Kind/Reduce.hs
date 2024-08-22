@@ -1,9 +1,9 @@
-module Kind.Evaluation where
+module Kind.Reduce where
 
 import Prelude hiding (EQ, LT, GT)
 import Data.Char (ord)
 
-import Kind.Types
+import Kind.Type
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

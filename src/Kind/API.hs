@@ -1,11 +1,11 @@
 module Kind.API where
 
-import Kind.Types
-import Kind.Environment
-import Kind.Evaluation
-import Kind.Checking
-import Kind.Stringification
-import Kind.Parsing
+import Kind.Type
+import Kind.Env
+import Kind.Reduce
+import Kind.Check
+import Kind.Show
+import Kind.Parse
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

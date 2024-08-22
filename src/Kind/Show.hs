@@ -1,9 +1,9 @@
-module Kind.Stringification where
+module Kind.Show where
 
 import Prelude hiding (EQ, LT, GT)
 
-import Kind.Types
-import Kind.Evaluation
+import Kind.Type
+import Kind.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

@@ -1,4 +1,4 @@
-module Kind.Types where
+module Kind.Type where
 
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
