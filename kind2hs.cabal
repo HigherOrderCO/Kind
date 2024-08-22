@@ -1,6 +1,5 @@
 cabal-version:      3.0
 name:               kind2hs
-
 version:            0.1.0.0
 license:            MIT
 license-file:       LICENSE
@@ -11,24 +10,30 @@ build-type:         Simple
 extra-doc-files:    CHANGELOG.md
 
 common warnings
-    ghc-options: -Wall
+    ghc-options: -w
 
 library
     import:           warnings
     exposed-modules:  Kind
-    build-depends:
-        base ^>=4.20.0.0,
-        containers ==0.7,
-        parsec ==3.1.17.0
+                    , Kind.Types
+                    , Kind.Environment
+                    , Kind.Evaluation
+                    , Kind.Equality
+                    , Kind.Checking
+                    , Kind.Stringification
+                    , Kind.Parsing
+                    , Kind.API
+    other-modules:    
+    build-depends:    base ^>=4.20.0.0
+                    , containers ==0.7
+                    , parsec ==3.1.17.0
     hs-source-dirs:   src
     default-language: GHC2024
 
 executable kindc
     import:           warnings
     main-is:          Main.hs
-    build-depends:
-        base ^>=4.20.0.0,
-        kind2hs
-
+    build-depends:    base ^>=4.20.0.0
+                    , kind2hs
     hs-source-dirs:   app
     default-language: GHC2024
