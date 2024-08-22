@@ -17,6 +17,5 @@ cabal.project.local*
 .vscode/
 .idea/
 .DS_Store
-*.kindc
 .holefill
 .tmp

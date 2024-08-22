@@ -1,0 +1,44 @@
+
+
+Bool : * = #[]{
+  #true{} : Bool
+  #false{} : Bool
+};
+
+Nat : * = #[]{
+  #zero{} : Nat
+  #succ{ pred: Nat } : Nat
+};
+
+
+IsTrue : ∀(b: Bool) * = λb #[b]{
+  #indeed{} : (IsTrue #true{})
+};
+
+Equal : ∀(T: *) ∀(a: T) ∀(b: T) * = λT λa λb #[a b]{
+  #refl{} : (Equal T a a)
+};
+
+rewrite
+: ∀(T: *)
+  ∀(a: T)
+  ∀(b: T)
+  ∀(e: (Equal T a b))
+  ∀(P: ∀(x: A) *)
+  ∀(x: (P a))
+  (P b)
+= λT λa λb λ{
+  #refl: λP λx x
+};
+
+MAIN = rewrite;
+
+//MAIN
+//: (((Equal Bool) #true{}) #true{})
+//= #refl{};
+
+//Equal.rewrite<A: Type, a: A, b: A>(e: Equal<A,a,b>)<P: A -> Type>(x: P(a)): P(b)
+  //case e {
+    //refl: x
+  //} : P(e.b)
+

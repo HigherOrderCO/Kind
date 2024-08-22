@@ -1,0 +1,42 @@
+Bool : * = #[]{
+  #true{} : Bool
+  #false{} : Bool
+}
+
+Nat : * = #[]{
+  #zero{} : Nat
+  #succ{ pred: Nat } : Nat
+}
+
+Nat.match
+: ∀(P: ∀(x: Nat) *)
+  ∀(z: (P #zero{}))
+  ∀(s: ∀(n: Nat) (P #succ{ n }))
+  ∀(n: Nat)
+  (P n)
+= λP λz λs λ{
+  #zero: z
+  #succ: λp (s p)
+}
+
+IsTrue : ∀(b: Bool) * = λb #[b]{
+  #indeed{} : (IsTrue #true{})
+}
+
+Equal : ∀(T: *) ∀(a: T) ∀(b: T) * = λT λa λb #[a b]{
+  #refl{} : (Equal T a a)
+}
+
+rewrite
+: ∀(T: *)
+  ∀(a: T)
+  ∀(b: T)
+  ∀(e: (Equal T a b))
+  ∀(P: ∀(x: A) *)
+  ∀(x: (P a))
+  (P b)
+= λT λa λb λ{
+  #refl: λP λx x
+}
+
+MAIN = Nat.match
