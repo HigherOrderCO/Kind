@@ -1,9 +1,9 @@
-module Kind.Parse where
+module Core.Parse where
 
 import Prelude hiding (EQ, LT, GT)
 
-import Kind.Type
-import Kind.Reduce
+import Core.Type
+import Core.Reduce
 
 import qualified Data.Map.Strict as M
 import Text.Parsec ((<|>))
@@ -63,9 +63,9 @@ parseLam = do
 parseApp = do
   P.char '('
   fun <- parseTerm
-  arg <- parseTerm
+  arg <- P.many1 parseTerm
   P.char ')'
-  return $ App fun arg
+  return $ foldl App fun arg
 
 parseAnn = do
   P.char '{'
@@ -158,7 +158,6 @@ parseUse = do
   P.spaces
   P.char '='
   val <- parseTerm
-  P.char ';'
   bod <- parseTerm
   return $ Use nam val (\x -> bod)
 
@@ -168,7 +167,6 @@ parseLet = do
   P.spaces
   P.char '='
   val <- parseTerm
-  P.char ';'
   bod <- parseTerm
   return $ Let nam val (\x -> bod)
 
@@ -280,7 +278,6 @@ parseDef = do
     return (typ, True)
   P.char '='
   value <- parseTerm
-  P.char ';'
   P.spaces
   return (name, if hasType then Ann True value typ else value)
 

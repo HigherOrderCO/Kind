@@ -1,9 +1,9 @@
-module Kind.Show where
+module Core.Show where
 
 import Prelude hiding (EQ, LT, GT)
 
-import Kind.Type
-import Kind.Reduce
+import Core.Type
+import Core.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

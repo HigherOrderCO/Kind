@@ -1,11 +1,11 @@
-module Kind.API where
+module Core.API where
 
-import Kind.Type
-import Kind.Env
-import Kind.Reduce
-import Kind.Check
-import Kind.Show
-import Kind.Parse
+import Core.Type
+import Core.Env
+import Core.Reduce
+import Core.Check
+import Core.Show
+import Core.Parse
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

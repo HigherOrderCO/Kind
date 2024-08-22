@@ -1,10 +1,10 @@
-module Kind.Equal where
+module Core.Equal where
 
 import Control.Monad (zipWithM)
 
-import Kind.Type
-import Kind.Env
-import Kind.Reduce
+import Core.Type
+import Core.Env
+import Core.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -13,104 +13,25 @@ import Debug.Trace
 -- Equality
 -- --------
 
--- Conversion checking works as follows:
--- 1. Two terms are equal if their wnf's are structurally identical
--- 2. Otherwise, they're equal if they're similar (component-wise equal)
--- This allows us to always identify two terms that have the same normal form,
--- while also allowing us to return earlier, if they become identical at any
--- point in the reduction. Note that, for Self types, the similarity checker
--- will "un-reduce" from `$(x: (T a b)) body` to `(T a b)`, avoiding loops.
-
+-- Checks if two terms are equal, after reduction steps
 equal :: Term -> Term -> Int -> Env Bool
-equal a b dep = do
-  -- trace ("== " ++ termShow a dep ++ "\n.. " ++ termShow b dep) $ do
+equal a b dep = {-trace ("== " ++ termShow a dep ++ "\n.. " ++ termShow b dep) $-} do
+  -- Reduces both sides to wnf
   book <- envGetBook
   fill <- envGetFill
   let a' = reduce book fill 2 a
   let b' = reduce book fill 2 b
-  same <- tryIdentical a' b' dep
-  if same then do
-    return True
+  state <- envSnapshot
+  -- If both sides are identical, return true
+  is_id <- identical a' b' dep
+  if is_id then
+    envPure True
+  -- Otherwise, check if they're component-wise equal
   else do
+    envRewind state
     similar a' b' dep
 
-tryIdentical :: Term -> Term -> Int -> Env Bool
-tryIdentical a b dep = do
-  state <- envSnapshot
-  equal <- identical a b dep
-  if equal
-    then envPure True
-    else envRewind state >> envPure False
-
-similar :: Term -> Term -> Int -> Env Bool
-similar a b dep =
-  -- trace ("~~ " ++ termShow a dep ++ "\n.. " ++ termShow b dep) $ do
-  go a b dep
-  where
-  go (All aNam aInp aBod) (All bNam bInp bBod) dep = do
-    eInp <- equal aInp bInp dep
-    eBod <- equal (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
-    envPure (eInp && eBod)
-  go (Lam aNam aBod) (Lam bNam bBod) dep =
-    equal (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
-  go (App aFun aArg) (App bFun bArg) dep = do
-    eFun <- similar aFun bFun dep
-    eArg <- equal aArg bArg dep
-    envPure (eFun && eArg)
-  go (Slf aNam aTyp aBod) (Slf bNam bTyp bBod) dep = do
-    book <- envGetBook
-    similar (reduce book IM.empty 0 aTyp) (reduce book IM.empty 0 bTyp) dep
-  go (Dat aScp aCts) (Dat bScp bCts) dep = do
-    eSlf <- zipWithM (\ ax bx -> equal ax bx dep) aScp bScp
-    if (and eSlf) && length aCts == length bCts then do
-      results <- zipWithM
-        (\ (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) ->
-          if aCNm == bCNm && length aFs == length bFs then do
-            fs <- zipWithM
-              (\ (aFNm, aFTyp) (bFNm, bFTyp) ->
-                if aFNm == bFNm then
-                  equal aFTyp bFTyp dep
-                else
-                  envPure False)
-              aFs bFs
-            rt <- equal aRt bRt dep
-            envPure (and fs && rt)
-          else
-            envPure False)
-        aCts bCts
-      envPure (and results)
-    else
-      envPure False
-  go (Con aNam aArg) (Con bNam bArg) dep = do
-    if aNam == bNam && length aArg == length bArg then do
-      results <- zipWithM (\aArg bArg -> equal aArg bArg dep) aArg bArg
-      envPure (and results)
-    else
-      envPure False
-  go (Mat aCse) (Mat bCse) dep = do
-    if length aCse == length bCse then do
-      results <- zipWithM
-        (\ (aCNam, aCBod) (bCNam, bCBod) ->
-          if aCNam == bCNam then
-            equal aCBod bCBod dep
-          else
-            envPure False)
-        aCse bCse
-      envPure (and results)
-    else
-      envPure False
-  go (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep = do
-    eFst <- equal aFst bFst dep
-    eSnd <- equal aSnd bSnd dep
-    envPure (eFst && eSnd)
-  go (Swi aNam aX aZ aS aP) (Swi bNam bX bZ bS bP) dep = do
-    eX <- equal aX bX dep
-    eZ <- equal aZ bZ dep
-    eS <- equal (aS (Var (aNam ++ "-1") dep)) (bS (Var (bNam ++ "-1") dep)) dep
-    eP <- equal (aP (Var aNam dep)) (bP (Var bNam dep)) dep
-    envPure (eX && eZ && eS && eP)
-  go a b dep = identical a b dep
-
+-- Checks if two terms are already syntactically identical
 identical :: Term -> Term -> Int -> Env Bool
 identical a b dep = go a b dep where
   go (All aNam aInp aBod) (All bNam bInp bBod) dep = do
@@ -130,38 +51,18 @@ identical a b dep = go a b dep where
   go a (Ins bVal) dep =
     identical a bVal dep
   go (Dat aScp aCts) (Dat bScp bCts) dep = do
-    iSlf <- zipWithM (\ ax bx -> equal ax bx dep) aScp bScp
-    if (and iSlf) && length aCts == length bCts then do
-      results <- zipWithM
-        (\ (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) ->
-          if aCNm == bCNm && length aFs == length bFs then do
-            fs <- zipWithM (\ (aFNm, aFTy) (bFNm, bFTy) -> identical aFTy bFTy dep) aFs bFs
-            rt <- identical aRt bRt dep
-            envPure (and fs && rt)
-          else
-            envPure False)
-        aCts bCts
-      envPure (and results)
-    else
-      envPure False
+    iSlf <- zipWithM (\ax bx -> identical ax bx dep) aScp bScp
+    if and iSlf && length aCts == length bCts
+      then and <$> zipWithM goCtr aCts bCts
+      else return False
   go (Con aNam aArg) (Con bNam bArg) dep = do
-    if aNam == bNam && length aArg == length bArg then do
-      results <- zipWithM (\aArg bArg -> identical aArg bArg dep) aArg bArg
-      envPure (and results)
-    else
-      envPure False
+    if aNam == bNam && length aArg == length bArg
+      then and <$> zipWithM (\aArg bArg -> identical aArg bArg dep) aArg bArg
+      else return False
   go (Mat aCse) (Mat bCse) dep = do
-    if length aCse == length bCse then do
-      results <- zipWithM
-        (\ (aCNam, aCBod) (bCNam, bCBod) ->
-          if aCNam == bCNam then
-            identical aCBod bCBod dep
-          else
-            envPure False)
-        aCse bCse
-      envPure (and results)
-    else
-      envPure False
+    if length aCse == length bCse
+      then and <$> zipWithM goCse aCse bCse
+      else return False
   go (Let aNam aVal aBod) b dep =
     identical (aBod aVal) b dep
   go a (Let bNam bVal bBod) dep =
@@ -213,6 +114,73 @@ identical a b dep = go a b dep where
   go a b dep =
     return False
 
+  goCtr (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) = do
+    if aCNm == bCNm && length aFs == length bFs
+      then do
+        fs <- zipWithM (\(_, aFTy) (_, bFTy) -> identical aFTy bFTy dep) aFs bFs
+        rt <- identical aRt bRt dep
+        return (and fs && rt)
+      else return False
+
+  goCse (aCNam, aCBod) (bCNam, bCBod) = do
+    if aCNam == bCNam
+      then identical aCBod bCBod dep
+      else return False
+
+-- Checks if two terms are component-wise equal
+similar :: Term -> Term -> Int -> Env Bool
+similar a b dep = go a b dep where
+  go (All aNam aInp aBod) (All bNam bInp bBod) dep = do
+    eInp <- equal aInp bInp dep
+    eBod <- equal (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+    return (eInp && eBod)
+  go (Lam aNam aBod) (Lam bNam bBod) dep =
+    equal (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+  go (App aFun aArg) (App bFun bArg) dep = do
+    eFun <- similar aFun bFun dep
+    eArg <- equal aArg bArg dep
+    return (eFun && eArg)
+  go (Slf aNam aTyp aBod) (Slf bNam bTyp bBod) dep = do
+    book <- envGetBook
+    similar (reduce book IM.empty 0 aTyp) (reduce book IM.empty 0 bTyp) dep
+  go (Dat aScp aCts) (Dat bScp bCts) dep = do
+    eSlf <- zipWithM (\ax bx -> equal ax bx dep) aScp bScp
+    if and eSlf && length aCts == length bCts
+      then and <$> zipWithM goCtr aCts bCts
+      else return False
+  go (Con aNam aArg) (Con bNam bArg) dep = do
+    if aNam == bNam && length aArg == length bArg
+      then and <$> zipWithM (\a b -> equal a b dep) aArg bArg
+      else return False
+  go (Mat aCse) (Mat bCse) dep = do
+    if length aCse == length bCse
+      then and <$> zipWithM goCse aCse bCse
+      else return False
+  go (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep = do
+    eFst <- equal aFst bFst dep
+    eSnd <- equal aSnd bSnd dep
+    return (eFst && eSnd)
+  go (Swi aNam aX aZ aS aP) (Swi bNam bX bZ bS bP) dep = do
+    eX <- equal aX bX dep
+    eZ <- equal aZ bZ dep
+    eS <- equal (aS (Var (aNam ++ "-1") dep)) (bS (Var (bNam ++ "-1") dep)) dep
+    eP <- equal (aP (Var aNam dep)) (bP (Var bNam dep)) dep
+    return (eX && eZ && eS && eP)
+  go a b dep = identical a b dep
+
+  goCtr (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) = do
+    if aCNm == bCNm && length aFs == length bFs
+      then do
+        fs <- zipWithM (\(_, aFTyp) (_, bFTyp) -> equal aFTyp bFTyp dep) aFs bFs
+        rt <- equal aRt bRt dep
+        return (and fs && rt)
+      else return False
+
+  goCse (aCNam, aCBod) (bCNam, bCBod) = do
+    if aCNam == bCNam
+      then equal aCBod bCBod dep
+      else return False
+
 -- Unification
 -- -----------
 
@@ -236,16 +204,25 @@ unify :: Int -> [Term] -> Term -> Int -> Env Bool
 unify uid spn b dep = do
   book <- envGetBook
   fill <- envGetFill
-  let unsolved = not (IM.member uid fill) -- is this hole not already solved?
-  let solvable = valid fill spn [] -- does the spine satisfies conditions?
-  let no_loops = not $ occur book fill uid b dep -- is the solution not recursive?
+
+  -- is this hole not already solved?
+  let unsolved = not (IM.member uid fill)
+
+  -- does the spine satisfies conditions?
+  let solvable = valid fill spn []
+
+  -- is the solution not recursive?
+  let no_loops = not $ occur book fill uid b dep
+
   -- trace ("unify: " ++ show uid ++ " " ++ termShow b dep ++ " | " ++ show unsolved ++ " " ++ show solvable ++ " " ++ show no_loops) $ do
   do
+
     -- If all is ok, generate the solution and return true
     if unsolved && solvable && no_loops then do
       let solution = solve book fill uid spn b
       envFill uid solution
       return True
+
     -- Otherwise, return true iff both are identical metavars
     else case b of
       (Met bUid bSpn) -> return $ uid == bUid

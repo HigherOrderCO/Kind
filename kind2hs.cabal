@@ -15,14 +15,14 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Kind
-                    , Kind.Type
-                    , Kind.Env
-                    , Kind.Reduce
-                    , Kind.Equal
-                    , Kind.Check
-                    , Kind.Show
-                    , Kind.Parse
-                    , Kind.API
+                    , Core.Type
+                    , Core.Env
+                    , Core.Reduce
+                    , Core.Equal
+                    , Core.Check
+                    , Core.Show
+                    , Core.Parse
+                    , Core.API
     other-modules:    
     build-depends:    base ^>=4.20.0.0
                     , containers ==0.7

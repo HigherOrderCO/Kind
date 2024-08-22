@@ -1,4 +1,4 @@
-module Kind.Type where
+module Core.Type where
 
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
@@ -81,7 +81,7 @@ data Oper
   | GT  | LTE | GTE | AND
   | OR  | XOR | LSH | RSH
 
--- Ctrs
+-- Constructor
 data Ctr = Ctr String [(String,Term)] Term
 
 -- Book of Definitions

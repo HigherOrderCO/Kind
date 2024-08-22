@@ -1,9 +1,9 @@
-module Kind.Reduce where
+module Core.Reduce where
 
 import Prelude hiding (EQ, LT, GT)
 import Data.Char (ord)
 
-import Kind.Type
+import Core.Type
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -11,6 +11,7 @@ import qualified Data.IntMap.Strict as IM
 -- Evaluation
 -- ----------
 
+-- Evaluates a term to weak normal form
 reduce :: Book -> Fill -> Int -> Term -> Term
 reduce book fill lv term = red term where
 
@@ -80,6 +81,7 @@ reduce book fill lv term = red term where
 -- Normalization
 -- -------------
 
+-- Evaluates a term to full normal form
 normal :: Book -> Fill -> Int -> Term -> Int -> Term
 normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (All nam inp bod) dep =
