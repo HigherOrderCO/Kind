@@ -343,15 +343,16 @@ check src val typ dep = trace ("check: " ++ termShow val dep ++ "\n    :: " ++ t
       envLog (Error src expected detected term dep)
       envFail
 
-checkDef :: Term -> Env ()
-checkDef (Ref nam) = do
+doCheck :: Term -> Env ()
+doCheck (Ref nam) = do
   book <- envGetBook
   case M.lookup nam book of
     Just val -> case val of
       Ann chk val typ -> check Nothing val typ 0 >> return ()
-      Ref nm2         -> checkDef (Ref nm2)
-      _               -> infer val 0 >> return ()
-    Nothing  -> do
+      Src src val     -> doCheck val
+      Ref nm2         -> doCheck (Ref nm2)
+      tm              -> infer val 0 >> return ()
+    Nothing -> do
       envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) 0)
       envFail
-checkDef other = error "invalid top-level definition"
+doCheck val = infer val 0 >> return ()

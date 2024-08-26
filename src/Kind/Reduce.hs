@@ -225,7 +225,10 @@ bind (Hol nam ctxs) ctx =
 bind (Met uid spn) ctx =
   let spn' = map (\t -> bind t ctx) spn in
   Met uid spn'
-bind (Var nam idx) ctx = Var nam idx
+bind (Var nam idx) ctx =
+  case lookup nam ctx of
+    Just x  -> x
+    Nothing -> Var nam idx
 bind (Src src val) ctx =
   let val' = bind val ctx in
   Src src val'

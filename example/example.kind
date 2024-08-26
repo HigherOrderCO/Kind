@@ -39,4 +39,12 @@ rewrite
   #refl: λP λx x
 }
 
-MAIN = Nat.match
+Nat.add : ∀(a: Nat) ∀(b: Nat) Nat
+= λ{
+  #zero: λb b
+  #succ: λpred λb (Nat.add pred #succ{ b })
+}
+
+MAIN = Nat.add
+
+//MAIN = (Nat.add #succ{#succ{#zero{}}} #succ{#zero{}})
