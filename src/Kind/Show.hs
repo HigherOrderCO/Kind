@@ -8,6 +8,8 @@ import Kind.Reduce
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
+import System.Console.ANSI
+
 -- Stringification
 -- ---------------
 
@@ -116,19 +118,37 @@ infoShow :: Book -> Fill -> Info -> String
 infoShow book fill (Found name typ ctx dep) =
   let typ' = termShow (normal book fill 0 typ dep) dep
       ctx' = drop 1 (contextShow book fill ctx dep)
-  in concat ["#found{", name, " ", typ', " [", ctx', "]}"]
+  in concat [(colorize Yellow "Hole: "), name, " \nType: ", typ', "\nContext [", ctx', "]"]
 infoShow book fill (Error src expected detected value dep) =
   let exp = termShow (normal book fill 0 expected dep) dep
       det = termShow (normal book fill 0 detected dep) dep
       val = termShow (normal book fill 0 value dep) dep
-  in concat ["#error{", exp, " ", det, " ", val, " ", locShow src, "}"]
+  in concat [(colorize Red "Error:\n"), "Expected: ", (colorize Green exp), "\n Found: ", (colorize Red det), "\n value: ", (colorize Yellow val), "\n path: ", locShow src ]
 infoShow book fill (Solve name term dep) =
   let term' = termShow (normal book fill 0 term dep) dep
-  in concat ["#solve{", show name, " ",  term', "}"]
+  in concat ["Solve:\n", show name, " ",  term']
 infoShow book fill (Vague name) =
-  concat ["#vague{", name, "}"]
+  concat ["Vague: ", name]
 infoShow book fill (Print value dep) =
   let val = termShow (normal book fill 0 value dep) dep
-  in concat ["#print{", val, "}"]
+  in concat [(colorize Blue "Result: "), val]
 
-locShow src = "TODO"
+locShow :: Maybe Cod -> String
+locShow Nothing = "Unknown location"
+locShow (Just (Cod start end)) = showLoc start
+
+showLoc :: Loc -> String
+showLoc (Loc file line col) = file ++ " - " ++ show line ++ ":" ++ show col
+
+colorize :: Color -> String -> String
+colorize color str =
+    setSGRCode [SetColor Foreground Vivid color] ++ str ++ setSGRCode [Reset]
+
+highlightString :: String -> Color -> Int -> Int -> String
+highlightString line color ini end =
+    let (prefix, rest) = splitAt ini line
+        (highlight, suffix) = splitAt (end - ini) rest
+        coloredPart = setSGRCode [SetColor Foreground Vivid color] ++ 
+                      highlight ++ 
+                      setSGRCode [Reset]
+    in prefix ++ coloredPart ++ suffix
