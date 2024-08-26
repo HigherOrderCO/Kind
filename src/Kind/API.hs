@@ -44,19 +44,19 @@ main = do
   case args of
     ["check", file] -> do
       content <- readFile file
-      let book = doParseBook "TODO.KINDC" content
+      let book = doParseBook file content
       case M.lookup "MAIN" book of
         Just term -> apiCheck book (Ref "MAIN")
         Nothing -> putStrLn "Error: No 'main' definition found in the file."
     ["run", file] -> do
       content <- readFile file
-      let book = doParseBook "TODO.KINDC" content
+      let book = doParseBook file content
       case M.lookup "MAIN" book of
         Just term -> apiNormal book term
         Nothing -> putStrLn "Error: No 'main' definition found in the file."
     ["show", file] -> do
       content <- readFile file
-      let book = doParseBook "TODO.KINDC" content
+      let book = doParseBook file content
       case M.lookup "MAIN" book of
         Just term -> putStrLn $ termShow term 0
         Nothing -> putStrLn "Error: No 'main' definition found in the file."
