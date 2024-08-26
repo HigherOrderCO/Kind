@@ -39,7 +39,8 @@ rewrite
   #refl: λP λx x
 }
 
-Nat.add : ∀(a: Nat) ∀(b: Nat) Nat
+Nat.add
+: ∀(a: Nat) ∀(b: Nat) Nat
 = λ{
   #zero: λb b
   #succ: λpred λb (Nat.add Nat.add #succ{ b })

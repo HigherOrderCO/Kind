@@ -23,7 +23,7 @@ import Debug.Trace
 -- ### Inference
 
 infer :: Term -> Int -> Env Term
-infer term dep = trace ("infer: " ++ termShow term dep) $ go term dep where
+infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
   -- inp : Set
   -- (bod {nam: inp}) : Set
   -- ----------------------- function
@@ -202,7 +202,7 @@ infer term dep = trace ("infer: " ++ termShow term dep) $ go term dep where
     infer val dep
 
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
-check src val typ dep = trace ("check: " ++ termShow val dep ++ "\n    :: " ++ termShow typ dep) $ go src val typ dep where
+check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++ termShow typ dep) $-} go src val typ dep where
   -- (bod {typ_nam: typ_inp}) : (typ_bod {nam: typ_inp})
   -- --------------------------------------------------- lambda
   -- (λnam bod) : (∀(typ_nam: typ_inp) typ_bod)
@@ -248,7 +248,7 @@ check src val typ dep = trace ("check: " ++ termShow val dep ++ "\n    :: " ++ t
           Nothing -> do
             envLog (Error Nothing (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
-      _ -> trace ("OXI " ++ termShow (reduce book fill 2 typx) dep) $ do
+      _ -> {-trace ("OXI " ++ termShow (reduce book fill 2 typx) dep) $-} do
         infer (Con nam arg) dep
         return ()
 
@@ -332,7 +332,7 @@ check src val typ dep = trace ("check: " ++ termShow val dep ++ "\n    :: " ++ t
     cmp src term typx infer dep
 
   -- Checks types equality and reports
-  cmp src term expected detected dep = trace ("cmp " ++ termShow expected dep ++ " " ++ termShow detected dep) $ do
+  cmp src term expected detected dep = {-trace ("cmp " ++ termShow expected dep ++ " " ++ termShow detected dep) $-} do
     equal <- equal expected detected dep
     if equal then do
       susp <- envTakeSusp
