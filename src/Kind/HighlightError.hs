@@ -13,7 +13,7 @@ highlightError (startLine, startCol) (endLine, endCol) file =
         color = "\x1b[4m\x1b[31m"
         reset = "\x1b[0m"
         numLen = length $ show endLine
-    in buildDisplayText numLen color reset relevantLines startLine startCol endLine endCol
+    in buildDisplayText numLen color reset relevantLines startLine startCol endLine (endCol - 1)
 
 buildDisplayText :: Int -> String -> String -> [(Int, String)] -> Int -> Int -> Int -> Int -> String
 buildDisplayText numLen color reset lines startLine startCol endLine endCol =

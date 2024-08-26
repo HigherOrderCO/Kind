@@ -27,6 +27,7 @@ import qualified Data.IntMap.Strict as IM
 
 import System.Console.ANSI
 
+
 -- Stringification
 -- ---------------
 
@@ -131,27 +132,43 @@ contextShowAnn :: Book -> Fill -> Term -> Int -> String
 contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShow (normal book fill 0 val dep) dep , ": " , termShow (normal book fill 0 typ dep) dep , "}"]
 contextShowAnn book fill term              dep = termShow (normal book fill 0 term dep) dep
 
-infoShow :: Book -> Fill -> Info -> String
+
+infoShow :: Book -> Fill -> Info -> IO String
 infoShow book fill info = case info of
   Found nam typ ctx dep ->
     let msg = concat ["?", nam, " : ", termShow typ dep]
         ctx_str = contextShow book fill ctx dep
-    in concat ["\x1b[1mGOAL\x1b[0m ", msg, ctx_str]
-  Error src exp det bad dep ->
+    in return $ concat ["\x1b[1mGOAL\x1b[0m ", msg, ctx_str]
+  Error src exp det bad dep -> do
     let exp'  = concat ["- expected: \x1b[32m", termShow exp dep, "\x1b[0m"]
         det'  = concat ["- detected: \x1b[31m", termShow det dep, "\x1b[0m"]
         bad'  = concat ["- bad_term: \x1b[2m", termShow bad dep, "\x1b[0m"]
-        file  = "unknown_file" -- Placeholder
-        text  = "Could not read source file." -- Placeholder
-        orig  = highlightError src text
-        src'  = concat ["\x1b[4m", file, "\x1b[0m\n", orig]
-    in concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
+    (file, text) <- case src of
+      Just (Cod (Loc fileName startLine startCol) (Loc _ endLine endCol)) -> do
+        canonicalPath <- resolveToAbsolutePath fileName
+        content <- readSourceFile canonicalPath
+        let highlighted = HE.highlightError (startLine, startCol) (endLine, endCol) content
+        return (canonicalPath, highlighted)
+      Nothing -> return ("unknown_file", "Could not read source file.")
+    let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
+    return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
   Solve nam val dep ->
-    concat ["SOLVE: _", show nam, " = ", termShow val dep]
+    return $ concat ["SOLVE: _", show nam, " = ", termShow val dep]
   Vague nam ->
-    concat ["VAGUE: _", nam]
+    return $ concat ["VAGUE: _", nam]
   Print val dep ->
-    termShow val dep
+    return $ termShow val dep
 
-highlightError :: Maybe Cod -> String -> String
-highlightError _ text = text -- Just print the whole file for now
+readSourceFile :: FilePath -> IO String
+readSourceFile file = do
+  result <- try (readFile file) :: IO (Either IOError String)
+  case result of
+    Right content -> return content
+    Left _ -> do
+      result2 <- try (readFile (file ++ "/_.kind2")) :: IO (Either IOError String)
+      return $ either (const "Could not read source file.") id result2
+
+resolveToAbsolutePath :: FilePath -> IO FilePath
+resolveToAbsolutePath relativePath = do
+    absPath <- canonicalizePath relativePath
+    return absPath
