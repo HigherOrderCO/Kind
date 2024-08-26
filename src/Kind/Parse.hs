@@ -1,24 +1,40 @@
-module Core.Parse where
+module Kind.Parse where
 
 import Prelude hiding (EQ, LT, GT)
 
-import Core.Type
-import Core.Reduce
+import Kind.Type
+import Kind.Reduce
 
-import qualified Data.Map.Strict as M
-import Text.Parsec ((<|>))
-import qualified Text.Parsec as P
 import Data.Char (ord)
+import Data.Functor.Identity (Identity)
+import qualified Data.Map.Strict as M
+
+import Text.Parsec ((<|>), getPosition, sourceLine, sourceColumn)
+import qualified Text.Parsec as P
 
 -- Parsing
 -- -------
 
-doParseTerm :: String -> Term
-doParseTerm input = case P.parse parseTerm "" input of
-  Left  err  -> error $ "Parse error: " ++ show err
-  Right term -> bind term []
+type ParserState = String -- File name
+type Parser a = P.ParsecT String ParserState Identity a
 
-parseTerm :: P.Parsec String () Term
+doParseTerm :: String -> String -> Term
+doParseTerm filename input =
+  case P.runParser (withSrc parseTerm) filename filename input of
+    Left err -> error $ "Parse error: " ++ show err
+    Right term -> bind term []
+
+withSrc :: Parser Term -> Parser Term
+withSrc parser = do
+  ini <- getPosition
+  val <- parser
+  end <- getPosition
+  nam <- P.getState
+  let iniLoc = Loc nam (sourceLine ini) (sourceColumn ini)
+  let endLoc = Loc nam (sourceLine end) (sourceColumn end)
+  return $ Src (Cod iniLoc endLoc) val
+
+parseTerm :: Parser Term
 parseTerm = do
   P.spaces
   P.choice
@@ -40,11 +56,10 @@ parseTerm = do
     , parseTxt
     , parseHol
     , parseMet
-    , parseSrc
     , parseRef
     ]
 
-parseAll = do
+parseAll = withSrc $ do
   P.string "∀"
   P.char '('
   nam <- parseName
@@ -54,20 +69,20 @@ parseAll = do
   bod <- parseTerm
   return $ All nam inp (\x -> bod)
 
-parseLam = do
+parseLam = withSrc $ do
   P.string "λ"
   nam <- parseName
   bod <- parseTerm
   return $ Lam nam (\x -> bod)
 
-parseApp = do
+parseApp = withSrc $ do
   P.char '('
   fun <- parseTerm
   arg <- P.many1 parseTerm
   P.char ')'
   return $ foldl App fun arg
 
-parseAnn = do
+parseAnn = withSrc $ do
   P.char '{'
   val <- parseTerm
   P.spaces
@@ -78,7 +93,7 @@ parseAnn = do
   P.char '}'
   return $ Ann chk val typ
 
-parseSlf = do
+parseSlf = withSrc $ do
   P.string "$("
   nam <- parseName
   P.char ':'
@@ -87,12 +102,12 @@ parseSlf = do
   bod <- parseTerm
   return $ Slf nam typ (\x -> bod)
 
-parseIns = do
+parseIns = withSrc $ do
   P.char '~'
   val <- parseTerm
   return $ Ins val
 
-parseDat = do
+parseDat = withSrc $ do
   P.try $ P.string "#["
   scp <- do
     indices <- P.many $ P.try $ parseTerm
@@ -122,7 +137,7 @@ parseDat = do
   P.char '}'
   return $ Dat scp cts
 
-parseCon = do
+parseCon = withSrc $ do
   P.char '#'
   nam <- parseName
   P.spaces
@@ -132,7 +147,7 @@ parseCon = do
   P.char '}'
   return $ Con nam arg
 
-parseMat = do
+parseMat = withSrc $ do
   P.try $ P.string "λ{"
   cse <- P.many $ P.try $ do
     P.spaces
@@ -146,13 +161,13 @@ parseMat = do
   P.char '}'
   return $ Mat cse
 
-parseRef = do
+parseRef = withSrc $ do
   name <- parseName
   return $ case name of
     "U48" -> U48
     _     -> Ref name
 
-parseUse = do
+parseUse = withSrc $ do
   P.try (P.string "use ")
   nam <- parseName
   P.spaces
@@ -161,7 +176,7 @@ parseUse = do
   bod <- parseTerm
   return $ Use nam val (\x -> bod)
 
-parseLet = do
+parseLet = withSrc $ do
   P.try (P.string "let ")
   nam <- parseName
   P.spaces
@@ -170,11 +185,11 @@ parseLet = do
   bod <- parseTerm
   return $ Let nam val (\x -> bod)
 
-parseSet = P.char '*' >> return Set
+parseSet = withSrc $ P.char '*' >> return Set
 
-parseNum = Num . read <$> P.many1 P.digit
+parseNum = withSrc $ Num . read <$> P.many1 P.digit
 
-parseOp2 = do
+parseOp2 = withSrc $ do
   opr <- P.try $ do
     P.string "("
     opr <- parseOper
@@ -184,7 +199,7 @@ parseOp2 = do
   P.char ')'
   return $ Op2 opr fst snd
 
-parseSwi = do
+parseSwi = withSrc $ do
   P.try (P.string "switch ")
   nam <- parseName
   P.spaces
@@ -204,18 +219,13 @@ parseSwi = do
   p <- parseTerm
   return $ Swi nam x z (\k -> s) (\k -> p)
 
-parseTxt = do
+parseTxt = withSrc $ do
   P.char '"'
   txt <- P.many (P.noneOf "\"")
   P.char '"'
   return $ Txt txt
 
--- parseNat = do
-  -- P.char '#'
-  -- val <- read <$> P.many1 P.digit
-  -- return $ Nat val
-
-parseHol = do
+parseHol = withSrc $ do
   P.char '?'
   nam <- parseName
   ctx <- P.option [] $ do
@@ -225,18 +235,12 @@ parseHol = do
     return terms
   return $ Hol nam ctx
 
-parseMet = do
+parseMet = withSrc $ do
   P.char '_'
   uid <- read <$> P.many1 P.digit
   return $ Met uid []
 
-parseSrc = do
-  P.char '!'
-  src <- read <$> P.many1 P.digit
-  val <- parseTerm
-  return $ Src src val
-
-parseName :: P.Parsec String () String
+parseName :: Parser String
 parseName = do
   P.spaces
   head <- P.letter
@@ -262,12 +266,12 @@ parseOper = P.choice
   , P.try (P.string ">>") >> return RSH
   ]
 
-parseBook :: P.Parsec String () Book
+parseBook :: Parser Book
 parseBook = do
   defs <- P.many parseDef
   return $ M.fromList defs
 
-parseDef :: P.Parsec String () (String, Term)
+parseDef :: Parser (String, Term)
 parseDef = do
   name <- parseName
   P.spaces
@@ -281,7 +285,9 @@ parseDef = do
   P.spaces
   return (name, if hasType then Ann True value typ else value)
 
-doParseBook :: String -> Book
-doParseBook input = case P.parse parseBook "" input of
-  Left  err  -> error $ "Parse error: " ++ show err
-  Right book -> M.map (\x -> bind x []) book
+doParseBook :: String -> String -> Book
+doParseBook filename input =
+  case P.runParser parseBook filename filename input of
+    Left err -> error $ "Parse error: " ++ show err
+    Right book -> M.map (\x -> bind x []) book
+

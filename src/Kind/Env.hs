@@ -1,6 +1,6 @@
-module Core.Env where
+module Kind.Env where
 
-import Core.Type
+import Kind.Type
 
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M

@@ -1,10 +1,10 @@
-module Core.Equal where
+module Kind.Equal where
 
 import Control.Monad (zipWithM)
 
-import Core.Type
-import Core.Env
-import Core.Reduce
+import Kind.Type
+import Kind.Env
+import Kind.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

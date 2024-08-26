@@ -1,9 +1,9 @@
-module Core.Show where
+module Kind.Show where
 
 import Prelude hiding (EQ, LT, GT)
 
-import Core.Type
-import Core.Reduce
+import Kind.Type
+import Kind.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -121,7 +121,7 @@ infoShow book fill (Error src expected detected value dep) =
   let exp = termShow (normal book fill 0 expected dep) dep
       det = termShow (normal book fill 0 detected dep) dep
       val = termShow (normal book fill 0 value dep) dep
-  in concat ["#error{", exp, " ", det, " ", val, " ", show src, "}"]
+  in concat ["#error{", exp, " ", det, " ", val, " ", locShow src, "}"]
 infoShow book fill (Solve name term dep) =
   let term' = termShow (normal book fill 0 term dep) dep
   in concat ["#solve{", show name, " ",  term', "}"]
@@ -130,3 +130,5 @@ infoShow book fill (Vague name) =
 infoShow book fill (Print value dep) =
   let val = termShow (normal book fill 0 value dep) dep
   in concat ["#print{", val, "}"]
+
+locShow src = "TODO"

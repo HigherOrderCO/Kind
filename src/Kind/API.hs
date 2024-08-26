@@ -1,11 +1,11 @@
-module Core.API where
+module Kind.API where
 
-import Core.Type
-import Core.Env
-import Core.Reduce
-import Core.Check
-import Core.Show
-import Core.Parse
+import Kind.Type
+import Kind.Env
+import Kind.Reduce
+import Kind.Check
+import Kind.Show
+import Kind.Parse
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -44,19 +44,19 @@ main = do
   case args of
     ["check", file] -> do
       content <- readFile file
-      let book = doParseBook content
+      let book = doParseBook "TODO.KINDC" content
       case M.lookup "MAIN" book of
         Just term -> apiCheck book (Ref "MAIN")
         Nothing -> putStrLn "Error: No 'main' definition found in the file."
     ["run", file] -> do
       content <- readFile file
-      let book = doParseBook content
+      let book = doParseBook "TODO.KINDC" content
       case M.lookup "MAIN" book of
         Just term -> apiNormal book term
         Nothing -> putStrLn "Error: No 'main' definition found in the file."
     ["show", file] -> do
       content <- readFile file
-      let book = doParseBook content
+      let book = doParseBook "TODO.KINDC" content
       case M.lookup "MAIN" book of
         Just term -> putStrLn $ termShow term 0
         Nothing -> putStrLn "Error: No 'main' definition found in the file."

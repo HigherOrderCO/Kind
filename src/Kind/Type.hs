@@ -1,9 +1,9 @@
-module Core.Type where
+module Kind.Type where
 
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 
--- Kind Core's AST
+-- Kind's AST
 data Term
   -- Product: `∀(x: A) B`
   = All String Term (Term -> Term)
@@ -66,13 +66,17 @@ data Term
   | Var String Int
 
   -- Source Location
-  | Src Int Term
+  | Src Cod Term
 
   -- Text Literal (sugar)
   | Txt String
 
   -- Nat Literal (sugar)
   | Nat Integer
+
+-- Location: Name, Line, Column
+data Loc = Loc String Int Int
+data Cod = Cod Loc Loc
 
 -- Numeric Operators
 data Oper
@@ -91,7 +95,7 @@ type Book = M.Map String Term
 data Info
   = Found String Term [Term] Int
   | Solve Int Term Int
-  | Error Int Term Term Term Int
+  | Error (Maybe Cod) Term Term Term Int
   | Vague String
   | Print Term Int
 
@@ -99,7 +103,7 @@ data Info
 type Fill = IM.IntMap Term
 
 -- Checker State
-data Check = Check Int Term Term Int -- postponed check
+data Check = Check (Maybe Cod) Term Term Int -- postponed check
 data State = State Book Fill [Check] [Info] -- state type
 data Res a = Done State a | Fail State -- result type
 data Env a = Env (State -> Res a) -- monadic checker
