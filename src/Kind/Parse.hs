@@ -1,3 +1,21 @@
+-- Files for context:
+
+-- Kind-Lang parser in Rust:
+
+-- //./../../../kind2/src/term/parse.rs//
+-- //./../../../kind2/src/book/parse.rs//
+
+-- Kind-Core types:
+
+-- //./Type.hs//
+
+-- ############################################################################
+
+-- Now, file below is Kind-Core's parser, in Haskell. Note that:
+-- The Kind-Lang parser (in Rust, above) has a high-level, user-friendly syntaxes.
+-- The Kind-Core parser (in Haskell, below) has a low-level, raw, core syntax.
+-- Our goal is to bring the high-level syntaxes to the Haskell version below.
+
 module Kind.Parse where
 
 import Prelude hiding (EQ, LT, GT)
@@ -6,8 +24,8 @@ import Kind.Type
 import Kind.Reduce
 
 import Data.Char (ord)
-import Data.Functor.Identity (Identity)
 import qualified Data.Map.Strict as M
+import Data.Functor.Identity (Identity)
 
 import Text.Parsec ((<|>), getPosition, sourceLine, sourceColumn)
 import qualified Text.Parsec as P
@@ -15,8 +33,8 @@ import qualified Text.Parsec as P
 -- Parsing
 -- -------
 
-type ParserState = String -- File name
-type Parser a = P.ParsecT String ParserState Identity a
+type PState   = String -- File name
+type Parser a = P.ParsecT String PState Identity a
 
 doParseTerm :: String -> String -> Term
 doParseTerm filename input =
@@ -275,19 +293,20 @@ parseDef :: Parser (String, Term)
 parseDef = do
   name <- parseName
   P.spaces
-  (typ, hasType) <- P.option (undefined, False) $ do
+  typ <- P.optionMaybe $ do
     P.char ':'
-    typ <- parseTerm
+    t <- parseTerm
     P.spaces
-    return (typ, True)
+    return t
   P.char '='
-  value <- parseTerm
+  val <- parseTerm
   P.spaces
-  return (name, if hasType then Ann True value typ else value)
+  case typ of
+    Nothing -> return (name, val)
+    Just t  -> return (name, bind (Ann False val t) [])
 
 doParseBook :: String -> String -> Book
 doParseBook filename input =
   case P.runParser parseBook filename filename input of
-    Left err -> error $ "Parse error: " ++ show err
-    Right book -> M.map (\x -> bind x []) book
-
+    Left err   -> error $ "Parse error: " ++ show err
+    Right book -> book

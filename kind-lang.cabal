@@ -1,5 +1,5 @@
 cabal-version:      3.0
-name:               kind-core
+name:               kind-lang
 version:            0.1.0.0
 license:            MIT
 license-file:       LICENSE
@@ -33,11 +33,11 @@ library
     hs-source-dirs:   src
     default-language: GHC2024
 
-executable kindc
+executable kind
     import:           warnings
     main-is:          Main.hs
     build-depends:    base ^>=4.20.0.0
-                    , kind-core
+                    , kind-lang
                     , ansi-terminal==1.1.1
                     , directory==1.3.8.3
     hs-source-dirs:   app

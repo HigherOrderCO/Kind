@@ -1,3 +1,15 @@
+-- Rust info stringifier (for reference):
+
+-- //./../../../kind2/src/info/mod.rs//
+
+-- Rust highlight_error (for reference):
+
+-- //./../../tmp_highlight.rs//
+
+-- Haskell Types (for reference):
+
+-- //./Type.hs//
+
 module Kind.Show where
 
 import Prelude hiding (EQ, LT, GT)
@@ -119,87 +131,27 @@ contextShowAnn :: Book -> Fill -> Term -> Int -> String
 contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShow (normal book fill 0 val dep) dep , ": " , termShow (normal book fill 0 typ dep) dep , "}"]
 contextShowAnn book fill term              dep = termShow (normal book fill 0 term dep) dep
 
-infoShow :: Book -> Fill -> Info -> IO String
-infoShow book fill (Found name typ ctx dep) = do
-  let typ' = termShow (normal book fill 0 typ dep) dep
-      ctx' = drop 1 (contextShow book fill ctx dep)
-  return $ concat [(colorize Yellow "Hole: "), name, " \nType: ", typ', "\nContext [", ctx', "]"]
+infoShow :: Book -> Fill -> Info -> String
+infoShow book fill info = case info of
+  Found nam typ ctx dep ->
+    let msg = concat ["?", nam, " : ", termShow typ dep]
+        ctx_str = contextShow book fill ctx dep
+    in concat ["\x1b[1mGOAL\x1b[0m ", msg, ctx_str]
+  Error src exp det bad dep ->
+    let exp'  = concat ["- expected: \x1b[32m", termShow exp dep, "\x1b[0m"]
+        det'  = concat ["- detected: \x1b[31m", termShow det dep, "\x1b[0m"]
+        bad'  = concat ["- bad_term: \x1b[2m", termShow bad dep, "\x1b[0m"]
+        file  = "unknown_file" -- Placeholder
+        text  = "Could not read source file." -- Placeholder
+        orig  = highlightError src text
+        src'  = concat ["\x1b[4m", file, "\x1b[0m\n", orig]
+    in concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
+  Solve nam val dep ->
+    concat ["SOLVE: _", show nam, " = ", termShow val dep]
+  Vague nam ->
+    concat ["VAGUE: _", nam]
+  Print val dep ->
+    termShow val dep
 
-infoShow book fill (Error src expected detected value dep) = do
-  let exp = termShow (normal book fill 0 expected dep) dep
-      det = termShow (normal book fill 0 detected dep) dep
-      val = termShow (normal book fill 0 value dep) dep
-
-  case src of
-    Nothing -> return $ concat [
-      (colorize Red "Error:\n"),
-      "Expected: ", (colorize Green exp), "\n",
-      "Found: ", (colorize Red det), "\n",
-      "Value: ", (colorize Yellow val), "\n",
-      "Path: Unknown location"
-      ]
-    Just (Cod start end) -> do
-      let Loc file startLine startCol = start
-          Loc _ endLine endCol = end
-      absFile <- resolveToAbsolutePath file
-      fileContent <- readSourceFile absFile
-      let highlightedCode = HE.highlightError (startLine, startCol) (endLine, endCol - 1) fileContent
-      return $ concat [
-        (makeBold (colorize Red "ERROR:\n")),
-        "- expected: ", (colorize Green exp), "\n",
-        "- detected: ", (colorize Red det), "\n",
-        "- bad_term: ", (colorize Yellow val), "\n",
-        (makeUnderline absFile), "\n",
-        highlightedCode
-        ]
-
-infoShow book fill (Solve name term dep) = do
-  let term' = termShow (normal book fill 0 term dep) dep
-  return $ concat ["Solve:\n", show name, " ", term']
-
-infoShow book fill (Vague name) = do
-  return $ concat ["Vague: ", name]
-
-infoShow book fill (Print value dep) = do
-  let val = termShow (normal book fill 0 value dep) dep
-  return $ concat [(colorize Blue "Result: "), val]
-
-locShow :: Maybe Cod -> String
-locShow Nothing = "Unknown location"
-locShow (Just (Cod start end)) = showLoc start
-
-showLoc :: Loc -> String
-showLoc (Loc file line col) = file ++ " - " ++ show line ++ ":" ++ show col
-
-colorize :: Color -> String -> String
-colorize color str =
-    setSGRCode [SetColor Foreground Vivid color] ++ str ++ setSGRCode [Reset]
-
-highlightString :: String -> Color -> Int -> Int -> String
-highlightString line color ini end =
-    let (prefix, rest) = splitAt ini line
-        (highlight, suffix) = splitAt (end - ini) rest
-        coloredPart = setSGRCode [SetColor Foreground Vivid color] ++ 
-                      highlight ++ 
-                      setSGRCode [Reset]
-    in prefix ++ coloredPart ++ suffix
-
-readSourceFile :: FilePath -> IO String
-readSourceFile file = do
-  result <- try (readFile file) :: IO (Either IOError String)
-  case result of
-    Right content -> return content
-    Left _ -> do
-      result2 <- try (readFile (file ++ "/_.kind2")) :: IO (Either IOError String)
-      return $ either (const "Could not read source file.") id result2
-
-resolveToAbsolutePath :: FilePath -> IO FilePath
-resolveToAbsolutePath relativePath = do
-    absPath <- canonicalizePath relativePath
-    return absPath
-
-makeBold :: String -> String
-makeBold text = "\ESC[1m" ++ text ++ "\ESC[0m"
-
-makeUnderline :: String -> String
-makeUnderline text = "\ESC[4m" ++ text ++ "\ESC[0m"
+highlightError :: Maybe Cod -> String -> String
+highlightError _ text = text -- Just print the whole file for now

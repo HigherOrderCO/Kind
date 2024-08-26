@@ -22,8 +22,8 @@ apiNormal book term = do
   putStrLn result
 
 -- Type-checks a term
-apiCheck :: Book -> Term -> IO ()
-apiCheck book term = case envRun (checkDef term) book of
+apiCheck :: Book -> String -> IO ()
+apiCheck book main = case envRun (doCheck (Ref main)) book of
   Done state value -> apiPrintLogs state
   Fail state       -> apiPrintLogs state
 
@@ -47,7 +47,7 @@ main = do
       content <- readFile file
       let book = doParseBook file content
       case M.lookup "MAIN" book of
-        Just term -> apiCheck book (Ref "MAIN")
+        Just term -> apiCheck book "MAIN"
         Nothing -> putStrLn "Error: No 'main' definition found in the file."
     ["run", file] -> do
       content <- readFile file
