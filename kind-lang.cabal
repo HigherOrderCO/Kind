@@ -27,6 +27,7 @@ library
     build-depends:    base ^>=4.20.0.0
                     , containers ==0.7
                     , parsec ==3.1.17.0
+                    , ansi-terminal==1.1.1
     hs-source-dirs:   src
     default-language: GHC2024
 
@@ -35,5 +36,6 @@ executable kind
     main-is:          Main.hs
     build-depends:    base ^>=4.20.0.0
                     , kind-lang
+                    , ansi-terminal==1.1.1
     hs-source-dirs:   app
     default-language: GHC2024

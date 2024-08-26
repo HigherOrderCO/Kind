@@ -42,7 +42,7 @@ rewrite
 Nat.add : ∀(a: Nat) ∀(b: Nat) Nat
 = λ{
   #zero: λb b
-  #succ: λpred λb (Nat.add pred #succ{ b })
+  #succ: λpred λb (Nat.add Nat.add #succ{ b })
 }
 
 MAIN = Nat.add

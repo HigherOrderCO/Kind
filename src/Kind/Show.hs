@@ -1,3 +1,15 @@
+-- Rust info stringifier (for reference):
+
+-- //./../../../kind2/src/info/mod.rs//
+
+-- Rust highlight_error (for reference):
+
+-- //./../../tmp_highlight.rs//
+
+-- Haskell Types (for reference):
+
+-- //./Type.hs//
+
 module Kind.Show where
 
 import Prelude hiding (EQ, LT, GT)
@@ -7,6 +19,8 @@ import Kind.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
+
+import System.Console.ANSI
 
 -- Stringification
 -- ---------------
@@ -113,22 +127,26 @@ contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShow (normal 
 contextShowAnn book fill term              dep = termShow (normal book fill 0 term dep) dep
 
 infoShow :: Book -> Fill -> Info -> String
-infoShow book fill (Found name typ ctx dep) =
-  let typ' = termShow (normal book fill 0 typ dep) dep
-      ctx' = drop 1 (contextShow book fill ctx dep)
-  in concat ["#found{", name, " ", typ', " [", ctx', "]}"]
-infoShow book fill (Error src expected detected value dep) =
-  let exp = termShow (normal book fill 0 expected dep) dep
-      det = termShow (normal book fill 0 detected dep) dep
-      val = termShow (normal book fill 0 value dep) dep
-  in concat ["#error{", exp, " ", det, " ", val, " ", locShow src, "}"]
-infoShow book fill (Solve name term dep) =
-  let term' = termShow (normal book fill 0 term dep) dep
-  in concat ["#solve{", show name, " ",  term', "}"]
-infoShow book fill (Vague name) =
-  concat ["#vague{", name, "}"]
-infoShow book fill (Print value dep) =
-  let val = termShow (normal book fill 0 value dep) dep
-  in concat ["#print{", val, "}"]
+infoShow book fill info = case info of
+  Found nam typ ctx dep ->
+    let msg = concat ["?", nam, " : ", termShow typ dep]
+        ctx_str = contextShow book fill ctx dep
+    in concat ["\x1b[1mGOAL\x1b[0m ", msg, ctx_str]
+  Error src exp det bad dep ->
+    let exp'  = concat ["- expected: \x1b[32m", termShow exp dep, "\x1b[0m"]
+        det'  = concat ["- detected: \x1b[31m", termShow det dep, "\x1b[0m"]
+        bad'  = concat ["- bad_term: \x1b[2m", termShow bad dep, "\x1b[0m"]
+        file  = "unknown_file" -- Placeholder
+        text  = "Could not read source file." -- Placeholder
+        orig  = highlightError src text
+        src'  = concat ["\x1b[4m", file, "\x1b[0m\n", orig]
+    in concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
+  Solve nam val dep ->
+    concat ["SOLVE: _", show nam, " = ", termShow val dep]
+  Vague nam ->
+    concat ["VAGUE: _", nam]
+  Print val dep ->
+    termShow val dep
 
-locShow src = "TODO"
+highlightError :: Maybe Cod -> String -> String
+highlightError _ text = text -- Just print the whole file for now
