@@ -6,18 +6,20 @@ import Kind.Reduce
 import Kind.Check
 import Kind.Show
 import Kind.Parse
-
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
+import Control.Monad (forM_)
 
 -- API
 -- ---
 
 -- Normalizes a term
 apiNormal :: Book -> Term -> IO ()
-apiNormal book term = putStrLn $ infoShow book IM.empty (Print (normal book IM.empty 2 term 0) 0)
+apiNormal book term = do
+  result <- infoShow book IM.empty (Print (normal book IM.empty 2 term 0) 0)
+  putStrLn result
 
 -- Type-checks a term
 apiCheck :: Book -> Term -> IO ()
@@ -26,11 +28,10 @@ apiCheck book term = case envRun (checkDef term) book of
   Fail state       -> apiPrintLogs state
 
 apiPrintLogs :: State -> IO ()
-apiPrintLogs (State book fill susp (log : logs)) = do
-  putStrLn $ infoShow book fill log
-  apiPrintLogs (State book fill susp logs)
-apiPrintLogs (State book fill susp []) = do
-  return ()
+apiPrintLogs (State book fill susp logs) = 
+  forM_ logs $ \log -> do
+    result <- infoShow book fill log
+    putStrLn result
 
 -- Main
 -- ----
