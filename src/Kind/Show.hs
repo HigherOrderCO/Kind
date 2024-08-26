@@ -4,6 +4,11 @@ import Prelude hiding (EQ, LT, GT)
 
 import Kind.Type
 import Kind.Reduce
+import Kind.HighlightError as HE
+
+import System.IO (readFile)
+import System.Directory (canonicalizePath)
+import Control.Exception (try)
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -114,24 +119,50 @@ contextShowAnn :: Book -> Fill -> Term -> Int -> String
 contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShow (normal book fill 0 val dep) dep , ": " , termShow (normal book fill 0 typ dep) dep , "}"]
 contextShowAnn book fill term              dep = termShow (normal book fill 0 term dep) dep
 
-infoShow :: Book -> Fill -> Info -> String
-infoShow book fill (Found name typ ctx dep) =
+infoShow :: Book -> Fill -> Info -> IO String
+infoShow book fill (Found name typ ctx dep) = do
   let typ' = termShow (normal book fill 0 typ dep) dep
       ctx' = drop 1 (contextShow book fill ctx dep)
-  in concat [(colorize Yellow "Hole: "), name, " \nType: ", typ', "\nContext [", ctx', "]"]
-infoShow book fill (Error src expected detected value dep) =
+  return $ concat [(colorize Yellow "Hole: "), name, " \nType: ", typ', "\nContext [", ctx', "]"]
+
+infoShow book fill (Error src expected detected value dep) = do
   let exp = termShow (normal book fill 0 expected dep) dep
       det = termShow (normal book fill 0 detected dep) dep
       val = termShow (normal book fill 0 value dep) dep
-  in concat [(colorize Red "Error:\n"), "Expected: ", (colorize Green exp), "\n Found: ", (colorize Red det), "\n value: ", (colorize Yellow val), "\n path: ", locShow src ]
-infoShow book fill (Solve name term dep) =
+
+  case src of
+    Nothing -> return $ concat [
+      (colorize Red "Error:\n"),
+      "Expected: ", (colorize Green exp), "\n",
+      "Found: ", (colorize Red det), "\n",
+      "Value: ", (colorize Yellow val), "\n",
+      "Path: Unknown location"
+      ]
+    Just (Cod start end) -> do
+      let Loc file startLine startCol = start
+          Loc _ endLine endCol = end
+      absFile <- resolveToAbsolutePath file
+      fileContent <- readSourceFile absFile
+      let highlightedCode = HE.highlightError (startLine, startCol) (endLine, endCol - 1) fileContent
+      return $ concat [
+        (makeBold (colorize Red "ERROR:\n")),
+        "- expected: ", (colorize Green exp), "\n",
+        "- detected: ", (colorize Red det), "\n",
+        "- bad_term: ", (colorize Yellow val), "\n",
+        (makeUnderline absFile), "\n",
+        highlightedCode
+        ]
+
+infoShow book fill (Solve name term dep) = do
   let term' = termShow (normal book fill 0 term dep) dep
-  in concat ["Solve:\n", show name, " ",  term']
-infoShow book fill (Vague name) =
-  concat ["Vague: ", name]
-infoShow book fill (Print value dep) =
+  return $ concat ["Solve:\n", show name, " ", term']
+
+infoShow book fill (Vague name) = do
+  return $ concat ["Vague: ", name]
+
+infoShow book fill (Print value dep) = do
   let val = termShow (normal book fill 0 value dep) dep
-  in concat [(colorize Blue "Result: "), val]
+  return $ concat [(colorize Blue "Result: "), val]
 
 locShow :: Maybe Cod -> String
 locShow Nothing = "Unknown location"
@@ -152,3 +183,23 @@ highlightString line color ini end =
                       highlight ++ 
                       setSGRCode [Reset]
     in prefix ++ coloredPart ++ suffix
+
+readSourceFile :: FilePath -> IO String
+readSourceFile file = do
+  result <- try (readFile file) :: IO (Either IOError String)
+  case result of
+    Right content -> return content
+    Left _ -> do
+      result2 <- try (readFile (file ++ "/_.kind2")) :: IO (Either IOError String)
+      return $ either (const "Could not read source file.") id result2
+
+resolveToAbsolutePath :: FilePath -> IO FilePath
+resolveToAbsolutePath relativePath = do
+    absPath <- canonicalizePath relativePath
+    return absPath
+
+makeBold :: String -> String
+makeBold text = "\ESC[1m" ++ text ++ "\ESC[0m"
+
+makeUnderline :: String -> String
+makeUnderline text = "\ESC[4m" ++ text ++ "\ESC[0m"
