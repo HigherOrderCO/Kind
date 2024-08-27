@@ -175,10 +175,10 @@ resolveToAbsolutePath relativePath = do
 
 highlightError :: (Int, Int) -> (Int, Int) -> String -> String
 highlightError (startLine, startCol) (endLine, endCol) content =
-  highlight (startLine, startCol) (endLine, endCol) "red" content underline
+  highlight (startLine, startCol) (endLine, endCol) "red" underline content
 
-highlight :: (Int, Int) -> (Int, Int) -> String -> String -> (String -> String) -> String
-highlight (startLine, startCol) (endLine, endCol) color content effect =
+highlight :: (Int, Int) -> (Int, Int) -> String -> (String -> String) -> String -> String
+highlight (startLine, startCol) (endLine, endCol) color effect content =
     assert (startLine <= endLine && (startLine /= endLine || startCol <= endCol)) "Start position must be before or equal to end position" $
     let (lineIndices, lineNumbers) = calculateIndicesAndLineNumbers content (startLine, startCol) (endLine, endCol)
         displayText = buildDisplayText lineIndices lineNumbers (startLine, startCol) (endLine, endCol) color effect
