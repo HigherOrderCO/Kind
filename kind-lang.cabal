@@ -23,7 +23,6 @@ library
                     , Kind.Show
                     , Kind.Parse
                     , Kind.API
-                    , Kind.Highlight
     other-modules:    
     build-depends:    base ^>=4.20.0.0
                     , containers ==0.7
