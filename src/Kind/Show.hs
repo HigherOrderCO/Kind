@@ -16,7 +16,7 @@ import Prelude hiding (EQ, LT, GT)
 
 import Kind.Type
 import Kind.Reduce
-import Kind.HighlightError as HE
+import Kind.Highlight as H
 
 import System.IO (readFile)
 import System.Directory (canonicalizePath)
@@ -147,7 +147,7 @@ infoShow book fill info = case info of
       Just (Cod (Loc fileName startLine startCol) (Loc _ endLine endCol)) -> do
         canonicalPath <- resolveToAbsolutePath fileName
         content <- readSourceFile canonicalPath
-        let highlighted = HE.highlightError (startLine, startCol) (endLine, endCol) content
+        let highlighted = H.highlightError (startLine, startCol) (endLine, endCol) content
         return (canonicalPath, highlighted)
       Nothing -> return ("unknown_file", "Could not read source file.")
     let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
