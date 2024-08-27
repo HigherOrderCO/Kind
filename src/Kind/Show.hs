@@ -191,7 +191,7 @@ targetLines content sLine eLine =
         -- Pair each line with its line number, starting from 1
         numberedLines = zip [1..] $ lines content
         
-        -- Extract only the lines between startLine and endLine (inclusive)
+        -- Extract only the lines between startLine and endLine 
         intervalLines = takeWhile (\(lineNum, _) -> lineNum <= eLine) $ 
                         dropWhile (\(lineNum, _) -> lineNum < sLine) numberedLines
         
