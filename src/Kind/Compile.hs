@@ -60,12 +60,10 @@ termToJS term dep = case term of
         fst' = termToJS fst dep
         snd' = termToJS snd dep
     in concat ["((", fst', " ", opr', " ", snd', ") >>> 0)"]
-  Swi nam x z s p ->
-    let x' = termToJS x dep
-        z' = termToJS z dep
-        s' = termToJS (s (Var (nam ++ "-1") dep)) (dep + 1)
-        p' = termToJS (p (Var nam dep)) dep
-    in concat ["((", x', " === 0) ? ", z', " : ", s', ")"]
+  Swi zer suc ->
+    let zer' = termToJS zer dep
+        suc' = termToJS suc dep
+    in concat ["((x => x === 0 ? ", zer', " : ", suc', "(x - 1)))"]
   Txt txt ->
     show txt
   Nat val ->
@@ -123,4 +121,3 @@ compileJS book =
         "}"]
       bookJS  = bookToJS book
   in concat [prelude, "\n\n", bookJS]
-

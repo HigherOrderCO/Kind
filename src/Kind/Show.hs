@@ -80,13 +80,10 @@ termShower small term dep = case term of
         fst' = termShower small fst dep
         snd' = termShower small snd dep
     in concat ["(" , opr' , " " , fst' , " " , snd' , ")"]
-  Swi nam x z s p ->
-    let nam' = nam
-        x'   = termShower small x dep
-        z'   = termShower small z dep
-        s'   = termShower small (s (Var (nam ++ "-1") dep)) (dep + 1)
-        p'   = termShower small (p (Var nam dep)) dep
-    in concat ["switch " , nam' , " = " , x' , " { 0: " , z' , " _: " , s' , " }: " , p']
+  Swi zero succ ->
+    let zero' = termShower small zero dep
+        succ' = termShower small succ dep
+    in concat ["λ{ 0: ", zero', " _: ", succ', " }"]
   Txt txt -> concat ["\"" , txt , "\""]
   Nat val -> show val
   Hol nam ctx -> concat ["?" , nam]

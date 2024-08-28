@@ -22,7 +22,6 @@ reduce book fill lv term = red term where
   red (Let nam val bod) = red (bod (red val))
   red (Use nam val bod) = red (bod (red val))
   red (Op2 opr fst snd) = op2 opr (red fst) (red snd)
-  red (Swi nam x z s p) = swi nam (red x) z s p
   red (Txt val)         = txt val
   red (Nat val)         = nat val
   red (Src src val)     = red val
@@ -33,12 +32,19 @@ reduce book fill lv term = red term where
   app (Met uid spn) arg = red (Met uid (spn ++ [arg]))
   app (Lam nam bod) arg = red (bod (reduce book fill 0 arg))
   app (Mat cse)     arg = mat cse (red arg)
+  app (Swi zer suc) arg = swi zer suc (red arg)
   app fun           arg = App fun arg
 
   mat cse (Con cnam carg) = case lookup cnam cse of
     Just cx -> red (foldl App cx carg)
     Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match."
-  mat cse arg = Mat cse
+  mat cse arg = App (Mat cse) arg
+
+  swi zer suc (Num 0)             = red zer
+  swi zer suc (Num n)             = red (App suc (Num (n - 1)))
+  swi zer suc (Op2 ADD (Num 1) k) = red (App suc k)
+  swi zer suc val                 = App (Swi zer suc) val
+
 
   met uid spn = case IM.lookup uid fill of
     Just val -> red (case spn of
@@ -60,12 +66,6 @@ reduce book fill lv term = red term where
   op2 LTE (Num fst) (Num snd) = Num (if fst <= snd then 1 else 0)
   op2 GTE (Num fst) (Num snd) = Num (if fst >= snd then 1 else 0)
   op2 opr fst       snd       = Op2 opr fst snd
-
-  swi nam (Ref x)             z s p | lv > 0 = swi nam (ref x) z s p
-  swi nam (Num 0)             z s p = red z
-  swi nam (Num n)             z s p = red (s (Num (n - 1)))
-  swi nam (Op2 ADD (Num 1) k) z s p = red (s k)
-  swi nam val                 z s p = Swi nam val z s p
 
   ref nam | lv == 2 = case M.lookup nam book of
     Just val -> red val
@@ -119,6 +119,10 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Mat cse) dep =
     let nf_cse = map (\(cnam, cbod) -> (cnam, normal book fill lv cbod dep)) cse in
     Mat nf_cse
+  go (Swi zer suc) dep =
+    let nf_zer = normal book fill lv zer dep in
+    let nf_suc = normal book fill lv suc dep in
+    Swi nf_zer nf_suc
   go (Ref nam) dep = Ref nam
   go (Let nam val bod) dep =
     let nf_val = normal book fill lv val dep in
@@ -136,12 +140,6 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_fst = normal book fill lv fst dep in
     let nf_snd = normal book fill lv snd dep in
     Op2 opr nf_fst nf_snd
-  go (Swi nam x z s p) dep =
-    let nf_x = normal book fill lv x dep in
-    let nf_z = normal book fill lv z dep in
-    let nf_s = \k -> normal book fill lv (s (Var (nam ++ "-1") dep)) dep in
-    let nf_p = \k -> normal book fill lv (p (Var nam dep)) dep in
-    Swi nam nf_x nf_z nf_s nf_p
   go (Txt val) dep = Txt val
   go (Nat val) dep = Nat val
   go (Var nam idx) dep = Var nam idx
@@ -192,6 +190,10 @@ bind (Con nam arg) ctx =
 bind (Mat cse) ctx =
   let cse' = map (\(cn,cb) -> (cn, bind cb ctx)) cse in
   Mat cse'
+bind (Swi zer suc) ctx =
+  let zer' = bind zer ctx in
+  let suc' = bind suc ctx in
+  Swi zer' suc'
 bind (Ref nam) ctx =
   case lookup nam ctx of
     Just x  -> x
@@ -211,12 +213,6 @@ bind (Op2 opr fst snd) ctx =
   let fst' = bind fst ctx in
   let snd' = bind snd ctx in
   Op2 opr fst' snd'
-bind (Swi nam x z s p) ctx =
-  let x' = bind x ctx in
-  let z' = bind z ctx in
-  let s' = \k -> bind (s (Var (nam ++ "-1") 0)) ((nam ++ "-1", k) : ctx) in
-  let p' = \k -> bind (p (Var nam 0)) ((nam, k) : ctx) in
-  Swi nam x' z' s' p'
 bind (Txt txt) ctx = Txt txt
 bind (Nat val) ctx = Nat val
 bind (Hol nam ctxs) ctx = Hol nam (map snd ctx)
@@ -244,6 +240,7 @@ subst lvl neo term = go term where
   go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
   go (Con nam arg)     = Con nam (map go arg)
   go (Mat cse)         = Mat (map goCse cse)
+  go (Swi zer suc)     = Swi (go zer) (go suc)
   go (Ref nam)         = Ref nam
   go (Let nam val bod) = Let nam (go val) (\x -> go (bod x))
   go (Use nam val bod) = Use nam (go val) (\x -> go (bod x))
@@ -253,7 +250,6 @@ subst lvl neo term = go term where
   go U32               = U32
   go (Num n)           = Num n
   go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
-  go (Swi nam x z s p) = Swi nam (go x) (go z) (\k -> go (s k)) (\k -> go (p k))
   go (Txt txt)         = Txt txt
   go (Nat val)         = Nat val
   go (Var nam idx)     = if lvl == idx then neo else Var nam idx

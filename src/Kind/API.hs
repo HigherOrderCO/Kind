@@ -90,7 +90,7 @@ apiToJS book name = do
 
 -- Prints logs from the type-checker
 apiPrintLogs :: State -> IO ()
-apiPrintLogs (State book fill susp logs) = 
+apiPrintLogs (State book fill susp logs) =
   forM_ logs $ \log -> do
     result <- infoShow book fill log
     putStrLn result
@@ -111,7 +111,7 @@ getDeps term = case term of
   Let _ val bod -> getDeps val ++ getDeps (bod Set)
   Use _ val bod -> getDeps val ++ getDeps (bod Set)
   Op2 _ fst snd -> getDeps fst ++ getDeps snd
-  Swi _ x z s p -> getDeps x ++ getDeps z ++ getDeps (s Set) ++ getDeps (p Set)
+  Swi zer suc   -> getDeps zer ++ getDeps suc
   Src _ val     -> getDeps val
   _             -> []
 

@@ -53,8 +53,8 @@ data Term
   -- U32 Binary Operation
   | Op2 Oper Term Term
 
-  -- U32 Elimination
-  | Swi String Term Term (Term -> Term) (Term -> Term)
+  -- U32 Elimination (updated to use splitting lambda)
+  | Swi Term Term
 
   -- Inspection Hole
   | Hol String [Term]

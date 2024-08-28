@@ -12,10 +12,7 @@ import Data.Functor.Identity (Identity)
 import Text.Parsec ((<|>), getPosition, sourceLine, sourceColumn)
 import qualified Text.Parsec as P
 
--- Parsing
--- -------
-
-type PState   = String -- File name
+type PState   = String
 type Parser a = P.ParsecT String PState Identity a
 
 doParseTerm :: String -> String -> Term
@@ -50,6 +47,7 @@ parseTerm = do
   parseTrivia
   P.choice
     [ parseAll
+    , parseSwi
     , parseMat
     , parseLam
     , parseOp2
@@ -63,7 +61,6 @@ parseTerm = do
     , parseLet
     , parseSet
     , parseNum
-    , parseSwi
     , parseTxt
     , parseHol
     , parseMet
@@ -163,6 +160,19 @@ parseCon = withSrc $ do
   P.char '}'
   return $ Con nam arg
 
+parseSwi = withSrc $ do
+  P.try $ do
+    P.string "λ{"
+    parseTrivia
+    P.string "0:"
+  zero <- parseTerm
+  parseTrivia
+  P.string "_:"
+  succ <- parseTerm
+  parseTrivia
+  P.char '}'
+  return $ Swi zero succ
+
 parseMat = withSrc $ do
   P.try $ P.string "λ{"
   cse <- P.many $ P.try $ do
@@ -214,26 +224,6 @@ parseOp2 = withSrc $ do
   snd <- parseTerm
   P.char ')'
   return $ Op2 opr fst snd
-
-parseSwi = withSrc $ do
-  P.try (P.string "switch ")
-  nam <- parseName
-  parseTrivia
-  P.char '='
-  x <- parseTerm
-  parseTrivia
-  P.char '{'
-  parseTrivia
-  P.string "0:"
-  z <- parseTerm
-  parseTrivia
-  P.string "_:"
-  s <- parseTerm
-  parseTrivia
-  P.char '}'
-  P.char ':'
-  p <- parseTerm
-  return $ Swi nam x z (\k -> s) (\k -> p)
 
 parseTxt = withSrc $ do
   P.char '"'
@@ -308,4 +298,3 @@ doParseBook filename input =
   case P.runParser parseBook filename filename input of
     Left err   -> error $ "Parse error: " ++ show err
     Right book -> book
-

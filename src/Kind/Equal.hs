@@ -15,7 +15,7 @@ import Debug.Trace
 
 -- Checks if two terms are equal, after reduction steps
 equal :: Term -> Term -> Int -> Env Bool
-equal a b dep = {-trace ("== " ++ termShow a dep ++ "\n.. " ++ termShow b dep) $-} do
+equal a b dep = do
   -- Reduces both sides to wnf
   book <- envGetBook
   fill <- envGetFill
@@ -93,12 +93,10 @@ identical a b dep = go a b dep where
     iFst <- identical aFst bFst dep
     iSnd <- identical aSnd bSnd dep
     return (iFst && iSnd)
-  go (Swi aNam aX aZ aS aP) (Swi bNam bX bZ bS bP) dep = do
-    iX <- identical aX bX dep
-    iZ <- identical aZ bZ dep
-    iS <- identical (aS (Var (aNam ++ "-1") dep)) (bS (Var (bNam ++ "-1") dep)) dep
-    iP <- identical (aP (Var aNam dep)) (bP (Var bNam dep)) dep
-    return (iX && iZ && iS && iP)
+  go (Swi aZer aSuc) (Swi bZer bSuc) dep = do
+    iZer <- identical aZer bZer dep
+    iSuc <- identical aSuc bSuc dep
+    return (iZer && iSuc)
   go (Txt aTxt) (Txt bTxt) dep =
     return (aTxt == bTxt)
   go (Nat aVal) (Nat bVal) dep =
@@ -160,12 +158,10 @@ similar a b dep = go a b dep where
     eFst <- equal aFst bFst dep
     eSnd <- equal aSnd bSnd dep
     return (eFst && eSnd)
-  go (Swi aNam aX aZ aS aP) (Swi bNam bX bZ bS bP) dep = do
-    eX <- equal aX bX dep
-    eZ <- equal aZ bZ dep
-    eS <- equal (aS (Var (aNam ++ "-1") dep)) (bS (Var (bNam ++ "-1") dep)) dep
-    eP <- equal (aP (Var aNam dep)) (bP (Var bNam dep)) dep
-    return (eX && eZ && eS && eP)
+  go (Swi aZer aSuc) (Swi bZer bSuc) dep = do
+    eZer <- equal aZer bZer dep
+    eSuc <- equal aSuc bSuc dep
+    return (eZer && eSuc)
   go a b dep = identical a b dep
 
   goCtr (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) = do
@@ -184,21 +180,6 @@ similar a b dep = go a b dep where
 -- Unification
 -- -----------
 
--- The unification algorithm is a simple pattern unifier, based on smalltt:
--- > https://github.com/AndrasKovacs/elaboration-zoo/blob/master/03-holes/Main.hs
--- The pattern unification problem provides a solution to the following problem:
---   (?X x y z ...) = K
--- When:
---   1. The LHS spine, `x y z ...`, consists of distinct variables.
---   2. Every free var of the RHS, `K`, occurs in the spine.
---   3. The LHS hole, `?A`, doesn't occur in the RHS, `K`.
--- If these conditions are met, ?X is solved as:
---   ?X = λx λy λz ... K
--- In this implementation, checking condition `2` is not necessary, because we
--- subst holes directly where they occur (rather than on top-level definitions),
--- so, it is impossible for unbound variables to appear. This approach may not
--- be completely correct, and is pending review.
-
 -- If possible, solves a `(?X x y z ...) = K` problem, generating a subst.
 unify :: Int -> [Term] -> Term -> Int -> Env Bool
 unify uid spn b dep = do
@@ -214,9 +195,7 @@ unify uid spn b dep = do
   -- is the solution not recursive?
   let no_loops = not $ occur book fill uid b dep
 
-  -- trace ("unify: " ++ show uid ++ " " ++ termShow b dep ++ " | " ++ show unsolved ++ " " ++ show solvable ++ " " ++ show no_loops) $ do
   do
-
     -- If all is ok, generate the solution and return true
     if unsolved && solvable && no_loops then do
       let solution = solve book fill uid spn b
@@ -289,12 +268,10 @@ occur book fill uid term dep = go term dep where
     let o_fst = go fst dep
         o_snd = go snd dep
     in o_fst || o_snd
-  go (Swi nam x z s p) dep =
-    let o_x = go x dep
-        o_z = go z dep
-        o_s = go (s (Var (nam ++ "-1") dep)) (dep + 1)
-        o_p = go (p (Var nam dep)) dep
-    in o_x || o_z || o_s || o_p
+  go (Swi zer suc) dep =
+    let o_zer = go zer dep
+        o_suc = go suc dep
+    in o_zer || o_suc
   go (Src src val) dep =
     let o_val = go val dep
     in o_val
