@@ -34,9 +34,20 @@ withSrc parser = do
   let endLoc = Loc nam (sourceLine end) (sourceColumn end)
   return $ Src (Cod iniLoc endLoc) val
 
+parseTrivia :: Parser ()
+parseTrivia = P.skipMany (parseSpace <|> parseComment) where
+  parseSpace = do
+    P.space
+    return ()
+  parseComment = P.try $ do
+    P.string "//"
+    P.skipMany (P.noneOf "\n")
+    P.char '\n'
+    return ()
+
 parseTerm :: Parser Term
 parseTerm = do
-  P.spaces
+  parseTrivia
   P.choice
     [ parseAll
     , parseMat
@@ -61,6 +72,7 @@ parseTerm = do
 
 parseAll = withSrc $ do
   P.string "∀"
+  era <- P.optionMaybe (P.char '-')
   P.char '('
   nam <- parseName
   P.char ':'
@@ -71,6 +83,7 @@ parseAll = withSrc $ do
 
 parseLam = withSrc $ do
   P.string "λ"
+  era <- P.optionMaybe (P.char '-')
   nam <- parseName
   bod <- parseTerm
   return $ Lam nam (\x -> bod)
@@ -78,18 +91,21 @@ parseLam = withSrc $ do
 parseApp = withSrc $ do
   P.char '('
   fun <- parseTerm
-  arg <- P.many1 parseTerm
+  args <- P.many1 $ do
+    era <- P.optionMaybe (P.char '-')
+    arg <- parseTerm
+    return (era, arg)
   P.char ')'
-  return $ foldl App fun arg
+  return $ foldl (\f (era, a) -> App f a) fun args
 
 parseAnn = withSrc $ do
   P.char '{'
   val <- parseTerm
-  P.spaces
+  parseTrivia
   P.char ':'
   chk <- P.option False (P.char ':' >> return True)
   typ <- parseTerm
-  P.spaces
+  parseTrivia
   P.char '}'
   return $ Ann chk val typ
 
@@ -112,52 +128,52 @@ parseDat = withSrc $ do
   scp <- do
     indices <- P.many $ P.try $ parseTerm
     return indices
-  P.spaces
+  parseTrivia
   P.char ']'
   P.char '{'
   cts <- P.many $ P.try $ do
-    P.spaces
+    parseTrivia
     P.char '#'
     nm <- parseName
-    P.spaces
+    parseTrivia
     P.char '{'
     fs <- P.many $ P.try $ do
       fn <- parseName
-      P.spaces
+      parseTrivia
       P.char ':'
       ft <- parseTerm
       return (fn, ft)
-    P.spaces
+    parseTrivia
     P.char '}'
-    P.spaces
+    parseTrivia
     P.char ':'
     rt <- parseTerm
     return $ Ctr nm fs rt
-  P.spaces
+  parseTrivia
   P.char '}'
   return $ Dat scp cts
 
 parseCon = withSrc $ do
   P.char '#'
   nam <- parseName
-  P.spaces
+  parseTrivia
   P.char '{'
   arg <- P.many $ P.try $ parseTerm
-  P.spaces
+  parseTrivia
   P.char '}'
   return $ Con nam arg
 
 parseMat = withSrc $ do
   P.try $ P.string "λ{"
   cse <- P.many $ P.try $ do
-    P.spaces
+    parseTrivia
     P.char '#'
     cnam <- parseName
-    P.spaces
+    parseTrivia
     P.char ':'
     cbod <- parseTerm
     return (cnam, cbod)
-  P.spaces
+  parseTrivia
   P.char '}'
   return $ Mat cse
 
@@ -170,7 +186,7 @@ parseRef = withSrc $ do
 parseUse = withSrc $ do
   P.try (P.string "use ")
   nam <- parseName
-  P.spaces
+  parseTrivia
   P.char '='
   val <- parseTerm
   bod <- parseTerm
@@ -179,7 +195,7 @@ parseUse = withSrc $ do
 parseLet = withSrc $ do
   P.try (P.string "let ")
   nam <- parseName
-  P.spaces
+  parseTrivia
   P.char '='
   val <- parseTerm
   bod <- parseTerm
@@ -202,18 +218,18 @@ parseOp2 = withSrc $ do
 parseSwi = withSrc $ do
   P.try (P.string "switch ")
   nam <- parseName
-  P.spaces
+  parseTrivia
   P.char '='
   x <- parseTerm
-  P.spaces
+  parseTrivia
   P.char '{'
-  P.spaces
+  parseTrivia
   P.string "0:"
   z <- parseTerm
-  P.spaces
+  parseTrivia
   P.string "_:"
   s <- parseTerm
-  P.spaces
+  parseTrivia
   P.char '}'
   P.char ':'
   p <- parseTerm
@@ -242,7 +258,7 @@ parseMet = withSrc $ do
 
 parseName :: Parser String
 parseName = do
-  P.spaces
+  parseTrivia
   head <- P.letter
   tail <- P.many (P.alphaNum <|> P.char '/' <|> P.char '.' <|> P.char '_' <|> P.char '-')
   return (head : tail)
@@ -274,15 +290,15 @@ parseBook = do
 parseDef :: Parser (String, Term)
 parseDef = do
   name <- parseName
-  P.spaces
+  parseTrivia
   typ <- P.optionMaybe $ do
     P.char ':'
     t <- parseTerm
-    P.spaces
+    parseTrivia
     return t
   P.char '='
   val <- parseTerm
-  P.spaces
+  parseTrivia
   case typ of
     Nothing -> return (name, val)
     Just t  -> return (name, bind (Ann False val t) [])
@@ -292,3 +308,4 @@ doParseBook filename input =
   case P.runParser parseBook filename filename input of
     Left err   -> error $ "Parse error: " ++ show err
     Right book -> book
+

@@ -219,12 +219,8 @@ bind (Swi nam x z s p) ctx =
   Swi nam x' z' s' p'
 bind (Txt txt) ctx = Txt txt
 bind (Nat val) ctx = Nat val
-bind (Hol nam ctxs) ctx =
-  let ctxs' = map (\t -> bind t ctx) ctxs in
-  Hol nam ctxs'
-bind (Met uid spn) ctx =
-  let spn' = map (\t -> bind t ctx) spn in
-  Met uid spn'
+bind (Hol nam ctxs) ctx = Hol nam (map snd ctx)
+bind (Met uid spn) ctx = Met uid (map snd ctx)
 bind (Var nam idx) ctx =
   case lookup nam ctx of
     Just x  -> x

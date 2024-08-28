@@ -125,28 +125,13 @@ operShow XOR = "^"
 operShow LSH = "<<"
 operShow RSH = ">>"
 
--- contextShow :: Book -> Fill -> [Term] -> Int -> String
--- contextShow book fill []     dep = ""
--- contextShow book fill (x:xs) dep = concat [" " , contextShowAnn book fill x dep , contextShow book fill xs dep]
-
--- contextShowAnn :: Book -> Fill -> Term -> Int -> String
--- contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShower True (normal book fill 0 val dep) dep , ": " , termShower True (normal book fill 0 typ dep) dep , "}"]
--- contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
-
--- TODO: this should show the context with one var per line, like:
--- - a : A
--- - b : B
--- - c : C
--- ... etc ...
--- fix it to show it that way:
-
 contextShow :: Book -> Fill -> [Term] -> Int -> String
-contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) ctx
+contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) (reverse ctx)
 
 contextShowAnn :: Book -> Fill -> Term -> Int -> String
-contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
+contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True val dep, " : ", termShower True typ dep]
 contextShowAnn book fill (Src _ val)       dep = contextShowAnn book fill val dep
-contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
+contextShowAnn book fill term              dep = termShower True term dep
 
 infoShow :: Book -> Fill -> Info -> IO String
 infoShow book fill info = case info of

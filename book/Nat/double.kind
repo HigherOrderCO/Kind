@@ -1,7 +1,9 @@
 Nat/double
+
 : ∀(n: Nat)
   Nat
+
 = λ{
   #zero: #zero{}
-  #succ: λpred #succ{#succ{(Nat/double pred)}}
+  #succ: λn.pred #succ{#succ{(Nat/double n.pred)}}
 }

@@ -8,7 +8,6 @@ Nat : * = #[]{
   #succ{ pred: Nat } : Nat
 }
 
-
 IsTrue : ∀(b: Bool) * = λb #[b]{
   #indeed{} : (IsTrue #true{})
 }
@@ -25,7 +24,7 @@ rewrite
   ∀(P: ∀(x: A) *)
   ∀(x: (P a))
   (P b)
-= λT λa λb ?a[T,a,b]
+= λT λa λb ?a
 
 foo
 : U48
