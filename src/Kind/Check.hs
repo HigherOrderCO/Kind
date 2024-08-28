@@ -23,7 +23,7 @@ import Debug.Trace
 -- ### Inference
 
 infer :: Term -> Int -> Env Term
-infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
+infer term dep = {-trace ("infer: " ++ termShower True term dep) $-} go term dep where
   -- inp : Set
   -- (bod {nam: inp}) : Set
   -- ----------------------- function
@@ -202,7 +202,7 @@ infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
     infer val dep
 
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
-check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++ termShow typ dep) $-} go src val typ dep where
+check src val typ dep = {-trace ("check: " ++ termShower True val dep ++ "\n    :: " ++ termShower True typ dep) $-} go src val typ dep where
   -- (bod {typ_nam: typ_inp}) : (typ_bod {nam: typ_inp})
   -- --------------------------------------------------- lambda
   -- (λnam bod) : (∀(typ_nam: typ_inp) typ_bod)
@@ -248,11 +248,45 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
           Nothing -> do
             envLog (Error Nothing (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
-      _ -> {-trace ("OXI " ++ termShow (reduce book fill 2 typx) dep) $-} do
+      _ -> {-trace ("OXI " ++ termShower True (reduce book fill 2 typx) dep) $-} do
         infer (Con nam arg) dep
         return ()
 
   -- TODO: comment match checker
+  -- go src (Mat cse) typx dep = do
+    -- book <- envGetBook
+    -- fill <- envGetFill
+    -- case reduce book fill 2 typx of
+      -- (All typ_nam typ_inp typ_bod) -> do
+        -- case reduce book fill 2 typ_inp of
+          -- (Dat adt_scp adt_cts) -> do
+            -- let adt_cts_map = M.fromList (map (\ (Ctr cnm cfs crt) -> (cnm, (cfs, crt))) adt_cts)
+            -- forM_ cse $ \ (cnm, cbod) -> do
+              -- case M.lookup cnm adt_cts_map of
+                -- Just (cfs,crt) -> do
+                  -- -- TODO: for debugging purposes, print ALL definitions inside book, and their terms
+                  -- forM_ (M.toList book) $ \(k, v) -> do
+                    -- trace ("Definition: " ++ k ++ " = " ++ termShower True v dep) $ return ()
+                  -- let ann = Ann False (Con cnm (map (\ (fn, ft) -> Var fn dep) cfs)) typ_inp
+                  -- let bty = foldr (\(fn, ft) acc -> All fn ft (\x -> acc)) (typ_bod ann) cfs
+                  -- let ext = \ (Dat as _) (Dat bs _) -> zipWith (\ (Var _ i) v -> (i,v)) as bs
+                  -- let sub = ext (reduce book fill 2 typ_inp) (reduce book fill 2 crt)
+                  -- let rty = foldl' (\ ty (i,t) -> subst i t ty) bty sub
+                  -- check Nothing cbod rty dep
+                -- Nothing -> do
+                  -- envLog (Error Nothing (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
+                  -- envFail
+          -- _ -> do
+            -- infer (Mat cse) dep
+            -- return ()
+      -- _ -> do
+        -- infer (Mat cse) dep
+        -- return ()
+  -- TODO: refactor the Mat case above so that 'ext' is a separate function.
+  -- add a default case for when it isn't the case that both terms are Dat. in that case, debug-trace both terms, and return an error.
+  -- also move the function inside zipWith out, add a default case to it. debug-trace when the first isn't var, and default to (0,v).
+  -- remember: move these functions to a SEPARATE place using a 'where' block
+  
   go src (Mat cse) typx dep = do
     book <- envGetBook
     fill <- envGetFill
@@ -266,7 +300,6 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
                 Just (cfs,crt) -> do
                   let ann = Ann False (Con cnm (map (\ (fn, ft) -> Var fn dep) cfs)) typ_inp
                   let bty = foldr (\(fn, ft) acc -> All fn ft (\x -> acc)) (typ_bod ann) cfs
-                  let ext = \ (Dat as _) (Dat bs _) -> zipWith (\ (Var _ i) v -> (i,v)) as bs
                   let sub = ext (reduce book fill 2 typ_inp) (reduce book fill 2 crt)
                   let rty = foldl' (\ ty (i,t) -> subst i t ty) bty sub
                   check Nothing cbod rty dep
@@ -279,6 +312,17 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
       _ -> do
         infer (Mat cse) dep
         return ()
+    where
+      ext :: Term -> Term -> [(Int, Term)]
+      ext (Dat as _) (Dat bs _) = zipWith extHelper as bs
+      ext a          b          = trace ("Unexpected terms in ext: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
+
+      extHelper :: Term -> Term -> (Int, Term)
+      extHelper (Var _ i) v = (i, v)
+      extHelper (Src _ i) v = extHelper i v
+      extHelper a         v = trace ("Unexpected first term in extHelper: " ++ termShower True a dep) (0, v)
+
+
 
   -- val : typ
   -- (bod {nam: typ}) : T
@@ -332,7 +376,7 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
     cmp src term typx infer dep
 
   -- Checks types equality and reports
-  cmp src term expected detected dep = {-trace ("cmp " ++ termShow expected dep ++ " " ++ termShow detected dep) $-} do
+  cmp src term expected detected dep = {-trace ("cmp " ++ termShower True expected dep ++ " " ++ termShower True detected dep) $-} do
     equal <- equal expected detected dep
     if equal then do
       susp <- envTakeSusp
@@ -344,15 +388,14 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
       envFail
 
 doCheck :: Term -> Env ()
-doCheck (Ref nam) = do
+doCheck (Ann _ val typ) = check Nothing val typ 0 >> return ()
+doCheck (Src _ val)     = doCheck val
+doCheck (Ref nam)       = doCheckRef nam
+doCheck term            = infer term 0 >> return ()
+
+doCheckRef :: String -> Env ()
+doCheckRef nam = do
   book <- envGetBook
   case M.lookup nam book of
-    Just val -> case val of
-      Ann chk val typ -> check Nothing val typ 0 >> return ()
-      Src src val     -> doCheck val
-      Ref nm2         -> doCheck (Ref nm2)
-      tm              -> infer val 0 >> return ()
-    Nothing -> do
-      envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) 0)
-      envFail
-doCheck val = infer val 0 >> return ()
+    Just val -> doCheck val
+    Nothing  -> envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) 0) >> envFail

@@ -1,15 +1,3 @@
--- Rust info stringifier (for reference):
-
--- //./../../../kind2/src/info/mod.rs//
-
--- Rust highlight_error (for reference):
-
--- //./../../tmp_highlight.rs//
-
--- Haskell Types (for reference):
-
--- //./Type.hs//
-
 module Kind.Show where
 
 import Prelude hiding (EQ, LT, GT)
@@ -26,84 +14,97 @@ import qualified Data.IntMap.Strict as IM
 
 import System.Console.ANSI
 
-
 -- Stringification
 -- ---------------
 
-termShow :: Term -> Int -> String
-termShow (All nam inp bod) dep =
-  let nam' = nam
-      inp' = termShow inp dep
-      bod' = termShow (bod (Var nam dep)) (dep + 1)
-  in concat ["∀(" , nam' , ": " , inp' , ") " , bod']
-termShow (Lam nam bod) dep =
-  let nam' = nam
-      bod' = termShow (bod (Var nam dep)) (dep + 1)
-  in concat ["λ" , nam' , " " , bod']
-termShow (App fun arg) dep =
-  let fun' = termShow fun dep
-      arg' = termShow arg dep
-  in concat ["(" , fun' , " " , arg' , ")"]
-termShow (Ann chk val typ) dep =
-  let val' = termShow val dep
-      typ' = termShow typ dep
-  in concat ["{" , val' , ": " , typ' , "}"]
-termShow (Slf nam typ bod) dep =
-  termShow typ dep
-termShow (Ins val) dep =
-  let val' = termShow val dep
-  in concat ["~" , val']
-termShow (Dat scp cts) dep =
-  let scp' = unwords (map (\x -> termShow x dep) scp)
-      cts' = unwords (map (\(Ctr nm fs rt) ->
-        "#" ++ nm ++ "{" ++
-        unwords (map (\(fn, ft) -> fn ++ ":" ++ termShow ft dep) fs) ++
-        "} : " ++ termShow rt dep) cts)
-  in concat ["#[", scp', "]{ ", cts', " }"]
-termShow (Con nam arg) dep =
-  let arg' = unwords (map (\x -> termShow x dep) arg)
-  in concat ["#", nam, "{", arg', "}"]
-termShow (Mat cse) dep =
-  let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShow cbod dep) cse)
-  in concat ["λ{ ", cse', " }"]
-termShow (Ref nam) dep = nam
-termShow (Let nam val bod) dep =
-  let nam' = nam
-      val' = termShow val dep
-      bod' = termShow (bod (Var nam dep)) (dep + 1)
-  in concat ["let " , nam' , " = " , val' , "; " , bod']
-termShow (Use nam val bod) dep =
-  let nam' = nam
-      val' = termShow val dep
-      bod' = termShow (bod (Var nam dep)) (dep + 1)
-  in concat ["use " , nam' , " = " , val' , "; " , bod']
-termShow Set dep = "*"
-termShow U48 dep = "U48"
-termShow (Num val) dep =
-  let val' = show val
-  in concat [val']
-termShow (Op2 opr fst snd) dep =
-  let opr' = operShow opr
-      fst' = termShow fst dep
-      snd' = termShow snd dep
-  in concat ["(" , opr' , " " , fst' , " " , snd' , ")"]
-termShow (Swi nam x z s p) dep =
-  let nam' = nam
-      x'   = termShow x dep
-      z'   = termShow z dep
-      s'   = termShow (s (Var (nam ++ "-1") dep)) (dep + 1)
-      p'   = termShow (p (Var nam dep)) dep
-  in concat ["switch " , nam' , " = " , x' , " { 0: " , z' , " _: " , s' , " }: " , p']
-termShow (Txt txt) dep = concat ["\"" , txt , "\""]
-termShow (Nat val) dep = show val
-termShow (Hol nam ctx) dep = concat ["?" , nam]
-termShow (Met uid spn) dep = concat ["(_", strSpn (reverse spn) dep, ")"]
-termShow (Var nam idx) dep = nam
-termShow (Src src val) dep = termShow val dep
+termShower :: Bool -> Term -> Int -> String
+termShower small term dep = case term of
+  All nam inp bod ->
+    let nam' = nam
+        inp' = termShower small inp dep
+        bod' = termShower small (bod (Var nam dep)) (dep + 1)
+    in concat ["∀(" , nam' , ": " , inp' , ") " , bod']
+  Lam nam bod ->
+    let nam' = nam
+        bod' = termShower small (bod (Var nam dep)) (dep + 1)
+    in concat ["λ" , nam' , " " , bod']
+  App fun arg ->
+    let (fun', args) = unwrapApp fun [arg]
+        fun'' = termShower small fun' dep
+        args' = unwords (map (\x -> termShower small x dep) args)
+    in concat ["(" , fun'' , " " , args' , ")"]
+  Ann chk val typ ->
+    if small
+      then termShower small val dep
+      else let val' = termShower small val dep
+               typ' = termShower small typ dep
+           in concat ["{" , val' , ": " , typ' , "}"]
+  Slf nam typ bod ->
+    termShower small typ dep
+  Ins val ->
+    let val' = termShower small val dep
+    in concat ["~" , val']
+  Dat scp cts ->
+    let scp' = unwords (map (\x -> termShower small x dep) scp)
+        cts' = unwords (map (\(Ctr nm fs rt) ->
+          "#" ++ nm ++ "{" ++
+          unwords (map (\(fn, ft) -> fn ++ ":" ++ termShower small ft dep) fs) ++
+          "} : " ++ termShower small rt dep) cts)
+    in concat ["#[", scp', "]{ ", cts', " }"]
+  Con nam arg ->
+    let arg' = unwords (map (\x -> termShower small x dep) arg)
+    in concat ["#", nam, "{", arg', "}"]
+  Mat cse ->
+    let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShower small cbod dep) cse)
+    in concat ["λ{ ", cse', " }"]
+  Ref nam -> nam
+  Let nam val bod ->
+    let nam' = nam
+        val' = termShower small val dep
+        bod' = termShower small (bod (Var nam dep)) (dep + 1)
+    in concat ["let " , nam' , " = " , val' , "; " , bod']
+  Use nam val bod ->
+    let nam' = nam
+        val' = termShower small val dep
+        bod' = termShower small (bod (Var nam dep)) (dep + 1)
+    in concat ["use " , nam' , " = " , val' , "; " , bod']
+  Set -> "*"
+  U48 -> "U48"
+  Num val ->
+    let val' = show val
+    in concat [val']
+  Op2 opr fst snd ->
+    let opr' = operShow opr
+        fst' = termShower small fst dep
+        snd' = termShower small snd dep
+    in concat ["(" , opr' , " " , fst' , " " , snd' , ")"]
+  Swi nam x z s p ->
+    let nam' = nam
+        x'   = termShower small x dep
+        z'   = termShower small z dep
+        s'   = termShower small (s (Var (nam ++ "-1") dep)) (dep + 1)
+        p'   = termShower small (p (Var nam dep)) dep
+    in concat ["switch " , nam' , " = " , x' , " { 0: " , z' , " _: " , s' , " }: " , p']
+  Txt txt -> concat ["\"" , txt , "\""]
+  Nat val -> show val
+  Hol nam ctx -> concat ["?" , nam]
+  Met uid spn -> concat ["(_", strSpn (reverse spn) dep, ")"]
+  Var nam idx -> nam
+  Src src val ->
+    if small
+      then termShower small val dep
+      else concat ["!", termShower small val dep]
+
+unwrapApp :: Term -> [Term] -> (Term, [Term])
+unwrapApp (App fun arg) args = unwrapApp fun (arg:args)
+unwrapApp term          args = (term, args)
+
+termShow :: Term -> String
+termShow term = termShower True term 0
 
 strSpn :: [Term] -> Int -> String
 strSpn []       dep = ""
-strSpn (x : xs) dep = concat [" ", termShow x dep, strSpn xs dep]
+strSpn (x : xs) dep = concat [" ", termShower True x dep, strSpn xs dep]
 
 operShow :: Oper -> String
 operShow ADD = "+"
@@ -128,20 +129,19 @@ contextShow book fill []     dep = ""
 contextShow book fill (x:xs) dep = concat [" " , contextShowAnn book fill x dep , contextShow book fill xs dep]
 
 contextShowAnn :: Book -> Fill -> Term -> Int -> String
-contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShow (normal book fill 0 val dep) dep , ": " , termShow (normal book fill 0 typ dep) dep , "}"]
-contextShowAnn book fill term              dep = termShow (normal book fill 0 term dep) dep
-
+contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShower True (normal book fill 0 val dep) dep , ": " , termShower True (normal book fill 0 typ dep) dep , "}"]
+contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
 
 infoShow :: Book -> Fill -> Info -> IO String
 infoShow book fill info = case info of
   Found nam typ ctx dep ->
-    let msg = concat ["?", nam, " : ", termShow typ dep]
+    let msg = concat ["?", nam, " : ", termShower True typ dep]
         ctx_str = contextShow book fill ctx dep
     in return $ concat ["\x1b[1mGOAL\x1b[0m ", msg, ctx_str]
   Error src exp det bad dep -> do
-    let exp'  = concat ["- expected: \x1b[32m", termShow exp dep, "\x1b[0m"]
-        det'  = concat ["- detected: \x1b[31m", termShow det dep, "\x1b[0m"]
-        bad'  = concat ["- bad_term: \x1b[2m", termShow bad dep, "\x1b[0m"]
+    let exp'  = concat ["- expected: \x1b[32m", termShower True exp dep, "\x1b[0m"]
+        det'  = concat ["- detected: \x1b[31m", termShower True det dep, "\x1b[0m"]
+        bad'  = concat ["- bad_term: \x1b[2m", termShower True bad dep, "\x1b[0m"]
     (file, text) <- case src of
       Just (Cod (Loc fileName startLine startCol) (Loc _ endLine endCol)) -> do
         canonicalPath <- resolveToAbsolutePath fileName
@@ -152,11 +152,11 @@ infoShow book fill info = case info of
     let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
     return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
   Solve nam val dep ->
-    return $ concat ["SOLVE: _", show nam, " = ", termShow val dep]
+    return $ concat ["SOLVE: _", show nam, " = ", termShower True val dep]
   Vague nam ->
     return $ concat ["VAGUE: _", nam]
   Print val dep ->
-    return $ termShow val dep
+    return $ termShower True val dep
 
 readSourceFile :: FilePath -> IO String
 readSourceFile file = do
@@ -171,7 +171,6 @@ resolveToAbsolutePath :: FilePath -> IO FilePath
 resolveToAbsolutePath relativePath = do
     absPath <- canonicalizePath relativePath
     return absPath
-
 
 highlightError :: (Int, Int) -> (Int, Int) -> String -> String
 highlightError (startLine, startCol) (endLine, endCol) content =
@@ -239,4 +238,5 @@ underline text = "\x1b[4m" ++ text ++ "\x1b[24m"
 -- | Simple bold function using ANSI escape codes
 bold :: String -> String
 bold text = "\x1b[1m" ++ text ++ "\x1b[22m"
+
 
