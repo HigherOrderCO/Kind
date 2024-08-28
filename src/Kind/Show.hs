@@ -69,7 +69,7 @@ termShower small term dep = case term of
         bod' = termShower small (bod (Var nam dep)) (dep + 1)
     in concat ["use " , nam' , " = " , val' , "; " , bod']
   Set -> "*"
-  U48 -> "U48"
+  U32 -> "U32"
   Num val ->
     let val' = show val
     in concat [val']

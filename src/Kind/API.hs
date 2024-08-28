@@ -1,3 +1,11 @@
+-- //./Type.hs//
+-- //./Compile.hs//
+
+
+
+
+
+
 module Kind.API where
 
 import Control.Monad (forM_, foldM)
@@ -8,6 +16,7 @@ import Kind.Parse
 import Kind.Reduce
 import Kind.Show
 import Kind.Type
+import Kind.Compile
 import System.Directory (getCurrentDirectory, doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
@@ -81,6 +90,12 @@ apiShow book name = case M.lookup name book of
   Just term -> putStrLn $ termShow term
   Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
 
+-- Compiles the whole book to JS
+apiToJS :: Book -> String -> IO ()
+apiToJS book name = do
+  let jsCode = compileJS book
+  putStrLn jsCode
+
 -- Prints logs from the type-checker
 apiPrintLogs :: State -> IO ()
 apiPrintLogs (State book fill susp logs) = 
@@ -138,6 +153,7 @@ main = do
         ["check", input] -> runCommand basePath apiCheck input
         ["run", input]   -> runCommand basePath apiNormal input
         ["show", input]  -> runCommand basePath apiShow input
+        ["to-js", input] -> runCommand basePath apiToJS input
         ["deps", input]  -> runDeps basePath input
         ["help"]         -> printHelp
         []               -> printHelp
@@ -162,5 +178,6 @@ printHelp = do
   putStrLn "  kind check <name|path> # Type-checks the specified definition"
   putStrLn "  kind run   <name|path> # Normalizes the specified definition"
   putStrLn "  kind show  <name|path> # Stringifies the specified definition"
+  putStrLn "  kind to-js <name|path> # Compiles the specified definition to JavaScript"
   putStrLn "  kind deps  <name|path> # Shows dependencies of the specified definition"
   putStrLn "  kind help              # Shows this help message"

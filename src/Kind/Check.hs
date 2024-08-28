@@ -108,16 +108,16 @@ infer term dep = {-trace ("infer: " ++ termShower True term dep) $-} go term dep
     return Set
 
   -- ...
-  -- --------- U48-type
-  -- U48 : Set
-  go U48 dep = do
+  -- --------- U32-type
+  -- U32 : Set
+  go U32 dep = do
     return Set
 
   -- ...
-  -- ----------- U48-value
-  -- <num> : U48
+  -- ----------- U32-value
+  -- <num> : U32
   go (Num num) dep = do
-    return U48
+    return U32
 
   -- ...
   -- -------------- String-literal
@@ -131,26 +131,26 @@ infer term dep = {-trace ("infer: " ++ termShower True term dep) $-} go term dep
   go (Nat val) dep = do
     return (Ref "Nat")
 
-  -- fst : U48
-  -- snd : U48
-  -- ----------------- U48-operator
-  -- (+ fst snd) : U48
+  -- fst : U32
+  -- snd : U32
+  -- ----------------- U32-operator
+  -- (+ fst snd) : U32
   go (Op2 opr fst snd) dep = do
-    envSusp (Check Nothing fst U48 dep)
-    envSusp (Check Nothing snd U48 dep)
-    return U48
+    envSusp (Check Nothing fst U32 dep)
+    envSusp (Check Nothing snd U32 dep)
+    return U32
 
-  -- x : U48
-  -- p : U48 -> Set
+  -- x : U32
+  -- p : U32 -> Set
   -- z : (p 0)
-  -- s : (n: U48) -> (p (+ 1 n))
-  -- ------------------------------------- U48-elim
+  -- s : (n: U32) -> (p (+ 1 n))
+  -- ------------------------------------- U32-elim
   -- (switch x { 0: z ; _: s }: p) : (p x)
   go (Swi nam x z s p) dep = do
-    envSusp (Check Nothing x U48 dep)
-    envSusp (Check Nothing (p (Ann False (Var nam dep) U48)) Set dep)
+    envSusp (Check Nothing x U32 dep)
+    envSusp (Check Nothing (p (Ann False (Var nam dep) U32)) Set dep)
     envSusp (Check Nothing z (p (Num 0)) dep)
-    envSusp (Check Nothing (s (Ann False (Var (nam ++ "-1") dep) U48)) (p (Op2 ADD (Num 1) (Var (nam ++ "-1") dep))) (dep + 1))
+    envSusp (Check Nothing (s (Ann False (Var (nam ++ "-1") dep) U32)) (p (Op2 ADD (Num 1) (Var (nam ++ "-1") dep))) (dep + 1))
     return (p x)
 
   -- val : typ

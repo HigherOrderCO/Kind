@@ -182,7 +182,7 @@ parseMat = withSrc $ do
 parseRef = withSrc $ do
   name <- parseName
   return $ case name of
-    "U48" -> U48
+    "U32" -> U32
     _     -> Ref name
 
 parseUse = withSrc $ do

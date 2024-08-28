@@ -1,0 +1,4 @@
+Nat : * = #[]{
+  #zero{} : Nat
+  #succ{ pred: Nat } : Nat
+}

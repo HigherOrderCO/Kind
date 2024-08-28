@@ -85,7 +85,7 @@ identical a b dep = go a b dep where
     return True
   go a (Hol bNam bCtx) dep =
     return True
-  go U48 U48 dep =
+  go U32 U32 dep =
     return True
   go (Num aVal) (Num bVal) dep =
     return (aVal == bVal)
