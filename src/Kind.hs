@@ -7,7 +7,6 @@ module Kind (
   module Kind.Reduce,
   module Kind.Show,
   module Kind.Type,
-  module Kind.Util,
 ) where
 
 import Kind.API
@@ -19,4 +18,3 @@ import Kind.Parse
 import Kind.Reduce
 import Kind.Show
 import Kind.Type
-import Kind.Util

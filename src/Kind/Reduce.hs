@@ -149,3 +149,119 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_val = normal book fill lv val dep in
     Src src nf_val
   go (Met uid spn) dep = Met uid spn -- TODO: normalize spine
+
+-- Binding
+-- -------
+
+-- Binds quoted variables to bound HOAS variables
+bind :: Term -> [(String,Term)] -> Term
+bind (All nam inp bod) ctx =
+  let inp' = bind inp ctx in
+  let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
+  All nam inp' bod'
+bind (Lam nam bod) ctx =
+  let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
+  Lam nam bod'
+bind (App fun arg) ctx =
+  let fun' = bind fun ctx in
+  let arg' = bind arg ctx in
+  App fun' arg'
+bind (Ann chk val typ) ctx =
+  let val' = bind val ctx in
+  let typ' = bind typ ctx in
+  Ann chk val' typ'
+bind (Slf nam typ bod) ctx =
+  let typ' = bind typ ctx in
+  let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
+  Slf nam typ' bod'
+bind (Ins val) ctx =
+  let val' = bind val ctx in
+  Ins val'
+bind (Dat scp cts) ctx =
+  let scp' = map (\x -> bind x ctx) scp in
+  let cts' = map bindCtr cts in
+  Dat scp' cts'
+  where
+    bindCtr (Ctr nm fs rt) =
+      let fs' = map (\(n,t) -> (n, bind t ctx)) fs in
+      let rt' = bind rt ctx in
+      Ctr nm fs' rt'
+bind (Con nam arg) ctx =
+  let arg' = map (\x -> bind x ctx) arg in
+  Con nam arg'
+bind (Mat cse) ctx =
+  let cse' = map (\(cn,cb) -> (cn, bind cb ctx)) cse in
+  Mat cse'
+bind (Ref nam) ctx =
+  case lookup nam ctx of
+    Just x  -> x
+    Nothing -> Ref nam
+bind (Let nam val bod) ctx =
+  let val' = bind val ctx in
+  let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
+  Let nam val' bod'
+bind (Use nam val bod) ctx =
+  let val' = bind val ctx in
+  let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
+  Use nam val' bod'
+bind Set ctx = Set
+bind U32 ctx = U32
+bind (Num val) ctx = Num val
+bind (Op2 opr fst snd) ctx =
+  let fst' = bind fst ctx in
+  let snd' = bind snd ctx in
+  Op2 opr fst' snd'
+bind (Swi nam x z s p) ctx =
+  let x' = bind x ctx in
+  let z' = bind z ctx in
+  let s' = \k -> bind (s (Var (nam ++ "-1") 0)) ((nam ++ "-1", k) : ctx) in
+  let p' = \k -> bind (p (Var nam 0)) ((nam, k) : ctx) in
+  Swi nam x' z' s' p'
+bind (Txt txt) ctx = Txt txt
+bind (Nat val) ctx = Nat val
+bind (Hol nam ctxs) ctx =
+  let ctxs' = map (\t -> bind t ctx) ctxs in
+  Hol nam ctxs'
+bind (Met uid spn) ctx =
+  let spn' = map (\t -> bind t ctx) spn in
+  Met uid spn'
+bind (Var nam idx) ctx =
+  case lookup nam ctx of
+    Just x  -> x
+    Nothing -> Var nam idx
+bind (Src src val) ctx =
+  let val' = bind val ctx in
+  Src src val'
+
+-- Substitution
+-- ------------
+
+-- Substitutes a Bruijn level variable by a `neo` value in `term`.
+subst :: Int -> Term -> Term -> Term
+subst lvl neo term = go term where
+  go (All nam inp bod) = All nam (go inp) (\x -> go (bod x))
+  go (Lam nam bod)     = Lam nam (\x -> go (bod x))
+  go (App fun arg)     = App (go fun) (go arg)
+  go (Ann chk val typ) = Ann chk (go val) (go typ)
+  go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
+  go (Ins val)         = Ins (go val)
+  go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
+  go (Con nam arg)     = Con nam (map go arg)
+  go (Mat cse)         = Mat (map goCse cse)
+  go (Ref nam)         = Ref nam
+  go (Let nam val bod) = Let nam (go val) (\x -> go (bod x))
+  go (Use nam val bod) = Use nam (go val) (\x -> go (bod x))
+  go (Met uid spn)     = Met uid (map go spn)
+  go (Hol nam ctx)     = Hol nam (map go ctx)
+  go Set               = Set
+  go U32               = U32
+  go (Num n)           = Num n
+  go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
+  go (Swi nam x z s p) = Swi nam (go x) (go z) (\k -> go (s k)) (\k -> go (p k))
+  go (Txt txt)         = Txt txt
+  go (Nat val)         = Nat val
+  go (Var nam idx)     = if lvl == idx then neo else Var nam idx
+  go (Src src val)     = Src src (go val)
+  goCtr (Ctr nm fs rt) = Ctr nm (map goFld fs) (go rt)
+  goFld (fn, ft)       = (fn, go ft)
+  goCse (cnam, cbod)   = (cnam, go cbod)

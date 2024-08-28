@@ -2,10 +2,9 @@ module Kind.Equal where
 
 import Control.Monad (zipWithM)
 
+import Kind.Type
 import Kind.Env
 import Kind.Reduce
-import Kind.Type
-import Kind.Util
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -242,3 +241,66 @@ solve book fill uid []        b = b
 solve book fill uid (x : spn) b = case reduce book fill 0 x of
   (Var nam idx) -> Lam nam $ \x -> subst idx x (solve book fill uid spn b)
   otherwise     -> error "unreachable"
+
+-- Checks if a metavar uid occurs recursively inside a term
+occur :: Book -> Fill -> Int -> Term -> Int -> Bool
+occur book fill uid term dep = go term dep where
+  go (All nam inp bod) dep =
+    let o_inp = go inp dep
+        o_bod = go (bod (Var nam dep)) (dep + 1)
+    in o_inp || o_bod
+  go (Lam nam bod) dep =
+    let o_bod = go (bod (Var nam dep)) (dep + 1)
+    in  o_bod
+  go (App fun arg) dep =
+    let o_fun = go fun dep
+        o_arg = go arg dep
+    in o_fun || o_arg
+  go (Ann chk val typ) dep =
+    let o_val = go val dep
+        o_typ = go typ dep
+    in o_val || o_typ
+  go (Slf nam typ bod) dep =
+    let o_typ = go typ dep
+        o_bod = go (bod (Var nam dep)) (dep + 1)
+    in o_typ || o_bod
+  go (Ins val) dep =
+    let o_val = go val dep
+    in o_val
+  go (Dat scp cts) dep =
+    let o_scp = any (\x -> go x dep) scp
+        o_cts = any (\ (Ctr _ fs rt) -> any (\ (_, ty) -> go ty dep) fs || go rt dep) cts
+    in o_scp || o_cts
+  go (Con nam arg) dep =
+    any (\x -> go x dep) arg
+  go (Mat cse) dep =
+    any (\ (_, cbod) -> go cbod dep) cse
+  go (Let nam val bod) dep =
+    let o_val = go val dep
+        o_bod = go (bod (Var nam dep)) (dep + 1)
+    in o_val || o_bod
+  go (Use nam val bod) dep =
+    let o_val = go val dep
+        o_bod = go (bod (Var nam dep)) (dep + 1)
+    in o_val || o_bod
+  go (Hol nam ctx) dep =
+    False
+  go (Op2 opr fst snd) dep =
+    let o_fst = go fst dep
+        o_snd = go snd dep
+    in o_fst || o_snd
+  go (Swi nam x z s p) dep =
+    let o_x = go x dep
+        o_z = go z dep
+        o_s = go (s (Var (nam ++ "-1") dep)) (dep + 1)
+        o_p = go (p (Var nam dep)) dep
+    in o_x || o_z || o_s || o_p
+  go (Src src val) dep =
+    let o_val = go val dep
+    in o_val
+  go (Met bUid bSpn) dep =
+    case reduce book fill 2 (Met bUid bSpn) of
+      Met bUid bSpn -> uid == bUid
+      term          -> go term dep
+  go _ dep =
+    False

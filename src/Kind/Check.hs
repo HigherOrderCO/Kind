@@ -1,11 +1,10 @@
 module Kind.Check where
 
-import Kind.Env
-import Kind.Equal
-import Kind.Reduce
-import Kind.Show
 import Kind.Type
-import Kind.Util
+import Kind.Env
+import Kind.Reduce
+import Kind.Equal
+import Kind.Show
 
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
@@ -253,6 +252,41 @@ check src val typ dep = {-trace ("check: " ++ termShower True val dep ++ "\n    
         infer (Con nam arg) dep
         return ()
 
+  -- TODO: comment match checker
+  -- go src (Mat cse) typx dep = do
+    -- book <- envGetBook
+    -- fill <- envGetFill
+    -- case reduce book fill 2 typx of
+      -- (All typ_nam typ_inp typ_bod) -> do
+        -- case reduce book fill 2 typ_inp of
+          -- (Dat adt_scp adt_cts) -> do
+            -- let adt_cts_map = M.fromList (map (\ (Ctr cnm cfs crt) -> (cnm, (cfs, crt))) adt_cts)
+            -- forM_ cse $ \ (cnm, cbod) -> do
+              -- case M.lookup cnm adt_cts_map of
+                -- Just (cfs,crt) -> do
+                  -- -- TODO: for debugging purposes, print ALL definitions inside book, and their terms
+                  -- forM_ (M.toList book) $ \(k, v) -> do
+                    -- trace ("Definition: " ++ k ++ " = " ++ termShower True v dep) $ return ()
+                  -- let ann = Ann False (Con cnm (map (\ (fn, ft) -> Var fn dep) cfs)) typ_inp
+                  -- let bty = foldr (\(fn, ft) acc -> All fn ft (\x -> acc)) (typ_bod ann) cfs
+                  -- let ext = \ (Dat as _) (Dat bs _) -> zipWith (\ (Var _ i) v -> (i,v)) as bs
+                  -- let sub = ext (reduce book fill 2 typ_inp) (reduce book fill 2 crt)
+                  -- let rty = foldl' (\ ty (i,t) -> subst i t ty) bty sub
+                  -- check Nothing cbod rty dep
+                -- Nothing -> do
+                  -- envLog (Error Nothing (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
+                  -- envFail
+          -- _ -> do
+            -- infer (Mat cse) dep
+            -- return ()
+      -- _ -> do
+        -- infer (Mat cse) dep
+        -- return ()
+  -- TODO: refactor the Mat case above so that 'ext' is a separate function.
+  -- add a default case for when it isn't the case that both terms are Dat. in that case, debug-trace both terms, and return an error.
+  -- also move the function inside zipWith out, add a default case to it. debug-trace when the first isn't var, and default to (0,v).
+  -- remember: move these functions to a SEPARATE place using a 'where' block
+  
   go src (Mat cse) typx dep = do
     book <- envGetBook
     fill <- envGetFill
@@ -287,6 +321,8 @@ check src val typ dep = {-trace ("check: " ++ termShower True val dep ++ "\n    
       extHelper (Var _ i) v = (i, v)
       extHelper (Src _ i) v = extHelper i v
       extHelper a         v = trace ("Unexpected first term in extHelper: " ++ termShower True a dep) (0, v)
+
+
 
   -- val : typ
   -- (bod {nam: typ}) : T

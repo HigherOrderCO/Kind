@@ -24,7 +24,6 @@ library
                     , Kind.Reduce
                     , Kind.Show
                     , Kind.Type
-                    , Kind.Util
     other-modules:    
     build-depends:    base ^>=4.20.0.0
                     , containers ==0.7
