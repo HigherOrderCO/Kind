@@ -1,0 +1,14 @@
+// Performs logical XOR (exclusive or) operation on two boolean values.
+// - a: The first boolean value.
+// - b: The second boolean value.
+// = True if 'a' and 'b' are different, false if they are the same.
+Bool/xor
+: ∀(a: Bool)
+  ∀(b: Bool)
+  Bool
+= λ{
+  #true: λb
+    (Bool/not b)
+  #false: λb
+    b
+}

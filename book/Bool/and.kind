@@ -1,0 +1,14 @@
+// Performs logical AND operation on two boolean values.
+// - a: The first boolean value.
+// - b: The second boolean value.
+// = True if both 'a' and 'b' are true, false otherwise.
+Bool/and
+: ∀(a: Bool)
+  ∀(b: Bool)
+  Bool
+= λ{
+  #true: λb
+    b
+  #false: λb
+    #false{}
+}

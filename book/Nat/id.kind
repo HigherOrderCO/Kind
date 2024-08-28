@@ -1,7 +1,12 @@
+// The identity function for natural numbers.
+// - n: The input natural number.
+// = The same natural number `n`.
 Nat/id
-: ∀(a: Nat)
+: ∀(n: Nat)
   Nat
 = λ{
-  #zero: #zero{}
-  #succ: λa.pred (Nat/id a.pred)
+  #zero:
+    #zero{}
+  #succ: λn.pred
+    #succ{(Nat/id n.pred)}
 }

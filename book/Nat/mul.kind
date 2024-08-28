@@ -7,7 +7,8 @@ Nat/mul
   ∀(b: Nat)
   Nat
 = λ{
-  #zero: λb #zero{}
+  #zero: λb
+    #zero{}
   #succ: λa.pred λb
     (Nat/add b (Nat/mul a.pred b))
 }

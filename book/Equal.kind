@@ -9,6 +9,6 @@ Equal
   ∀(a: A)
   ∀(b: A)
   *
-= λA λa λb #[]{
+= λA λa λb #[a b]{
   #refl{} : (Equal A a a)
 }

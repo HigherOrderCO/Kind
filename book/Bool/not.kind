@@ -1,0 +1,12 @@
+// Performs logical NOT operation on a boolean value.
+// - a: The boolean value to negate.
+// = True if 'a' is false, false if 'a' is true.
+Bool/not
+: ∀(a: Bool)
+  Bool
+= λ{
+  #true:
+    #false{}
+  #false:
+    #true{}
+}

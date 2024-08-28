@@ -1,13 +1,19 @@
+// Rewrites a proof using an equality.
+// - T: The type of the values being compared.
+// - a: The first value.
+// - b: The second value.
+// - e: The proof of equality between `a` and `b`.
+// - P: A predicate that depends on a value of type T.
+// - x: A proof of (P a).
+// = A proof of (P b), obtained by rewriting `x` using the equality `e`.
 Equal/rewrite
-
 : ∀(T: *)
   ∀(a: T)
   ∀(b: T)
   ∀(e: (Equal T a b))
-  ∀(P: ∀(x: A) *)
+  ∀(P: ∀(x: T) *)
   ∀(x: (P a))
   (P b)
-  
 = λT λa λb λ{
   #refl: λP λx x
 }

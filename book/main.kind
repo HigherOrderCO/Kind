@@ -1,3 +1,5 @@
 main
 : Nat
-= (Nat/mul #succ{#succ{#succ{#zero{}}}} #succ{#succ{#zero{}}})
+= (Nat/mul
+  #succ{#succ{#succ{#zero{}}}}
+  #succ{#succ{#zero{}}})

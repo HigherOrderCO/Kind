@@ -1,10 +1,10 @@
+// Calculates the sum of all natural numbers from 0 to x (inclusive).
+// - x: The upper bound of the sum.
+// = The sum of all numbers from 0 to x.
 U32/sum
-
 : ∀(x: U32)
   U32
-
 = λ{
   0: 0
   _: λx.pred (+ x.pred (U32/sum x.pred))
 }
-

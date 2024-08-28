@@ -1,9 +1,12 @@
+// Doubles a natural number
+// - n: The natural number to double
+// = The result of multiplying `n` by 2
 Nat/double
-
 : ∀(n: Nat)
   Nat
-
 = λ{
-  #zero: #zero{}
-  #succ: λn.pred #succ{#succ{(Nat/double n.pred)}}
+  #zero:
+    #zero{}
+  #succ: λn.pred
+    #succ{#succ{(Nat/double n.pred)}}
 }
