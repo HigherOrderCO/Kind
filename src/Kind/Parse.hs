@@ -1,21 +1,3 @@
--- Files for context:
-
--- Kind-Lang parser in Rust:
-
--- //./../../../kind2/src/term/parse.rs//
--- //./../../../kind2/src/book/parse.rs//
-
--- Kind-Core types:
-
--- //./Type.hs//
-
--- ############################################################################
-
--- Now, file below is Kind-Core's parser, in Haskell. Note that:
--- The Kind-Lang parser (in Rust, above) has a high-level, user-friendly syntaxes.
--- The Kind-Core parser (in Haskell, below) has a low-level, raw, core syntax.
--- Our goal is to bring the high-level syntaxes to the Haskell version below.
-
 module Kind.Parse where
 
 import Prelude hiding (EQ, LT, GT)
@@ -182,7 +164,7 @@ parseMat = withSrc $ do
 parseRef = withSrc $ do
   name <- parseName
   return $ case name of
-    "U48" -> U48
+    "U32" -> U32
     _     -> Ref name
 
 parseUse = withSrc $ do

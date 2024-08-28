@@ -8,16 +8,6 @@ Nat : * = #[]{
   #succ{ pred: Nat } : Nat
 }
 
-Nat.match
-: ∀(P: ∀(x: Nat) *)
-  ∀(z: (P #zero{}))
-  ∀(s: ∀(n: Nat) (P #succ{ n }))
-  ∀(n: Nat)
-  (P n)
-= λP λz λs λ{
-  #zero: z
-  #succ: λp (s p)
-}
 
 IsTrue : ∀(b: Bool) * = λb #[b]{
   #indeed{} : (IsTrue #true{})
@@ -36,16 +26,11 @@ rewrite
   ∀(x: (P a))
   (P b)
 = λT λa λb λ{
-  #refl: λP λx x
+  #refl: λP λa a
 }
 
-Nat.add
-: ∀(a: Nat) ∀(b: Nat) Nat
-= λ{
-  #zero: λb b
-  #succ: λpred λb (Nat.add Nat.add #succ{ b })
-}
+foo
+: U48
+= 45
 
-MAIN = Nat.add
-
-//MAIN = (Nat.add #succ{#succ{#zero{}}} #succ{#zero{}})
+example = rewrite

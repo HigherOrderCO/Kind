@@ -1,19 +1,20 @@
 module Kind (
-  module Kind.Type,
-  module Kind.Env,
-  module Kind.Reduce,
-  module Kind.Equal,
+  module Kind.API,
   module Kind.Check,
-  module Kind.Show,
+  module Kind.Env,
+  module Kind.Equal,
   module Kind.Parse,
-  module Kind.API
+  module Kind.Reduce,
+  module Kind.Show,
+  module Kind.Type,
 ) where
 
-import Kind.Type
-import Kind.Env
-import Kind.Reduce
-import Kind.Equal
-import Kind.Check
-import Kind.Show
-import Kind.Parse
 import Kind.API
+import Kind.Check
+import Kind.Compile
+import Kind.Env
+import Kind.Equal
+import Kind.Parse
+import Kind.Reduce
+import Kind.Show
+import Kind.Type

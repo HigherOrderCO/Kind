@@ -23,7 +23,7 @@ import Debug.Trace
 -- ### Inference
 
 infer :: Term -> Int -> Env Term
-infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
+infer term dep = {-trace ("infer: " ++ termShower True term dep) $-} go term dep where
   -- inp : Set
   -- (bod {nam: inp}) : Set
   -- ----------------------- function
@@ -108,16 +108,16 @@ infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
     return Set
 
   -- ...
-  -- --------- U48-type
-  -- U48 : Set
-  go U48 dep = do
+  -- --------- U32-type
+  -- U32 : Set
+  go U32 dep = do
     return Set
 
   -- ...
-  -- ----------- U48-value
-  -- <num> : U48
+  -- ----------- U32-value
+  -- <num> : U32
   go (Num num) dep = do
-    return U48
+    return U32
 
   -- ...
   -- -------------- String-literal
@@ -131,26 +131,26 @@ infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
   go (Nat val) dep = do
     return (Ref "Nat")
 
-  -- fst : U48
-  -- snd : U48
-  -- ----------------- U48-operator
-  -- (+ fst snd) : U48
+  -- fst : U32
+  -- snd : U32
+  -- ----------------- U32-operator
+  -- (+ fst snd) : U32
   go (Op2 opr fst snd) dep = do
-    envSusp (Check Nothing fst U48 dep)
-    envSusp (Check Nothing snd U48 dep)
-    return U48
+    envSusp (Check Nothing fst U32 dep)
+    envSusp (Check Nothing snd U32 dep)
+    return U32
 
-  -- x : U48
-  -- p : U48 -> Set
+  -- x : U32
+  -- p : U32 -> Set
   -- z : (p 0)
-  -- s : (n: U48) -> (p (+ 1 n))
-  -- ------------------------------------- U48-elim
+  -- s : (n: U32) -> (p (+ 1 n))
+  -- ------------------------------------- U32-elim
   -- (switch x { 0: z ; _: s }: p) : (p x)
   go (Swi nam x z s p) dep = do
-    envSusp (Check Nothing x U48 dep)
-    envSusp (Check Nothing (p (Ann False (Var nam dep) U48)) Set dep)
+    envSusp (Check Nothing x U32 dep)
+    envSusp (Check Nothing (p (Ann False (Var nam dep) U32)) Set dep)
     envSusp (Check Nothing z (p (Num 0)) dep)
-    envSusp (Check Nothing (s (Ann False (Var (nam ++ "-1") dep) U48)) (p (Op2 ADD (Num 1) (Var (nam ++ "-1") dep))) (dep + 1))
+    envSusp (Check Nothing (s (Ann False (Var (nam ++ "-1") dep) U32)) (p (Op2 ADD (Num 1) (Var (nam ++ "-1") dep))) (dep + 1))
     return (p x)
 
   -- val : typ
@@ -202,7 +202,7 @@ infer term dep = {-trace ("infer: " ++ termShow term dep) $-} go term dep where
     infer val dep
 
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
-check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++ termShow typ dep) $-} go src val typ dep where
+check src val typ dep = {-trace ("check: " ++ termShower True val dep ++ "\n    :: " ++ termShower True typ dep) $-} go src val typ dep where
   -- (bod {typ_nam: typ_inp}) : (typ_bod {nam: typ_inp})
   -- --------------------------------------------------- lambda
   -- (λnam bod) : (∀(typ_nam: typ_inp) typ_bod)
@@ -248,11 +248,10 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
           Nothing -> do
             envLog (Error Nothing (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
-      _ -> {-trace ("OXI " ++ termShow (reduce book fill 2 typx) dep) $-} do
+      _ -> {-trace ("OXI " ++ termShower True (reduce book fill 2 typx) dep) $-} do
         infer (Con nam arg) dep
         return ()
 
-  -- TODO: comment match checker
   go src (Mat cse) typx dep = do
     book <- envGetBook
     fill <- envGetFill
@@ -266,7 +265,6 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
                 Just (cfs,crt) -> do
                   let ann = Ann False (Con cnm (map (\ (fn, ft) -> Var fn dep) cfs)) typ_inp
                   let bty = foldr (\(fn, ft) acc -> All fn ft (\x -> acc)) (typ_bod ann) cfs
-                  let ext = \ (Dat as _) (Dat bs _) -> zipWith (\ (Var _ i) v -> (i,v)) as bs
                   let sub = ext (reduce book fill 2 typ_inp) (reduce book fill 2 crt)
                   let rty = foldl' (\ ty (i,t) -> subst i t ty) bty sub
                   check Nothing cbod rty dep
@@ -279,6 +277,15 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
       _ -> do
         infer (Mat cse) dep
         return ()
+    where
+      ext :: Term -> Term -> [(Int, Term)]
+      ext (Dat as _) (Dat bs _) = zipWith extHelper as bs
+      ext a          b          = trace ("Unexpected terms in ext: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
+
+      extHelper :: Term -> Term -> (Int, Term)
+      extHelper (Var _ i) v = (i, v)
+      extHelper (Src _ i) v = extHelper i v
+      extHelper a         v = trace ("Unexpected first term in extHelper: " ++ termShower True a dep) (0, v)
 
   -- val : typ
   -- (bod {nam: typ}) : T
@@ -332,7 +339,7 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
     cmp src term typx infer dep
 
   -- Checks types equality and reports
-  cmp src term expected detected dep = {-trace ("cmp " ++ termShow expected dep ++ " " ++ termShow detected dep) $-} do
+  cmp src term expected detected dep = {-trace ("cmp " ++ termShower True expected dep ++ " " ++ termShower True detected dep) $-} do
     equal <- equal expected detected dep
     if equal then do
       susp <- envTakeSusp
@@ -344,15 +351,14 @@ check src val typ dep = {-trace ("check: " ++ termShow val dep ++ "\n    :: " ++
       envFail
 
 doCheck :: Term -> Env ()
-doCheck (Ref nam) = do
+doCheck (Ann _ val typ) = check Nothing val typ 0 >> return ()
+doCheck (Src _ val)     = doCheck val
+doCheck (Ref nam)       = doCheckRef nam
+doCheck term            = infer term 0 >> return ()
+
+doCheckRef :: String -> Env ()
+doCheckRef nam = do
   book <- envGetBook
   case M.lookup nam book of
-    Just val -> case val of
-      Ann chk val typ -> check Nothing val typ 0 >> return ()
-      Src src val     -> doCheck val
-      Ref nm2         -> doCheck (Ref nm2)
-      tm              -> infer val 0 >> return ()
-    Nothing -> do
-      envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) 0)
-      envFail
-doCheck val = infer val 0 >> return ()
+    Just val -> doCheck val
+    Nothing  -> envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) 0) >> envFail

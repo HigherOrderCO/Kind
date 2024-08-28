@@ -1,0 +1,3 @@
+main
+: Nat
+= (Nat/double #succ{#succ{#zero{}}})

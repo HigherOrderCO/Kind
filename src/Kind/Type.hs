@@ -44,16 +44,16 @@ data Term
   -- Type : Type
   | Set
 
-  -- U48 Type
-  | U48
+  -- U32 Type
+  | U32
 
-  -- U48 Value
+  -- U32 Value (FIXME: this is wrong, should be Word32)
   | Num Int
 
-  -- U48 Binary Operation
+  -- U32 Binary Operation
   | Op2 Oper Term Term
 
-  -- U48 Elimination
+  -- U32 Elimination
   | Swi String Term Term (Term -> Term) (Term -> Term)
 
   -- Inspection Hole

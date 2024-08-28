@@ -15,14 +15,15 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Kind
-                    , Kind.Type
-                    , Kind.Env
-                    , Kind.Reduce
-                    , Kind.Equal
-                    , Kind.Check
-                    , Kind.Show
-                    , Kind.Parse
                     , Kind.API
+                    , Kind.Check
+                    , Kind.Compile
+                    , Kind.Env
+                    , Kind.Equal
+                    , Kind.Parse
+                    , Kind.Reduce
+                    , Kind.Show
+                    , Kind.Type
     other-modules:    
     build-depends:    base ^>=4.20.0.0
                     , containers ==0.7
@@ -30,6 +31,7 @@ library
                     , ansi-terminal==1.1.1
                     , directory==1.3.8.3
                     , hs-highlight == 1.0.3
+                    , filepath==1.5.2.0
     hs-source-dirs:   src
     default-language: GHC2024
 
@@ -41,5 +43,6 @@ executable kind
                     , ansi-terminal==1.1.1
                     , directory==1.3.8.3
                     , hs-highlight == 1.0.3
+                    , filepath==1.5.2.0
     hs-source-dirs:   app
     default-language: GHC2024

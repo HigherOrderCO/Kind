@@ -130,7 +130,7 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     Use nam nf_val nf_bod
   go (Hol nam ctx) dep = Hol nam ctx
   go Set dep = Set
-  go U48 dep = U48
+  go U32 dep = U32
   go (Num val) dep = Num val
   go (Op2 opr fst snd) dep =
     let nf_fst = normal book fill lv fst dep in
@@ -205,7 +205,7 @@ bind (Use nam val bod) ctx =
   let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
   Use nam val' bod'
 bind Set ctx = Set
-bind U48 ctx = U48
+bind U32 ctx = U32
 bind (Num val) ctx = Num val
 bind (Op2 opr fst snd) ctx =
   let fst' = bind fst ctx in
@@ -254,7 +254,7 @@ subst lvl neo term = go term where
   go (Met uid spn)     = Met uid (map go spn)
   go (Hol nam ctx)     = Hol nam (map go ctx)
   go Set               = Set
-  go U48               = U48
+  go U32               = U32
   go (Num n)           = Num n
   go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
   go (Swi nam x z s p) = Swi nam (go x) (go z) (\k -> go (s k)) (\k -> go (p k))
