@@ -25,9 +25,7 @@ rewrite
   ∀(P: ∀(x: A) *)
   ∀(x: (P a))
   (P b)
-= λT λa λb λ{
-  #refl: λP λa a
-}
+= λT λa λb ?a[T,a,b]
 
 foo
 : U48

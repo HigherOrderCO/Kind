@@ -92,10 +92,9 @@ termShower small term dep = case term of
   Hol nam ctx -> concat ["?" , nam]
   Met uid spn -> concat ["(_", strSpn (reverse spn) dep, ")"]
   Var nam idx -> nam
-  Src src val ->
-    if small
-      then termShower small val dep
-      else concat ["!", termShower small val dep]
+  Src src val -> if small
+    then termShower small val dep
+    else concat ["!", termShower small val dep]
 
 unwrapApp :: Term -> [Term] -> (Term, [Term])
 unwrapApp (App fun arg) args = unwrapApp fun (arg:args)
@@ -126,30 +125,46 @@ operShow XOR = "^"
 operShow LSH = "<<"
 operShow RSH = ">>"
 
+-- contextShow :: Book -> Fill -> [Term] -> Int -> String
+-- contextShow book fill []     dep = ""
+-- contextShow book fill (x:xs) dep = concat [" " , contextShowAnn book fill x dep , contextShow book fill xs dep]
+
+-- contextShowAnn :: Book -> Fill -> Term -> Int -> String
+-- contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShower True (normal book fill 0 val dep) dep , ": " , termShower True (normal book fill 0 typ dep) dep , "}"]
+-- contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
+
+-- TODO: this should show the context with one var per line, like:
+-- - a : A
+-- - b : B
+-- - c : C
+-- ... etc ...
+-- fix it to show it that way:
+
 contextShow :: Book -> Fill -> [Term] -> Int -> String
-contextShow book fill []     dep = ""
-contextShow book fill (x:xs) dep = concat [" " , contextShowAnn book fill x dep , contextShow book fill xs dep]
+contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) ctx
 
 contextShowAnn :: Book -> Fill -> Term -> Int -> String
-contextShowAnn book fill (Ann chk val typ) dep = concat ["{" , termShower True (normal book fill 0 val dep) dep , ": " , termShower True (normal book fill 0 typ dep) dep , "}"]
+contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
+contextShowAnn book fill (Src _ val)       dep = contextShowAnn book fill val dep
 contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
 
 infoShow :: Book -> Fill -> Info -> IO String
 infoShow book fill info = case info of
   Found nam typ ctx dep ->
-    let msg = concat ["?", nam, " : ", termShower True typ dep]
-        ctx_str = contextShow book fill ctx dep
-    in return $ concat ["\x1b[1mGOAL\x1b[0m ", msg, ctx_str]
+    let nam' = concat ["?", nam]
+        typ' = termShower True typ dep
+        ctx' = contextShow book fill ctx dep
+    in return $ concat ["\x1b[1mGOAL\x1b[0m ", nam', " : ", typ', "\n", ctx']
   Error src exp det bad dep -> do
-    let exp'  = concat ["- expected: \x1b[32m", termShower True exp dep, "\x1b[0m"]
-        det'  = concat ["- detected: \x1b[31m", termShower True det dep, "\x1b[0m"]
-        bad'  = concat ["- bad_term: \x1b[2m", termShower True bad dep, "\x1b[0m"]
+    let exp' = concat ["- expected: \x1b[32m", termShower True exp dep, "\x1b[0m"]
+        det' = concat ["- detected: \x1b[31m", termShower True det dep, "\x1b[0m"]
+        bad' = concat ["- bad_term: \x1b[2m", termShower True bad dep, "\x1b[0m"]
     (file, text) <- case src of
-      Just (Cod (Loc fileName startLine startCol) (Loc _ endLine endCol)) -> do
-        canonicalPath <- resolveToAbsolutePath fileName
-        content <- readSourceFile canonicalPath
-        let highlighted = highlightError (startLine, startCol) (endLine, endCol) content
-        return (canonicalPath, highlighted)
+      Just (Cod (Loc fileName iniLine iniCol) (Loc _ endLine endCol)) -> do
+        canonPath <- resolveToAbsolutePath fileName
+        content   <- readSourceFile canonPath
+        let highlighted = highlightError (iniLine, iniCol) (endLine, endCol) content
+        return (canonPath, highlighted)
       Nothing -> return ("unknown_file", "Could not read source file.")
     let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
     return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
