@@ -24,6 +24,8 @@ import Control.Exception (try)
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
+import Highlight (highlightError)
+
 import System.Console.ANSI
 
 
@@ -171,99 +173,4 @@ resolveToAbsolutePath :: FilePath -> IO FilePath
 resolveToAbsolutePath relativePath = do
     absPath <- canonicalizePath relativePath
     return absPath
-
-
-highlightError :: (Int, Int) -> (Int, Int) -> String -> String
-highlightError (sLine, sCol) (eLine, eCol) content =
-  highlight (sLine, sCol) (eLine, eCol) "red" underline content
-
-highlight :: (Int, Int) -> (Int, Int) -> String -> (String -> String) -> String -> String
-highlight sPos@(sLine, sCol) ePos@(eLine, eCol) color effect content =
-    assert (isInBounds sPos ePos) "Start position must be before or equal to end position" $
-
-    let (lineIndices, lineNumbers) = targetLines content sLine eLine
-        displayText = buildDisplayText lineIndices lineNumbers sPos ePos color effect
-    in displayText
-
-targetLines :: String -> Int -> Int -> ([(Int, String)], [Int])
-targetLines content sLine eLine =
-    let
-        -- Pair each line with its line number, starting from 1
-        numberedLines = zip [1..] $ lines content
-        
-        -- Extract only the lines between startLine and endLine 
-        intervalLines = takeWhile (\(lineNum, _) -> lineNum <= eLine) $ 
-                        dropWhile (\(lineNum, _) -> lineNum < sLine) numberedLines
-        
-        -- Calculate cumulative character indices for each target line
-        -- Example: "Hello\nWorld" will return [0, 6] because 0 has 5 characters + 1 for newline
-        indices = scanl (\accIndex (_, line) -> accIndex + length line + 1) 0 intervalLines
-        -- Extract line numbers from target lines to a list
-        numbers = map fst intervalLines
-        -- Extract line contents from target lines to a list
-        contents = map snd intervalLines
-        -- Pair each line index with its corresponding line content
-        -- Example: "Hello\nWorld" would return: [(0, "Hello"), (6, "World")]
-        indexedLines = zip indices contents
-      -- Returns (a list of)  a tuple containing the indexed lines above along with their respective line numbers
-     in (indexedLines, numbers)
-
-buildDisplayText :: [(Int, String)] -> [Int] -> (Int, Int) -> (Int, Int) -> String -> (String -> String) -> String
-buildDisplayText indices numbers (sLine, sCol) (eLine, eCol) colorStr effect =
-    -- Calculate the maximum line number to pad the pipe
-    let maxNumLineWidth = length $ show $ maximum numbers
-        -- add padding to the number + pipe line
-        formatLineNum n = pad maxNumLineWidth (show n) ++ " | "
-        color = getColor colorStr
-        reset = "\x1b[0m"
-
-        -- helper to determine start/end column index of highlighting
-        col num line col fallback = if num == line then col - 1 else fallback 
-
-        highlightLine (start, line) num =
-              -- Split the line at the starting column for highlighting (0-based index).
-          let (before, rest)  = splitAt (col num sLine sCol 0) line
-              -- Split the remaining part of the line at the ending column for highlighting (0-based index), 
-              -- adjusted by subtracting the length of the `before` segment to correctly identify the `target` segment.
-              (target, after) = splitAt (col num eLine eCol (length line) - length before) rest
-              -- apply color and effects to target text
-              highlighted = color ++ effect target ++ reset
-          in formatLineNum num ++ before ++ highlighted ++ after
-
-    -- zipWith calls highlightLine for every element of zipped indices and numbers, resulting in a list of strings with the highlighted ones
-    -- unlines concate them with newlines, returning a highlighted string
-    in unlines $ zipWith highlightLine indices numbers
-
--- | Pads a string with spaces to the left
-pad :: Int -> String -> String
-pad len txt = replicate (max (len - length txt) 0) ' ' ++ txt
-
--- Checks if the start line is <= end line, and start col <= end col. 
-isInBounds :: (Int, Int) -> (Int, Int) -> Bool
-isInBounds (sLine, sCol) (eLine, eCol) =
-    sLine < eLine || (sLine == eLine && sCol <= eCol)
- 
-assert :: Bool -> String -> a -> a
-assert True _ x = x
-assert False msg _ = error msg
-
--- returns ANSI code for colors
-getColor :: String -> String
-getColor color = case color of
-    "red"    -> "\x1b[31m"
-    "green"  -> "\x1b[32m"
-    "yellow" -> "\x1b[33m"
-    "blue"   -> "\x1b[34m"
-    "magenta" -> "\x1b[35m"
-    "cyan"   -> "\x1b[36m"
-    "white"  -> "\x1b[37m"
-    _        -> "\x1b[0m"  -- defaults to reset
-
--- underlines a string using ANSI code
-underline :: String -> String
-underline text = "\x1b[4m" ++ text ++ "\x1b[24m"
-
--- bolds a string using ANSI code
-bold :: String -> String
-bold text = "\x1b[1m" ++ text ++ "\x1b[22m"
 
