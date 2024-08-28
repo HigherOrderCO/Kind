@@ -1,11 +1,3 @@
--- //./Type.hs//
--- //./Compile.hs//
-
-
-
-
-
-
 module Kind.API where
 
 import Control.Monad (forM_, foldM)
@@ -129,14 +121,13 @@ getDepsCtr (Ctr _ fields ret) = concatMap (getDeps . snd) fields ++ getDeps ret
 
 -- Gets all dependencies (direct and indirect) of a term
 getAllDeps :: Book -> String -> S.Set String
-getAllDeps book name = go S.empty [name]
-  where
-    go visited [] = visited
-    go visited (x:xs)
-      | x `S.member` visited = go visited xs
-      | otherwise = case M.lookup x book of
-          Just term -> go (S.insert x visited) (getDeps term ++ xs)
-          Nothing   -> go (S.insert x visited) xs
+getAllDeps book name = go S.empty [name] where
+  go visited [] = visited
+  go visited (x:xs)
+    | x `S.member` visited = go visited xs
+    | otherwise = case M.lookup x book of
+        Just term -> go (S.insert x visited) (getDeps term ++ xs)
+        Nothing   -> go (S.insert x visited) xs
 
 -- Main
 -- ----
