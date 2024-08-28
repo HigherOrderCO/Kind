@@ -1,0 +1,13 @@
+Equal/rewrite
+
+: ∀(T: *)
+  ∀(a: T)
+  ∀(b: T)
+  ∀(e: (Equal T a b))
+  ∀(P: ∀(x: A) *)
+  ∀(x: (P a))
+  (P b)
+  
+= λT λa λb λ{
+  #refl: λP λx x
+}

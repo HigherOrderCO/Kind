@@ -1,0 +1,7 @@
+Nat/id
+: ∀(a: Nat)
+  Nat
+= λ{
+  #zero: #zero{}
+  #succ: λa.pred (Nat/id a.pred)
+}

@@ -19,3 +19,5 @@ cabal.project.local*
 .DS_Store
 .holefill
 .tmp
+.backup/
+*.koder

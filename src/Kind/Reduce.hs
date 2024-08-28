@@ -2,8 +2,10 @@ module Kind.Reduce where
 
 import Prelude hiding (EQ, LT, GT)
 import Data.Char (ord)
+import Debug.Trace
 
 import Kind.Type
+import Kind.Show
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -12,8 +14,9 @@ import qualified Data.IntMap.Strict as IM
 -- ----------
 
 -- Evaluates a term to weak normal form
+-- 'lv' defines when to expand refs: 0 = never, 1 = on redexes
 reduce :: Book -> Fill -> Int -> Term -> Term
-reduce book fill lv term = red term where
+reduce book fill lv term = {-trace (termShower False term 0) $-} red term where
 
   red (App fun arg)     = app (red fun) arg
   red (Ann chk val typ) = red val
@@ -28,7 +31,7 @@ reduce book fill lv term = red term where
   red (Met uid spn)     = met uid spn
   red val               = val
 
-  app (Ref nam)     arg = app (ref nam) arg
+  app (Ref nam)     arg | lv > 0 = app (ref nam) arg
   app (Met uid spn) arg = red (Met uid (spn ++ [arg]))
   app (Lam nam bod) arg = red (bod (reduce book fill 0 arg))
   app (Mat cse)     arg = mat cse (red arg)
@@ -44,7 +47,6 @@ reduce book fill lv term = red term where
   swi zer suc (Num n)             = red (App suc (Num (n - 1)))
   swi zer suc (Op2 ADD (Num 1) k) = red (App suc k)
   swi zer suc val                 = App (Swi zer suc) val
-
 
   met uid spn = case IM.lookup uid fill of
     Just val -> red (case spn of
@@ -67,7 +69,7 @@ reduce book fill lv term = red term where
   op2 GTE (Num fst) (Num snd) = Num (if fst >= snd then 1 else 0)
   op2 opr fst       snd       = Op2 opr fst snd
 
-  ref nam | lv == 2 = case M.lookup nam book of
+  ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
     Nothing  -> error $ "Undefined reference: " ++ nam
   ref nam = Ref nam

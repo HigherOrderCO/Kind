@@ -1,0 +1,12 @@
+// Defines a generic list datatype.
+// - A: The type of elements in the list.
+// Constructors:
+// - nil: Represents an empty list.
+// - cons: Adds an element to the front of a list.
+List
+: ∀(A: *)
+  *
+= λA #[]{
+  #nil{} : (List A)
+  #cons{ head:A tail:(List A) } : (List A)
+}

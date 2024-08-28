@@ -1,0 +1,18 @@
+// Checks if two natural numbers are equal.
+// - a: The 1st nat.
+// - b: The 2nt nat.
+// = True if `a` and `b` are equal.
+Nat/equal
+: ∀(a: Nat)
+  ∀(b: Nat)
+  Bool
+= λ{
+  #zero: λ{
+    #zero: #true{}
+    #succ: λb.pred #false{}
+  }
+  #succ: λa.pred λ{
+    #zero: #false{}
+    #succ: λb.pred (Nat/equal a.pred b.pred)
+  }
+}

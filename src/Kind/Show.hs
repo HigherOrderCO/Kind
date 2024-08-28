@@ -3,8 +3,8 @@ module Kind.Show where
 import Prelude hiding (EQ, LT, GT)
 
 import Kind.Type
-import Kind.Reduce
 
+import Debug.Trace
 import System.IO (readFile)
 import System.Directory (canonicalizePath)
 import Control.Exception (try)
@@ -59,7 +59,7 @@ termShower small term dep = case term of
   Mat cse ->
     let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShower small cbod dep) cse)
     in concat ["λ{ ", cse', " }"]
-  Ref nam -> nam
+  Ref nam -> concat ["@", nam]
   Let nam val bod ->
     let nam' = nam
         val' = termShower small val dep

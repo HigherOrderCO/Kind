@@ -1,0 +1,10 @@
+// Constructs a proof of reflexivity for propositional equality.
+// - A: The type of the value.
+// - x: The value for which to construct the reflexivity proof.
+// = A proof that `x` is equal to itself.
+Equal/refl
+: ∀(A: *)
+  ∀(x: A)
+  (Equal A x x)
+= λA λx
+  #refl{}

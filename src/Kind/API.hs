@@ -36,12 +36,8 @@ extractName :: FilePath -> String -> String
 extractName basePath = dropBasePath . dropExtension where
   dropExtension path
     | "kind" `isExtensionOf` path = System.FilePath.dropExtension path
-    | otherwise = path
-  dropBasePath path = maybe path id (stripPrefix basePath path)
-
--- Resolves an input to a definition name
-resolveName :: FilePath -> String -> String
-resolveName = extractName
+    | otherwise                   = path
+  dropBasePath path = maybe path id (stripPrefix (basePath++"/") path)
 
 -- Loads a file and its dependencies into the book
 apiLoad :: FilePath -> Book -> String -> IO Book
@@ -152,13 +148,13 @@ main = do
 
 runCommand :: FilePath -> (Book -> String -> IO ()) -> String -> IO ()
 runCommand basePath cmd input = do
-  let name = resolveName basePath input
+  let name = extractName basePath input
   book <- apiLoad basePath M.empty name
   cmd book name
 
 runDeps :: FilePath -> String -> IO ()
 runDeps basePath input = do
-  let name = resolveName basePath input
+  let name = extractName basePath input
   book <- apiLoad basePath M.empty name
   let deps = S.toList $ getAllDeps book name
   forM_ deps $ \dep -> putStrLn dep

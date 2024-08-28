@@ -1,0 +1,4 @@
+Bool : * = #[]{
+  #false{} : Bool
+  #true{} : Bool
+}

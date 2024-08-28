@@ -16,7 +16,7 @@ import Debug.Trace
 -- -------------
 
 infer :: Term -> Int -> Env Term
-infer term dep = go term dep where
+infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep where
   go (All nam inp bod) dep = do
     envSusp (Check Nothing inp Set dep)
     envSusp (Check Nothing (bod (Ann False (Var nam dep) inp)) Set (dep + 1))
@@ -130,7 +130,7 @@ infer term dep = go term dep where
     infer val dep
 
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
-check src val typ dep = go src val typ dep where
+check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    :: " ++ termShower True typ dep) $ go src val typ dep where
   go src (Lam nam bod) typx dep = do
     book <- envGetBook
     fill <- envGetFill

@@ -1,0 +1,10 @@
+U32/sum
+
+: ∀(x: U32)
+  U32
+
+= λ{
+  0: 0
+  _: λx.pred (+ x.pred (U32/sum x.pred))
+}
+

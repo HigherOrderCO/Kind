@@ -1,3 +1,3 @@
 main
-: U32
-= (U32/sum 10)
+: Nat
+= (Nat/mul #succ{#succ{#succ{#zero{}}}} #succ{#succ{#zero{}}})

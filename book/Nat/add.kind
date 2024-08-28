@@ -1,0 +1,12 @@
+// Adds two natural numbers
+// - a: The 1st nat.
+// - b: The 2nd nat.
+// = The sum of `a` and `b`
+Nat/add
+: ∀(a: Nat)
+  ∀(b: Nat)
+  Nat
+= λ{
+  #zero: λb b
+  #succ: λa.pred λb #succ{(Nat/add a.pred b)}
+}

@@ -5,17 +5,17 @@ import Control.Monad (zipWithM)
 import Kind.Type
 import Kind.Env
 import Kind.Reduce
+import Kind.Show
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
-import Debug.Trace
 
 -- Equality
 -- --------
 
 -- Checks if two terms are equal, after reduction steps
 equal :: Term -> Term -> Int -> Env Bool
-equal a b dep = do
+equal a b dep = debug ("== " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep) $ do
   -- Reduces both sides to wnf
   book <- envGetBook
   fill <- envGetFill
@@ -24,7 +24,7 @@ equal a b dep = do
   state <- envSnapshot
   -- If both sides are identical, return true
   is_id <- identical a' b' dep
-  if is_id then
+  if is_id then do
     envPure True
   -- Otherwise, check if they're component-wise equal
   else do
@@ -33,7 +33,7 @@ equal a b dep = do
 
 -- Checks if two terms are already syntactically identical
 identical :: Term -> Term -> Int -> Env Bool
-identical a b dep = go a b dep where
+identical a b dep = debug ("ID " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep) $ go a b dep where
   go (All aNam aInp aBod) (All bNam bInp bBod) dep = do
     iInp <- identical aInp bInp dep
     iBod <- identical (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
@@ -77,10 +77,16 @@ identical a b dep = go a b dep where
     identical aVal b dep
   go a (Ann chk bVal bTyp) dep =
     identical a bVal dep
-  go a (Met bUid bSpn) dep =
-    unify bUid bSpn a dep
-  go (Met aUid aSpn) b dep =
-    unify aUid aSpn b dep
+  go (Met aUid aSpn) b dep = do
+    fill <- envGetFill
+    case IM.lookup aUid fill of
+      Just sol -> identical sol b dep
+      Nothing  -> unify aUid aSpn b dep
+  go a (Met bUid bSpn) dep = do
+    fill <- envGetFill
+    case IM.lookup bUid fill of
+      Just sol -> identical a sol dep
+      Nothing  -> unify bUid bSpn a dep
   go (Hol aNam aCtx) b dep =
     return True
   go a (Hol bNam bCtx) dep =
@@ -187,7 +193,7 @@ unify uid spn b dep = do
   fill <- envGetFill
 
   -- is this hole not already solved?
-  let unsolved = not (IM.member uid fill)
+  let solved = IM.member uid fill
 
   -- does the spine satisfies conditions?
   let solvable = valid fill spn []
@@ -195,11 +201,11 @@ unify uid spn b dep = do
   -- is the solution not recursive?
   let no_loops = not $ occur book fill uid b dep
 
-  do
+  debug ("unify: " ++ show uid ++ " " ++ termShower False b dep ++ " | " ++ show solved ++ " " ++ show solvable ++ " " ++ show no_loops) $ do
     -- If all is ok, generate the solution and return true
-    if unsolved && solvable && no_loops then do
+    if not solved && solvable && no_loops then do
       let solution = solve book fill uid spn b
-      envFill uid solution
+      debug ("solve: " ++ show uid ++ " " ++ termShower False solution dep) $ envFill uid solution
       return True
 
     -- Otherwise, return true iff both are identical metavars

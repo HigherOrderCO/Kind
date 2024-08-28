@@ -1,4 +1,9 @@
-Nat : * = #[]{
+// Defines the natural numbers (nat) as an inductive datatype.
+// - succ: Represents the successor of a nat (x+1).
+// - zero: Represents the natural nat (0).
+Nat
+: *
+= #[]{
   #zero{} : Nat
-  #succ{ pred: Nat } : Nat
+  #succ{ pred:Nat } : Nat
 }
