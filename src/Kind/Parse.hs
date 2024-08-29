@@ -40,6 +40,25 @@ doParseBook filename input =
       die ""
     Right book -> return book
 
+extractExpectedTokens :: ParseError -> String
+extractExpectedTokens err =
+    let expectedMsgs = [msg | Expect msg <- errorMessages err]
+    in intercalate ", " expectedMsgs
+
+showParseError :: String -> String -> P.ParseError -> IO ()
+showParseError filename input err = do
+  let pos = errorPos err
+  let line = sourceLine pos
+  let col = sourceColumn pos
+  let errorMsg = extractExpectedTokens err
+
+  putStrLn $ setSGRCode [SetConsoleIntensity BoldIntensity] ++ "\nPARSE_ERROR" ++ setSGRCode [Reset]
+  putStrLn $ "- expected: " ++ errorMsg
+  putStrLn "- detected:"
+  putStrLn $ highlightError (line, col) (line, col + 1) input
+  putStrLn $ setSGRCode [SetUnderlining SingleUnderline] ++ filename ++ 
+             setSGRCode [Reset] ++ " " ++ show line ++ ":" ++ show col
+
 withSrc :: Parser Term -> Parser Term
 withSrc parser = do
   ini <- getPosition
@@ -311,9 +330,3 @@ parseDef = do
   case typ of
     Nothing -> return (name, val)
     Just t  -> return (name, bind (Ann False val t) [])
-
-doParseBook :: String -> String -> Book
-doParseBook filename input =
-  case P.runParser parseBook filename filename input of
-    Left err   -> error $ "Parse error: " ++ show err
-    Right book -> book
