@@ -1,4 +1,4 @@
-// Adds two natural numbers
+// Adds two nats.
 // - a: The 1st nat.
 // - b: The 2nd nat.
 // = The sum of `a` and `b`
@@ -7,8 +7,8 @@ Nat/add
   ∀(b: Nat)
   Nat
 = λ{
-  #zero: λb
+  #z: λb
     b
-  #succ: λa.pred λb
-    #succ{(Nat/add a.pred b)}
+  #s: λa.pred λb
+    #s{(Nat/add a.pred b)}
 }

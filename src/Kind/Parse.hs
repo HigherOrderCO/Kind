@@ -126,7 +126,7 @@ parseLam = withSrc $ do
 parseApp = withSrc $ do
   P.char '('
   fun <- parseTerm
-  args <- P.many1 $ do
+  args <- P.many $ do
     era <- P.optionMaybe (P.char '-')
     arg <- parseTerm
     return (era, arg)

@@ -3,10 +3,10 @@
 // - head: The element to add to the front of the list.
 // - tail: The current list.
 // = A new list with `head` as its 1st element, followed by the elements of `tail`.
-List/cons
+List/con
 : ∀(A: *)
   ∀(head: A)
   ∀(tail: (List A))
   (List A)
 = λA λhead λtail
-  #cons{head tail}
+  #con{head tail}

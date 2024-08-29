@@ -1,0 +1,8 @@
+// Constructs the successor of a nat.
+// - n: The nat to which we add 1.
+// = The successor of the nat `n`.
+Nat/s
+: ∀(n: Nat)
+  Nat
+= λn
+  #s{n}

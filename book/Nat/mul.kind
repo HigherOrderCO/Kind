@@ -1,14 +1,14 @@
-// Multiplies two natural numbers
+// Multiplies two nats.
 // - a: The 1st nat.
 // - b: The 2nd nat.
-// = The product of `a` and `b`
+// = The product of `a` and `b`.
 Nat/mul
 : ∀(a: Nat)
   ∀(b: Nat)
   Nat
 = λ{
-  #zero: λb
-    #zero{}
-  #succ: λa.pred λb
+  #z: λb
+    #z{}
+  #s: λa.pred λb
     (Nat/add b (Nat/mul a.pred b))
 }

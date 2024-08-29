@@ -1,0 +1,10 @@
+Bool/if
+: ∀(b: Bool)
+  ∀(P: *)
+  ∀(t: P)
+  ∀(f: P)
+  P
+= λ{
+  #t: λP λt λf t
+  #f: λP λt λf f
+}

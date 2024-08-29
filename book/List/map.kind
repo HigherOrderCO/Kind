@@ -13,8 +13,8 @@ List/map
 = λA λB λ{
   #nil: λfn
     #nil{}
-  #cons: λxs.head λxs.tail λfn
+  #con: λxs.head λxs.tail λfn
     let head = (fn xs.head)
     let tail = (List/map A B xs.tail fn)
-    #cons{head tail}
+    #con{head tail}
 }

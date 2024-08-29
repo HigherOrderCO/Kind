@@ -17,6 +17,8 @@ import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 
+import Debug.Trace
+
 -- API
 -- ---
 
@@ -48,12 +50,14 @@ apiLoad basePath book name
       fileExists <- doesFileExist file
       if fileExists
         then do
-          content <- readFile file
-          book0 <- doParseBook file content
+          code  <- readFile file
+          book0 <- doParseBook file code
           let book1 = M.union book0 book
           let deps  = getDeps (M.findWithDefault Set name book0)
           foldM (apiLoad basePath) book1 deps
-        else return $ M.insert name (Ref name) book  -- Handle unbound definitions
+        else do
+          putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+          exitFailure
 
 -- Normalizes a term
 apiNormal :: Book -> String -> IO ()

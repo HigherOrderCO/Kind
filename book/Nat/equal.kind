@@ -1,4 +1,4 @@
-// Checks if two natural numbers are equal.
+// Checks if two nats are equal.
 // - a: The 1st nat.
 // - b: The 2nt nat.
 // = True if `a` and `b` are equal.
@@ -7,12 +7,16 @@ Nat/equal
   ∀(b: Nat)
   Bool
 = λ{
-  #zero: λ{
-    #zero: #true{}
-    #succ: λb.pred #false{}
+  #z: λ{
+    #z:
+      #t{}
+    #s: λb.pred
+      #f{}
   }
-  #succ: λa.pred λ{
-    #zero: #false{}
-    #succ: λb.pred (Nat/equal a.pred b.pred)
+  #s: λa.pred λ{
+    #z:
+      #f{}
+    #s: λb.pred
+      (Nat/equal a.pred b.pred)
   }
 }

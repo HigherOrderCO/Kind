@@ -1,5 +1,0 @@
-// Represents the zero natural number.
-// = The nat 0.
-Nat/zero
-: Nat
-= #zero{}

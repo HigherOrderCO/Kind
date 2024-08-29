@@ -1,0 +1,20 @@
+// Helper function for List/filter that decides whether to include the current element.
+// - A: The type of elements in the list.
+// - cond: The result of applying the predicate to the current element.
+// - head: The current element being considered.
+// - tail: The rest of the list to be filtered.
+// - fn: The predicate function.
+// = A new list containing the filtered elements.
+List/filter/go
+: ∀(A: *)
+  ∀(cond: Bool)
+  ∀(head: A)
+  ∀(tail: (List A))
+  ∀(fn: ∀(x: A) Bool)
+  (List A)
+= λA λ{
+  #t: λhead λtail λfn
+    #con{head (List/filter A tail fn)}
+  #f: λhead λtail λfn
+    (List/filter A tail fn)
+}

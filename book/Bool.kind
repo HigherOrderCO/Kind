@@ -1,4 +1,5 @@
+// Defines the Boolean type with two constructors: true and false.
 Bool : * = #[]{
-  #false{} : Bool
-  #true{} : Bool
+  #t{} : Bool
+  #f{} : Bool
 }

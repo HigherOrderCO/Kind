@@ -7,8 +7,8 @@ Bool/xor
   ∀(b: Bool)
   Bool
 = λ{
-  #true: λb
+  #t: λb
     (Bool/not b)
-  #false: λb
+  #f: λb
     b
 }

@@ -1,0 +1,10 @@
+Bool/match
+: ∀(P: ∀(x: Bool) *)
+  ∀(t: (P #t{}))
+  ∀(f: (P #f{}))
+  ∀(b: Bool)
+  (P b)
+= λP λt λf λ{
+  #t: t
+  #f: f
+}
