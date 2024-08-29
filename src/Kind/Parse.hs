@@ -24,11 +24,21 @@ import System.Console.ANSI
 type PState   = String
 type Parser a = P.ParsecT String PState Identity a
 
-doParseTerm :: String -> String -> Term
+doParseTerm :: String -> String -> IO Term
 doParseTerm filename input =
   case P.runParser (withSrc parseTerm) filename filename input of
-    Left err -> error $ "Parse error: " ++ show err
-    Right term -> bind term []
+    Left err -> do
+      showParseError filename input err
+      die ""
+    Right term -> return $ bind term []
+
+doParseBook :: String -> String -> IO Book
+doParseBook filename input =
+  case P.runParser parseBook filename filename input of
+    Left err -> do
+      showParseError filename input err
+      die ""
+    Right book -> return book
 
 withSrc :: Parser Term -> Parser Term
 withSrc parser = do
