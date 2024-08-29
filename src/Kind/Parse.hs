@@ -5,12 +5,21 @@ import Prelude hiding (EQ, LT, GT)
 import Kind.Type
 import Kind.Reduce
 
+import Highlight (highlightError, highlight)
+
 import Data.Char (ord)
 import qualified Data.Map.Strict as M
 import Data.Functor.Identity (Identity)
 
+import System.Exit (die)
+
 import Text.Parsec ((<|>), getPosition, sourceLine, sourceColumn)
+import Text.Parsec.Error (errorPos, errorMessages, showErrorMessages, ParseError, errorMessages, Message(..))
 import qualified Text.Parsec as P
+
+import Data.List (intercalate)
+
+import System.Console.ANSI
 
 type PState   = String
 type Parser a = P.ParsecT String PState Identity a
