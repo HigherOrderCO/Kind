@@ -53,7 +53,7 @@ apiLoad basePath book name
       if fileExists
         then do
           content <- readFile file
-          let book0 = doParseBook file content
+          book0 <- doParseBook file content
           let book1 = M.union book0 book
           let deps  = getDeps (M.findWithDefault Set name book0)
           foldM (apiLoad basePath) book1 deps
