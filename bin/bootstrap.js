@@ -12,5 +12,5 @@ execSync("git checkout "+kind_path);
 
 // Creates kind.js
 console.log("Generating kind.js");
-execSync("scheme  --libdirs ../bin/scm/src ../bin/scm/src/main.scm Kind.api.export --js --module > "+kind_path+".tmp");
+execSync("node ../bin/js/src/main.js Kind.api.export --js --module > "+kind_path+".tmp");
 execSync("mv "+kind_path+".tmp "+kind_path);
