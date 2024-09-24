@@ -56,11 +56,10 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
         envLog (Error Nothing (Hol "self-type" []) vtyp (Ins val) dep)
         envFail
 
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts) dep = do
-    forM_ cts $ \ (Ctr _ fs rt) -> do
-      forM_ fs $ \ (_, ty) -> do
-        envSusp (Check Nothing ty Set dep)
-      envSusp (Check Nothing rt Set dep)
+    forM_ cts $ \ (Ctr _ tele) -> do
+      checkTele Nothing tele Set dep
     return Set
 
   go (Ref nam) dep = do
@@ -152,20 +151,16 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
         infer (Ins val) dep
         return ()
 
+  -- CHANGED: Updated Con case to handle new Ctr structure with Tele
   go src val@(Con nam arg) typx dep = do
     book <- envGetBook
     fill <- envGetFill
     case reduce book fill 2 typx of
       (Dat adt_scp adt_cts) -> do
-        case lookup nam (map (\(Ctr cnm cfs crt) -> (cnm, (cfs, crt))) adt_cts) of
-          Just (cfs,crt) -> do
-            if length cfs == length arg then do
-              forM_ (zip arg cfs) $ \(a, (_, t)) -> do
-                check Nothing a t dep
-              cmp src val crt typx dep
-            else do
-              envLog (Error Nothing (Hol "constructor_arity_mismatch" []) (Hol "unknown_type" []) (Con nam arg) dep)
-              envFail
+        case lookup nam (map (\(Ctr cnm tele) -> (cnm, tele)) adt_cts) of
+          Just tele -> do
+            checkConAgainstTele Nothing arg tele dep
+            cmp src val typx typx dep
           Nothing -> do
             envLog (Error Nothing (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
@@ -173,6 +168,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
         infer (Con nam arg) dep
         return ()
 
+  -- CHANGED: Updated Mat case to handle new Ctr structure with Tele
   go src (Mat cse) typx dep = do
     book <- envGetBook
     fill <- envGetFill
@@ -180,15 +176,15 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
       (All typ_nam typ_inp typ_bod) -> do
         case reduce book fill 2 typ_inp of
           (Dat adt_scp adt_cts) -> do
-            let adt_cts_map = M.fromList (map (\ (Ctr cnm cfs crt) -> (cnm, (cfs, crt))) adt_cts)
+            let adt_cts_map = M.fromList (map (\ (Ctr cnm tele) -> (cnm, tele)) adt_cts)
             forM_ cse $ \ (cnm, cbod) -> do
               case M.lookup cnm adt_cts_map of
-                Just (cfs,crt) -> do
-                  let ann = Ann False (Con cnm (map (\ (fn, ft) -> Var fn dep) cfs)) typ_inp
-                  let bty = foldr (\(fn, ft) acc -> All fn ft (\x -> acc)) (typ_bod ann) cfs
-                  let sub = ext (reduce book fill 2 typ_inp) (reduce book fill 2 crt)
-                  let rty = foldl' (\ ty (i,t) -> subst i t ty) bty sub
-                  check Nothing cbod rty dep
+                Just tele -> do
+                  let a_r = teleToTerm tele dep
+                  let eqs = extractEqualities (reduce book fill 2 typ_inp) (reduce book fill 2 (snd a_r)) dep
+                  let rt0 = teleToType tele (typ_bod (Ann False (Con cnm (fst a_r)) typ_inp)) dep
+                  let rt1 = foldl' (\ ty (i,t) -> subst i t ty) rt0 eqs
+                  check Nothing cbod rt1 dep
                 Nothing -> do
                   envLog (Error Nothing (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
                   envFail
@@ -260,14 +256,42 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
       envLog (Error src expected detected term dep)
       envFail
 
-  ext :: Term -> Term -> [(Int, Term)]
-  ext (Dat as _) (Dat bs _) = zipWith extHelper as bs
-  ext a          b          = trace ("Unexpected terms in ext: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
+-- CHANGED: Added checkTele function
+checkTele :: Maybe Cod -> Tele -> Term -> Int -> Env ()
+checkTele src tele typ dep = case tele of
+  TRet term -> check src term typ dep
+  TExt nam inp bod -> do
+    check src inp Set dep
+    checkTele src (bod (Ann False (Var nam dep) inp)) typ (dep + 1)
 
-  extHelper :: Term -> Term -> (Int, Term)
-  extHelper (Var _ i) v = (i, v)
-  extHelper (Src _ i) v = extHelper i v
-  extHelper a         v = trace ("Unexpected first term in extHelper: " ++ termShower True a dep) (0, v)
+-- CHANGED: Added checkConAgainstTele function
+checkConAgainstTele :: Maybe Cod -> [Term] -> Tele -> Int -> Env ()
+checkConAgainstTele src [] (TRet _) _ = return ()
+checkConAgainstTele src (arg:args) (TExt nam inp bod) dep = do
+  check src arg inp dep
+  checkConAgainstTele src args (bod arg) dep
+checkConAgainstTele src _ _ dep = do
+  envLog (Error src (Hol "constructor_arity_mismatch" []) (Hol "unknown_type" []) (Hol "constructor" []) dep)
+  envFail
+
+-- CHANGED: ....
+teleToType :: Tele -> Term -> Int -> Term
+teleToType (TRet _)           ret _   = ret
+teleToType (TExt nam inp bod) ret dep = All nam inp (\x -> teleToType (bod x) ret (dep + 1))
+
+-- CHANGED: Helper function to extract both arguments and return type from a telescope
+teleToTerm :: Tele -> Int -> ([Term], Term)
+teleToTerm tele dep = go tele [] dep where
+  go (TRet ret)         args _   = (reverse args, ret)
+  go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Var nam dep) : args) (dep + 1)
+
+-- CHANGED: ...
+extractEqualities :: Term -> Term -> Int -> [(Int, Term)]
+extractEqualities (Dat as _) (Dat bs _) dep = zipWith go as bs where
+  go (Var _ i) v = (i, v)
+  go (Src _ i) v = go i v
+  go a         v = trace ("Unexpected term: " ++ termShower True a dep) (0, v)
+extractEqualities a b dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
 
 doCheck :: Term -> Env ()
 doCheck (Ann _ val typ) = check Nothing val typ 0 >> return ()

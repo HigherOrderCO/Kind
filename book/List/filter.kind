@@ -12,5 +12,5 @@ List/filter
   #nil: λfn
     #nil{}
   #con: λxs.head λxs.tail λfn
-    (List/filter/go (fn xs.head) xs.head xs.tail fn)
+    (List/filter/go A (fn xs.head) xs.head xs.tail fn)
 }

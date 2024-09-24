@@ -46,12 +46,11 @@ termShower small term dep = case term of
   Ins val ->
     let val' = termShower small val dep
     in concat ["~" , val']
+  -- CHANGED: Updated Dat case to use new Ctr structure
   Dat scp cts ->
     let scp' = unwords (map (\x -> termShower small x dep) scp)
-        cts' = unwords (map (\(Ctr nm fs rt) ->
-          "#" ++ nm ++ "{" ++
-          unwords (map (\(fn, ft) -> fn ++ ":" ++ termShower small ft dep) fs) ++
-          "} : " ++ termShower small rt dep) cts)
+        cts' = unwords (map (\(Ctr nm tele) ->
+          "#" ++ nm ++ " " ++ teleShower small tele dep) cts)
     in concat ["#[", scp', "]{ ", cts', " }"]
   Con nam arg ->
     let arg' = unwords (map (\x -> termShower small x dep) arg)
@@ -92,6 +91,17 @@ termShower small term dep = case term of
   Src src val -> if small
     then termShower small val dep
     else concat ["!", termShower small val dep]
+
+-- CHANGED: Added teleShower function
+teleShower :: Bool -> Tele -> Int -> String
+teleShower small tele dep = "{ " ++ go tele dep where
+  go (TExt nam typ bod) dep =
+    let typ' = termShower small typ dep
+        bod' = go (bod (Var nam dep)) (dep + 1)
+    in concat [nam, ": ", typ', " ", bod']
+  go (TRet term) dep =
+    let term' = termShower small term dep
+    in concat ["}: ", term']
 
 unwrapApp :: Term -> [Term] -> (Term, [Term])
 unwrapApp (App fun arg) args = unwrapApp fun (arg:args)

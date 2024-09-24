@@ -50,6 +50,7 @@ identical a b dep = debug ("ID " ++ termShower False a dep ++ "\n.. " ++ termSho
     identical aVal b dep
   go a (Ins bVal) dep =
     identical a bVal dep
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat aScp aCts) (Dat bScp bCts) dep = do
     iSlf <- zipWithM (\ax bx -> identical ax bx dep) aScp bScp
     if and iSlf && length aCts == length bCts
@@ -118,18 +119,25 @@ identical a b dep = debug ("ID " ++ termShower False a dep ++ "\n.. " ++ termSho
   go a b dep =
     return False
 
-  goCtr (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) = do
-    if aCNm == bCNm && length aFs == length bFs
-      then do
-        fs <- zipWithM (\(_, aFTy) (_, bFTy) -> identical aFTy bFTy dep) aFs bFs
-        rt <- identical aRt bRt dep
-        return (and fs && rt)
+  -- CHANGED: Updated goCtr to handle new Ctr structure with Tele
+  goCtr (Ctr aCNm aTele) (Ctr bCNm bTele) = do
+    if aCNm == bCNm
+      then goTele aTele bTele dep
       else return False
 
   goCse (aCNam, aCBod) (bCNam, bCBod) = do
     if aCNam == bCNam
       then identical aCBod bCBod dep
       else return False
+
+  -- CHANGED: Added goTele function to handle Tele equality
+  goTele :: Tele -> Tele -> Int -> Env Bool
+  goTele (TRet aTerm) (TRet bTerm) dep = identical aTerm bTerm dep
+  goTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep = do
+    iTyp <- identical aTyp bTyp dep
+    iBod <- goTele (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+    return (iTyp && iBod)
+  goTele _ _ _ = return False
 
 -- Checks if two terms are component-wise equal
 similar :: Term -> Term -> Int -> Env Bool
@@ -147,6 +155,7 @@ similar a b dep = go a b dep where
   go (Slf aNam aTyp aBod) (Slf bNam bTyp bBod) dep = do
     book <- envGetBook
     similar (reduce book IM.empty 0 aTyp) (reduce book IM.empty 0 bTyp) dep
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat aScp aCts) (Dat bScp bCts) dep = do
     eSlf <- zipWithM (\ax bx -> equal ax bx dep) aScp bScp
     if and eSlf && length aCts == length bCts
@@ -170,12 +179,10 @@ similar a b dep = go a b dep where
     return (eZer && eSuc)
   go a b dep = identical a b dep
 
-  goCtr (Ctr aCNm aFs aRt) (Ctr bCNm bFs bRt) = do
-    if aCNm == bCNm && length aFs == length bFs
-      then do
-        fs <- zipWithM (\(_, aFTyp) (_, bFTyp) -> equal aFTyp bFTyp dep) aFs bFs
-        rt <- equal aRt bRt dep
-        return (and fs && rt)
+  -- CHANGED: Updated goCtr to handle new Ctr structure with Tele
+  goCtr (Ctr aCNm aTele) (Ctr bCNm bTele) = do
+    if aCNm == bCNm
+      then goTele aTele bTele dep
       else return False
 
   goCse (aCNam, aCBod) (bCNam, bCBod) = do
@@ -183,10 +190,19 @@ similar a b dep = go a b dep where
       then equal aCBod bCBod dep
       else return False
 
+  -- CHANGED: Added goTele function to handle Tele similarity
+  goTele :: Tele -> Tele -> Int -> Env Bool
+  goTele (TRet aTerm) (TRet bTerm) dep = equal aTerm bTerm dep
+  goTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep = do
+    eTyp <- equal aTyp bTyp dep
+    eBod <- goTele (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+    return (eTyp && eBod)
+  goTele _ _ _ = return False
+
 -- Unification
 -- -----------
 
--- If possible, solves a `(?X x y z ...) = K` problem, generating a subst.
+-- If possible, solves a (?X x y z ...) = K problem, generating a subst.
 unify :: Int -> [Term] -> Term -> Int -> Env Bool
 unify uid spn b dep = do
   book <- envGetBook
@@ -252,9 +268,10 @@ occur book fill uid term dep = go term dep where
   go (Ins val) dep =
     let o_val = go val dep
     in o_val
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts) dep =
     let o_scp = any (\x -> go x dep) scp
-        o_cts = any (\ (Ctr _ fs rt) -> any (\ (_, ty) -> go ty dep) fs || go rt dep) cts
+        o_cts = any (\(Ctr _ tele) -> goTele tele dep) cts
     in o_scp || o_cts
   go (Con nam arg) dep =
     any (\x -> go x dep) arg
@@ -287,3 +304,11 @@ occur book fill uid term dep = go term dep where
       term          -> go term dep
   go _ dep =
     False
+
+  -- CHANGED: Added goTele function to handle Tele occurrence check
+  goTele :: Tele -> Int -> Bool
+  goTele (TRet term) dep = go term dep
+  goTele (TExt nam typ bod) dep =
+    let o_typ = go typ dep
+        o_bod = goTele (bod (Var nam dep)) (dep + 1)
+    in o_typ || o_bod

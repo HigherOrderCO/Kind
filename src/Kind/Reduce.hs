@@ -107,11 +107,11 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Ins val) dep =
     let nf_val = normal book fill lv val dep in
     Ins nf_val
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts) dep =
-    let go_ctr = (\ (Ctr nm fs rt) ->
-          let nf_fs = map (\(fn, ft) -> (fn, normal book fill lv ft dep)) fs in
-          let nf_rt = normal book fill lv rt dep in
-          Ctr nm nf_fs nf_rt) in
+    let go_ctr = (\ (Ctr nm tele) ->
+          let nf_tele = normalTele book fill lv tele dep in
+          Ctr nm nf_tele) in
     let nf_scp = map (\x -> normal book fill lv x dep) scp in
     let nf_cts = map go_ctr cts in
     Dat nf_scp nf_cts
@@ -150,6 +150,17 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     Src src nf_val
   go (Met uid spn) dep = Met uid spn -- TODO: normalize spine
 
+-- CHANGED: Added normalTele function
+normalTele :: Book -> Fill -> Int -> Tele -> Int -> Tele
+normalTele book fill lv tele dep = case tele of
+  TRet term ->
+    let nf_term = normal book fill lv term dep in
+    TRet nf_term
+  TExt nam typ bod ->
+    let nf_typ = normal book fill lv typ dep in
+    let nf_bod = \x -> normalTele book fill lv (bod (Var nam dep)) (dep + 1) in
+    TExt nam nf_typ nf_bod
+
 -- Binding
 -- -------
 
@@ -177,15 +188,15 @@ bind (Slf nam typ bod) ctx =
 bind (Ins val) ctx =
   let val' = bind val ctx in
   Ins val'
+-- CHANGED: Updated Dat case to handle new Ctr structure with Tele
 bind (Dat scp cts) ctx =
   let scp' = map (\x -> bind x ctx) scp in
-  let cts' = map bindCtr cts in
+  let cts' = map (\x -> bindCtr x ctx) cts in
   Dat scp' cts'
   where
-    bindCtr (Ctr nm fs rt) =
-      let fs' = map (\(n,t) -> (n, bind t ctx)) fs in
-      let rt' = bind rt ctx in
-      Ctr nm fs' rt'
+    bindCtr (Ctr nm tele)       ctx = Ctr nm (bindTele tele ctx)
+    bindTele (TRet term)        ctx = TRet (bind term ctx)
+    bindTele (TExt nam typ bod) ctx = TExt nam (bind typ ctx) $ \x -> bindTele (bod x) ((nam, x) : ctx)
 bind (Con nam arg) ctx =
   let arg' = map (\x -> bind x ctx) arg in
   Con nam arg'
@@ -230,7 +241,7 @@ bind (Src src val) ctx =
 -- Substitution
 -- ------------
 
--- Substitutes a Bruijn level variable by a `neo` value in `term`.
+-- Substitutes a Bruijn level variable by a neo value in term.
 subst :: Int -> Term -> Term -> Term
 subst lvl neo term = go term where
   go (All nam inp bod) = All nam (go inp) (\x -> go (bod x))
@@ -239,6 +250,7 @@ subst lvl neo term = go term where
   go (Ann chk val typ) = Ann chk (go val) (go typ)
   go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
   go (Ins val)         = Ins (go val)
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
   go (Con nam arg)     = Con nam (map go arg)
   go (Mat cse)         = Mat (map goCse cse)
@@ -256,6 +268,7 @@ subst lvl neo term = go term where
   go (Nat val)         = Nat val
   go (Var nam idx)     = if lvl == idx then neo else Var nam idx
   go (Src src val)     = Src src (go val)
-  goCtr (Ctr nm fs rt) = Ctr nm (map goFld fs) (go rt)
-  goFld (fn, ft)       = (fn, go ft)
+  goCtr (Ctr nm tele)  = Ctr nm (goTele tele)
   goCse (cnam, cbod)   = (cnam, go cbod)
+  goTele (TRet term)   = TRet (go term)
+  goTele (TExt nam typ bod) = TExt nam (go typ) (\x -> goTele (bod x))

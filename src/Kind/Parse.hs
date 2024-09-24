@@ -51,12 +51,11 @@ showParseError filename input err = do
   let line = sourceLine pos
   let col = sourceColumn pos
   let errorMsg = extractExpectedTokens err
-
   putStrLn $ setSGRCode [SetConsoleIntensity BoldIntensity] ++ "\nPARSE_ERROR" ++ setSGRCode [Reset]
   putStrLn $ "- expected: " ++ errorMsg
-  putStrLn "- detected:"
+  putStrLn $ "- detected:"
   putStrLn $ highlightError (line, col) (line, col + 1) input
-  putStrLn $ setSGRCode [SetUnderlining SingleUnderline] ++ filename ++ 
+  putStrLn $ setSGRCode [SetUnderlining SingleUnderline] ++ filename ++
              setSGRCode [Reset] ++ " " ++ show line ++ ":" ++ show col
 
 withSrc :: Parser Term -> Parser Term
@@ -158,6 +157,7 @@ parseIns = withSrc $ do
   val <- parseTerm
   return $ Ins val
 
+-- CHANGED: Updated parseDat to use new Ctr structure with Tele
 parseDat = withSrc $ do
   P.try $ P.string "#["
   scp <- do
@@ -171,22 +171,31 @@ parseDat = withSrc $ do
     P.char '#'
     nm <- parseName
     parseTrivia
-    P.char '{'
-    fs <- P.many $ P.try $ do
-      fn <- parseName
-      parseTrivia
-      P.char ':'
-      ft <- parseTerm
-      return (fn, ft)
-    parseTrivia
-    P.char '}'
-    parseTrivia
-    P.char ':'
-    rt <- parseTerm
-    return $ Ctr nm fs rt
+    tele <- parseTele
+    return $ Ctr nm tele
   parseTrivia
   P.char '}'
   return $ Dat scp cts
+
+-- CHANGED: Added parseTele function
+parseTele :: Parser Tele
+parseTele = do
+  P.char '{'
+  parseTrivia
+  fields <- P.many $ P.try $ do
+    nam <- parseName
+    parseTrivia
+    P.char ':'
+    parseTrivia
+    typ <- parseTerm
+    parseTrivia
+    return (nam, typ)
+  P.char '}'
+  parseTrivia
+  P.char ':'
+  parseTrivia
+  ret <- parseTerm
+  return $ foldr (\(nam, typ) acc -> TExt nam typ (\x -> acc)) (TRet ret) fields
 
 parseCon = withSrc $ do
   P.char '#'

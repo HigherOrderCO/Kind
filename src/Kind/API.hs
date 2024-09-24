@@ -3,12 +3,12 @@ module Kind.API where
 import Control.Monad (forM_, foldM)
 import Data.List (stripPrefix)
 import Kind.Check
+import Kind.Compile
 import Kind.Env
 import Kind.Parse
 import Kind.Reduce
 import Kind.Show
 import Kind.Type
-import Kind.Compile
 import System.Directory (getCurrentDirectory, doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
@@ -37,8 +37,8 @@ findBookDir dir = do
 extractName :: FilePath -> String -> String
 extractName basePath = dropBasePath . dropExtension where
   dropExtension path
-    | "kind" `isExtensionOf` path = System.FilePath.dropExtension path
-    | otherwise                   = path
+    | isExtensionOf "kind" path = System.FilePath.dropExtension path
+    | otherwise                 = path
   dropBasePath path = maybe path id (stripPrefix (basePath++"/") path)
 
 -- Loads a file and its dependencies into the book
@@ -105,6 +105,7 @@ getDeps term = case term of
   Ann _ val typ -> getDeps val ++ getDeps typ
   Slf _ typ bod -> getDeps typ ++ getDeps (bod Set)
   Ins val       -> getDeps val
+  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   Dat scp cts   -> concatMap getDeps scp ++ concatMap getDepsCtr cts
   Con _ arg     -> concatMap getDeps arg
   Mat cse       -> concatMap (getDeps . snd) cse
@@ -115,16 +116,23 @@ getDeps term = case term of
   Src _ val     -> getDeps val
   _             -> []
 
+-- CHANGED: Updated getDepsCtr to handle new Ctr structure with Tele
 -- Gets dependencies of a constructor
 getDepsCtr :: Ctr -> [String]
-getDepsCtr (Ctr _ fields ret) = concatMap (getDeps . snd) fields ++ getDeps ret
+getDepsCtr (Ctr _ tele) = getDepsTele tele
+
+-- CHANGED: Added getDepsTele function to handle Tele dependencies
+-- Gets dependencies of a telescope
+getDepsTele :: Tele -> [String]
+getDepsTele (TRet term) = getDeps term
+getDepsTele (TExt _ typ bod) = getDeps typ ++ getDepsTele (bod Set)
 
 -- Gets all dependencies (direct and indirect) of a term
 getAllDeps :: Book -> String -> S.Set String
 getAllDeps book name = go S.empty [name] where
   go visited [] = visited
   go visited (x:xs)
-    | x `S.member` visited = go visited xs
+    | S.member x visited = go visited xs
     | otherwise = case M.lookup x book of
         Just term -> go (S.insert x visited) (getDeps term ++ xs)
         Nothing   -> go (S.insert x visited) xs

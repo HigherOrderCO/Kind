@@ -1,0 +1,8 @@
+Sigma/snd
+: ∀(A: *)
+  ∀(B: ∀(x: A) *)
+  ∀(x: (Sigma A B))
+  (B (Sigma/fst A B x))
+= λA λB λ{
+  #new: λfst λsnd snd
+}

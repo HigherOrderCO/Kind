@@ -7,31 +7,31 @@ import Debug.Trace
 
 -- Kind's AST
 data Term
-  -- Product: `∀(x: A) B`
+  -- Product: ∀(x: A) B
   = All String Term (Term -> Term)
 
-  -- Lambda: `λx f`
+  -- Lambda: λx f
   | Lam String (Term -> Term)
 
-  -- Application: `(fun arg)`
+  -- Application: (fun arg)
   | App Term Term
 
-  -- Annotation: `{x: T}`
+  -- Annotation: {x: T}
   | Ann Bool Term Term
 
-  -- Self-Type: `$(x: A) B`
+  -- Self-Type: $(x: A) B
   | Slf String Term (Term -> Term)
 
-  -- Self-Inst: `~x`
+  -- Self-Inst: ~x
   | Ins Term
 
-  -- Datatype: `"#[i0 i1...]{ #C0 { x0:T0 x1:T1 ... } #C1 { x0:T0 x1:T1 ... } }
+  -- Datatype: "#[i0 i1...]{ #C0 Tele0 #C1 Tele1 ... }
   | Dat [Term] [Ctr]
 
-  -- Constructor: `#CN { x0 x1 ... }`
+  -- Constructor: #CN { x0 x1 ... }
   | Con String [Term]
 
-  -- Match: `λ{ #C0:B0 #C1:B1 ... }`
+  -- Match: λ{ #C0:B0 #C1:B1 ... }
   | Mat [(String, Term)]
 
   -- Top-Level Reference
@@ -87,8 +87,13 @@ data Oper
   | GT  | LTE | GTE | AND
   | OR  | XOR | LSH | RSH
 
+-- Telescope for dependent types
+data Tele
+  = TRet Term
+  | TExt String Term (Term -> Tele)
+
 -- Constructor
-data Ctr = Ctr String [(String,Term)] Term
+data Ctr = Ctr String Tele
 
 -- Book of Definitions
 type Book = M.Map String Term
