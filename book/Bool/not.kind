@@ -5,8 +5,6 @@ Bool/not
 : ∀(a: Bool)
   Bool
 = λ{
-  #t:
-    #f{}
-  #f:
-    #t{}
+  #t: #f{}
+  #f: #t{}
 }

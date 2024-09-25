@@ -87,7 +87,7 @@ data Oper
   | GT  | LTE | GTE | AND
   | OR  | XOR | LSH | RSH
 
--- Telescope for dependent types
+-- Telescope
 data Tele
   = TRet Term
   | TExt String Term (Term -> Tele)

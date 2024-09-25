@@ -7,8 +7,6 @@ Bool/and
   ∀(b: Bool)
   Bool
 = λ{
-  #t: λb
-    b
-  #f: λb
-    #f{}
+  #t: λb b
+  #f: λb #f{}
 }

@@ -1,7 +1,7 @@
 module Kind.API where
 
 import Control.Monad (forM_, foldM)
-import Data.List (stripPrefix)
+import Data.List (stripPrefix, isSuffixOf)
 import Kind.Check
 import Kind.Compile
 import Kind.Env
@@ -22,42 +22,57 @@ import Debug.Trace
 -- API
 -- ---
 
--- Finds the directory named "book"
+-- Finds the directory named "book" or "monobook"
 findBookDir :: FilePath -> IO (Maybe FilePath)
 findBookDir dir = do
   let bookDir = dir </> "book"
+  let monoBookDir = dir </> "monobook"
   isBook <- doesDirectoryExist bookDir
+  isMonoBook <- doesDirectoryExist monoBookDir
   if isBook
     then return $ Just bookDir
-    else if takeDirectory dir == dir
-      then return Nothing
-      else findBookDir (takeDirectory dir)
+    else if isMonoBook
+      then return $ Just monoBookDir
+      else if takeDirectory dir == dir
+        then return Nothing
+        else findBookDir (takeDirectory dir)
 
 -- Extracts the definition name from a file path or name
 extractName :: FilePath -> String -> String
-extractName basePath = dropBasePath . dropExtension where
+extractName basePath = dropSlashType . dropBasePath . dropExtension where
+  dropSlashType name
+    | isSuffixOf "/Type" name = take (length name - 5) name
+    | otherwise               = name
   dropExtension path
     | isExtensionOf "kind" path = System.FilePath.dropExtension path
     | otherwise                 = path
   dropBasePath path = maybe path id (stripPrefix (basePath++"/") path)
 
--- Loads a file and its dependencies into the book
 apiLoad :: FilePath -> Book -> String -> IO Book
-apiLoad basePath book name
-  | M.member name book = return book
-  | otherwise = do
+apiLoad basePath book name = do
+  if M.member name book
+    then return book
+    else do
       let file = basePath </> name ++ ".kind"
+      let fall = basePath </> name </> "Type.kind"
       fileExists <- doesFileExist file
-      if fileExists
-        then do
-          code  <- readFile file
-          book0 <- doParseBook file code
-          let book1 = M.union book0 book
-          let deps  = getDeps (M.findWithDefault Set name book0)
-          foldM (apiLoad basePath) book1 deps
-        else do
-          putStrLn $ "Error: Definition '" ++ name ++ "' not found."
-          exitFailure
+      fallExists <- doesFileExist fall
+      if fileExists then
+        loadFile file
+      else if fallExists then
+        loadFile fall
+      else do
+        putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+        putStrLn $ file
+        putStrLn $ fall
+        exitFailure
+  where
+    loadFile filePath = do
+      code  <- readFile filePath
+      book0 <- doParseBook filePath code
+      let book1 = M.union book0 book
+      let deps  = getDeps (M.findWithDefault Set name book0)
+      foldM (apiLoad basePath) book1 deps
 
 -- Normalizes a term
 apiNormal :: Book -> String -> IO ()

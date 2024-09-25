@@ -7,8 +7,6 @@ Nat/add
   ∀(b: Nat)
   Nat
 = λ{
-  #z: λb
-    b
-  #s: λa.pred λb
-    #s{(Nat/add a.pred b)}
+  #z: λb b
+  #s: λa.pred λb #s{(Nat/add a.pred b)}
 }
