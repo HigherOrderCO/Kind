@@ -1,7 +1,7 @@
 module Kind.API where
 
 import Control.Monad (forM_, foldM)
-import Data.List (stripPrefix, isSuffixOf)
+import Data.List (stripPrefix, isSuffixOf, nub)
 import Kind.Check
 import Kind.Compile
 import Kind.Env
@@ -39,10 +39,7 @@ findBookDir dir = do
 
 -- Extracts the definition name from a file path or name
 extractName :: FilePath -> String -> String
-extractName basePath = {-dropSlashType .-} dropBasePath . dropExtension where
-  -- dropSlashType name
-    -- | isSuffixOf "/Type" name = take (length name - 5) name
-    -- | otherwise               = name
+extractName basePath = dropBasePath . dropExtension where
   dropExtension path
     | isExtensionOf "kind" path = System.FilePath.dropExtension path
     | otherwise                 = path
@@ -54,17 +51,11 @@ apiLoad basePath book name = do
     then return book
     else do
       let file = basePath </> name ++ ".kind"
-      -- let fall = basePath </> name </> "Type.kind"
       fileExists <- doesFileExist file
-      -- fallExists <- doesFileExist fall
       if fileExists then
         loadFile file
-      -- else if fallExists then
-        -- loadFile fall
       else do
         putStrLn $ "Error: Definition '" ++ name ++ "' not found."
-        -- putStrLn $ file
-        -- putStrLn $ fall
         exitFailure
   where
     loadFile filePath = do
@@ -120,7 +111,6 @@ getDeps term = case term of
   Ann _ val typ -> getDeps val ++ getDeps typ
   Slf _ typ bod -> getDeps typ ++ getDeps (bod Set)
   Ins val       -> getDeps val
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   Dat scp cts   -> concatMap getDeps scp ++ concatMap getDepsCtr cts
   Con _ arg     -> concatMap getDeps arg
   Mat cse       -> concatMap (getDeps . snd) cse
@@ -131,12 +121,10 @@ getDeps term = case term of
   Src _ val     -> getDeps val
   _             -> []
 
--- CHANGED: Updated getDepsCtr to handle new Ctr structure with Tele
 -- Gets dependencies of a constructor
 getDepsCtr :: Ctr -> [String]
 getDepsCtr (Ctr _ tele) = getDepsTele tele
 
--- CHANGED: Added getDepsTele function to handle Tele dependencies
 -- Gets dependencies of a telescope
 getDepsTele :: Tele -> [String]
 getDepsTele (TRet term) = getDeps term
@@ -169,6 +157,7 @@ main = do
         ["show", input]  -> runCommand basePath apiShow input
         ["to-js", input] -> runCommand basePath apiToJS input
         ["deps", input]  -> runDeps basePath input
+        ["rdeps", input] -> runRDeps basePath input
         ["help"]         -> printHelp
         []               -> printHelp
         _                -> printHelp
@@ -183,7 +172,15 @@ runDeps :: FilePath -> String -> IO ()
 runDeps basePath input = do
   let name = extractName basePath input
   book <- apiLoad basePath M.empty name
-  let deps = S.toList $ getAllDeps book name
+  case M.lookup name book of
+    Just term -> forM_ (nub $ getDeps term) $ \dep -> putStrLn dep
+    Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+
+runRDeps :: FilePath -> String -> IO ()
+runRDeps basePath input = do
+  let name = extractName basePath input
+  book <- apiLoad basePath M.empty name
+  let deps = S.toList $ S.delete name $ getAllDeps book name
   forM_ deps $ \dep -> putStrLn dep
 
 printHelp :: IO ()
@@ -193,5 +190,7 @@ printHelp = do
   putStrLn "  kind run   <name|path> # Normalizes the specified definition"
   putStrLn "  kind show  <name|path> # Stringifies the specified definition"
   putStrLn "  kind to-js <name|path> # Compiles the specified definition to JavaScript"
-  putStrLn "  kind deps  <name|path> # Shows dependencies of the specified definition"
+  putStrLn "  kind deps  <name|path> # Shows immediate dependencies of the specified definition"
+  putStrLn "  kind rdeps <name|path> # Shows all dependencies of the specified definition recursively"
   putStrLn "  kind help              # Shows this help message"
+
