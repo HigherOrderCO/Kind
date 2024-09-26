@@ -47,23 +47,24 @@ extractName basePath = dropBasePath . dropExtension where
 
 apiLoad :: FilePath -> Book -> String -> IO Book
 apiLoad basePath book name = do
-  if M.member name book
-    then return book
-    else do
-      let file = basePath </> name ++ ".kind"
-      fileExists <- doesFileExist file
-      if fileExists then
-        loadFile file
+  trace ("load " ++ name) $
+    if M.member name book
+      then return book
       else do
-        putStrLn $ "Error: Definition '" ++ name ++ "' not found."
-        exitFailure
-  where
-    loadFile filePath = do
-      code  <- readFile filePath
-      book0 <- doParseBook filePath code
-      let book1 = M.union book0 book
-      let deps  = getDeps (M.findWithDefault Set name book0)
-      foldM (apiLoad basePath) book1 deps
+        let file = basePath </> name ++ ".kind"
+        fileExists <- doesFileExist file
+        if fileExists then
+          loadFile file
+        else do
+          putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+          exitFailure
+    where
+      loadFile filePath = do
+        code  <- readFile filePath
+        book0 <- doParseBook filePath code
+        let book1 = M.union book0 book
+        let deps  = getDeps (M.findWithDefault Set name book0)
+        foldM (apiLoad basePath) book1 deps
 
 -- Normalizes a term
 apiNormal :: Book -> String -> IO ()

@@ -80,10 +80,10 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
     return U32
 
   go (Txt txt) dep = do
-    return (Ref "String")
+    return (Ref "Base/String/String")
 
   go (Nat val) dep = do
-    return (Ref "Nat")
+    return (Ref "Base/Nat/Nat")
 
   go (Op2 opr fst snd) dep = do
     envSusp (Check Nothing fst U32 dep)

@@ -74,11 +74,11 @@ reduce book fill lv term = {-trace (termShower False term 0) $-} red term where
     Nothing  -> error $ "Undefined reference: " ++ nam
   ref nam = Ref nam
 
-  txt []     = red (Ref "String/cons")
-  txt (x:xs) = red (App (App (Ref "String/nil") (Num (ord x))) (Txt xs))
+  txt []     = red (Ref "Base/String/cons")
+  txt (x:xs) = red (App (App (Ref "Base/String/nil") (Num (ord x))) (Txt xs))
 
-  nat 0 = Ref "Nat/zero"
-  nat n = App (Ref "Nat/succ") (nat (n - 1))
+  nat 0 = Ref "Base/Nat/zero"
+  nat n = App (Ref "Base/Nat/succ") (nat (n - 1))
 
 -- Normalization
 -- -------------
