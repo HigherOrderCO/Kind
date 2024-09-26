@@ -39,10 +39,10 @@ findBookDir dir = do
 
 -- Extracts the definition name from a file path or name
 extractName :: FilePath -> String -> String
-extractName basePath = dropSlashType . dropBasePath . dropExtension where
-  dropSlashType name
-    | isSuffixOf "/Type" name = take (length name - 5) name
-    | otherwise               = name
+extractName basePath = {-dropSlashType .-} dropBasePath . dropExtension where
+  -- dropSlashType name
+    -- | isSuffixOf "/Type" name = take (length name - 5) name
+    -- | otherwise               = name
   dropExtension path
     | isExtensionOf "kind" path = System.FilePath.dropExtension path
     | otherwise                 = path
@@ -54,17 +54,17 @@ apiLoad basePath book name = do
     then return book
     else do
       let file = basePath </> name ++ ".kind"
-      let fall = basePath </> name </> "Type.kind"
+      -- let fall = basePath </> name </> "Type.kind"
       fileExists <- doesFileExist file
-      fallExists <- doesFileExist fall
+      -- fallExists <- doesFileExist fall
       if fileExists then
         loadFile file
-      else if fallExists then
-        loadFile fall
+      -- else if fallExists then
+        -- loadFile fall
       else do
         putStrLn $ "Error: Definition '" ++ name ++ "' not found."
-        putStrLn $ file
-        putStrLn $ fall
+        -- putStrLn $ file
+        -- putStrLn $ fall
         exitFailure
   where
     loadFile filePath = do
