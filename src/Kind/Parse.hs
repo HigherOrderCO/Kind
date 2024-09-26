@@ -31,7 +31,7 @@ doParseTerm filename input =
     Left err -> do
       showParseError filename input err
       die ""
-    Right term -> return $ bind term []
+    Right term -> return $ bind (genMetas term) []
 
 doParseUses :: String -> String -> IO Uses
 doParseUses filename input =
@@ -303,8 +303,8 @@ parseHol = withSrc $ do
 
 parseMet = withSrc $ do
   P.char '_'
-  uid <- read <$> P.many1 P.digit
-  return $ Met uid []
+  -- uid <- read <$> P.many1 P.digit
+  return $ Met 0 []
 
 parseName :: Parser String
 parseName = do
@@ -353,7 +353,7 @@ parseDef = do
   let name' = expandUses uses name
   case typ of
     Nothing -> return (name', val)
-    Just t  -> return (name', bind (Ann False val t) [])
+    Just t  -> return (name', bind (genMetas (Ann False val t)) [])
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do
