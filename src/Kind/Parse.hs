@@ -213,10 +213,19 @@ parseCon = withSrc $ do
   nam <- parseName
   parseTrivia
   P.char '{'
-  arg <- P.many $ P.try $ parseTerm
-  parseTrivia
+  args <- P.many $ P.try $ do
+    parseTrivia
+    fieldName <- P.optionMaybe $ do
+      name <- parseName
+      parseTrivia
+      P.char ':'
+      parseTrivia
+      return name
+    arg <- parseTerm
+    parseTrivia
+    return arg
   P.char '}'
-  return $ Con nam arg
+  return $ Con nam args
 
 parseSwi = withSrc $ do
   P.try $ do
