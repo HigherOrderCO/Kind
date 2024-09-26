@@ -86,7 +86,7 @@ termShower small term dep = case term of
   Txt txt -> concat ["\"" , txt , "\""]
   Nat val -> show val
   Hol nam ctx -> concat ["?" , nam]
-  Met uid spn -> concat ["(_", strSpn (reverse spn) dep, ")"]
+  Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
   Var nam idx -> nam
   Src src val -> if small
     then termShower small val dep
@@ -133,7 +133,7 @@ operShow LSH = "<<"
 operShow RSH = ">>"
 
 contextShow :: Book -> Fill -> [Term] -> Int -> String
-contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) (reverse ctx)
+contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) ctx
 
 contextShowAnn :: Book -> Fill -> Term -> Int -> String
 contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True val dep, " : ", termShower True typ dep]

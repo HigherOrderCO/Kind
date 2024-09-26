@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Equal where
 
 import Control.Monad (zipWithM)
@@ -33,7 +35,10 @@ equal a b dep = debug ("== " ++ termShower False a dep ++ "\n.. " ++ termShower 
 
 -- Checks if two terms are already syntactically identical
 identical :: Term -> Term -> Int -> Env Bool
-identical a b dep = debug ("ID " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep) $ go a b dep where
+identical a b dep = do
+  fill <- envGetFill
+  debug ("ID " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep ++ "\n" ++ (unlines $ map (\(k,v) -> "~" ++ show k ++ " = " ++ termShower False v dep) $ IM.toList fill)) $ go a b dep
+ where
   go (All aNam aInp aBod) (All bNam bInp bBod) dep = do
     iInp <- identical aInp bInp dep
     iBod <- identical (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
@@ -221,7 +226,7 @@ unify uid spn b dep = do
     -- If all is ok, generate the solution and return true
     if not solved && solvable && no_loops then do
       let solution = solve book fill uid spn b
-      debug ("solve: " ++ show uid ++ " " ++ termShower False solution dep) $ envFill uid solution
+      debug ("solve: " ++ show uid ++ " " ++ termShower False solution dep ++ " | spn: " ++ show (map (\t -> termShower False t dep) spn)) $ envFill uid solution
       return True
 
     -- Otherwise, return true iff both are identical metavars

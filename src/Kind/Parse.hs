@@ -213,19 +213,10 @@ parseCon = withSrc $ do
   nam <- parseName
   parseTrivia
   P.char '{'
-  args <- P.many $ P.try $ do
-    parseTrivia
-    fieldName <- P.optionMaybe $ do
-      name <- parseName
-      parseTrivia
-      P.char ':'
-      parseTrivia
-      return name
-    arg <- parseTerm
-    parseTrivia
-    return arg
+  arg <- P.many $ P.try $ parseTerm
+  parseTrivia
   P.char '}'
-  return $ Con nam args
+  return $ Con nam arg
 
 parseSwi = withSrc $ do
   P.try $ do
@@ -363,7 +354,6 @@ parseDef = do
   case typ of
     Nothing -> return (name', val)
     Just t  -> return (name', bind (Ann False val t) [])
-
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do

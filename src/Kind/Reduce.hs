@@ -228,8 +228,8 @@ bind (Op2 opr fst snd) ctx =
   Op2 opr fst' snd'
 bind (Txt txt) ctx = Txt txt
 bind (Nat val) ctx = Nat val
-bind (Hol nam ctxs) ctx = Hol nam (map snd ctx)
-bind (Met uid spn) ctx = Met uid (map snd ctx)
+bind (Hol nam ctxs) ctx = Hol nam (reverse (map snd ctx))
+bind (Met uid spn) ctx = Met uid []
 bind (Var nam idx) ctx =
   case lookup nam ctx of
     Just x  -> x
