@@ -116,7 +116,7 @@ getDeps term = case term of
   Slf _ typ bod -> getDeps typ ++ getDeps (bod Set)
   Ins val       -> getDeps val
   Dat scp cts   -> concatMap getDeps scp ++ concatMap getDepsCtr cts
-  Con _ arg     -> concatMap getDeps arg
+  Con _ arg     -> concatMap (getDeps . snd) arg
   Mat cse       -> concatMap (getDeps . snd) cse
   Let _ val bod -> getDeps val ++ getDeps (bod Set)
   Use _ val bod -> getDeps val ++ getDeps (bod Set)

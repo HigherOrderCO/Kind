@@ -56,7 +56,6 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
         envLog (Error Nothing (Hol "self-type" []) vtyp (Ins val) dep)
         envFail
 
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts) dep = do
     forM_ cts $ \ (Ctr _ tele) -> do
       checkTele Nothing tele Set dep
@@ -151,7 +150,6 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
         infer (Ins val) dep
         return ()
 
-  -- CHANGED: Updated Con case to handle new Ctr structure with Tele
   go src val@(Con nam arg) typx dep = do
     book <- envGetBook
     fill <- envGetFill
@@ -168,7 +166,6 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
         infer (Con nam arg) dep
         return ()
 
-  -- CHANGED: Updated Mat case to handle new Ctr structure with Tele
   go src (Mat cse) typx dep = do
     book <- envGetBook
     fill <- envGetFill
@@ -256,7 +253,6 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
       envLog (Error src expected detected term dep)
       envFail
 
--- CHANGED: Added checkTele function
 checkTele :: Maybe Cod -> Tele -> Term -> Int -> Env ()
 checkTele src tele typ dep = case tele of
   TRet term -> check src term typ dep
@@ -264,28 +260,30 @@ checkTele src tele typ dep = case tele of
     check src inp Set dep
     checkTele src (bod (Ann False (Var nam dep) inp)) typ (dep + 1)
 
--- CHANGED: Added checkConAgainstTele function
-checkConAgainstTele :: Maybe Cod -> [Term] -> Tele -> Int -> Env ()
+checkConAgainstTele :: Maybe Cod -> [(Maybe String, Term)] -> Tele -> Int -> Env ()
 checkConAgainstTele src [] (TRet _) _ = return ()
-checkConAgainstTele src (arg:args) (TExt nam inp bod) dep = do
-  check src arg inp dep
+checkConAgainstTele src ((maybeField, arg):args) (TExt nam inp bod) dep = do
+  case maybeField of
+    Just field -> if field /= nam
+      then do
+        envLog (Error src (Hol ("expected:" ++ nam) []) (Hol ("detected:" ++ field) []) (Hol "field_mismatch" []) dep)
+        envFail
+      else check src arg inp dep
+    Nothing -> check src arg inp dep
   checkConAgainstTele src args (bod arg) dep
 checkConAgainstTele src _ _ dep = do
   envLog (Error src (Hol "constructor_arity_mismatch" []) (Hol "unknown_type" []) (Hol "constructor" []) dep)
   envFail
 
--- CHANGED: ....
 teleToType :: Tele -> Term -> Int -> Term
 teleToType (TRet _)           ret _   = ret
 teleToType (TExt nam inp bod) ret dep = All nam inp (\x -> teleToType (bod x) ret (dep + 1))
 
--- CHANGED: Helper function to extract both arguments and return type from a telescope
-teleToTerm :: Tele -> Int -> ([Term], Term)
+teleToTerm :: Tele -> Int -> ([(Maybe String, Term)], Term)
 teleToTerm tele dep = go tele [] dep where
   go (TRet ret)         args _   = (reverse args, ret)
-  go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Var nam dep) : args) (dep + 1)
+  go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
 
--- CHANGED: ...
 extractEqualities :: Term -> Term -> Int -> [(Int, Term)]
 extractEqualities (Dat as _) (Dat bs _) dep = zipWith go as bs where
   go (Var _ i) v = (i, v)

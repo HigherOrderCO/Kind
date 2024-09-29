@@ -32,7 +32,7 @@ termToJS term dep = case term of
   Dat _ _ ->
     "null"
   Con nam arg ->
-    let arg' = map (\x -> termToJS x dep) arg
+    let arg' = map (\(f, x) -> termToJS x dep) arg
         fds' = concat (zipWith (\i x -> concat [", x", show i, ": ", x]) [0..] arg')
     in concat ["{$: \"", nameToJS nam, "\", length: ", show (length arg), fds', "}"]
   Mat cse ->

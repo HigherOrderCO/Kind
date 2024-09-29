@@ -1,5 +1,3 @@
--- //./Type.hs//
-
 module Kind.Equal where
 
 import Control.Monad (zipWithM)
@@ -55,7 +53,6 @@ identical a b dep = do
     identical aVal b dep
   go a (Ins bVal) dep =
     identical a bVal dep
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat aScp aCts) (Dat bScp bCts) dep = do
     iSlf <- zipWithM (\ax bx -> identical ax bx dep) aScp bScp
     if and iSlf && length aCts == length bCts
@@ -63,7 +60,7 @@ identical a b dep = do
       else return False
   go (Con aNam aArg) (Con bNam bArg) dep = do
     if aNam == bNam && length aArg == length bArg
-      then and <$> zipWithM (\aArg bArg -> identical aArg bArg dep) aArg bArg
+      then and <$> zipWithM (\(_, aVal) (_, bVal) -> identical aVal bVal dep) aArg bArg
       else return False
   go (Mat aCse) (Mat bCse) dep = do
     if length aCse == length bCse
@@ -124,7 +121,6 @@ identical a b dep = do
   go a b dep =
     return False
 
-  -- CHANGED: Updated goCtr to handle new Ctr structure with Tele
   goCtr (Ctr aCNm aTele) (Ctr bCNm bTele) = do
     if aCNm == bCNm
       then goTele aTele bTele dep
@@ -135,7 +131,6 @@ identical a b dep = do
       then identical aCBod bCBod dep
       else return False
 
-  -- CHANGED: Added goTele function to handle Tele equality
   goTele :: Tele -> Tele -> Int -> Env Bool
   goTele (TRet aTerm) (TRet bTerm) dep = identical aTerm bTerm dep
   goTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep = do
@@ -160,7 +155,6 @@ similar a b dep = go a b dep where
   go (Slf aNam aTyp aBod) (Slf bNam bTyp bBod) dep = do
     book <- envGetBook
     similar (reduce book IM.empty 0 aTyp) (reduce book IM.empty 0 bTyp) dep
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat aScp aCts) (Dat bScp bCts) dep = do
     eSlf <- zipWithM (\ax bx -> equal ax bx dep) aScp bScp
     if and eSlf && length aCts == length bCts
@@ -168,7 +162,7 @@ similar a b dep = go a b dep where
       else return False
   go (Con aNam aArg) (Con bNam bArg) dep = do
     if aNam == bNam && length aArg == length bArg
-      then and <$> zipWithM (\a b -> equal a b dep) aArg bArg
+      then and <$> zipWithM (\(_, aVal) (_, bVal) -> equal aVal bVal dep) aArg bArg
       else return False
   go (Mat aCse) (Mat bCse) dep = do
     if length aCse == length bCse
@@ -184,7 +178,6 @@ similar a b dep = go a b dep where
     return (eZer && eSuc)
   go a b dep = identical a b dep
 
-  -- CHANGED: Updated goCtr to handle new Ctr structure with Tele
   goCtr (Ctr aCNm aTele) (Ctr bCNm bTele) = do
     if aCNm == bCNm
       then goTele aTele bTele dep
@@ -195,7 +188,6 @@ similar a b dep = go a b dep where
       then equal aCBod bCBod dep
       else return False
 
-  -- CHANGED: Added goTele function to handle Tele similarity
   goTele :: Tele -> Tele -> Int -> Env Bool
   goTele (TRet aTerm) (TRet bTerm) dep = equal aTerm bTerm dep
   goTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep = do
@@ -273,13 +265,12 @@ occur book fill uid term dep = go term dep where
   go (Ins val) dep =
     let o_val = go val dep
     in o_val
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts) dep =
     let o_scp = any (\x -> go x dep) scp
         o_cts = any (\(Ctr _ tele) -> goTele tele dep) cts
     in o_scp || o_cts
   go (Con nam arg) dep =
-    any (\x -> go x dep) arg
+    any (\(_, x) -> go x dep) arg
   go (Mat cse) dep =
     any (\ (_, cbod) -> go cbod dep) cse
   go (Let nam val bod) dep =
@@ -310,7 +301,6 @@ occur book fill uid term dep = go term dep where
   go _ dep =
     False
 
-  -- CHANGED: Added goTele function to handle Tele occurrence check
   goTele :: Tele -> Int -> Bool
   goTele (TRet term) dep = go term dep
   goTele (TExt nam typ bod) dep =

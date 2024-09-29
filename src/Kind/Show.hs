@@ -53,8 +53,12 @@ termShower small term dep = case term of
           "#" ++ nm ++ " " ++ teleShower small tele dep) cts)
     in concat ["#[", scp', "]{ ", cts', " }"]
   Con nam arg ->
-    let arg' = unwords (map (\x -> termShower small x dep) arg)
+    let arg' = unwords (map showArg arg)
     in concat ["#", nam, "{", arg', "}"]
+    where
+      showArg (maybeField, term) = case maybeField of
+        Just field -> field ++ ": " ++ termShower small term dep
+        Nothing -> termShower small term dep
   Mat cse ->
     let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShower small cbod dep) cse)
     in concat ["λ{ ", cse', " }"]
