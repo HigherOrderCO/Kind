@@ -1,6 +1,6 @@
 module Kind.API where
 
-import Control.Monad (forM_, foldM)
+import Control.Monad (forM, forM_, foldM)
 import Data.List (stripPrefix, isSuffixOf, nub)
 import Kind.Check
 import Kind.Compile
@@ -9,9 +9,9 @@ import Kind.Parse
 import Kind.Reduce
 import Kind.Show
 import Kind.Type
-import System.Directory (getCurrentDirectory, doesDirectoryExist, doesFileExist)
+import System.Directory (getCurrentDirectory, doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.Environment (getArgs)
-import System.Exit (exitFailure)
+import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
 import System.FilePath (takeDirectory, (</>), takeFileName, dropExtension, isExtensionOf)
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
@@ -45,58 +45,113 @@ extractName basePath = dropBasePath . dropExtension where
     | otherwise                 = path
   dropBasePath path = maybe path id (stripPrefix (basePath++"/") path)
 
-apiLoad :: FilePath -> Book -> String -> IO Book
+-- New apiLoad function that returns the book, a map of file paths to top-level definitions, and a map of dependencies
+apiLoad :: FilePath -> Book -> String -> IO (Either String (Book, M.Map FilePath [String], M.Map FilePath [String]))
 apiLoad basePath book name = do
   if M.member name book
-    then return book
+    then return $ Right (book, M.empty, M.empty)
     else do
       let file = basePath </> name ++ ".kind"
       fileExists <- doesFileExist file
       if fileExists then
         loadFile file
-      else do
-        putStrLn $ "Error: Definition '" ++ name ++ "' not found."
-        exitFailure
+      else
+        return $ Left $ "Error: Definition '" ++ name ++ "' not found."
   where
     loadFile filePath = do
       code  <- readFile filePath
       book0 <- doParseBook filePath code
       let book1 = M.union book0 book
+      let defs  = M.keys book0
       let deps  = concatMap (getDeps . snd) (M.toList book0)
-      foldM (apiLoad basePath) book1 deps
+      let defs' = M.singleton filePath defs
+      let deps' = M.singleton filePath deps
+      foldDeps book1 defs' deps' deps
+    foldDeps book defs deps [] = return $ Right (book, defs, deps)
+    foldDeps book defs deps (dep:rest) = do
+      result <- apiLoad basePath book dep
+      case result of
+        Left err -> return $ Left err
+        Right (book', defs', deps') -> foldDeps book' (M.union defs defs') (M.union deps deps') rest
 
 -- Normalizes a term
-apiNormal :: Book -> String -> IO ()
+apiNormal :: Book -> String -> IO (Either String ())
 apiNormal book name = case M.lookup name book of
   Just term -> do
     result <- infoShow book IM.empty (Print (normal book IM.empty 2 term 0) 0)
     putStrLn result
-  Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+    return $ Right ()
+  Nothing -> return $ Left $ "Error: Definition '" ++ name ++ "' not found."
 
 -- Type-checks all terms in a file
-apiCheckFile :: Book -> FilePath -> IO ()
-apiCheckFile book filePath = do
-  code <- readFile filePath
-  fileBook <- doParseBook filePath code
-  let termsToCheck = M.toList fileBook
-  forM_ termsToCheck $ \(name, term) -> do
-    putStrLn $ "Checking " ++ name ++ ":"
+apiCheckFile :: Book -> M.Map FilePath [String] -> FilePath -> IO (Either String ())
+apiCheckFile book defs path = do
+  let termsToCheck = case M.lookup path defs of
+        Just names -> [(name, term) | name <- names, Just term <- [M.lookup name book]]
+        Nothing    -> []
+  results <- forM termsToCheck $ \(name, term) -> do
     case envRun (doCheck term) book of
-      Done state value -> apiPrintLogs state >> putStrLn "Check."
-      Fail state       -> apiPrintLogs state >> putStrLn "Error."
-    putStrLn ""
+      Done state _ -> do
+        putStrLn $ "\x1b[32m✓ " ++ name ++ "\x1b[0m"
+        return $ Right ()
+      Fail _ -> do
+        putStrLn $ "\x1b[31m✗ " ++ name ++ "\x1b[0m"
+        return $ Left $ "Error."
+  return $ sequence_ results
+
+apiCheckAll :: FilePath -> IO (Either String ())
+apiCheckAll basePath = do
+  files <- findKindFiles basePath
+  result <- foldM (\acc f -> case acc of
+    Left err -> return $ Left err
+    Right (b, d, p) -> do
+      res <- apiLoad basePath b (extractName basePath f)
+      case res of
+        Left err -> return $ Left err
+        Right (b', d', p') -> return $ Right (b', M.union d d', M.union p p')
+    ) (Right (M.empty, M.empty, M.empty)) files
+  case result of
+    Left err -> return $ Left err
+    Right (book, defs, _) -> do
+      results <- forM (M.toList defs) $ \(_, names) -> do
+        forM names $ \name -> do
+          case M.lookup name book of
+            Just term -> case envRun (doCheck term) book of
+              Done _ _ -> do
+                putStrLn $ "\x1b[32m✓ " ++ name ++ "\x1b[0m"
+                return $ Right ()
+              Fail _ -> do
+                putStrLn $ "\x1b[31m✗ " ++ name ++ "\x1b[0m"
+                return $ Left $ "Error."
+            Nothing -> return $ Left $ "Definition not found: " ++ name
+      return $ sequence_ (concat results)
+  where
+    findKindFiles :: FilePath -> IO [FilePath]
+    findKindFiles dir = do
+      contents <- getDirectoryContents dir
+      let properNames = filter (`notElem` [".", ".."]) contents
+      paths <- forM properNames $ \name -> do
+        let path = dir </> name
+        isDirectory <- doesDirectoryExist path
+        if isDirectory
+          then findKindFiles path
+          else return [path | ".kind" `isSuffixOf` path]
+      return (concat paths)
 
 -- Shows a term
-apiShow :: Book -> String -> IO ()
+apiShow :: Book -> String -> IO (Either String ())
 apiShow book name = case M.lookup name book of
-  Just term -> putStrLn $ termShow term
-  Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+  Just term -> do
+    putStrLn $ termShow term
+    return $ Right ()
+  Nothing -> return $ Left $ "Error: Definition '" ++ name ++ "' not found."
 
 -- Compiles the whole book to JS
-apiToJS :: Book -> String -> IO ()
+apiToJS :: Book -> String -> IO (Either String ())
 apiToJS book name = do
   let jsCode = compileJS book
   putStrLn jsCode
+  return $ Right ()
 
 -- Prints logs from the type-checker
 apiPrintLogs :: State -> IO ()
@@ -153,9 +208,12 @@ main = do
   currentDir <- getCurrentDirectory
   maybeBasePath <- findBookDir currentDir
   case maybeBasePath of
-    Nothing -> putStrLn "Error: No 'book' directory found in the path."
+    Nothing -> do
+      putStrLn "Error: No 'book' directory found in the path."
+      exitWith (ExitFailure 1)
     Just basePath -> do
-      case args of
+      result <- case args of
+        ["check"]        -> apiCheckAll basePath
         ["check", input] -> runCheckCommand basePath input
         ["run", input]   -> runCommand basePath apiNormal input
         ["show", input]  -> runCommand basePath apiShow input
@@ -165,38 +223,56 @@ main = do
         ["help"]         -> printHelp
         []               -> printHelp
         _                -> printHelp
+      case result of
+        Left err -> do
+          putStrLn err
+          exitWith (ExitFailure 1)
+        Right _ -> exitWith ExitSuccess
 
-runCommand :: FilePath -> (Book -> String -> IO ()) -> String -> IO ()
+runCommand :: FilePath -> (Book -> String -> IO (Either String ())) -> String -> IO (Either String ())
 runCommand basePath cmd input = do
   let name = extractName basePath input
-  book <- apiLoad basePath M.empty name
-  cmd book name
+  result <- apiLoad basePath M.empty name
+  case result of
+    Left err -> return $ Left err
+    Right (book, _, _) -> cmd book name
 
-runCheckCommand :: FilePath -> String -> IO ()
+runCheckCommand :: FilePath -> String -> IO (Either String ())
 runCheckCommand basePath input = do
   let name = extractName basePath input
   let filePath = basePath </> name ++ ".kind"
-  book <- apiLoad basePath M.empty name
-  apiCheckFile book filePath
+  result <- apiLoad basePath M.empty name
+  case result of
+    Left err -> return $ Left err
+    Right (book, defs, _) -> apiCheckFile book defs filePath
 
-runDeps :: FilePath -> String -> IO ()
+runDeps :: FilePath -> String -> IO (Either String ())
 runDeps basePath input = do
   let name = extractName basePath input
-  book <- apiLoad basePath M.empty name
-  case M.lookup name book of
-    Just term -> forM_ (filter (/= name) $ nub $ getDeps term) $ \dep -> putStrLn dep
-    Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+  result <- apiLoad basePath M.empty name
+  case result of
+    Left err -> return $ Left err
+    Right (book, _, _) -> case M.lookup name book of
+      Just term -> do
+        forM_ (filter (/= name) $ nub $ getDeps term) $ \dep -> putStrLn dep
+        return $ Right ()
+      Nothing -> return $ Left $ "Error: Definition '" ++ name ++ "' not found."
 
-runRDeps :: FilePath -> String -> IO ()
+runRDeps :: FilePath -> String -> IO (Either String ())
 runRDeps basePath input = do
   let name = extractName basePath input
-  book <- apiLoad basePath M.empty name
-  let deps = S.toList $ S.delete name $ getAllDeps book name
-  forM_ deps $ \dep -> putStrLn dep
+  result <- apiLoad basePath M.empty name
+  case result of
+    Left err -> return $ Left err
+    Right (book, _, _) -> do
+      let deps = S.toList $ S.delete name $ getAllDeps book name
+      forM_ deps $ \dep -> putStrLn dep
+      return $ Right ()
 
-printHelp :: IO ()
+printHelp :: IO (Either String ())
 printHelp = do
   putStrLn "Kind usage:"
+  putStrLn "  kind check            # Checks all .kind files in the current directory and subdirectories"
   putStrLn "  kind check <name|path> # Type-checks all definitions in the specified file"
   putStrLn "  kind run   <name|path> # Normalizes the specified definition"
   putStrLn "  kind show  <name|path> # Stringifies the specified definition"
@@ -204,4 +280,4 @@ printHelp = do
   putStrLn "  kind deps  <name|path> # Shows immediate dependencies of the specified definition"
   putStrLn "  kind rdeps <name|path> # Shows all dependencies of the specified definition recursively"
   putStrLn "  kind help              # Shows this help message"
-
+  return $ Right ()
