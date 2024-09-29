@@ -90,13 +90,17 @@ apiCheckFile book defs path = do
         Just names -> [(name, term) | name <- names, Just term <- [M.lookup name book]]
         Nothing    -> []
   results <- forM termsToCheck $ \(name, term) -> do
+    putStrLn $ "Checking " ++ name ++ ":"
     case envRun (doCheck term) book of
-      Done state _ -> do
+      Done state value -> do
+        apiPrintLogs state
         putStrLn $ "\x1b[32m✓ " ++ name ++ "\x1b[0m"
         return $ Right ()
-      Fail _ -> do
+      Fail state -> do
+        apiPrintLogs state
         putStrLn $ "\x1b[31m✗ " ++ name ++ "\x1b[0m"
         return $ Left $ "Error."
+  putStrLn ""
   return $ sequence_ results
 
 apiCheckAll :: FilePath -> IO (Either String ())
@@ -272,7 +276,7 @@ runRDeps basePath input = do
 printHelp :: IO (Either String ())
 printHelp = do
   putStrLn "Kind usage:"
-  putStrLn "  kind check            # Checks all .kind files in the current directory and subdirectories"
+  putStrLn "  kind check             # Checks all .kind files in the current directory and subdirectories"
   putStrLn "  kind check <name|path> # Type-checks all definitions in the specified file"
   putStrLn "  kind run   <name|path> # Normalizes the specified definition"
   putStrLn "  kind show  <name|path> # Stringifies the specified definition"
@@ -281,3 +285,4 @@ printHelp = do
   putStrLn "  kind rdeps <name|path> # Shows all dependencies of the specified definition recursively"
   putStrLn "  kind help              # Shows this help message"
   return $ Right ()
+
