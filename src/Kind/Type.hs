@@ -29,7 +29,7 @@ data Term
   | Dat [Term] [Ctr]
 
   -- Constructor: #CN { x0 x1 ... }
-  | Con String [Term]
+  | Con String [(Maybe String, Term)]
 
   -- Match: λ{ #C0:B0 #C1:B1 ... }
   | Mat [(String, Term)]

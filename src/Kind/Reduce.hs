@@ -16,7 +16,7 @@ import qualified Data.IntMap.Strict as IM
 -- Evaluates a term to weak normal form
 -- 'lv' defines when to expand refs: 0 = never, 1 = on redexes
 reduce :: Book -> Fill -> Int -> Term -> Term
-reduce book fill lv term = {-trace (termShower False term 0) $-} red term where
+reduce book fill lv term = red term where
 
   red (App fun arg)     = app (red fun) arg
   red (Ann chk val typ) = red val
@@ -39,7 +39,7 @@ reduce book fill lv term = {-trace (termShower False term 0) $-} red term where
   app fun           arg = App fun arg
 
   mat cse (Con cnam carg) = case lookup cnam cse of
-    Just cx -> red (foldl App cx carg)
+    Just cx -> red (foldl App cx (map snd carg))
     Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match."
   mat cse arg = App (Mat cse) arg
 
@@ -107,7 +107,6 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Ins val) dep =
     let nf_val = normal book fill lv val dep in
     Ins nf_val
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts) dep =
     let go_ctr = (\ (Ctr nm tele) ->
           let nf_tele = normalTele book fill lv tele dep in
@@ -116,7 +115,7 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_cts = map go_ctr cts in
     Dat nf_scp nf_cts
   go (Con nam arg) dep =
-    let nf_arg = map (\a -> normal book fill lv a dep) arg in
+    let nf_arg = map (\(f, t) -> (f, normal book fill lv t dep)) arg in
     Con nam nf_arg
   go (Mat cse) dep =
     let nf_cse = map (\(cnam, cbod) -> (cnam, normal book fill lv cbod dep)) cse in
@@ -150,7 +149,6 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     Src src nf_val
   go (Met uid spn) dep = Met uid spn -- TODO: normalize spine
 
--- CHANGED: Added normalTele function
 normalTele :: Book -> Fill -> Int -> Tele -> Int -> Tele
 normalTele book fill lv tele dep = case tele of
   TRet term ->
@@ -188,7 +186,6 @@ bind (Slf nam typ bod) ctx =
 bind (Ins val) ctx =
   let val' = bind val ctx in
   Ins val'
--- CHANGED: Updated Dat case to handle new Ctr structure with Tele
 bind (Dat scp cts) ctx =
   let scp' = map (\x -> bind x ctx) scp in
   let cts' = map (\x -> bindCtr x ctx) cts in
@@ -198,7 +195,7 @@ bind (Dat scp cts) ctx =
     bindTele (TRet term)        ctx = TRet (bind term ctx)
     bindTele (TExt nam typ bod) ctx = TExt nam (bind typ ctx) $ \x -> bindTele (bod x) ((nam, x) : ctx)
 bind (Con nam arg) ctx =
-  let arg' = map (\x -> bind x ctx) arg in
+  let arg' = map (\(f, x) -> (f, bind x ctx)) arg in
   Con nam arg'
 bind (Mat cse) ctx =
   let cse' = map (\(cn,cb) -> (cn, bind cb ctx)) cse in
@@ -268,7 +265,7 @@ genMetas term = fst (go term 0) where
         (cts', c2) = foldr (\(Ctr nm tele) (acc, c') -> let (tele', c'') = goTele tele c' in (Ctr nm tele' : acc, c'')) ([], c1) cts
     in (Dat scp' cts', c2)
   go (Con nam arg) c = 
-    let (arg', c1) = foldr (\t (acc, c') -> let (t', c'') = go t c' in (t':acc, c'')) ([], c) arg
+    let (arg', c1) = foldr (\(f, t) (acc, c') -> let (t', c'') = go t c' in ((f, t'):acc, c'')) ([], c) arg
     in (Con nam arg', c1)
   go (Mat cse) c = 
     let (cse', c1) = foldr (\(cn, cb) (acc, c') -> let (cb', c'') = go cb c' in ((cn, cb'):acc, c'')) ([], c) cse
@@ -318,9 +315,8 @@ subst lvl neo term = go term where
   go (Ann chk val typ) = Ann chk (go val) (go typ)
   go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
   go (Ins val)         = Ins (go val)
-  -- CHANGED: Updated Dat case to handle new Ctr structure with Tele
   go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
-  go (Con nam arg)     = Con nam (map go arg)
+  go (Con nam arg)     = Con nam (map (\(f, t) -> (f, go t)) arg)
   go (Mat cse)         = Mat (map goCse cse)
   go (Swi zer suc)     = Swi (go zer) (go suc)
   go (Ref nam)         = Ref nam
