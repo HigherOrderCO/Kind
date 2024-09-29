@@ -62,7 +62,7 @@ apiLoad basePath book name = do
       code  <- readFile filePath
       book0 <- doParseBook filePath code
       let book1 = M.union book0 book
-      let deps  = getDeps (M.findWithDefault Set name book0)
+      let deps  = concatMap (getDeps . snd) (M.toList book0)
       foldM (apiLoad basePath) book1 deps
 
 -- Normalizes a term
@@ -73,14 +73,18 @@ apiNormal book name = case M.lookup name book of
     putStrLn result
   Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
 
--- Type-checks a term
-apiCheck :: Book -> String -> IO ()
-apiCheck book name = case M.lookup name book of
-  Just term -> do
+-- Type-checks all terms in a file
+apiCheckFile :: Book -> FilePath -> IO ()
+apiCheckFile book filePath = do
+  code <- readFile filePath
+  fileBook <- doParseBook filePath code
+  let termsToCheck = M.toList fileBook
+  forM_ termsToCheck $ \(name, term) -> do
+    putStrLn $ "Checking " ++ name ++ ":"
     case envRun (doCheck term) book of
-      Done state value -> apiPrintLogs state >> putStrLn "Done."
-      Fail state       -> apiPrintLogs state >> putStrLn "Fail."
-  Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
+      Done state value -> apiPrintLogs state >> putStrLn "Check."
+      Fail state       -> apiPrintLogs state >> putStrLn "Error."
+    putStrLn ""
 
 -- Shows a term
 apiShow :: Book -> String -> IO ()
@@ -152,7 +156,7 @@ main = do
     Nothing -> putStrLn "Error: No 'book' directory found in the path."
     Just basePath -> do
       case args of
-        ["check", input] -> runCommand basePath apiCheck input
+        ["check", input] -> runCheckCommand basePath input
         ["run", input]   -> runCommand basePath apiNormal input
         ["show", input]  -> runCommand basePath apiShow input
         ["to-js", input] -> runCommand basePath apiToJS input
@@ -167,6 +171,13 @@ runCommand basePath cmd input = do
   let name = extractName basePath input
   book <- apiLoad basePath M.empty name
   cmd book name
+
+runCheckCommand :: FilePath -> String -> IO ()
+runCheckCommand basePath input = do
+  let name = extractName basePath input
+  let filePath = basePath </> name ++ ".kind"
+  book <- apiLoad basePath M.empty name
+  apiCheckFile book filePath
 
 runDeps :: FilePath -> String -> IO ()
 runDeps basePath input = do
@@ -186,7 +197,7 @@ runRDeps basePath input = do
 printHelp :: IO ()
 printHelp = do
   putStrLn "Kind usage:"
-  putStrLn "  kind check <name|path> # Type-checks the specified definition"
+  putStrLn "  kind check <name|path> # Type-checks all definitions in the specified file"
   putStrLn "  kind run   <name|path> # Normalizes the specified definition"
   putStrLn "  kind show  <name|path> # Stringifies the specified definition"
   putStrLn "  kind to-js <name|path> # Compiles the specified definition to JavaScript"
