@@ -373,5 +373,3 @@ expandUses uses name =
   case filter (\(short, _) -> short `isPrefixOf` name) uses of
     (short, long):_ -> long ++ drop (length short) name
     []              -> name
-
-
