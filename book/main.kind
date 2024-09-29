@@ -1,3 +1,7 @@
 main
-: U32
-= 3
+: ∀(n: Nat)
+  Nat
+= λ{
+  #s: λpred #z{}
+  #z: #z{}
+}
