@@ -173,7 +173,7 @@ runDeps basePath input = do
   let name = extractName basePath input
   book <- apiLoad basePath M.empty name
   case M.lookup name book of
-    Just term -> forM_ (nub $ getDeps term) $ \dep -> putStrLn dep
+    Just term -> forM_ (filter (/= name) $ nub $ getDeps term) $ \dep -> putStrLn dep
     Nothing -> putStrLn $ "Error: Definition '" ++ name ++ "' not found."
 
 runRDeps :: FilePath -> String -> IO ()
