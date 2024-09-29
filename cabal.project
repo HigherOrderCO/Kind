@@ -1,0 +1,5 @@
+packages: .
+
+-- Enable -O2 optimization for all packages
+package *
+  optimization: 2
