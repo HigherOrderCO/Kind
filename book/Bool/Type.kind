@@ -1,5 +1,0 @@
-// Defines the Boolean type with two constructors: true and false.
-Bool : * = #[]{
-  #t{} : Bool
-  #f{} : Bool
-}

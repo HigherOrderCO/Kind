@@ -1,4 +1,0 @@
-// Defines String as a List of U32 characters.
-// Each U32 represents a Unicode code point.
-String : *
-= (List U32)

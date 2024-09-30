@@ -1,5 +1,0 @@
-// Represents the nat 0.
-// = The nat 0.
-Nat/z
-: Nat
-= #z{}

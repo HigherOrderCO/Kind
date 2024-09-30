@@ -1,8 +1,0 @@
-// Constructs an empty list.
-// - A: The type of elements in the list.
-// = An empty list of type `(List A)`.
-List/nil
-: ∀(A: *)
-  (List A)
-= λA
-  #nil{}

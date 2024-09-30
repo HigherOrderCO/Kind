@@ -1,6 +1,8 @@
 # Kind-Core
 
-Kind is a very raw and minimal Type Theory.
+Kind is a minimal Proof Checker.
+
+Example files on [https://github.com/HigherOrderCO/MonoBook](HigherOrderCO/MonoBook).
 
 # Usage
 

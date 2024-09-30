@@ -1,7 +1,0 @@
-main
-: ∀(n: Nat)
-  Nat
-= λ{
-  #s: λpred #z{}
-  #z: #z{}
-}

@@ -1,8 +1,0 @@
-Sigma/fst
-: ∀(A: *)
-  ∀(B: ∀(x: A) *)
-  ∀(x: (Sigma A B))
-  A
-= λA λB λ{
-  #new: λfst λsnd fst
-}
