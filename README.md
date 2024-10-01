@@ -100,3 +100,14 @@ The grammar of Kind is defined as follows:
 
 This grammar defines the syntactic structure of the Kind language, including terms, constructors, operators, and other fundamental elements.
 
+
+### Prerequisites
+
+Before installing Kind, ensure that you have GHC (Glasgow Haskell Compiler) version 9.10.1 installed on your system. You can check your GHC version by running:
+
+```
+ghc --version
+```
+
+If you don't have GHC 9.10.1 installed, please visit the official Haskell website (https://www.haskell.org/ghc/) for installation instructions specific to your operating system.
+
