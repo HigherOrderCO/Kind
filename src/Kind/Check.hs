@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Check where
 
 import Kind.Type
@@ -157,8 +159,8 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
       (Dat adt_scp adt_cts) -> do
         case lookup nam (map (\(Ctr cnm tele) -> (cnm, tele)) adt_cts) of
           Just tele -> do
-            checkConAgainstTele Nothing arg tele dep
-            cmp src val typx typx dep
+            rtyp <- checkConAgainstTele Nothing arg tele dep
+            cmp src val rtyp typx dep
           Nothing -> do
             envLog (Error Nothing (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
@@ -260,8 +262,8 @@ checkTele src tele typ dep = case tele of
     check src inp Set dep
     checkTele src (bod (Ann False (Var nam dep) inp)) typ (dep + 1)
 
-checkConAgainstTele :: Maybe Cod -> [(Maybe String, Term)] -> Tele -> Int -> Env ()
-checkConAgainstTele src [] (TRet _) _ = return ()
+checkConAgainstTele :: Maybe Cod -> [(Maybe String, Term)] -> Tele -> Int -> Env Term
+checkConAgainstTele src [] (TRet ret) _ = return ret
 checkConAgainstTele src ((maybeField, arg):args) (TExt nam inp bod) dep = do
   case maybeField of
     Just field -> if field /= nam
@@ -270,7 +272,7 @@ checkConAgainstTele src ((maybeField, arg):args) (TExt nam inp bod) dep = do
         envFail
       else check src arg inp dep
     Nothing -> check src arg inp dep
-  checkConAgainstTele src args (bod arg) dep
+  checkConAgainstTele src args (bod arg) (dep + 1)
 checkConAgainstTele src _ _ dep = do
   envLog (Error src (Hol "constructor_arity_mismatch" []) (Hol "unknown_type" []) (Hol "constructor" []) dep)
   envFail
