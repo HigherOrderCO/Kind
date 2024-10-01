@@ -12,12 +12,12 @@ To install Kind using Haskell and Cabal, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/HigherOrderCO/Kind-Core.git
+   git clone https://github.com/HigherOrderCO/Kind.git
    ```
 
 2. Navigate to the project directory:
    ```
-   cd Kind-core
+   cd Kind
    ```
 
 3. Update Cabal's package list:
