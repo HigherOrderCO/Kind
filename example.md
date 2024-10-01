@@ -1,7 +1,3 @@
----
-title: main.kindc
-description: 'Type and function definitions in Kind, including Bool, Nat, IsTrue, Equal and rewrite'
----
 
 # main.kindc
 
@@ -13,7 +9,7 @@ This file contains fundamental type and function definitions in Kind, a function
 
 Defines the boolean type with two constructors:
 
-```kind
+```hs
 Bool : * = #[]{
   #true{} : Bool
   #false{} : Bool
@@ -24,7 +20,7 @@ Bool : * = #[]{
 
 Defines the natural numbers type with two constructors:
 
-```kind
+```hs
 Nat : * = #[]{
   #zero{} : Nat
   #succ{ pred: Nat } : Nat
@@ -37,7 +33,7 @@ Nat : * = #[]{
 
 A predicate that checks if a boolean is true:
 
-```kind
+```hs
 IsTrue : ∀(b: Bool) * = λb #[b]{
   #indeed{} : (IsTrue #true{})
 };
@@ -47,7 +43,7 @@ IsTrue : ∀(b: Bool) * = λb #[b]{
 
 Defines propositional equality between two values of the same type:
 
-```kind
+```hs
 Equal : ∀(T: *) ∀(a: T) ∀(b: T) * = λT λa λb #[a b]{
   #refl{} : (Equal T a a)
 };
@@ -59,7 +55,7 @@ Equal : ∀(T: *) ∀(a: T) ∀(b: T) * = λT λa λb #[a b]{
 
 A function that allows rewriting an equality proof:
 
-```kind
+```hs
 rewrite
 : ∀(T: *)
   ∀(a: T)
@@ -77,7 +73,7 @@ rewrite
 
 The program's entry point is defined as:
 
-```kind
+```hs
 MAIN = rewrite;
 ```
 
