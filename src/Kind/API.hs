@@ -46,33 +46,29 @@ extractName basePath = dropBasePath . dropExtension where
   dropBasePath path = maybe path id (stripPrefix (basePath++"/") path)
 
 -- New apiLoad function that returns the book, a map of file paths to top-level definitions, and a map of dependencies
-apiLoad :: FilePath -> Book -> String -> IO (Either String (Book, M.Map FilePath [String], M.Map FilePath [String]))
+apiLoad :: FilePath -> Book -> String -> IO (Book, M.Map FilePath [String], M.Map FilePath [String])
 apiLoad basePath book name = do
   if M.member name book
-    then return $ Right (book, M.empty, M.empty)
-    else do
-      let file = basePath </> name ++ ".kind"
-      fileExists <- doesFileExist file
-      if fileExists then
-        loadFile file
-      else
-        return $ Left $ "Error: Definition '" ++ name ++ "' not found."
+    then return (book, M.empty, M.empty)
+    else loadFile (basePath </> name ++ ".kind")
   where
     loadFile filePath = do
-      code  <- readFile filePath
-      book0 <- doParseBook filePath code
-      let book1 = M.union book0 book
-      let defs  = M.keys book0
-      let deps  = concatMap (getDeps . snd) (M.toList book0)
-      let defs' = M.singleton filePath defs
-      let deps' = M.singleton filePath deps
-      foldDeps book1 defs' deps' deps
-    foldDeps book defs deps [] = return $ Right (book, defs, deps)
-    foldDeps book defs deps (dep:rest) = do
-      result <- apiLoad basePath book dep
-      case result of
-        Left err -> return $ Left err
-        Right (book', defs', deps') -> foldDeps book' (M.union defs defs') (M.union deps deps') rest
+      fileExists <- doesFileExist filePath
+      if not fileExists
+        then return (book, M.empty, M.empty)
+        else do
+          code  <- readFile filePath
+          book0 <- doParseBook filePath code
+          let book1 = M.union book0 book
+          let defs  = M.keys book0
+          let deps  = concatMap (getDeps . snd) (M.toList book0)
+          let defs' = M.singleton filePath defs
+          let deps' = M.singleton filePath deps
+          foldDeps book1 defs' deps' deps filePath
+    foldDeps book defs deps [] _ = return (book, defs, deps)
+    foldDeps book defs deps (dep:rest) originalFile = do
+      (book', defs', deps') <- apiLoad basePath book dep
+      foldDeps book' (M.union defs defs') (M.union deps deps') rest originalFile
 
 -- Normalizes a term
 apiNormal :: Book -> String -> IO (Either String ())
@@ -106,29 +102,22 @@ apiCheckFile book defs path = do
 apiCheckAll :: FilePath -> IO (Either String ())
 apiCheckAll basePath = do
   files <- findKindFiles basePath
-  result <- foldM (\acc f -> case acc of
-    Left err -> return $ Left err
-    Right (b, d, p) -> do
-      res <- apiLoad basePath b (extractName basePath f)
-      case res of
-        Left err -> return $ Left err
-        Right (b', d', p') -> return $ Right (b', M.union d d', M.union p p')
-    ) (Right (M.empty, M.empty, M.empty)) files
-  case result of
-    Left err -> return $ Left err
-    Right (book, defs, _) -> do
-      results <- forM (M.toList defs) $ \(_, names) -> do
-        forM names $ \name -> do
-          case M.lookup name book of
-            Just term -> case envRun (doCheck term) book of
-              Done _ _ -> do
-                putStrLn $ "\x1b[32m✓ " ++ name ++ "\x1b[0m"
-                return $ Right ()
-              Fail _ -> do
-                putStrLn $ "\x1b[31m✗ " ++ name ++ "\x1b[0m"
-                return $ Left $ "Error."
-            Nothing -> return $ Left $ "Definition not found: " ++ name
-      return $ sequence_ (concat results)
+  (book, defs, _) <- foldM (\(b, d, p) f -> do
+    (b', d', p') <- apiLoad basePath b (extractName basePath f)
+    return (b', M.union d d', M.union p p')
+    ) (M.empty, M.empty, M.empty) files
+  results <- forM (M.toList defs) $ \(_, names) -> do
+    forM names $ \name -> do
+      case M.lookup name book of
+        Just term -> case envRun (doCheck term) book of
+          Done _ _ -> do
+            putStrLn $ "\x1b[32m✓ " ++ name ++ "\x1b[0m"
+            return $ Right ()
+          Fail _ -> do
+            putStrLn $ "\x1b[31m✗ " ++ name ++ "\x1b[0m"
+            return $ Left $ "Error."
+        Nothing -> return $ Left $ "Definition not found: " ++ name
+  return $ sequence_ (concat results)
   where
     findKindFiles :: FilePath -> IO [FilePath]
     findKindFiles dir = do
@@ -236,42 +225,33 @@ main = do
 runCommand :: FilePath -> (Book -> String -> IO (Either String ())) -> String -> IO (Either String ())
 runCommand basePath cmd input = do
   let name = extractName basePath input
-  result <- apiLoad basePath M.empty name
-  case result of
-    Left err -> return $ Left err
-    Right (book, _, _) -> cmd book name
+  (book, _, _) <- apiLoad basePath M.empty name
+  cmd book name
 
 runCheckCommand :: FilePath -> String -> IO (Either String ())
 runCheckCommand basePath input = do
   let name = extractName basePath input
   let filePath = basePath </> name ++ ".kind"
-  result <- apiLoad basePath M.empty name
-  case result of
-    Left err -> return $ Left err
-    Right (book, defs, _) -> apiCheckFile book defs filePath
+  (book, defs, _) <- apiLoad basePath M.empty name
+  apiCheckFile book defs filePath
 
 runDeps :: FilePath -> String -> IO (Either String ())
 runDeps basePath input = do
   let name = extractName basePath input
-  result <- apiLoad basePath M.empty name
-  case result of
-    Left err -> return $ Left err
-    Right (book, _, _) -> case M.lookup name book of
-      Just term -> do
-        forM_ (filter (/= name) $ nub $ getDeps term) $ \dep -> putStrLn dep
-        return $ Right ()
-      Nothing -> return $ Left $ "Error: Definition '" ++ name ++ "' not found."
+  (book, _, _) <- apiLoad basePath M.empty name
+  case M.lookup name book of
+    Just term -> do
+      forM_ (filter (/= name) $ nub $ getDeps term) $ \dep -> putStrLn dep
+      return $ Right ()
+    Nothing -> return $ Left $ "Error: Definition '" ++ name ++ "' not found."
 
 runRDeps :: FilePath -> String -> IO (Either String ())
 runRDeps basePath input = do
   let name = extractName basePath input
-  result <- apiLoad basePath M.empty name
-  case result of
-    Left err -> return $ Left err
-    Right (book, _, _) -> do
-      let deps = S.toList $ S.delete name $ getAllDeps book name
-      forM_ deps $ \dep -> putStrLn dep
-      return $ Right ()
+  (book, _, _) <- apiLoad basePath M.empty name
+  let deps = S.toList $ S.delete name $ getAllDeps book name
+  forM_ deps $ \dep -> putStrLn dep
+  return $ Right ()
 
 printHelp :: IO (Either String ())
 printHelp = do
@@ -285,4 +265,3 @@ printHelp = do
   putStrLn "  kind rdeps <name|path> # Shows all dependencies of the specified definition recursively"
   putStrLn "  kind help              # Shows this help message"
   return $ Right ()
-
