@@ -25,17 +25,13 @@ import Debug.Trace
 -- Finds the directory named "book" or "monobook"
 findBookDir :: FilePath -> IO (Maybe FilePath)
 findBookDir dir = do
-  let bookDir = dir </> "book"
-  let monoBookDir = dir </> "monobook"
+  let bookDir = dir </> "Book"
   isBook <- doesDirectoryExist bookDir
-  isMonoBook <- doesDirectoryExist monoBookDir
   if isBook
     then return $ Just bookDir
-    else if isMonoBook
-      then return $ Just monoBookDir
-      else if takeDirectory dir == dir
-        then return Nothing
-        else findBookDir (takeDirectory dir)
+    else if takeDirectory dir == dir
+      then return Nothing
+      else findBookDir (takeDirectory dir)
 
 -- Extracts the definition name from a file path or name
 extractName :: FilePath -> String -> String
