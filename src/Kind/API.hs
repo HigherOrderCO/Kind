@@ -86,7 +86,6 @@ apiCheckFile book defs path = do
         Just names -> [(name, term) | name <- names, Just term <- [M.lookup name book]]
         Nothing    -> []
   results <- forM termsToCheck $ \(name, term) -> do
-    putStrLn $ "Checking " ++ name ++ ":"
     case envRun (doCheck term) book of
       Done state value -> do
         apiPrintLogs state

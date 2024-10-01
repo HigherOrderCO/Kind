@@ -2,6 +2,8 @@ module Kind.Equal where
 
 import Control.Monad (zipWithM)
 
+import Debug.Trace
+
 import Kind.Type
 import Kind.Env
 import Kind.Reduce
@@ -223,8 +225,9 @@ unify uid spn b dep = do
 
     -- Otherwise, return true iff both are identical metavars
     else case b of
+      (Src bSrc bVal) -> unify uid spn bVal dep
       (Met bUid bSpn) -> return $ uid == bUid
-      other           -> return False
+      other           -> return $ False
 
 -- Checks if a problem is solveable by pattern unification.
 valid :: Fill -> [Term] -> [Int] -> Bool
