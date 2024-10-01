@@ -1,5 +1,3 @@
--- //./Type.hs//
-
 module Kind.Check where
 
 import Kind.Type
