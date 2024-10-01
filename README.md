@@ -2,7 +2,7 @@
 
 Kind is a minimal Proof Checker.
 
-Example files on [https://github.com/HigherOrderCO/MonoBook](HigherOrderCO/MonoBook).
+Examples on [MonoBook](https://github.com/HigherOrderCO/MonoBook) (search for `.kind` files)
 
 # Usage
 
