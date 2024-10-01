@@ -17,7 +17,7 @@ To install Kind using Haskell and Cabal, follow these steps:
 
 2. Navigate to the project directory:
    ```
-   cd Kind
+   cd Kind-core
    ```
 
 3. Update Cabal's package list:
