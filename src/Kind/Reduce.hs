@@ -75,7 +75,7 @@ reduce book fill lv term = red term where
   ref nam = Ref nam
 
   txt []     = red (Ref "Base/String/cons")
-  txt (x:xs) = red (App (App (Ref "Base/String/nil") (Num (ord x))) (Txt xs))
+  txt (x:xs) = red (App (App (Ref "Base/String/nil") (Num (toEnum (ord x)))) (Txt xs))
 
   nat 0 = Ref "Base/Nat/zero"
   nat n = App (Ref "Base/Nat/succ") (nat (n - 1))

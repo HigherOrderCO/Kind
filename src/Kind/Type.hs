@@ -4,6 +4,7 @@ import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 
 import Debug.Trace
+import Data.Word (Word32)
 
 -- Kind's AST
 data Term
@@ -49,8 +50,8 @@ data Term
   -- U32 Type
   | U32
 
-  -- U32 Value (FIXME: this is wrong, should be Word32)
-  | Num Int
+  -- U32 Value
+  | Num Word32
 
   -- U32 Binary Operation
   | Op2 Oper Term Term

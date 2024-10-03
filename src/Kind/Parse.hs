@@ -134,6 +134,7 @@ parseTerm = (do
     , parseSet
     , parseNum
     , parseTxt
+    , parseChr
     , parseHol
     , parseMet
     , parseRef
@@ -301,6 +302,23 @@ parseTxt = withSrc $ do
   txt <- P.many (noneOf "\"")
   char '"'
   return $ Txt txt
+
+parseChr = withSrc $ do
+  char '\''  
+  chr <- parseEscaped <|> noneOf "'\\"
+  char '\''
+  return $ Num (fromIntegral $ ord chr)
+  where
+    parseEscaped :: Parser Char
+    parseEscaped = do
+      char '\\'
+      c <- oneOf "\\\'nrt"
+      return $ case c of
+        '\\' -> '\\'
+        '\'' -> '\''
+        'n'  -> '\n'
+        'r'  -> '\r'
+        't'  -> '\t'
 
 parseHol = withSrc $ do
   char '?'
