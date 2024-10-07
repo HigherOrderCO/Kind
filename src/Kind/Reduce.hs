@@ -1,9 +1,9 @@
 module Kind.Reduce where
 
 import Prelude hiding (EQ, LT, GT)
+import Data.Bits ( (.&.), (.|.), xor, shiftL, shiftR )
 import Data.Char (ord)
 import Debug.Trace
-
 import Kind.Type
 import Kind.Show
 
@@ -67,6 +67,11 @@ reduce book fill lv term = red term where
   op2 GT  (Num fst) (Num snd) = Num (if fst > snd then 1 else 0)
   op2 LTE (Num fst) (Num snd) = Num (if fst <= snd then 1 else 0)
   op2 GTE (Num fst) (Num snd) = Num (if fst >= snd then 1 else 0)
+  op2 AND (Num fst) (Num snd) = Num (fst .&. snd)
+  op2 OR  (Num fst) (Num snd) = Num (fst .|. snd)
+  op2 XOR (Num fst) (Num snd) = Num (fst `xor` snd)
+  op2 LSH (Num fst) (Num snd) = Num (shiftL fst (fromIntegral snd))
+  op2 RSH (Num fst) (Num snd) = Num (shiftR fst (fromIntegral snd))
   op2 opr fst       snd       = Op2 opr fst snd
 
   ref nam | lv > 0 = case M.lookup nam book of

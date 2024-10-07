@@ -347,6 +347,8 @@ parseOper = P.choice
   , P.try (string "*") >> return MUL
   , P.try (string "/") >> return DIV
   , P.try (string "%") >> return MOD
+  , P.try (string "<<") >> return LSH
+  , P.try (string ">>") >> return RSH
   , P.try (string "<=") >> return LTE
   , P.try (string ">=") >> return GTE
   , P.try (string "<") >> return LT
@@ -356,8 +358,6 @@ parseOper = P.choice
   , P.try (string "&") >> return AND
   , P.try (string "|") >> return OR
   , P.try (string "^") >> return XOR
-  , P.try (string "<<") >> return LSH
-  , P.try (string ">>") >> return RSH
   ]
 
 parseBook :: Parser Book
