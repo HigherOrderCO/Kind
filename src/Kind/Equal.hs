@@ -12,7 +12,6 @@ import Kind.Show
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
-
 -- Equality
 -- --------
 
@@ -311,3 +310,166 @@ occur book fill uid term dep = go term dep where
     let o_typ = go typ dep
         o_bod = goTele (bod (Var nam dep)) (dep + 1)
     in o_typ || o_bod
+
+-- Substitution
+-- ------------
+
+-- This is the ugly / slow part of Kind. See: https://gist.github.com/VictorTaelin/48eed41a8eca3500721c06dfec72d48c
+
+-- Behaves like 'identical', except it is pure and returns a Bool.
+same :: Term -> Term -> Int -> Bool
+same (All aNam aInp aBod) (All bNam bInp bBod) dep =
+  let sInp = same aInp bInp dep
+      sBod = same (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+  in sInp && sBod
+same (Lam aNam aBod) (Lam bNam bBod) dep =
+  let sBod = same (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+  in  sBod
+same (App aFun aArg) (App bFun bArg) dep =
+  let sFun = same aFun bFun dep
+      sArg = same aArg bArg dep
+  in sFun && sArg
+same (Slf aNam aTyp aBod) (Slf bNam bTyp bBod) dep =
+  let sTyp = same aTyp bTyp dep
+  in  sTyp
+same (Ins aVal) b dep =
+  same aVal b dep
+same a (Ins bVal) dep =
+  same a bVal dep
+same (Dat aScp aCts) (Dat bScp bCts) dep =
+  let sSlf = and $ zipWith (\ax bx -> same ax bx dep) aScp bScp
+      sCts = length aCts == length bCts && and (zipWith (\ a b -> sameCtr a b dep) aCts bCts)
+  in sSlf && sCts
+same (Con aNam aArg) (Con bNam bArg) dep =
+  let sNam = aNam == bNam
+      sArg = length aArg == length bArg && and (zipWith (\(_, aVal) (_, bVal) -> same aVal bVal dep) aArg bArg)
+  in sNam && sArg
+same (Mat aCse) (Mat bCse) dep =
+  let sCse = length aCse == length bCse && and (zipWith (\ a b -> sameCse a b dep) aCse bCse)
+  in  sCse
+same (Let aNam aVal aBod) b dep =
+  same (aBod aVal) b dep
+same a (Let bNam bVal bBod) dep =
+  same a (bBod bVal) dep
+same (Use aNam aVal aBod) b dep =
+  same (aBod aVal) b dep
+same a (Use bNam bVal bBod) dep =
+  same a (bBod bVal) dep
+same Set Set dep =
+  True
+same (Ann chk aVal aTyp) b dep =
+  same aVal b dep
+same a (Ann chk bVal bTyp) dep =
+  same a bVal dep
+same (Met aUid aSpn) b dep =
+  False
+same a (Met bUid bSpn) dep =
+  False
+same (Hol aNam aCtx) b dep =
+  True
+same a (Hol bNam bCtx) dep =
+  True
+same U32 U32 dep =
+  True
+same (Num aVal) (Num bVal) dep =
+  aVal == bVal
+same (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep =
+  same aFst bFst dep && same aSnd bSnd dep
+same (Swi aZer aSuc) (Swi bZer bSuc) dep =
+  same aZer bZer dep && same aSuc bSuc dep
+same (Txt aTxt) (Txt bTxt) dep =
+  aTxt == bTxt
+same (Nat aVal) (Nat bVal) dep =
+  aVal == bVal
+same (Src aSrc aVal) b dep =
+  same aVal b dep
+same a (Src bSrc bVal) dep =
+  same a bVal dep
+same (Ref aNam) (Ref bNam) dep =
+  aNam == bNam
+same (Var aNam aIdx) (Var bNam bIdx) dep =
+  aIdx == bIdx
+same _ _ _ = False
+
+-- Auxiliary functions
+sameCtr :: Ctr -> Ctr -> Int -> Bool
+sameCtr (Ctr aCNm aTele) (Ctr bCNm bTele) dep =
+  if aCNm == bCNm
+    then goTele aTele bTele dep
+    else False
+
+sameCse :: (String, Term) -> (String, Term) -> Int -> Bool
+sameCse (aCNam, aCBod) (bCNam, bCBod) dep =
+  if aCNam == bCNam
+    then same aCBod bCBod dep
+    else False
+
+goTele :: Tele -> Tele -> Int -> Bool
+goTele (TRet aTerm) (TRet bTerm) dep = same aTerm bTerm dep
+goTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep =
+  let sTyp = same aTyp bTyp dep
+      sBod = goTele (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+  in sTyp && sBod
+goTele _ _ _ = False
+
+-- Substitutes a Bruijn level variable by a neo value in term.
+subst :: Int -> Term -> Term -> Term
+subst lvl neo term = go term where
+  go (All nam inp bod) = All nam (go inp) (\x -> go (bod x))
+  go (Lam nam bod)     = Lam nam (\x -> go (bod x))
+  go (App fun arg)     = App (go fun) (go arg)
+  go (Ann chk val typ) = Ann chk (go val) (go typ)
+  go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
+  go (Ins val)         = Ins (go val)
+  go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
+  go (Con nam arg)     = Con nam (map (\(f, t) -> (f, go t)) arg)
+  go (Mat cse)         = Mat (map goCse cse)
+  go (Swi zer suc)     = Swi (go zer) (go suc)
+  go (Ref nam)         = Ref nam
+  go (Let nam val bod) = Let nam (go val) (\x -> go (bod x))
+  go (Use nam val bod) = Use nam (go val) (\x -> go (bod x))
+  go (Met uid spn)     = Met uid (map go spn)
+  go (Hol nam ctx)     = Hol nam (map go ctx)
+  go Set               = Set
+  go U32               = U32
+  go (Num n)           = Num n
+  go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
+  go (Txt txt)         = Txt txt
+  go (Nat val)         = Nat val
+  go (Var nam idx)     = if lvl == idx then neo else Var nam idx
+  go (Src src val)     = Src src (go val)
+  goCtr (Ctr nm tele)  = Ctr nm (goTele tele)
+  goCse (cnam, cbod)   = (cnam, go cbod)
+  goTele (TRet term)   = TRet (go term)
+  goTele (TExt k t b)  = TExt k (go t) (\x -> goTele (b x))
+
+-- Replaces a term by another
+replace :: Term -> Term -> Term -> Int -> Term
+replace old neo term dep = if same old term dep then neo else go term where
+  go (All nam inp bod)  = All nam (replace old neo inp dep) (\x -> replace old neo (bod x) (dep+1))
+  go (Lam nam bod)      = Lam nam (\x -> replace old neo (bod x) (dep+1))
+  go (App fun arg)      = App (replace old neo fun dep) (replace old neo arg dep)
+  go (Ann chk val typ)  = Ann chk (replace old neo val dep) (replace old neo typ dep)
+  go (Slf nam typ bod)  = Slf nam (replace old neo typ dep) (\x -> replace old neo (bod x) (dep+1))
+  go (Ins val)          = Ins (replace old neo val dep)
+  go (Dat scp cts)      = Dat (map (\x -> replace old neo x (dep+1)) scp) (map goCtr cts)
+  go (Con nam arg)      = Con nam (map (\(f, t) -> (f, replace old neo t dep)) arg)
+  go (Mat cse)          = Mat (map goCse cse)
+  go (Swi zer suc)      = Swi (replace old neo zer dep) (replace old neo suc dep)
+  go (Ref nam)          = Ref nam
+  go (Let nam val bod)  = Let nam (replace old neo val dep) (\x -> replace old neo (bod x) (dep+1))
+  go (Use nam val bod)  = Use nam (replace old neo val dep) (\x -> replace old neo (bod x) (dep+1))
+  go (Met uid spn)      = Met uid (map (\x -> replace old neo x (dep+1)) spn)
+  go (Hol nam ctx)      = Hol nam (map (\x -> replace old neo x (dep+1)) ctx)
+  go Set                = Set
+  go U32                = U32
+  go (Num n)            = Num n
+  go (Op2 opr fst snd)  = Op2 opr (replace old neo fst dep) (replace old neo snd dep)
+  go (Txt txt)          = Txt txt
+  go (Nat val)          = Nat val
+  go (Var nam idx)      = Var nam idx
+  go (Src src val)      = Src src (replace old neo val dep)
+  goCtr (Ctr nm tele)   = Ctr nm (goTele tele dep)
+  goCse (cnam, cbod)    = (cnam, replace old neo cbod dep)
+  goTele (TRet term)  d = TRet (replace old neo term d)
+  goTele (TExt k t b) d = TExt k (replace old neo t d) (\x -> goTele (b x) (d+1))

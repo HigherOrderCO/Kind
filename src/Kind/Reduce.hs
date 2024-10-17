@@ -306,38 +306,3 @@ genMetas term = fst (go term 0) where
     let (typ', c1) = go typ c
         (bod', c2) = goTele (bod (Var nam 0)) c1
     in (TExt nam typ' (\_ -> bod'), c2)
-
-
--- Substitution
--- ------------
-
--- Substitutes a Bruijn level variable by a neo value in term.
-subst :: Int -> Term -> Term -> Term
-subst lvl neo term = go term where
-  go (All nam inp bod) = All nam (go inp) (\x -> go (bod x))
-  go (Lam nam bod)     = Lam nam (\x -> go (bod x))
-  go (App fun arg)     = App (go fun) (go arg)
-  go (Ann chk val typ) = Ann chk (go val) (go typ)
-  go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
-  go (Ins val)         = Ins (go val)
-  go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
-  go (Con nam arg)     = Con nam (map (\(f, t) -> (f, go t)) arg)
-  go (Mat cse)         = Mat (map goCse cse)
-  go (Swi zer suc)     = Swi (go zer) (go suc)
-  go (Ref nam)         = Ref nam
-  go (Let nam val bod) = Let nam (go val) (\x -> go (bod x))
-  go (Use nam val bod) = Use nam (go val) (\x -> go (bod x))
-  go (Met uid spn)     = Met uid (map go spn)
-  go (Hol nam ctx)     = Hol nam (map go ctx)
-  go Set               = Set
-  go U32               = U32
-  go (Num n)           = Num n
-  go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
-  go (Txt txt)         = Txt txt
-  go (Nat val)         = Nat val
-  go (Var nam idx)     = if lvl == idx then neo else Var nam idx
-  go (Src src val)     = Src src (go val)
-  goCtr (Ctr nm tele)  = Ctr nm (goTele tele)
-  goCse (cnam, cbod)   = (cnam, go cbod)
-  goTele (TRet term)   = TRet (go term)
-  goTele (TExt nam typ bod) = TExt nam (go typ) (\x -> goTele (bod x))

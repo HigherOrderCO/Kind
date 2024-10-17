@@ -129,6 +129,14 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
 
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
 check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    :: " ++ termShower True typ dep) $ go src val typ dep where
+
+  -- Case-Of: `(λ{...} x)`. NOTE: this is probably very slow due to 'replace'
+  go src (App (Src _ val) arg) typx dep = go src (App val arg) typx dep
+  go src (App (Mat cse)   arg) typx dep = do
+    arg_ty <- infer arg dep
+    infer (App (Ann True (Mat cse) (All "x" arg_ty (\x -> replace arg x typx dep))) arg) dep
+    return ()
+
   go src (Lam nam bod) typx dep = do
     book <- envGetBook
     fill <- envGetFill

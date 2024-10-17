@@ -134,7 +134,8 @@ parseTerm = (do
     , parseCon
     , parseUse
     , parseLet
-    , parseDo
+    , parseDo -- sugar
+    , parseMatch -- sugar
     , parseSet
     , parseNum
     , parseTxt
@@ -481,3 +482,23 @@ desugarDo (DoBlck name stmts wrap ret) = do
 
 parseDo :: Parser Term
 parseDo = parseDoSugar >>= desugarDo
+
+-- Let's now implement the 'parseMatch' sugar. The following syntax:
+-- 'match x { #Foo: foo #Bar: bar ... }'
+-- desugars to:
+-- '(λ{ #Foo: foo #Bar: bar ... } x)
+-- it parses the cases identically to parseMat.
+parseMatch :: Parser Term
+parseMatch = withSrc $ do
+  P.try $ string "match "
+  x <- parseTerm
+  char '{'
+  parseTrivia
+  cse <- P.many $ do
+    char '#'
+    cnam <- parseName
+    char ':'
+    cbod <- parseTerm
+    return (cnam, cbod)
+  char '}'
+  return $ App (Mat cse) x
