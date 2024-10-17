@@ -112,6 +112,9 @@ withSrc parser = do
   let endLoc = Loc nam (sourceLine end) (sourceColumn end)
   return $ Src (Cod iniLoc endLoc) val
 
+-- Term Parser
+-- -----------
+
 -- Main term parser
 parseTerm :: Parser Term
 parseTerm = (do
@@ -131,6 +134,7 @@ parseTerm = (do
     , parseCon
     , parseUse
     , parseLet
+    , parseDo
     , parseSet
     , parseNum
     , parseTxt
@@ -360,6 +364,9 @@ parseOper = P.choice
   , P.try (string "^") >> return XOR
   ]
 
+-- Book Parser
+-- -----------
+
 parseBook :: Parser Book
 parseBook = M.fromList <$> P.many parseDef
 
@@ -391,3 +398,86 @@ expandUses uses name =
   case filter (\(short, _) -> short `isPrefixOf` name) uses of
     (short, long):_ -> long ++ drop (length short) name
     []              -> name
+
+-- Syntax Sugars
+-- -------------
+
+-- TODO: implement a parser for Kind's do-notation:
+-- do Name { // this starts a do-block
+--   ask x = exp0 // this is parsed as a monadic binder
+--   ask exp1     // this is parsed as a monadic sequencer
+--   ret-val      // this is the monadic return
+-- } // this ends a do block
+
+-- The do-notation above is desugared to:
+-- (Name/Monad/bind _ _ exp0 λx
+-- (Name/Monad/bind _ _ exp1 λ_
+-- ret-val))
+-- Note this is just a series of applications:
+-- (App (App (App (App (Ref "Name/Monad/bind") (Met 0 [])) (Met 0 [])) exp0) (Lam "x" λx ...
+
+-- To make the code cleaner, create a DoBlock type.
+-- Then, create a 'parseDoSugar' parser, that returns a DoBlock.
+-- Then, create a 'desugarDo' function, that converts a DoBlock into a Term.
+-- Finally, create a 'parseDo' parser, that parses a do-block as a Term.
+
+-- actually, let's add another option:
+-- - optionally, the user can end the block in 'wrap value'
+-- - if they do, the end value will be `((Name/Monad/bind _) value)` instead of just `value`
+-- rewrite the commented out code above to add this feature. keep all else the same. do it now:
+
+-- this 'isDoWrap' logic is ugly. clean up the code above to avoid pattern-matching on (App (App ...)) like that. implement the wrap functionality in a more elegant fashion. rewrite the code now.
+
+-- TODO: rewrite the code above to apply the expand-uses functionality to the generated refs. also, append just "bind" and "pure" (instad of "/Monad/bind" etc.)
+
+data DoBlck = DoBlck String [DoStmt] Bool Term -- bool used for wrap
+data DoStmt = DoBind String Term | DoSeq Term
+
+parseDoSugar :: Parser DoBlck
+parseDoSugar = do
+  string "do "
+  name <- parseName
+  char '{'
+  parseTrivia
+  stmts <- P.many (P.try parseDoStmt)
+  (wrap, ret) <- parseDoReturn
+  char '}'
+  return $ DoBlck name stmts wrap ret
+
+parseDoStmt :: Parser DoStmt
+parseDoStmt = P.try parseDoBind <|> parseDoSeq
+
+parseDoBind :: Parser DoStmt
+parseDoBind = do
+  string "ask "
+  name <- parseName
+  char '='
+  exp <- parseTerm
+  return $ DoBind name exp
+
+parseDoSeq :: Parser DoStmt
+parseDoSeq = do
+  string "ask "
+  exp <- parseTerm
+  return $ DoSeq exp
+
+parseDoReturn :: Parser (Bool, Term)
+parseDoReturn = do
+  wrap <- P.optionMaybe (P.try (string "ret "))
+  term <- parseTerm
+  return (maybe False (const True) wrap, term)
+
+desugarDo :: DoBlck -> Parser Term
+desugarDo (DoBlck name stmts wrap ret) = do
+  (_, uses) <- P.getState
+  let exName = expandUses uses name
+  let mkBind = \ x exp acc -> App (App (App (App (Ref (exName ++ "bind")) (Met 0 [])) (Met 0 [])) exp) (Lam x (\_ -> acc))
+  let mkWrap = \ ret -> App (App (Ref (exName ++ "pure")) (Met 0 [])) ret
+  return $ foldr (\stmt acc ->
+    case stmt of
+      DoBind x exp -> mkBind x exp acc
+      DoSeq exp -> mkBind "_" exp acc
+    ) (if wrap then mkWrap ret else ret) stmts
+
+parseDo :: Parser Term
+parseDo = parseDoSugar >>= desugarDo
