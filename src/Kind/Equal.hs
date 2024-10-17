@@ -12,6 +12,7 @@ import Kind.Show
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
+
 -- Equality
 -- --------
 

@@ -160,7 +160,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
             rtyp <- checkConAgainstTele Nothing arg tele dep
             cmp src val rtyp typx dep
           Nothing -> do
-            envLog (Error Nothing (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
+            envLog (Error src (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
       _ -> do
         infer (Con nam arg) dep
@@ -183,7 +183,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
                   let rt1 = foldl' (\ ty (i,t) -> subst i t ty) rt0 eqs
                   check Nothing cbod rt1 dep
                 Nothing -> do
-                  envLog (Error Nothing (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
+                  envLog (Error src (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
                   envFail
           _ -> do
             infer (Mat cse) dep
@@ -201,12 +201,12 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
           U32 -> do
             -- Check zero case
             let zerAnn = Ann False (Num 0) U32
-            check Nothing zer (typ_bod zerAnn) dep
+            check src zer (typ_bod zerAnn) dep
             -- Check successor case
             let n = Var "n" dep
             let sucAnn = Ann False n U32
             let sucTyp = All "n" U32 (\x -> typ_bod (Op2 ADD (Num 1) x))
-            check Nothing suc sucTyp dep
+            check src suc sucTyp dep
           _ -> do
             infer (Swi zer suc) dep
             return ()
@@ -216,10 +216,10 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
 
   go src (Let nam val bod) typx dep = do
     typ <- infer val dep
-    check Nothing (bod (Ann False (Var nam dep) typ)) typx dep
+    check src (bod (Ann False (Var nam dep) typ)) typx dep
 
   go src (Use nam val bod) typx dep = do
-    check Nothing (bod val) typx dep
+    check src (bod val) typx dep
 
   go src (Hol nam ctx) typx dep = do
     envLog (Found nam typx ctx dep)
