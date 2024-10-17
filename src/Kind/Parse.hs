@@ -134,6 +134,7 @@ parseTerm = (do
     , parseSet
     , parseNum
     , parseTxt
+    , parseChr
     , parseHol
     , parseMet
     , parseRef
@@ -302,6 +303,23 @@ parseTxt = withSrc $ do
   char '"'
   return $ Txt txt
 
+parseChr = withSrc $ do
+  char '\''  
+  chr <- parseEscaped <|> noneOf "'\\"
+  char '\''
+  return $ Num (fromIntegral $ ord chr)
+  where
+    parseEscaped :: Parser Char
+    parseEscaped = do
+      char '\\'
+      c <- oneOf "\\\'nrt"
+      return $ case c of
+        '\\' -> '\\'
+        '\'' -> '\''
+        'n'  -> '\n'
+        'r'  -> '\r'
+        't'  -> '\t'
+
 parseHol = withSrc $ do
   char '?'
   nam <- parseName
@@ -329,6 +347,8 @@ parseOper = P.choice
   , P.try (string "*") >> return MUL
   , P.try (string "/") >> return DIV
   , P.try (string "%") >> return MOD
+  , P.try (string "<<") >> return LSH
+  , P.try (string ">>") >> return RSH
   , P.try (string "<=") >> return LTE
   , P.try (string ">=") >> return GTE
   , P.try (string "<") >> return LT
@@ -338,8 +358,6 @@ parseOper = P.choice
   , P.try (string "&") >> return AND
   , P.try (string "|") >> return OR
   , P.try (string "^") >> return XOR
-  , P.try (string "<<") >> return LSH
-  , P.try (string ">>") >> return RSH
   ]
 
 parseBook :: Parser Book
