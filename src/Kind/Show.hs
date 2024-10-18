@@ -187,7 +187,8 @@ infoShow book fill info = case info of
         canonPath <- resolveToAbsolutePath fileName
         content   <- readSourceFile canonPath
         let highlighted = highlightError (iniLine, iniCol) (endLine, endCol) content
-        return (canonPath, highlighted)
+        -- FIXME: remove this cropping when the parse locations are fixed to exclude suffix trivia
+        return (canonPath, unlines $ take 8 $ lines highlighted)
       Nothing -> return ("unknown_file", "Could not read source file.")
     let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
     return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']

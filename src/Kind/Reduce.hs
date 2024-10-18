@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Reduce where
 
 import Prelude hiding (EQ, LT, GT)
@@ -44,7 +46,9 @@ reduce book fill lv term = red term where
 
   mat cse (Con cnam carg) = case lookup cnam cse of
     Just cx -> red (foldl App cx (map snd carg))
-    Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match."
+    Nothing -> case lookup "_" cse of
+      Just df -> red (App df (Con cnam carg))
+      Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match and no default case '_' provided."
   mat cse arg = App (Mat cse) arg
 
   swi zer suc (Num 0)             = red zer

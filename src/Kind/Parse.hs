@@ -108,6 +108,7 @@ showParseError filename input err = do
              setSGRCode [Reset] ++ " " ++ show line ++ ":" ++ show col
 
 -- Parsing helpers
+-- FIXME: currently, this will include suffix trivia. how can we avoid that?
 withSrc :: Parser Term -> Parser Term
 withSrc parser = do
   ini <- getPosition
@@ -158,7 +159,6 @@ withSrc parser = do
 -- parseSuffAnn: parses an Ann without needing the {}. Example: ... :: term
 -- parseSuffVal: if none of the above worked, we just return term.
 -- NOTE: the parseSuff functions receive the currently parsed term.
-
 
 parseTerm :: Parser Term
 parseTerm = (do
@@ -316,7 +316,16 @@ parseCse = do
     char ':'
     cbod <- parseTerm
     return (cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) cbod args)
-  return cse
+  dflt <- P.optionMaybe $ do
+    dnam <- P.try $ do
+      dnam <- parseName
+      string ":"
+      return dnam
+    dbod <- parseTerm
+    return (dnam, dbod)
+  return $ case dflt of
+    Just (dnam, dbod) -> cse ++ [("_", (Lam dnam (\_ -> dbod)))]
+    Nothing           -> cse
 
 parseMat = withSrc $ do
   P.try $ string "λ{"
@@ -587,7 +596,7 @@ parseDef = do
         return (pats, body)
       let (mat, bods) = unzip rules
       let flat = (flattenDef mat bods 0)
-      return $ {-trace (termShow flat)-} flat
+      return $ trace (termShow flat) flat
     ]
   (_, uses) <- P.getState
   let name' = expandUses uses name
@@ -671,16 +680,42 @@ flattenAdt col mat bods fresh = do
         ) ctrs'
   -- Since we don't know how many constructors in the ADT,
   -- we add a default case if there are any Var patterns in this column.
+  -- let (dflMat, dflBods) = foldr (\(pat, pats, bod) (mat, bods) -> case pat of
+        -- PVar nam -> do
+          -- let bod' = Use nam (Ref var) (\x -> bod)
+          -- (pats:mat, bod':bods)
+        -- _ -> do
+          -- (mat, bods)
+        -- ) ([], []) (zip3 col mat bods)
+  -- let cse' = if null dflBods
+             -- then cse
+             -- else cse ++ [("_", flattenDef dflMat dflBods fresh')]
+
+  -- FIXME: @developedby please review below
+  -- ---------------------------------------
+
+  -- PROBLEM: this is desugaring a default case, like:
+  -- Foo : B/Bool -> B/Bool
+  -- | #True{} = #False
+  -- | other   = #True
+  -- To the following term:
+  -- λ%x0 (λ{ #True: #False{} #_: use other = @%x0; #True{} } @%x0)
+  -- But that's wrong; default cases need a lambda. The correct desugaring would be:
+  -- λ%x0 (λ{ #True: #False{} #_: λother #True{} } @%x0)
+  -- Fix the commented-out code o implement this
+
   let (dflMat, dflBods) = foldr (\(pat, pats, bod) (mat, bods) -> case pat of
         PVar nam -> do
-          let bod' = Use nam (Ref var) (\x -> bod)
-          (pats:mat, bod':bods)
+          let newPats = map (\i -> PVar (var ++ "." ++ show i)) [0..nPats-1]
+          let bod' = Lam nam (\x -> bod)
+          (newPats:mat, bod':bods)
         _ -> do
           (mat, bods)
         ) ([], []) (zip3 col mat bods)
   let cse' = if null dflBods
              then cse
              else cse ++ [("_", flattenDef dflMat dflBods fresh')]
+
   let bod = (App (Mat cse') (Ref var))
   Lam var (\x -> bod)
 

@@ -119,5 +119,6 @@ data State = State Book Fill [Check] [Info] -- state type
 data Res a = Done State a | Fail State -- result type
 data Env a = Env (State -> Res a) -- monadic checker
 
+-- UNCOMMENT THIS TO DEBUG THE TYPE CHECKER
 -- debug a b = trace a b
 debug a b = b
