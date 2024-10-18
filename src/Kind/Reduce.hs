@@ -10,6 +10,10 @@ import Kind.Show
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
+-- for exitting on undefined ref (should be handled better)
+import System.Exit (exitWith, ExitCode(ExitFailure))
+import System.IO.Unsafe (unsafePerformIO)
+
 -- Evaluation
 -- ----------
 
@@ -26,6 +30,7 @@ reduce book fill lv term = red term where
   red (Use nam val bod) = red (bod (red val))
   red (Op2 opr fst snd) = op2 opr (red fst) (red snd)
   red (Txt val)         = txt val
+  red (Lst val)         = lst val
   red (Nat val)         = nat val
   red (Src src val)     = red val
   red (Met uid spn)     = met uid spn
@@ -76,14 +81,18 @@ reduce book fill lv term = red term where
 
   ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
-    Nothing  -> error $ "Undefined reference: " ++ nam
+    Nothing  -> trace ("Undefined reference: " ++ nam) (unsafePerformIO $ exitWith $ ExitFailure 1)
   ref nam = Ref nam
 
-  txt []     = red (Ref "Base/String/cons")
-  txt (x:xs) = red (App (App (Ref "Base/String/nil") (Num (toEnum (ord x)))) (Txt xs))
+  txt []     = red (Con "Nil" [])
+  txt (x:xs) = red (Con "Cons" [(Nothing, Num (toEnum (ord x))), (Nothing, Txt xs)])
 
-  nat 0 = Ref "Base/Nat/zero"
-  nat n = App (Ref "Base/Nat/succ") (nat (n - 1))
+  lst []     = red (Con "Nil" [])
+  lst (x:xs) = red (Con "Cons" [(Nothing, x), (Nothing, Lst xs)])
+  
+  nat 0 = Con "Zero" []
+  nat n = Con "Succ" [(Nothing, Nat (n - 1))]
+
 
 -- Normalization
 -- -------------
@@ -147,6 +156,9 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_snd = normal book fill lv snd dep in
     Op2 opr nf_fst nf_snd
   go (Txt val) dep = Txt val
+  go (Lst val) dep =
+    let nf_val = map (\x -> normal book fill lv x dep) val in
+    Lst nf_val
   go (Nat val) dep = Nat val
   go (Var nam idx) dep = Var nam idx
   go (Src src val) dep =
@@ -229,6 +241,9 @@ bind (Op2 opr fst snd) ctx =
   let snd' = bind snd ctx in
   Op2 opr fst' snd'
 bind (Txt txt) ctx = Txt txt
+bind (Lst lst) ctx =
+  let lst' = map (\x -> bind x ctx) lst in
+  Lst lst'
 bind (Nat val) ctx = Nat val
 bind (Hol nam ctxs) ctx = Hol nam (reverse (map snd ctx))
 bind (Met uid spn) ctx = Met uid []

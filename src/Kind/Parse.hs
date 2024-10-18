@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Parse where
 
 import Debug.Trace
@@ -131,6 +133,7 @@ parseTerm = (do
     , parseSlf
     , parseIns
     , parseDat
+    , parseNat -- sugar
     , parseCon
     , parseUse
     , parseLet
@@ -138,8 +141,9 @@ parseTerm = (do
     , parseMatch -- sugar
     , parseSet
     , parseNum
-    , parseTxt
-    , parseChr
+    , parseTxt -- sugar
+    , parseLst -- sugar
+    , parseChr -- sugar
     , parseHol
     , parseMet
     , parseRef
@@ -308,6 +312,12 @@ parseTxt = withSrc $ do
   char '"'
   return $ Txt txt
 
+parseLst = withSrc $ do
+  char '['
+  elems <- P.many parseTerm
+  char ']'
+  return $ Lst elems
+
 parseChr = withSrc $ do
   char '\''  
   chr <- parseEscaped <|> noneOf "'\\"
@@ -431,6 +441,9 @@ expandUses uses name =
 
 -- TODO: rewrite the code above to apply the expand-uses functionality to the generated refs. also, append just "bind" and "pure" (instad of "/Monad/bind" etc.)
 
+-- Do-Notation:
+-- ------------
+
 data DoBlck = DoBlck String [DoStmt] Bool Term -- bool used for wrap
 data DoStmt = DoBind String Term | DoSeq Term
 
@@ -483,6 +496,9 @@ desugarDo (DoBlck name stmts wrap ret) = do
 parseDo :: Parser Term
 parseDo = parseDoSugar >>= desugarDo
 
+-- Match
+-- -----
+
 -- Let's now implement the 'parseMatch' sugar. The following syntax:
 -- 'match x { #Foo: foo #Bar: bar ... }'
 -- desugars to:
@@ -502,3 +518,14 @@ parseMatch = withSrc $ do
     return (cnam, cbod)
   char '}'
   return $ App (Mat cse) x
+
+-- Match
+-- -----
+
+-- Nat: the '#123' expression is parsed into (Nat 123)
+
+parseNat :: Parser Term
+parseNat = withSrc $ P.try $ do
+  char '#'
+  num <- P.many1 digit
+  return $ Nat (read num)

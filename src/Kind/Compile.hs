@@ -5,6 +5,8 @@ import Kind.Reduce
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
+import Data.List (intercalate)
+
 
 import Prelude hiding (EQ, LT, GT)
 
@@ -66,6 +68,8 @@ termToJS term dep = case term of
     in concat ["((x => x === 0 ? ", zer', " : ", suc', "(x - 1)))"]
   Txt txt ->
     show txt
+  Lst lst ->
+    "[" ++ intercalate " " (map (\x -> termToJS x dep) lst) ++ "]"
   Nat val ->
     show val
   Hol _ _ ->

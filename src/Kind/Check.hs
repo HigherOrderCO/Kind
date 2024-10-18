@@ -78,12 +78,6 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
   go (Num num) dep = do
     return U32
 
-  go (Txt txt) dep = do
-    return (Ref "Base/String/String")
-
-  go (Nat val) dep = do
-    return (Ref "Base/Nat/Nat")
-
   go (Op2 opr fst snd) dep = do
     envSusp (Check Nothing fst U32 dep)
     envSusp (Check Nothing snd U32 dep)
@@ -235,6 +229,21 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
 
   go src (Met uid spn) typx dep = do
     return ()
+
+  go src tm@(Txt txt) typx dep = do
+    book <- envGetBook
+    fill <- envGetFill
+    go src (reduce book fill 2 tm) typx dep
+
+  go src tm@(Nat val) typx dep = do
+    book <- envGetBook
+    fill <- envGetFill
+    go src (reduce book fill 2 tm) typx dep
+
+  go src tm@(Lst lst) typx dep = do
+    book <- envGetBook
+    fill <- envGetFill
+    go src (reduce book fill 2 tm) typx dep
 
   go src (Ann chk val typ) typx dep = do
     cmp src val typ typx dep

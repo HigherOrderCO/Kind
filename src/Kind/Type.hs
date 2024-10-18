@@ -74,6 +74,9 @@ data Term
   -- Text Literal (sugar)
   | Txt String
 
+  -- List Literal (sugar)
+  | Lst [Term]
+
   -- Nat Literal (sugar)
   | Nat Integer
 

@@ -88,7 +88,8 @@ termShower small term dep = case term of
         succ' = termShower small succ dep
     in concat ["λ{ 0: ", zero', " _: ", succ', " }"]
   Txt txt -> concat ["\"" , txt , "\""]
-  Nat val -> show val
+  Lst lst -> concat ["[", unwords (map (\x -> termShower small x dep) lst), "]"]
+  Nat val -> concat ["#", (show val)]
   Hol nam ctx -> concat ["?" , nam]
   Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
   Var nam idx -> nam

@@ -110,6 +110,8 @@ identical a b dep = do
     return (iZer && iSuc)
   go (Txt aTxt) (Txt bTxt) dep =
     return (aTxt == bTxt)
+  go (Lst aLst) (Lst bLst) dep =
+    and <$> zipWithM (\a b -> identical a b dep) aLst bLst
   go (Nat aVal) (Nat bVal) dep =
     return (aVal == bVal)
   go (Src aSrc aVal) b dep =
@@ -379,6 +381,8 @@ same (Swi aZer aSuc) (Swi bZer bSuc) dep =
   same aZer bZer dep && same aSuc bSuc dep
 same (Txt aTxt) (Txt bTxt) dep =
   aTxt == bTxt
+same (Lst aLst) (Lst bLst) dep =
+  length aLst == length bLst && and (zipWith (\a b -> same a b dep) aLst bLst)
 same (Nat aVal) (Nat bVal) dep =
   aVal == bVal
 same (Src aSrc aVal) b dep =
@@ -435,6 +439,7 @@ subst lvl neo term = go term where
   go (Num n)           = Num n
   go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
   go (Txt txt)         = Txt txt
+  go (Lst lst)         = Lst (map go lst)
   go (Nat val)         = Nat val
   go (Var nam idx)     = if lvl == idx then neo else Var nam idx
   go (Src src val)     = Src src (go val)
@@ -466,6 +471,7 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Num n)            = Num n
   go (Op2 opr fst snd)  = Op2 opr (replace old neo fst dep) (replace old neo snd dep)
   go (Txt txt)          = Txt txt
+  go (Lst lst)          = Lst (map (\x -> replace old neo x dep) lst)
   go (Nat val)          = Nat val
   go (Var nam idx)      = Var nam idx
   go (Src src val)      = Src src (replace old neo val dep)
