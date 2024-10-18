@@ -289,10 +289,12 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
       envFail
 
 unreachable :: Maybe Cod -> Term -> Int -> Env ()
-unreachable src (Lam nam bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
-unreachable src (Hol nam ctx) dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> return ()
-unreachable _   (Src src val) dep = unreachable (Just src) val dep
-unreachable src term          dep = return ()
+unreachable src (Lam nam bod)     dep = unreachable src (bod (Con "void" [])) (dep+1)
+unreachable src (Hol nam ctx)     dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> return ()
+unreachable src (Let nam val bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
+unreachable src (Use nam val bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
+unreachable _   (Src src val)     dep = unreachable (Just src) val dep
+unreachable src term              dep = return ()
 
 checkTele :: Maybe Cod -> Tele -> Term -> Int -> Env ()
 checkTele src tele typ dep = case tele of

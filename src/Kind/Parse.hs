@@ -6,6 +6,7 @@ import Debug.Trace
 import Prelude hiding (EQ, LT, GT)
 import Kind.Type
 import Kind.Reduce
+import Kind.Show
 import Highlight (highlightError, highlight)
 import Data.Char (ord)
 import qualified Data.Map.Strict as M
@@ -585,7 +586,8 @@ parseDef = do
         body <- parseTerm
         return (pats, body)
       let (mat, bods) = unzip rules
-      return (flattenDef mat bods 0)
+      let flat = (flattenDef mat bods 0)
+      return $ {-trace (termShow flat)-} flat
     ]
   (_, uses) <- P.getState
   let name' = expandUses uses name
