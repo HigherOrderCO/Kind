@@ -238,16 +238,18 @@ parseTele = do
 parseCon = withSrc $ do
   char '#'
   nam <- parseName
-  char '{'
-  args <- P.many $ do
-    P.notFollowedBy (char '}')
-    name <- P.optionMaybe $ P.try $ do
-      name <- parseName
-      char ':'
-      return name
-    term <- parseTerm
-    return (name, term)
-  char '}'
+  args <- P.option [] $ P.try $ do
+    char '{'
+    args <- P.many $ do
+      P.notFollowedBy (char '}')
+      name <- P.optionMaybe $ P.try $ do
+        name <- parseName
+        char ':'
+        return name
+      term <- parseTerm
+      return (name, term)
+    char '}'
+    return args
   return $ Con nam args
 
 parseSwi = withSrc $ do
