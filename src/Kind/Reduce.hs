@@ -5,7 +5,6 @@ import Data.Bits ( (.&.), (.|.), xor, shiftL, shiftR )
 import Data.Char (ord)
 import Debug.Trace
 import Kind.Type
-import Kind.Show
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM

@@ -3,6 +3,7 @@ module Kind.Show where
 import Prelude hiding (EQ, LT, GT)
 
 import Kind.Type
+import Kind.Reduce
 
 import Debug.Trace
 import System.IO (readFile)
@@ -91,7 +92,8 @@ termShower small term dep = case term of
   Lst lst -> concat ["[", unwords (map (\x -> termShower small x dep) lst), "]"]
   Nat val -> concat ["#", (show val)]
   Hol nam ctx -> concat ["?" , nam]
-  Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
+  -- Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
+  Met uid spn -> concat ["_", show uid]
   Var nam idx -> nam
   Src src val -> if small
     then termShower small val dep
@@ -143,13 +145,15 @@ contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn b
 contextShowAnn :: Book -> Fill -> Term -> Int -> String
 contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True val dep, " : ", termShower True typ dep]
 contextShowAnn book fill (Src _ val)       dep = contextShowAnn book fill val dep
-contextShowAnn book fill term              dep = termShower True term dep
+contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
 
 infoShow :: Book -> Fill -> Info -> IO String
 infoShow book fill info = case info of
+
+-- normal :: Book -> Fill -> Int -> Term -> Int -> Term
   Found nam typ ctx dep ->
     let nam' = concat ["?", nam]
-        typ' = termShower True typ dep
+        typ' = termShower True (normal book fill 0 typ dep) dep
         ctx' = contextShow book fill ctx dep
     in return $ concat ["\x1b[1mGOAL\x1b[0m ", nam', " : ", typ', "\n", ctx']
   Error src exp det bad dep -> do
