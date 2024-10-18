@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Show where
 
 import Prelude hiding (EQ, LT, GT)
@@ -9,6 +11,7 @@ import Debug.Trace
 import System.IO (readFile)
 import System.Directory (canonicalizePath)
 import Control.Exception (try)
+import Data.Word
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
@@ -21,83 +24,102 @@ import System.Console.ANSI
 -- ---------------
 
 termShower :: Bool -> Term -> Int -> String
-termShower small term dep = case term of
-  All nam inp bod ->
-    let nam' = nam
-        inp' = termShower small inp dep
-        bod' = termShower small (bod (Var nam dep)) (dep + 1)
-    in concat ["∀(" , nam' , ": " , inp' , ") " , bod']
-  Lam nam bod ->
-    let nam' = nam
-        bod' = termShower small (bod (Var nam dep)) (dep + 1)
-    in concat ["λ" , nam' , " " , bod']
-  App fun arg ->
-    let (fun', args) = unwrapApp fun [arg]
-        fun'' = termShower small fun' dep
-        args' = unwords (map (\x -> termShower small x dep) args)
-    in concat ["(" , fun'' , " " , args' , ")"]
-  Ann chk val typ ->
-    if small
-      then termShower small val dep
-      else let val' = termShower small val dep
-               typ' = termShower small typ dep
-           in concat ["{" , val' , ": " , typ' , "}"]
-  Slf nam typ bod ->
-    termShower small typ dep
-  Ins val ->
-    let val' = termShower small val dep
-    in concat ["~" , val']
-  -- CHANGED: Updated Dat case to use new Ctr structure
-  Dat scp cts ->
-    let scp' = unwords (map (\x -> termShower small x dep) scp)
-        cts' = unwords (map (\(Ctr nm tele) ->
-          "#" ++ nm ++ " " ++ teleShower small tele dep) cts)
-    in concat ["#[", scp', "]{ ", cts', " }"]
-  Con nam arg ->
-    let arg' = unwords (map showArg arg)
-    in concat ["#", nam, "{", arg', "}"]
-    where
-      showArg (maybeField, term) = case maybeField of
-        Just field -> field ++ ": " ++ termShower small term dep
-        Nothing -> termShower small term dep
-  Mat cse ->
-    let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShower small cbod dep) cse)
-    in concat ["λ{ ", cse', " }"]
-  Ref nam -> concat ["@", nam]
-  Let nam val bod ->
-    let nam' = nam
-        val' = termShower small val dep
-        bod' = termShower small (bod (Var nam dep)) (dep + 1)
-    in concat ["let " , nam' , " = " , val' , "; " , bod']
-  Use nam val bod ->
-    let nam' = nam
-        val' = termShower small val dep
-        bod' = termShower small (bod (Var nam dep)) (dep + 1)
-    in concat ["use " , nam' , " = " , val' , "; " , bod']
-  Set -> "*"
-  U32 -> "U32"
-  Num val ->
-    let val' = show val
-    in concat [val']
-  Op2 opr fst snd ->
-    let opr' = operShow opr
-        fst' = termShower small fst dep
-        snd' = termShower small snd dep
-    in concat ["(" , opr' , " " , fst' , " " , snd' , ")"]
-  Swi zero succ ->
-    let zero' = termShower small zero dep
-        succ' = termShower small succ dep
-    in concat ["λ{ 0: ", zero', " _: ", succ', " }"]
-  Txt txt -> concat ["\"" , txt , "\""]
-  Lst lst -> concat ["[", unwords (map (\x -> termShower small x dep) lst), "]"]
-  Nat val -> concat ["#", (show val)]
-  Hol nam ctx -> concat ["?" , nam]
-  -- Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
-  Met uid spn -> concat ["_", show uid]
-  Var nam idx -> nam
-  Src src val -> if small
-    then termShower small val dep
-    else concat ["!", termShower small val dep]
+termShower small term dep =
+  case sugar term of
+    Just str -> str
+    Nothing  -> case term of
+      All nam inp bod ->
+        let nam' = nam
+            inp' = termShower small inp dep
+            bod' = termShower small (bod (Var nam dep)) (dep + 1)
+        in concat ["∀(" , nam' , ": " , inp' , ") " , bod']
+      Lam nam bod ->
+        let nam' = nam
+            bod' = termShower small (bod (Var nam dep)) (dep + 1)
+        in concat ["λ" , nam' , " " , bod']
+      App fun arg ->
+        let (fun', args) = unwrapApp fun [arg]
+            fun'' = termShower small fun' dep
+            args' = unwords (map (\x -> termShower small x dep) args)
+        in concat ["(" , fun'' , " " , args' , ")"]
+      Ann chk val typ ->
+        if small
+          then termShower small val dep
+          else let val' = termShower small val dep
+                   typ' = termShower small typ dep
+              in concat ["{" , val' , ": " , typ' , "}"]
+      Slf nam typ bod ->
+        termShower small typ dep
+      Ins val ->
+        let val' = termShower small val dep
+        in concat ["~" , val']
+      -- CHANGED: Updated Dat case to use new Ctr structure
+      Dat scp cts ->
+        let scp' = unwords (map (\x -> termShower small x dep) scp)
+            cts' = unwords (map (\(Ctr nm tele) ->
+              "#" ++ nm ++ " " ++ teleShower small tele dep) cts)
+        in concat ["#[", scp', "]{ ", cts', " }"]
+      Con nam arg ->
+        let arg' = unwords (map showArg arg)
+        in concat ["#", nam, "{", arg', "}"]
+        where
+          showArg (maybeField, term) = case maybeField of
+            Just field -> field ++ ": " ++ termShower small term dep
+            Nothing -> termShower small term dep
+      Mat cse ->
+        let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShower small cbod dep) cse)
+        in concat ["λ{ ", cse', " }"]
+      Ref nam -> concat ["@", nam]
+      Let nam val bod ->
+        let nam' = nam
+            val' = termShower small val dep
+            bod' = termShower small (bod (Var nam dep)) (dep + 1)
+        in concat ["let " , nam' , " = " , val' , "; " , bod']
+      Use nam val bod ->
+        let nam' = nam
+            val' = termShower small val dep
+            bod' = termShower small (bod (Var nam dep)) (dep + 1)
+        in concat ["use " , nam' , " = " , val' , "; " , bod']
+      Set -> "*"
+      U32 -> "U32"
+      Num val ->
+        let val' = show val
+        in concat [val']
+      Op2 opr fst snd ->
+        let opr' = operShow opr
+            fst' = termShower small fst dep
+            snd' = termShower small snd dep
+        in concat ["(" , opr' , " " , fst' , " " , snd' , ")"]
+      Swi zero succ ->
+        let zero' = termShower small zero dep
+            succ' = termShower small succ dep
+        in concat ["λ{ 0: ", zero', " _: ", succ', " }"]
+      Txt txt -> concat ["\"" , txt , "\""]
+      Lst lst -> concat ["[", unwords (map (\x -> termShower small x dep) lst), "]"]
+      Nat val -> concat ["#", (show val)]
+      Hol nam ctx -> concat ["?" , nam]
+      -- Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
+      Met uid spn -> concat ["_", show uid]
+      Var nam idx -> nam
+      Src src val -> if small
+        then termShower small val dep
+        else concat ["!", termShower small val dep]
+
+sugar :: Term -> Maybe String
+sugar term = sugarString term
+
+sugarString :: Term -> Maybe String
+sugarString (Con "View" [(_, term)]) = do
+  chars <- sugarStringGo term
+  return $ '"' : chars ++ "\""
+sugarString _ = Nothing
+
+sugarStringGo :: Term -> Maybe String
+sugarStringGo (Con "Nil" []) = Just []
+sugarStringGo (Con "Cons" [(_, Num head), (_, tail)]) = do
+  rest <- sugarStringGo tail
+  return $ toEnum (fromIntegral head) : rest
+sugarStringGo _ = Nothing
 
 -- CHANGED: Added teleShower function
 teleShower :: Bool -> Tele -> Int -> String

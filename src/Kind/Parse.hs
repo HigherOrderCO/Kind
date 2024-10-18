@@ -436,11 +436,38 @@ parseOp2 = withSrc $ do
   char ')'
   return $ Op2 opr fst snd
 
+-- parseTxt = withSrc $ do
+  -- char '"'
+  -- txt <- P.many (noneOf "\"")
+  -- char '"'
+  -- return $ Txt txt
+
+-- FIXME: edit parseTxt to allow parsing escape sequences, identically to how JS works.
 parseTxt = withSrc $ do
   char '"'
-  txt <- P.many (noneOf "\"")
+  txt <- P.many parseTxtChr
   char '"'
-  return $ Txt txt
+  return $ Txt (concat txt)
+
+parseTxtChr :: Parser String
+parseTxtChr = P.choice
+  [ P.try $ do
+      char '\\'
+      c <- oneOf "\\\"nrtbf"
+      return $ case c of
+        '\\' -> "\\"
+        '"'  -> "\""
+        'n'  -> "\n"
+        'r'  -> "\r"
+        't'  -> "\t"
+        'b'  -> "\b"
+        'f'  -> "\f"
+  , P.try $ do
+      string "\\u"
+      code <- P.count 4 P.hexDigit
+      return [toEnum (read ("0x" ++ code) :: Int)]
+  , fmap (:[]) (noneOf "\"\\")
+  ]
 
 parseLst = withSrc $ do
   char '['
