@@ -121,6 +121,21 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
   go (Src src val) dep = do
     infer val dep
 
+  go tm@(Txt txt) dep = do
+    book <- envGetBook
+    fill <- envGetFill
+    go (reduce book fill 2 tm) dep
+
+  go tm@(Nat val) dep = do
+    book <- envGetBook
+    fill <- envGetFill
+    go (reduce book fill 2 tm) dep
+
+  go tm@(Lst lst) dep = do
+    book <- envGetBook
+    fill <- envGetFill
+    go (reduce book fill 2 tm) dep
+
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
 check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    :: " ++ termShower True typ dep) $ go src val typ dep where
 

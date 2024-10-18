@@ -117,11 +117,49 @@ withSrc parser = do
 -- Term Parser
 -- -----------
 
--- Main term parser
+-- -- Main term parser
+-- parseTerm :: Parser Term
+-- parseTerm = (do
+  -- parseTrivia
+  -- P.choice
+    -- [ parseAll
+    -- , parseSwi
+    -- , parseMat
+    -- , parseLam
+    -- , parseEra
+    -- , parseOp2
+    -- , parseApp
+    -- , parseAnn
+    -- , parseSlf
+    -- , parseIns
+    -- , parseDat
+    -- , parseNat -- sugar
+    -- , parseCon
+    -- , (parseUse parseTerm)
+    -- , (parseLet parseTerm)
+    -- , (parseMch parseTerm) -- sugar
+    -- , parseDo -- sugar
+    -- , parseSet
+    -- , parseNum
+    -- , parseTxt -- sugar
+    -- , parseLst -- sugar
+    -- , parseChr -- sugar
+    -- , parseHol
+    -- , parseMet
+    -- , parseRef
+    -- ] <* parseTrivia) <?> "Term"
+
+-- TODO: update parseTerm to, optionally, parse a "suffix" part. include the following suffix parsers:
+-- parseSuffArr: parses an All that doesn't use its bound varaible. Example: ... -> term
+-- parseSuffAnn: parses an Ann without needing the {}. Example: ... :: term
+-- parseSuffVal: if none of the above worked, we just return term.
+-- NOTE: the parseSuff functions receive the currently parsed term.
+
+
 parseTerm :: Parser Term
 parseTerm = (do
   parseTrivia
-  P.choice
+  term <- P.choice
     [ parseAll
     , parseSwi
     , parseMat
@@ -147,7 +185,8 @@ parseTerm = (do
     , parseHol
     , parseMet
     , parseRef
-    ] <* parseTrivia) <?> "Term"
+    ] <* parseTrivia
+  parseSuffix term) <?> "Term"
 
 -- Individual term parsers
 parseAll = withSrc $ do
@@ -465,6 +504,28 @@ parseOper = P.choice
   , P.try (string "|") >> return OR
   , P.try (string "^") >> return XOR
   ]
+
+parseSuffix :: Term -> Parser Term
+parseSuffix term = P.choice
+  [ parseSuffArr term
+  , parseSuffAnn term
+  , parseSuffVal term
+  ]
+
+parseSuffArr :: Term -> Parser Term
+parseSuffArr term = do
+  P.try $ string "->"
+  ret <- parseTerm
+  return $ All "_" term (\_ -> ret)
+
+parseSuffAnn :: Term -> Parser Term
+parseSuffAnn term = do
+  P.try $ string "::"
+  typ <- parseTerm
+  return $ Ann False term typ
+
+parseSuffVal :: Term -> Parser Term
+parseSuffVal term = return term
 
 -- Book Parser
 -- -----------
