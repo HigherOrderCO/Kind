@@ -182,7 +182,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
                   let a_r = teleToTerm tele dep
                   let eqs = extractEqualities (reduce book fill 2 typ_inp) (reduce book fill 2 (snd a_r)) dep
                   let rt0 = teleToType tele (typ_bod (Ann False (Con cnm (fst a_r)) typ_inp)) dep
-                  let rt1 = foldl' (\ ty (i,t) -> subst i t ty) rt0 eqs
+                  let rt1 = foldl' (\ ty (a,b) -> replace a b ty dep) rt0 eqs
                   check Nothing cbod rt1 dep
                 Nothing -> do
                   envLog (Error src (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
@@ -301,11 +301,11 @@ teleToTerm tele dep = go tele [] dep where
   go (TRet ret)         args _   = (reverse args, ret)
   go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
 
-extractEqualities :: Term -> Term -> Int -> [(Int, Term)]
-extractEqualities (Dat as _) (Dat bs _) dep = zipWith go as bs where
-  go (Var _ i) v = (i, v)
-  go (Src _ i) v = go i v
-  go a         v = trace ("Unexpected term: " ++ termShower True a dep) (0, v)
+extractEqualities :: Term -> Term -> Int -> [(Term, Term)]
+extractEqualities (Dat as _) (Dat bs _) dep = zip as bs where
+  -- go (Var _ i) v = (i, v)
+  -- go (Src _ i) v = go i v
+  -- go a         v = trace ("Unexpected term: " ++ termShower True a dep ++ " == " ++ termShower True v dep) (0, v)
 extractEqualities a b dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
 
 doCheck :: Term -> Env ()
