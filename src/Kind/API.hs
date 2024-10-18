@@ -184,7 +184,16 @@ getDeps term = case term of
   Op2 _ fst snd -> getDeps fst ++ getDeps snd
   Swi zer suc   -> getDeps zer ++ getDeps suc
   Src _ val     -> getDeps val
-  _             -> []
+  Hol _ args    -> concatMap getDeps args
+  Met _ args    -> concatMap getDeps args
+  Var _ _       -> []
+  Set           -> []
+  U32           -> []
+  Num _         -> []
+  Txt _         -> []
+  Lst elems     -> concatMap getDeps elems
+  Nat _         -> []
+
 
 -- Gets dependencies of a constructor
 getDepsCtr :: Ctr -> [String]
