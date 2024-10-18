@@ -485,3 +485,13 @@ replace old neo term dep = if same old term dep then neo else go term where
   goCse (cnam, cbod)    = (cnam, replace old neo cbod dep)
   goTele (TRet term)  d = TRet (replace old neo term d)
   goTele (TExt k t b) d = TExt k (replace old neo t d) (\x -> goTele (b x) (d+1))
+
+-- Returns true when two terms can definitely never be made identical.
+-- TODO: to implement this, just recurse pairwise on the Con constructor,
+-- until a different name is found. All other terms are considered compatible.
+incompatible :: Term -> Term -> Int -> Bool
+incompatible (Con aNam aArg) (Con bNam bArg) dep | aNam /= bNam = True
+incompatible (Con aNam aArg) (Con bNam bArg) dep | otherwise    = length aArg == length bArg && any (\(a,b) -> incompatible a b dep) (zip (map snd aArg) (map snd bArg))
+incompatible (Src aSrc aVal) b               dep                = incompatible aVal b dep
+incompatible a               (Src bSrc bVal) dep                = incompatible a bVal dep
+incompatible _               _               _                  = False
