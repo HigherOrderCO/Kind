@@ -399,7 +399,7 @@ same _ _ _ = False
 sameCtr :: Ctr -> Ctr -> Int -> Bool
 sameCtr (Ctr aCNm aTele) (Ctr bCNm bTele) dep =
   if aCNm == bCNm
-    then goTele aTele bTele dep
+    then sameTele aTele bTele dep
     else False
 
 sameCse :: (String, Term) -> (String, Term) -> Int -> Bool
@@ -408,13 +408,13 @@ sameCse (aCNam, aCBod) (bCNam, bCBod) dep =
     then same aCBod bCBod dep
     else False
 
-goTele :: Tele -> Tele -> Int -> Bool
-goTele (TRet aTerm) (TRet bTerm) dep = same aTerm bTerm dep
-goTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep =
+sameTele :: Tele -> Tele -> Int -> Bool
+sameTele (TRet aTerm) (TRet bTerm) dep = same aTerm bTerm dep
+sameTele (TExt aNam aTyp aBod) (TExt bNam bTyp bBod) dep =
   let sTyp = same aTyp bTyp dep
-      sBod = goTele (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
+      sBod = sameTele (aBod (Var aNam dep)) (bBod (Var bNam dep)) (dep + 1)
   in sTyp && sBod
-goTele _ _ _ = False
+sameTele _ _ _ = False
 
 -- Substitutes a Bruijn level variable by a neo value in term.
 subst :: Int -> Term -> Term -> Term
