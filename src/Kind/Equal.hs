@@ -18,20 +18,27 @@ import qualified Data.IntMap.Strict as IM
 -- Checks if two terms are equal, after reduction steps
 equal :: Term -> Term -> Int -> Env Bool
 equal a b dep = debug ("== " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep) $ do
-  -- Reduces both sides to wnf
-  book <- envGetBook
-  fill <- envGetFill
-  let a' = reduce book fill 2 a
-  let b' = reduce book fill 2 b
+  -- If both terms are identical, return true
   state <- envSnapshot
-  -- If both sides are identical, return true
-  is_id <- identical a' b' dep
+  is_id <- identical a b dep
   if is_id then do
     envPure True
-  -- Otherwise, check if they're component-wise equal
+  -- Otherwise, reduces both terms to wnf
   else do
     envRewind state
-    similar a' b' dep
+    book <- envGetBook
+    fill <- envGetFill
+    let aWnf = reduce book fill 2 a
+    let bWnf = reduce book fill 2 b
+    -- If both term wnfs are identical, return true
+    state <- envSnapshot
+    is_id <- identical aWnf bWnf dep
+    if is_id then do
+      envPure True
+    -- Otherwise, check if they're component-wise equal
+    else do
+      envRewind state
+      similar aWnf bWnf dep
 
 -- Checks if two terms are already syntactically identical
 identical :: Term -> Term -> Int -> Env Bool
@@ -219,7 +226,6 @@ unify uid spn b dep = do
   let no_loops = not $ occur book fill uid b dep
 
   debug ("unify: " ++ show uid ++ " " ++ termShower False b dep ++ " | " ++ show solved ++ " " ++ show solvable ++ " " ++ show no_loops) $ do
-    -- If all is ok, generate the solution and return true
     if not solved && solvable && no_loops then do
       let solution = solve book fill uid spn b
       debug ("solve: " ++ show uid ++ " " ++ termShower False solution dep ++ " | spn: " ++ show (map (\t -> termShower False t dep) spn)) $ envFill uid solution
