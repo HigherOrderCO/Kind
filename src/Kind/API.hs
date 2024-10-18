@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.API where
 
 import Control.Monad (forM, forM_, foldM)
@@ -89,10 +91,12 @@ apiCheckFile book defs path = do
     case envRun (doCheck term) book of
       Done state value -> do
         apiPrintLogs state
+        apiPrintWarn term state
         putStrLn $ "\x1b[32m✓ " ++ name ++ "\x1b[0m"
         return $ Right ()
       Fail state -> do
         apiPrintLogs state
+        apiPrintWarn term state
         putStrLn $ "\x1b[31m✗ " ++ name ++ "\x1b[0m"
         return $ Left $ "Error."
   putStrLn ""
@@ -147,10 +151,20 @@ apiToJS book name = do
 
 -- Prints logs from the type-checker
 apiPrintLogs :: State -> IO ()
-apiPrintLogs (State book fill susp logs) =
+apiPrintLogs (State book fill susp logs) = do
   forM_ logs $ \log -> do
     result <- infoShow book fill log
     putStrLn result
+
+-- Prints a warning if there are unsolved metas
+apiPrintWarn :: Term -> State -> IO ()
+apiPrintWarn term (State _ fill _ _) = do
+  let metaCount = countMetas term
+  let fillCount = IM.size fill
+  if (metaCount > fillCount) then do
+    putStrLn $ "WARNING: " ++ show (metaCount - fillCount) ++ " unsolved metas."
+  else
+    return ()
 
 -- Gets dependencies of a term
 getDeps :: Term -> [String]

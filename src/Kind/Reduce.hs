@@ -255,68 +255,72 @@ bind (Src src val) ctx =
   Src src val'
 
 genMetas :: Term -> Term
-genMetas term = fst (go term 0) where
-  go :: Term -> Int -> (Term, Int)
-  go (All nam inp bod) c = 
-    let (inp', c1) = go inp c
-        (bod', c2) = go (bod (Var nam 0)) c1
-    in (All nam inp' (\_ -> bod'), c2)
-  go (Lam nam bod) c = 
-    let (bod', c1) = go (bod (Var nam 0)) c
-    in (Lam nam (\_ -> bod'), c1)
-  go (App fun arg) c = 
-    let (fun', c1) = go fun c
-        (arg', c2) = go arg c1
-    in (App fun' arg', c2)
-  go (Ann chk val typ) c = 
-    let (val', c1) = go val c
-        (typ', c2) = go typ c1
-    in (Ann chk val' typ', c2)
-  go (Slf nam typ bod) c = 
-    let (typ', c1) = go typ c
-        (bod', c2) = go (bod (Var nam 0)) c1
-    in (Slf nam typ' (\_ -> bod'), c2)
-  go (Ins val) c = 
-    let (val', c1) = go val c
-    in (Ins val', c1)
-  go (Dat scp cts) c = 
-    let (scp', c1) = foldr (\t (acc, c') -> let (t', c'') = go t c' in (t':acc, c'')) ([], c) scp
-        (cts', c2) = foldr (\(Ctr nm tele) (acc, c') -> let (tele', c'') = goTele tele c' in (Ctr nm tele' : acc, c'')) ([], c1) cts
-    in (Dat scp' cts', c2)
-  go (Con nam arg) c = 
-    let (arg', c1) = foldr (\(f, t) (acc, c') -> let (t', c'') = go t c' in ((f, t'):acc, c'')) ([], c) arg
-    in (Con nam arg', c1)
-  go (Mat cse) c = 
-    let (cse', c1) = foldr (\(cn, cb) (acc, c') -> let (cb', c'') = go cb c' in ((cn, cb'):acc, c'')) ([], c) cse
-    in (Mat cse', c1)
-  go (Swi zer suc) c = 
-    let (zer', c1) = go zer c
-        (suc', c2) = go suc c1
-    in (Swi zer' suc', c2)
-  go (Let nam val bod) c = 
-    let (val', c1) = go val c
-        (bod', c2) = go (bod (Var nam 0)) c1
-    in (Let nam val' (\_ -> bod'), c2)
-  go (Use nam val bod) c = 
-    let (val', c1) = go val c
-        (bod', c2) = go (bod (Var nam 0)) c1
-    in (Use nam val' (\_ -> bod'), c2)
-  go (Met _ spn) c = 
-    let (spn', c1) = foldr (\t (acc, c') -> let (t', c'') = go t c' in (t':acc, c'')) ([], c) spn
-    in (Met c1 spn', c1 + 1)
-  go (Hol nam ctx) c = 
-    let (ctx', c1) = foldr (\t (acc, c') -> let (t', c'') = go t c' in (t':acc, c'')) ([], c) ctx
-    in (Hol nam ctx', c1)
-  go (Src src val) c = 
-    let (val', c1) = go val c
-    in (Src src val', c1)
-  go term c = (term, c)
+genMetas term = fst (genMetasGo term 0)
 
-  goTele :: Tele -> Int -> (Tele, Int)
-  goTele (TRet term) c = 
-    let (term', c1) = go term c
-    in (TRet term', c1)
-  goTele (TExt nam typ bod) c = 
-    let (typ', c1) = go typ c
-        (bod', c2) = goTele (bod (Var nam 0)) c1
-    in (TExt nam typ' (\_ -> bod'), c2)
+genMetasGo :: Term -> Int -> (Term, Int)
+genMetasGo (All nam inp bod) c = 
+  let (inp', c1) = genMetasGo inp c
+      (bod', c2) = genMetasGo (bod (Var nam 0)) c1
+  in (All nam inp' (\_ -> bod'), c2)
+genMetasGo (Lam nam bod) c = 
+  let (bod', c1) = genMetasGo (bod (Var nam 0)) c
+  in (Lam nam (\_ -> bod'), c1)
+genMetasGo (App fun arg) c = 
+  let (fun', c1) = genMetasGo fun c
+      (arg', c2) = genMetasGo arg c1
+  in (App fun' arg', c2)
+genMetasGo (Ann chk val typ) c = 
+  let (val', c1) = genMetasGo val c
+      (typ', c2) = genMetasGo typ c1
+  in (Ann chk val' typ', c2)
+genMetasGo (Slf nam typ bod) c = 
+  let (typ', c1) = genMetasGo typ c
+      (bod', c2) = genMetasGo (bod (Var nam 0)) c1
+  in (Slf nam typ' (\_ -> bod'), c2)
+genMetasGo (Ins val) c = 
+  let (val', c1) = genMetasGo val c
+  in (Ins val', c1)
+genMetasGo (Dat scp cts) c = 
+  let (scp', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) scp
+      (cts', c2) = foldr (\(Ctr nm tele) (acc, c') -> let (tele', c'') = genMetasGoTele tele c' in (Ctr nm tele' : acc, c'')) ([], c1) cts
+  in (Dat scp' cts', c2)
+genMetasGo (Con nam arg) c = 
+  let (arg', c1) = foldr (\(f, t) (acc, c') -> let (t', c'') = genMetasGo t c' in ((f, t'):acc, c'')) ([], c) arg
+  in (Con nam arg', c1)
+genMetasGo (Mat cse) c = 
+  let (cse', c1) = foldr (\(cn, cb) (acc, c') -> let (cb', c'') = genMetasGo cb c' in ((cn, cb'):acc, c'')) ([], c) cse
+  in (Mat cse', c1)
+genMetasGo (Swi zer suc) c = 
+  let (zer', c1) = genMetasGo zer c
+      (suc', c2) = genMetasGo suc c1
+  in (Swi zer' suc', c2)
+genMetasGo (Let nam val bod) c = 
+  let (val', c1) = genMetasGo val c
+      (bod', c2) = genMetasGo (bod (Var nam 0)) c1
+  in (Let nam val' (\_ -> bod'), c2)
+genMetasGo (Use nam val bod) c = 
+  let (val', c1) = genMetasGo val c
+      (bod', c2) = genMetasGo (bod (Var nam 0)) c1
+  in (Use nam val' (\_ -> bod'), c2)
+genMetasGo (Met _ spn) c = 
+  let (spn', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) spn
+  in (Met c1 spn', c1 + 1)
+genMetasGo (Hol nam ctx) c = 
+  let (ctx', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) ctx
+  in (Hol nam ctx', c1)
+genMetasGo (Src src val) c = 
+  let (val', c1) = genMetasGo val c
+  in (Src src val', c1)
+genMetasGo term c = (term, c)
+
+genMetasGoTele :: Tele -> Int -> (Tele, Int)
+genMetasGoTele (TRet term) c = 
+  let (term', c1) = genMetasGo term c
+  in (TRet term', c1)
+genMetasGoTele (TExt nam typ bod) c = 
+  let (typ', c1) = genMetasGo typ c
+      (bod', c2) = genMetasGoTele (bod (Var nam 0)) c1
+  in (TExt nam typ' (\_ -> bod'), c2)
+
+countMetas :: Term -> Int
+countMetas term = snd (genMetasGo term 0)
