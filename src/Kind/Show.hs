@@ -143,14 +143,14 @@ contextShow :: Book -> Fill -> [Term] -> Int -> String
 contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) ctx
 
 contextShowAnn :: Book -> Fill -> Term -> Int -> String
-contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True val dep, " : ", termShower True typ dep]
+contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
 contextShowAnn book fill (Src _ val)       dep = contextShowAnn book fill val dep
 contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
 
+-- normal :: Book -> Fill -> Int -> Term -> Int -> Term
+
 infoShow :: Book -> Fill -> Info -> IO String
 infoShow book fill info = case info of
-
--- normal :: Book -> Fill -> Int -> Term -> Int -> Term
   Found nam typ ctx dep ->
     let nam' = concat ["?", nam]
         typ' = termShower True (normal book fill 0 typ dep) dep
