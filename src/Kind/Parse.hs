@@ -43,8 +43,8 @@ string s = P.string s <* parseTrivia
 letter :: Parser Char
 letter = P.letter
 
-alphaNum :: Parser Char
-alphaNum = P.alphaNum
+parseNameChar :: Parser Char
+parseNameChar = P.satisfy (`elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/_.-$")
 
 digit :: Parser Char
 digit = P.digit
@@ -443,7 +443,7 @@ parseMet = withSrc $ do
 parseName :: Parser String
 parseName = do
   head <- letter
-  tail <- P.many (alphaNum <|> oneOf "/_.-")
+  tail <- P.many parseNameChar
   parseTrivia
   return (head : tail)
 
