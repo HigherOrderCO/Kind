@@ -258,14 +258,24 @@ parseSwi = withSrc $ do
   char '}'
   return $ Swi zero succ
 
-parseMat = withSrc $ do
-  P.try $ string "λ{"
-  cse <- P.many $ do
+parseCse :: Parser [(String, Term)]
+parseCse = do
+  cse <- P.many $ P.try $ do
     char '#'
     cnam <- parseName
+    args <- P.option [] $ P.try $ do
+      char '{'
+      names <- P.many parseName
+      char '}'
+      return names
     char ':'
     cbod <- parseTerm
-    return (cnam, cbod)
+    return (cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) cbod args)
+  return cse
+
+parseMat = withSrc $ do
+  P.try $ string "λ{"
+  cse <- parseCse
   char '}'
   return $ Mat cse
 
@@ -277,21 +287,100 @@ parseRef = withSrc $ do
     "U32" -> U32
     _     -> Ref name'
 
-parseUse parseBody = withSrc $ do
-  P.try (string "use ")
-  nam <- parseName
+-- parseUse parseBody = withSrc $ do
+  -- P.try (string "use ")
+  -- nam <- parseName
+  -- char '='
+  -- val <- parseTerm
+  -- bod <- parseTerm
+  -- return $ Use nam val (\x -> bod)
+
+-- parseLet parseBody = withSrc $ do
+  -- P.try (string "let ")
+  -- nam <- parseName
+  -- char '='
+  -- val <- parseTerm
+  -- bod <- parseBody
+  -- return $ Let nam val (\x -> bod)
+
+-- TODO: update the parseLet syntax to allow for the following feature:
+-- let #Name{ x y z } = value body
+-- will be desugared to the equivalent of:
+-- let got = value match got { #Name: λx λy λz ... }
+-- this should be make as 3 different parsers:
+-- parseLet: a choice between the two parsers below
+-- parseLetMch: combines let and match in a single parser
+-- parseLetVal: the current let parser
+
+-- parseLet :: Parser Term -> Parser Term
+-- parseLet parseBody = withSrc $ P.choice
+  -- [ parseLetMch parseBody
+  -- , parseLetVal parseBody
+  -- ]
+
+-- parseLetMch :: Parser Term -> Parser Term
+-- parseLetMch parseBody = do
+  -- P.try $ string "let #"
+  -- cnam <- parseName
+  -- char '{'
+  -- args <- P.many parseName
+  -- char '}'
+  -- char '='
+  -- val <- parseTerm
+  -- bod <- parseBody
+  -- return $ Let "got" val (\got ->
+    -- App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) bod args)]) got)
+
+-- parseLetVal :: Parser Term -> Parser Term
+-- parseLetVal parseBody = do
+  -- P.try $ string "let "
+  -- nam <- parseName
+  -- char '='
+  -- val <- parseTerm
+  -- bod <- parseBody
+  -- return $ Let nam val (\x -> bod)
+
+-- This works, but now 'use' is still using the old syntax.
+-- Update the commented-out code above so that 'use' also has the new syntaxes.
+-- Do it in a way that minimizes code repetition (i.e., do not re-create a
+-- parseUse, parseUseMch and parseUseVal functions; instead, create a generic
+-- parseLoc, parseLocMch, parseLocVal functions, which will receive the header
+-- name (either "let" or "use"), and the header ctor (either Let or Use). then,
+-- make the specialized functions (parseLet, parseUse, etc.) by calling these.
+
+parseLocal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
+parseLocal header ctor parseBody = withSrc $ P.choice
+  [ parseLocalMch header ctor parseBody
+  , parseLocalVal header ctor parseBody
+  ]
+
+parseLocalMch :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
+parseLocalMch header ctor parseBody = do
+  P.try $ string (header ++ " #")
+  cnam <- parseName
+  char '{'
+  args <- P.many parseName
+  char '}'
   char '='
   val <- parseTerm
-  bod <- parseTerm
-  return $ Use nam val (\x -> bod)
+  bod <- parseBody
+  return $ ctor "got" val (\got ->
+    App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) bod args)]) got)
 
-parseLet parseBody = withSrc $ do
-  P.try (string "let ")
+parseLocalVal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
+parseLocalVal header ctor parseBody = do
+  P.try $ string (header ++ " ")
   nam <- parseName
   char '='
   val <- parseTerm
   bod <- parseBody
-  return $ Let nam val (\x -> bod)
+  return $ ctor nam val (\x -> bod)
+
+parseLet :: Parser Term -> Parser Term
+parseLet = parseLocal "let" Let
+
+parseUse :: Parser Term -> Parser Term
+parseUse = parseLocal "use" Use
 
 parseSet = withSrc $ char '*' >> return Set
 
@@ -506,6 +595,57 @@ expandUses uses name =
 -- parseDoUse: uses use parser, but continues the body with a parseStmt instead of parseTerm
 -- parseTerm: when all above fail, we will just parse a term and return it.
 
+-- parseDo :: Parser Term
+-- parseDo = withSrc $ do
+  -- string "do "
+  -- name <- parseName
+  -- char '{'
+  -- parseTrivia
+  -- body <- parseStmt name
+  -- char '}'
+  -- return body
+
+-- parseStmt :: String -> Parser Term
+-- parseStmt name = P.choice
+  -- [ parseDoAsk name
+  -- , parseDoRet name
+  -- , parseLet (parseStmt name)
+  -- , parseUse (parseStmt name)
+  -- -- , parseMch (parseStmt name)
+  -- , parseTerm
+  -- ]
+
+-- parseDoAsk :: String -> Parser Term
+-- parseDoAsk name = do
+  -- P.try $ string "ask "
+  -- nam <- P.optionMaybe parseName
+  -- exp <- case nam of
+    -- Just var -> char '=' >> parseTerm
+    -- Nothing  -> parseTerm
+  -- next <- parseStmt name
+  -- (_, uses) <- P.getState
+  -- let exName = expandUses uses name
+  -- return $ App
+    -- (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
+    -- (Lam (maybe "_" id nam) (\_ -> next))
+
+-- parseDoRet :: String -> Parser Term
+-- parseDoRet name = do
+  -- P.try $ string "ret "
+  -- exp <- parseTerm
+  -- (_, uses) <- P.getState
+  -- let exName = expandUses uses name
+  -- return $ App (App (Ref (exName ++ "/pure")) (Met 0 [])) exp
+
+-- TODO: this is great, but the ask syntax can't pattern-match (like the 'let' syntax).
+-- the following syntax:
+-- do Name { ask #Pair{ a b } = value ...body... }
+-- should be parsed identically to:
+-- do Name { ask got = value match got { #Pair{ a b }: ...body... } }
+-- use a similar approach to the one used in the let-parser (i.e., parseLetMch
+-- and parseLetVal), in order to make the 'ask' syntax feature destructuring too
+-- rewrite the commented out code above now:
+
 parseDo :: Parser Term
 parseDo = withSrc $ do
   string "do "
@@ -522,12 +662,34 @@ parseStmt name = P.choice
   , parseDoRet name
   , parseLet (parseStmt name)
   , parseUse (parseStmt name)
-  -- , parseMch (parseStmt name)
   , parseTerm
   ]
 
 parseDoAsk :: String -> Parser Term
-parseDoAsk name = do
+parseDoAsk name = P.choice
+  [ parseDoAskMch name
+  , parseDoAskVal name
+  ]
+
+parseDoAskMch :: String -> Parser Term
+parseDoAskMch name = do
+  P.try $ string "ask #"
+  cnam <- parseName
+  char '{'
+  args <- P.many parseName
+  char '}'
+  char '='
+  val <- parseTerm
+  next <- parseStmt name
+  (_, uses) <- P.getState
+  let exName = expandUses uses name
+  return $ App
+    (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
+    (Lam "got" (\got ->
+      App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) next args)]) got))
+
+parseDoAskVal :: String -> Parser Term
+parseDoAskVal name = do
   P.try $ string "ask "
   nam <- P.optionMaybe parseName
   exp <- case nam of
@@ -556,18 +718,13 @@ parseDoRet name = do
 -- desugars to:
 -- '(λ{ #Foo: foo #Bar: bar ... } x)
 -- it parses the cases identically to parseMat.
+-- TODO: edit this to use parseCse, making it shorter
 parseMch :: Parser Term -> Parser Term
 parseMch parseBody = withSrc $ do
   P.try $ string "match "
   x <- parseTerm
   char '{'
-  parseTrivia
-  cse <- P.many $ do
-    char '#'
-    cnam <- parseName
-    char ':'
-    cbod <- parseBody
-    return (cnam, cbod)
+  cse <- parseCse
   char '}'
   return $ App (Mat cse) x
 
