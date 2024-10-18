@@ -184,7 +184,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
                   let rt0 = teleToType tele (typ_bod (Ann False (Con cnm (fst a_r)) typ_inp)) dep
                   let rt1 = foldl' (\ ty (a,b) -> replace a b ty dep) rt0 eqs
                   if any (\(a,b) -> incompatible a b dep) eqs then
-                    check Nothing cbod (Hol "unreachable" []) dep
+                    unreachable Nothing cbod dep
                   else
                     check Nothing cbod rt1 dep
                 Nothing -> do
@@ -272,6 +272,12 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
     else do
       envLog (Error src expected detected term dep)
       envFail
+
+unreachable :: Maybe Cod -> Term -> Int -> Env ()
+unreachable src (Lam nam bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
+unreachable src (Hol nam ctx) dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> return ()
+unreachable _   (Src src val) dep = unreachable (Just src) val dep
+unreachable src term          dep = return ()
 
 checkTele :: Maybe Cod -> Tele -> Term -> Int -> Env ()
 checkTele src tele typ dep = case tele of
