@@ -135,10 +135,10 @@ parseTerm = (do
     , parseDat
     , parseNat -- sugar
     , parseCon
-    , parseUse
-    , parseLet
+    , (parseUse parseTerm)
+    , (parseLet parseTerm)
+    , (parseMch parseTerm) -- sugar
     , parseDo -- sugar
-    , parseMatch -- sugar
     , parseSet
     , parseNum
     , parseTxt -- sugar
@@ -277,7 +277,7 @@ parseRef = withSrc $ do
     "U32" -> U32
     _     -> Ref name'
 
-parseUse = withSrc $ do
+parseUse parseBody = withSrc $ do
   P.try (string "use ")
   nam <- parseName
   char '='
@@ -285,12 +285,12 @@ parseUse = withSrc $ do
   bod <- parseTerm
   return $ Use nam val (\x -> bod)
 
-parseLet = withSrc $ do
+parseLet parseBody = withSrc $ do
   P.try (string "let ")
   nam <- parseName
   char '='
   val <- parseTerm
-  bod <- parseTerm
+  bod <- parseBody
   return $ Let nam val (\x -> bod)
 
 parseSet = withSrc $ char '*' >> return Set
@@ -444,68 +444,120 @@ expandUses uses name =
 -- Do-Notation:
 -- ------------
 
-data DoBlck = DoBlck String [DoStmt] Bool Term -- bool used for wrap
-data DoStmt = DoBind String Term | DoSeq Term
+-- data DoBlck = DoBlck String [DoStmt] Bool Term -- bool used for wrap
+-- data DoStmt = DoBind String Term | DoSeq Term
 
-parseDoSugar :: Parser DoBlck
-parseDoSugar = do
+-- parseDoSugar :: Parser DoBlck
+-- parseDoSugar = do
+  -- string "do "
+  -- name <- parseName
+  -- char '{'
+  -- parseTrivia
+  -- stmts <- P.many (P.try parseDoStmt)
+  -- (wrap, ret) <- parseDoReturn
+  -- char '}'
+  -- return $ DoBlck name stmts wrap ret
+
+-- parseDoStmt :: Parser DoStmt
+-- parseDoStmt = P.try parseDoBind <|> parseDoSeq
+
+-- parseDoBind :: Parser DoStmt
+-- parseDoBind = do
+  -- string "ask "
+  -- name <- parseName
+  -- char '='
+  -- exp <- parseTerm
+  -- return $ DoBind name exp
+
+-- parseDoSeq :: Parser DoStmt
+-- parseDoSeq = do
+  -- string "ask "
+  -- exp <- parseTerm
+  -- return $ DoSeq exp
+
+-- parseDoReturn :: Parser (Bool, Term)
+-- parseDoReturn = do
+  -- wrap <- P.optionMaybe (P.try (string "ret "))
+  -- term <- parseTerm
+  -- return (maybe False (const True) wrap, term)
+
+-- desugarDo :: DoBlck -> Parser Term
+-- desugarDo (DoBlck name stmts wrap ret) = do
+  -- (_, uses) <- P.getState
+  -- let exName = expandUses uses name
+  -- let mkBind = \ x exp acc -> App (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp) (Lam x (\_ -> acc))
+  -- let mkWrap = \ ret -> App (App (Ref (exName ++ "/pure")) (Met 0 [])) ret
+  -- return $ foldr (\stmt acc ->
+    -- case stmt of
+      -- DoBind x exp -> mkBind x exp acc
+      -- DoSeq exp -> mkBind "_" exp acc
+    -- ) (if wrap then mkWrap ret else ret) stmts
+
+-- parseDo :: Parser Term
+-- parseDo = parseDoSugar >>= desugarDo
+
+-- this is too contrived. let's make it simpler by removing the DoBlck and DoStmt types, and just returing the parsed application directly.
+-- this will greatly shorten up the code above. include the following functions:
+-- parseDo: returns a term. calls parseStmt.
+-- parseStmt: parses a choice of parseDoAsk, parseDoRet, parseDoLet, parseDoUse, and parseTerm
+-- parseDoAsk: parses the ask syntax, creates the name/bind application
+-- parseDoRet: parses the ret syntax, creates the name/pure application
+-- parseDoLet: uses the let parser, but continues the body with a parseStmt instead of parseTerm
+-- parseDoUse: uses use parser, but continues the body with a parseStmt instead of parseTerm
+-- parseTerm: when all above fail, we will just parse a term and return it.
+
+parseDo :: Parser Term
+parseDo = withSrc $ do
   string "do "
   name <- parseName
   char '{'
   parseTrivia
-  stmts <- P.many (P.try parseDoStmt)
-  (wrap, ret) <- parseDoReturn
+  body <- parseStmt name
   char '}'
-  return $ DoBlck name stmts wrap ret
+  return body
 
-parseDoStmt :: Parser DoStmt
-parseDoStmt = P.try parseDoBind <|> parseDoSeq
+parseStmt :: String -> Parser Term
+parseStmt name = P.choice
+  [ parseDoAsk name
+  , parseDoRet name
+  , parseLet (parseStmt name)
+  , parseUse (parseStmt name)
+  -- , parseMch (parseStmt name)
+  , parseTerm
+  ]
 
-parseDoBind :: Parser DoStmt
-parseDoBind = do
-  string "ask "
-  name <- parseName
-  char '='
-  exp <- parseTerm
-  return $ DoBind name exp
-
-parseDoSeq :: Parser DoStmt
-parseDoSeq = do
-  string "ask "
-  exp <- parseTerm
-  return $ DoSeq exp
-
-parseDoReturn :: Parser (Bool, Term)
-parseDoReturn = do
-  wrap <- P.optionMaybe (P.try (string "ret "))
-  term <- parseTerm
-  return (maybe False (const True) wrap, term)
-
-desugarDo :: DoBlck -> Parser Term
-desugarDo (DoBlck name stmts wrap ret) = do
+parseDoAsk :: String -> Parser Term
+parseDoAsk name = do
+  P.try $ string "ask "
+  nam <- P.optionMaybe parseName
+  exp <- case nam of
+    Just var -> char '=' >> parseTerm
+    Nothing  -> parseTerm
+  next <- parseStmt name
   (_, uses) <- P.getState
   let exName = expandUses uses name
-  let mkBind = \ x exp acc -> App (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp) (Lam x (\_ -> acc))
-  let mkWrap = \ ret -> App (App (Ref (exName ++ "/pure")) (Met 0 [])) ret
-  return $ foldr (\stmt acc ->
-    case stmt of
-      DoBind x exp -> mkBind x exp acc
-      DoSeq exp -> mkBind "_" exp acc
-    ) (if wrap then mkWrap ret else ret) stmts
+  return $ App
+    (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
+    (Lam (maybe "_" id nam) (\_ -> next))
 
-parseDo :: Parser Term
-parseDo = parseDoSugar >>= desugarDo
+parseDoRet :: String -> Parser Term
+parseDoRet name = do
+  P.try $ string "ret "
+  exp <- parseTerm
+  (_, uses) <- P.getState
+  let exName = expandUses uses name
+  return $ App (App (Ref (exName ++ "/pure")) (Met 0 [])) exp
 
 -- Match
 -- -----
 
--- Let's now implement the 'parseMatch' sugar. The following syntax:
+-- Let's now implement the 'parseMch sugar. The following syntax:
 -- 'match x { #Foo: foo #Bar: bar ... }'
 -- desugars to:
 -- '(λ{ #Foo: foo #Bar: bar ... } x)
 -- it parses the cases identically to parseMat.
-parseMatch :: Parser Term
-parseMatch = withSrc $ do
+parseMch :: Parser Term -> Parser Term
+parseMch parseBody = withSrc $ do
   P.try $ string "match "
   x <- parseTerm
   char '{'
@@ -514,7 +566,7 @@ parseMatch = withSrc $ do
     char '#'
     cnam <- parseName
     char ':'
-    cbod <- parseTerm
+    cbod <- parseBody
     return (cnam, cbod)
   char '}'
   return $ App (Mat cse) x
