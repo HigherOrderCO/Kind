@@ -485,8 +485,8 @@ desugarDo :: DoBlck -> Parser Term
 desugarDo (DoBlck name stmts wrap ret) = do
   (_, uses) <- P.getState
   let exName = expandUses uses name
-  let mkBind = \ x exp acc -> App (App (App (App (Ref (exName ++ "bind")) (Met 0 [])) (Met 0 [])) exp) (Lam x (\_ -> acc))
-  let mkWrap = \ ret -> App (App (Ref (exName ++ "pure")) (Met 0 [])) ret
+  let mkBind = \ x exp acc -> App (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp) (Lam x (\_ -> acc))
+  let mkWrap = \ ret -> App (App (Ref (exName ++ "/pure")) (Met 0 [])) ret
   return $ foldr (\stmt acc ->
     case stmt of
       DoBind x exp -> mkBind x exp acc
