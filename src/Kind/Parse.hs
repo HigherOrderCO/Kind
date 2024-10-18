@@ -650,7 +650,7 @@ expandUses uses name =
 
 parseDo :: Parser Term
 parseDo = withSrc $ do
-  string "do "
+  P.try $ string "do "
   name <- parseName
   char '{'
   parseTrivia
