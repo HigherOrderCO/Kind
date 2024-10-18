@@ -651,30 +651,32 @@ expandUses uses name =
 parseDo :: Parser Term
 parseDo = withSrc $ do
   P.try $ string "do "
-  name <- parseName
+  monad <- parseName
   char '{'
   parseTrivia
-  body <- parseStmt name
+  (_, uses) <- P.getState
+  body <- parseStmt (expandUses uses monad)
   char '}'
   return body
 
 parseStmt :: String -> Parser Term
-parseStmt name = P.choice
-  [ parseDoAsk name
-  , parseDoRet name
-  , parseLet (parseStmt name)
-  , parseUse (parseStmt name)
+parseStmt monad = P.choice
+  [ parseDoFor monad
+  , parseDoAsk monad
+  , parseDoRet monad
+  , parseLet (parseStmt monad)
+  , parseUse (parseStmt monad)
   , parseTerm
   ]
 
 parseDoAsk :: String -> Parser Term
-parseDoAsk name = P.choice
-  [ parseDoAskMch name
-  , parseDoAskVal name
+parseDoAsk monad = P.choice
+  [ parseDoAskMch monad
+  , parseDoAskVal monad
   ]
 
 parseDoAskMch :: String -> Parser Term
-parseDoAskMch name = do
+parseDoAskMch monad = do
   P.try $ string "ask #"
   cnam <- parseName
   char '{'
@@ -682,35 +684,106 @@ parseDoAskMch name = do
   char '}'
   char '='
   val <- parseTerm
-  next <- parseStmt name
+  next <- parseStmt monad
   (_, uses) <- P.getState
-  let exName = expandUses uses name
   return $ App
-    (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
+    (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
     (Lam "got" (\got ->
       App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) next args)]) got))
 
 parseDoAskVal :: String -> Parser Term
-parseDoAskVal name = do
+parseDoAskVal monad = do
   P.try $ string "ask "
   nam <- P.optionMaybe parseName
   exp <- case nam of
     Just var -> char '=' >> parseTerm
     Nothing  -> parseTerm
-  next <- parseStmt name
+  next <- parseStmt monad
   (_, uses) <- P.getState
-  let exName = expandUses uses name
   return $ App
-    (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
+    (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
     (Lam (maybe "_" id nam) (\_ -> next))
 
 parseDoRet :: String -> Parser Term
-parseDoRet name = do
+parseDoRet monad = do
   P.try $ string "ret "
   exp <- parseTerm
   (_, uses) <- P.getState
-  let exName = expandUses uses name
-  return $ App (App (Ref (exName ++ "/pure")) (Met 0 [])) exp
+  return $ App (App (Ref (monad ++ "/pure")) (Met 0 [])) exp
+
+-- let's now implement a parseDoFor sugar.
+-- 
+-- parseDoFor:
+-- for x in xs with s { body }
+-- must be desugared to:
+-- (MONAD/bind _ _ (List/for-given _ MONAD/Monad _ _ xs s λsλx(body)) λs body)
+-- Note that 'x' and 's' are parsed as names.
+-- Note that 'MONAD' is the name of the monad
+-- implement below both of these syntaxes now:
+-- here is a draft of this function:
+-- it is wrong though, as it follows a different spec. specifically:
+-- - in the old function, we used two versions: for and for-given. now, we'll only use for-given
+-- - in the old function, we forgot to apply the monadic binder to access the final state. this must be fixed
+-- implement the correct parseDoFor function below:
+-- this is wrong. we should parse a 'loop' to use inside the List/for-given, and
+-- a 'body' AFTER the '}' as the continuation of the current monadic block.
+-- let's change this syntax. instead of:
+-- for x in list with state { ... } body
+-- it should now be:
+-- ask state = for x in list { ... } body
+-- note that, to avoid conflict with the 'ask' parser, we must try the "ask state = for" part with rollback
+-- write the correct version below:
+-- this is great, but there is a lot of repeated code.
+-- let's merge these functions into a single doParseFor function.
+-- create a SINGLE parseDoFor function merging both. do NOT create extra auxiliary functions like parseDoForWith, parseDoForSimple. make it inline.
+-- return a (nam,lst,loop,body) tuple from each possibility.
+-- then, create the term as usual.
+-- this is wrong. you should NOT use a where block with extra definitions. inline these blocks.
+-- this is wrong. now the state isn't being used. you must return stt too.  do
+-- NOT change how strings are parsed. i.e., do not merge 'string "="' and
+-- 'string "for"'. this will break how trivia is handled. don't do that.
+parseDoFor :: String -> Parser Term
+parseDoFor monad = do
+  (stt, nam, lst, loop, body) <- P.choice
+    [ do
+        stt <- P.try $ do
+          string "ask "
+          stt <- parseName
+          string "="
+          string "for"
+          return stt
+        nam <- parseName
+        string "in"
+        lst <- parseTerm
+        char '{'
+        loop <- parseStmt monad
+        char '}'
+        body <- parseStmt monad
+        return (Just stt, nam, lst, loop, body)
+    , do
+        P.try $ string "for "
+        nam <- parseName
+        string "in"
+        lst <- parseTerm
+        char '{'
+        loop <- parseStmt monad
+        char '}'
+        body <- parseStmt monad
+        return (Nothing, nam, lst, loop, body) ]
+  let f0 = Ref "Base/List/for-given"
+  let f1 = App f0 (Met 0 [])
+  let f2 = App f1 (Ref (monad ++ "/Monad"))
+  let f3 = App f2 (Met 0 [])
+  let f4 = App f3 (Met 0 [])
+  let f5 = App f4 lst
+  let f6 = App f5 (maybe (Num 0) Ref stt)
+  let f7 = App f6 (Lam (maybe "" id stt) (\s -> Lam nam (\_ -> loop)))
+  let b0 = Ref (monad ++ "/bind")
+  let b1 = App b0 (Met 0 [])
+  let b2 = App b1 (Met 0 [])
+  let b3 = App b2 f7
+  let b4 = App b3 (Lam (maybe "" id stt) (\_ -> body))
+  return b4
 
 -- Match
 -- -----
