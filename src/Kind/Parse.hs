@@ -14,12 +14,15 @@ import System.Exit (die)
 import Text.Parsec ((<?>), (<|>), getPosition, sourceLine, sourceColumn, getState, setState)
 import Text.Parsec.Error (errorPos, errorMessages, showErrorMessages, ParseError, errorMessages, Message(..))
 import qualified Text.Parsec as P
-import Data.List (intercalate, isPrefixOf)
+import Data.List (intercalate, isPrefixOf, uncons)
+import Data.Maybe (catMaybes)
 import System.Console.ANSI
+import Data.Set (toList, fromList)
 
 type Uses     = [(String, String)]
 type PState   = (String, Uses)
 type Parser a = P.ParsecT String PState Identity a
+data Pattern  = PVar String | PCtr String [Pattern]
 
 -- Helper functions that consume trailing whitespace
 parseTrivia :: Parser ()
@@ -410,7 +413,7 @@ parseLst = withSrc $ do
   return $ Lst elems
 
 parseChr = withSrc $ do
-  char '\''  
+  char '\''
   chr <- parseEscaped <|> noneOf "'\\"
   char '\''
   return $ Num (fromIntegral $ ord chr)
@@ -479,13 +482,117 @@ parseDef = do
     char ':'
     t <- parseTerm
     return t
-  char '='
-  val <- parseTerm
+
+  val <- P.choice [
+    do
+      char '='
+      val <- parseTerm
+      return val
+    ,
+    do
+      rules <- P.many1 $ do
+        char '|'
+        pats <- P.many parsePattern
+        char '='
+        body <- parseTerm
+        return (pats, body)
+      let (mat, bods) = unzip rules
+      return (flattenDef mat bods 0)
+    ]
   (_, uses) <- P.getState
   let name' = expandUses uses name
   case typ of
     Nothing -> return (name', val)
     Just t  -> return (name', bind (genMetas (Ann False val t)) [])
+
+parsePattern :: Parser Pattern
+parsePattern = do
+  P.choice [
+    do
+      name <- parseName
+      return (PVar name),
+    do
+      char '#'
+      name <- parseName
+      char '{'
+      args <- P.many parsePattern
+      char '}'
+      return (PCtr name args)
+    ]
+
+-- Flattener for pattern matching equations.
+-- We traverse the patterns in the equation left to right, top to bottom.
+--
+-- When encountering a nested (constructor) pattern, generate a match
+-- expression and pull out its sub-patterns.
+--
+-- When encountering a variable pattern, generate a lambda and continue to the next pattern.
+--
+-- When no patterns left, return the first rule.
+flattenDef :: [[Pattern]] -> [Term] -> Int -> Term
+flattenDef (pats:mat) (bod:bods) fresh = do
+  let isVar (PVar _) = True
+      isVar _        = False
+  if null pats then do
+    bod
+  else do
+    let bods' = bod:bods
+    let (col, mat') = unzip (catMaybes (map uncons (pats:mat)))
+    if all isVar col
+      then flattenVar col mat' bods' fresh
+      else flattenAdt col mat' bods' fresh
+flattenDef _ _ fresh = do
+  Hol "flatten error" []
+
+flattenVar :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
+flattenVar col mat bods fresh = do
+    let var    = "%x" ++ show fresh
+    let fresh' = fresh + 1
+    let bods'  = map (\(pat, bod) -> case pat of
+            (PVar nam) -> Use nam (Ref var) (\x -> bod)
+            _          -> bod
+          ) (zip col bods)
+    let bod = flattenDef mat bods' fresh'
+    Lam var (\x -> bod)
+
+flattenAdt :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
+flattenAdt col mat bods fresh = do
+  let var   = "%x" ++ show fresh
+  let fresh' = fresh + 1
+  -- For each constructor, filter the rules that match, pull the sub-patterns and recurse.
+  -- Var patterns also match and must introduce the same amount of sub-patterns.
+  let ctrs  = foldr (\pat acc -> case pat of (PCtr nam _) -> nam:acc ; _ -> acc) [] col
+  let ctrs' = toList (fromList ctrs)
+  let nPats = maximum (map (\pat -> case pat of (PCtr _ pats) -> length pats ; _ -> 0) col)
+  let cse   = map (\ctr -> do
+        let (mat', bods') = foldr (\(pat, pats, bod) (mat, bods) -> do
+              case pat of
+                (PCtr nam newPats) -> do
+                  if nam == ctr
+                    then ((newPats ++ pats):mat, bod:bods)
+                    else (mat, bods)
+                (PVar nam) -> do
+                  let newPats = map (\i -> PVar (var ++ "." ++ show i)) [0..nPats]
+                  let bod' = Use nam (Ref var) (\x -> bod)
+                  ((newPats ++ pats):mat, bod':bods)
+              ) ([], []) (zip3 col mat bods)
+        let bod = flattenDef mat' bods' fresh'
+        (ctr, bod)
+        ) ctrs'
+  -- Since we don't know how many constructors in the ADT,
+  -- we add a default case if there are any Var patterns in this column.
+  let (dflMat, dflBods) = foldr (\(pat, pats, bod) (mat, bods) -> case pat of
+        PVar nam -> do
+          let bod' = Use nam (Ref var) (\x -> bod)
+          (pats:mat, bod':bods)
+        _ -> do
+          (mat, bods)
+        ) ([], []) (zip3 col mat bods)
+  let cse' = if null dflBods
+             then cse
+             else cse ++ [("_", flattenDef dflMat dflBods fresh')]
+  let bod = (App (Mat cse') (Ref var))
+  Lam var (\x -> bod)
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do
