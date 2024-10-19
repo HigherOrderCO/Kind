@@ -218,7 +218,7 @@ parseIns = withSrc $ do
   return $ Ins val
 
 parseDat = withSrc $ do
-  P.try $ string "#["
+  P.try $ P.choice [string "#[", string "data["]
   scp <- P.many parseTerm
   char ']'
   char '{'
@@ -232,13 +232,15 @@ parseDat = withSrc $ do
 
 parseTele :: Parser Tele
 parseTele = do
-  char '{'
-  fields <- P.many $ P.try $ do
-    nam <- parseName
-    char ':'
-    typ <- parseTerm
-    return (nam, typ)
-  char '}'
+  fields <- P.option [] $ do
+    char '{'
+    fields <- P.many $ P.try $ do
+      nam <- parseName
+      char ':'
+      typ <- parseTerm
+      return (nam, typ)
+    char '}'
+    return fields
   char ':'
   ret <- parseTerm
   return $ foldr (\(nam, typ) acc -> TExt nam typ (\x -> acc)) (TRet ret) fields
@@ -261,7 +263,11 @@ parseCon = withSrc $ do
   return $ Con nam args
 
 parseSwi = withSrc $ do
-  P.try $ string "λ{0:"
+  P.try $ do  
+    string "λ"
+    string "{"
+    string "0"
+    string ":"
   zero <- parseTerm
   string "_:"
   succ <- parseTerm
@@ -508,9 +514,11 @@ parsePattern = do
     do
       char '#'
       name <- parseName
-      char '{'
-      args <- P.many parsePattern
-      char '}'
+      args <- P.option [] $ P.try $ do
+        char '{'
+        args <- P.many parsePattern
+        char '}'
+        return args
       return (PCtr name args)
     ]
 

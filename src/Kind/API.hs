@@ -74,12 +74,12 @@ apiLoad basePath book name = do
 
 -- Normalizes a term
 apiNormal :: Book -> String -> IO (Either String ())
-apiNormal book name = case M.lookup name book of
+apiNormal book name = case M.lookup "main" book of
   Just term -> do
     result <- infoShow book IM.empty (Print (normal book IM.empty 2 term 0) 0)
     putStrLn result
     return $ Right ()
-  Nothing -> return $ Left $ "Error: Definition '" ++ name ++ "' not found."
+  Nothing -> return $ Left $ "Error: Definition 'main' not found."
 
 -- Type-checks all terms in a file
 apiCheckFile :: Book -> M.Map FilePath [String] -> FilePath -> IO (Either String ())
