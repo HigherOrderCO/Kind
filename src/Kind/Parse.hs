@@ -4,7 +4,7 @@ module Kind.Parse where
 
 import Data.Char (ord)
 import Data.Functor.Identity (Identity)
-import Data.List (intercalate, isPrefixOf, uncons)
+import Data.List (intercalate, isPrefixOf, uncons, find)
 import Data.Maybe (catMaybes, fromJust)
 import Data.Set (toList, fromList)
 import Debug.Trace
@@ -144,7 +144,8 @@ parseTerm = (do
     , parseCon
     , (parseUse parseTerm)
     , (parseLet parseTerm)
-    , (parseMch parseTerm) -- sugar
+    , parseMatInl -- sugar
+    , parseSwiInl -- sugar
     , parseDo -- sugar
     , parseSet
     , parseNum
@@ -262,20 +263,37 @@ parseCon = withSrc $ do
     return args
   return $ Con nam args
 
+parseSwiCses :: Parser (Term, Term)
+parseSwiCses = do
+  zero <- do
+    P.try $ do
+      char '0'
+      char ':'
+    parseTerm
+  succ <- do
+    string "_"
+    pred <- P.optionMaybe $ do
+      char '{'
+      name <- parseName
+      char '}'
+      return name
+    char ':'
+    succ <- parseTerm
+    return $ maybe succ (\name -> Lam name (\_ -> succ)) pred
+  return (zero, succ)
+
 parseSwi = withSrc $ do
-  P.try $ do  
-    string "λ"
-    string "{"
-    string "0"
-    string ":"
-  zero <- parseTerm
-  string "_:"
-  succ <- parseTerm
+  P.try $ do
+    char 'λ'
+    char '{'
+    P.lookAhead $ P.try $ do
+      P.char '0'
+  (zero, succ) <- parseSwiCses
   char '}'
   return $ Swi zero succ
 
-parseCse :: Parser [(String, Term)]
-parseCse = do
+parseMatCses :: Parser [(String, Term)]
+parseMatCses = do
   cse <- P.many $ P.try $ do
     char '#'
     cnam <- parseName
@@ -299,8 +317,10 @@ parseCse = do
     Nothing           -> cse
 
 parseMat = withSrc $ do
-  P.try $ string "λ{"
-  cse <- parseCse
+  P.try $ do
+    string "λ"
+    string "{"
+  cse <- parseMatCses
   char '}'
   return $ Mat cse
 
@@ -496,8 +516,10 @@ parseDef = do
           body <- parseTerm
           return (pats, body)
         let (mat, bods) = unzip rules
-        let flat = flattenDef mat bods 0
-        return $ {-trace ("DONE: " ++ termShow flat)-} flat
+        let flat = flattenDef mat bods 0 0
+        return
+          -- $ trace ("DONE: " ++ termShow flat)
+          flat
     ]
   (_, uses) <- P.getState
   let name' = expandUses uses name
@@ -648,14 +670,23 @@ parseDoFor monad = do
 -- Match
 -- -----
 
-parseMch :: Parser Term -> Parser Term
-parseMch parseBody = withSrc $ do
+parseMatInl :: Parser Term
+parseMatInl = withSrc $ do
   P.try $ string "match "
   x <- parseTerm
   char '{'
-  cse <- parseCse
+  cse <- parseMatCses
   char '}'
   return $ App (Mat cse) x
+
+parseSwiInl :: Parser Term
+parseSwiInl = withSrc $ do
+  P.try $ string "switch "
+  x <- parseTerm
+  char '{'
+  (zero, succ) <- parseSwiCses
+  char '}'
+  return $ App (Swi zero succ) x
 
 -- Match
 -- -----
@@ -669,48 +700,59 @@ parseNat = withSrc $ P.try $ do
 -- Flattener
 -- ---------
 
+-- FIXME: the functions below are still a little bit messy and can be improved
+
 -- Flattener for pattern matching equations
-flattenDef :: [[Pattern]] -> [Term] -> Int -> Term
-flattenDef ([]:mat)   (bod:bods) fresh = bod
-flattenDef (pats:mat) (bod:bods) fresh
-  | all isVar col  = flattenVarCol col mat' (bod:bods) fresh
-  | otherwise      = flattenAdtCol col mat' (bod:bods) fresh
-  where (col,mat') = getCol (pats:mat)
-flattenDef _ _ _ = error "internal error"
+flattenDef :: [[Pattern]] -> [Term] -> Int -> Int -> Term
+flattenDef pats bods fresh depth =
+  -- trace (replicate (depth * 2) ' ' ++ "flattenDef: pats = " ++ show pats ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh) $
+  go pats bods fresh depth
+  where
+    go ([]:mat)   (bod:bods) fresh depth = bod
+    go (pats:mat) (bod:bods) fresh depth
+      | all isVar col  = flattenVarCol col mat' (bod:bods) fresh (depth + 1)
+      | otherwise      = flattenAdtCol col mat' (bod:bods) fresh (depth + 1)
+      where (col,mat') = getCol (pats:mat)
+    go _ _ _ _ = error "internal error"
 
 -- Flattens a column with only variables
-flattenVarCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
-flattenVarCol col mat bods fresh =
+flattenVarCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> Term
+flattenVarCol col mat bods fresh depth =
+  -- trace (replicate (depth * 2) ' ' ++ "flattenVarCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
   let nam = maybe ("%x" ++ show fresh) id (getColName col)
-      bod = flattenDef mat bods (fresh + 1)
+      bod = flattenDef mat bods (fresh + 1) depth
   in Lam nam (\x -> bod)
 
 -- Flattens a column with constructors and possibly variables
-flattenAdtCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
-flattenAdtCol col mat bods fresh = 
+flattenAdtCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> Term
+flattenAdtCol col mat bods fresh depth = 
+  -- trace (replicate (depth * 2) ' ' ++ "flattenAdtCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
   let nam = maybe ("%f" ++ show fresh) id (getColName col)
-      ctr = map (makeCtrCase col mat bods (getColArity col) (fresh+1) nam) (getColCtrs col)
-      dfl = makeDflCase col mat bods fresh
+      ctr = map (makeCtrCase col mat bods (fresh+1) nam depth) (getColCtrs col)
+      dfl = makeDflCase col mat bods fresh depth
   in Mat (ctr++dfl)
 
 -- Creates a constructor case: '#Name: body'
-makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> String -> String -> (String, Term)
-makeCtrCase col mat bods arity fresh var ctr = 
+makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> String -> Int -> String -> (String, Term)
+makeCtrCase col mat bods fresh var depth ctr = 
+  -- trace (replicate (depth * 2) ' ' ++ "makeCtrCase: col = " ++ show col ++ ", mat = " ++ show mat ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh ++ ", var = " ++ var ++ ", ctr = " ++ ctr) $
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
-      bod           = flattenDef mat' bods' fresh
+      bod           = flattenDef mat' bods' fresh (depth + 1)
   in (ctr, bod)
   where go ((PCtr nam ps), pats, bod) (mat, bods)
           | nam == ctr = ((ps ++ pats):mat, bod:bods)
           | otherwise  = (mat, bods)
         go ((PVar nam), pats, bod) (mat, bods) =
-          let ps = [PVar (nam++"."++show i) | i <- [0..arity-1]]
+          let ar = getArity $ fromJust $ find (\case PCtr c _ | c == ctr -> True ; _ -> False) col
+              ps = [PVar (nam++"."++show i) | i <- [0..ar-1]]
           in ((ps ++ pats) : mat, bod:bods)
 
 -- Creates a default case: '#_: body'
-makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> [(String, Term)]
-makeDflCase col mat bods fresh =
+makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> [(String, Term)]
+makeDflCase col mat bods fresh depth =
+  -- trace (replicate (depth * 2) ' ' ++ "makeDflCase: col = " ++ show col ++ ", fresh = " ++ show fresh) $
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods) in
-  if null bods' then [] else [("_", flattenDef mat' bods' (fresh+1))]
+  if null bods' then [] else [("_", flattenDef mat' bods' (fresh+1) (depth + 1))]
   where go ((PVar nam), pats, bod) (mat, bods) = (((PVar nam):pats):mat, bod:bods)
         go (ctr,        pats, bod) (mat, bods) = (mat, bods)
 
@@ -732,6 +774,3 @@ getColCtrs col = toList . fromList $ foldr (\pat acc -> case pat of (PCtr nam _)
 
 getColName :: [Pattern] -> Maybe String
 getColName col = foldr (A.<|>) Nothing $ map (\case PVar nam -> Just nam; _ -> Nothing) col
-
-getColArity :: [Pattern] -> Int
-getColArity col = maximum (map getArity col)
