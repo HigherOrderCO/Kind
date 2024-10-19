@@ -2,28 +2,30 @@
 
 module Kind.Parse where
 
+import Data.Char (ord)
+import Data.Functor.Identity (Identity)
+import Data.List (intercalate, isPrefixOf, uncons)
+import Data.Maybe (catMaybes, fromJust)
+import Data.Set (toList, fromList)
 import Debug.Trace
-import Prelude hiding (EQ, LT, GT)
-import Kind.Type
+import Highlight (highlightError, highlight)
+import Kind.Equal
 import Kind.Reduce
 import Kind.Show
-import Highlight (highlightError, highlight)
-import Data.Char (ord)
-import qualified Data.Map.Strict as M
-import Data.Functor.Identity (Identity)
+import Kind.Type
+import Prelude hiding (EQ, LT, GT)
+import System.Console.ANSI
 import System.Exit (die)
 import Text.Parsec ((<?>), (<|>), getPosition, sourceLine, sourceColumn, getState, setState)
 import Text.Parsec.Error (errorPos, errorMessages, showErrorMessages, ParseError, errorMessages, Message(..))
+import qualified Control.Applicative as A
+import qualified Data.Map.Strict as M
 import qualified Text.Parsec as P
-import Data.List (intercalate, isPrefixOf, uncons)
-import Data.Maybe (catMaybes)
-import System.Console.ANSI
-import Data.Set (toList, fromList)
 
 type Uses     = [(String, String)]
 type PState   = (String, Uses)
 type Parser a = P.ParsecT String PState Identity a
-data Pattern  = PVar String | PCtr String [Pattern]
+data Pattern  = PVar String | PCtr String [Pattern] deriving Show
 
 -- Helper functions that consume trailing whitespace
 parseTrivia :: Parser ()
@@ -122,44 +124,7 @@ withSrc parser = do
 -- Term Parser
 -- -----------
 
--- -- Main term parser
--- parseTerm :: Parser Term
--- parseTerm = (do
-  -- parseTrivia
-  -- P.choice
-    -- [ parseAll
-    -- , parseSwi
-    -- , parseMat
-    -- , parseLam
-    -- , parseEra
-    -- , parseOp2
-    -- , parseApp
-    -- , parseAnn
-    -- , parseSlf
-    -- , parseIns
-    -- , parseDat
-    -- , parseNat -- sugar
-    -- , parseCon
-    -- , (parseUse parseTerm)
-    -- , (parseLet parseTerm)
-    -- , (parseMch parseTerm) -- sugar
-    -- , parseDo -- sugar
-    -- , parseSet
-    -- , parseNum
-    -- , parseTxt -- sugar
-    -- , parseLst -- sugar
-    -- , parseChr -- sugar
-    -- , parseHol
-    -- , parseMet
-    -- , parseRef
-    -- ] <* parseTrivia) <?> "Term"
-
--- TODO: update parseTerm to, optionally, parse a "suffix" part. include the following suffix parsers:
--- parseSuffArr: parses an All that doesn't use its bound varaible. Example: ... -> term
--- parseSuffAnn: parses an Ann without needing the {}. Example: ... :: term
--- parseSuffVal: if none of the above worked, we just return term.
--- NOTE: the parseSuff functions receive the currently parsed term.
-
+-- Main term parser
 parseTerm :: Parser Term
 parseTerm = (do
   parseTrivia
@@ -341,67 +306,6 @@ parseRef = withSrc $ do
     "U32" -> U32
     _     -> Ref name'
 
--- parseUse parseBody = withSrc $ do
-  -- P.try (string "use ")
-  -- nam <- parseName
-  -- char '='
-  -- val <- parseTerm
-  -- bod <- parseTerm
-  -- return $ Use nam val (\x -> bod)
-
--- parseLet parseBody = withSrc $ do
-  -- P.try (string "let ")
-  -- nam <- parseName
-  -- char '='
-  -- val <- parseTerm
-  -- bod <- parseBody
-  -- return $ Let nam val (\x -> bod)
-
--- TODO: update the parseLet syntax to allow for the following feature:
--- let #Name{ x y z } = value body
--- will be desugared to the equivalent of:
--- let got = value match got { #Name: λx λy λz ... }
--- this should be make as 3 different parsers:
--- parseLet: a choice between the two parsers below
--- parseLetMch: combines let and match in a single parser
--- parseLetVal: the current let parser
-
--- parseLet :: Parser Term -> Parser Term
--- parseLet parseBody = withSrc $ P.choice
-  -- [ parseLetMch parseBody
-  -- , parseLetVal parseBody
-  -- ]
-
--- parseLetMch :: Parser Term -> Parser Term
--- parseLetMch parseBody = do
-  -- P.try $ string "let #"
-  -- cnam <- parseName
-  -- char '{'
-  -- args <- P.many parseName
-  -- char '}'
-  -- char '='
-  -- val <- parseTerm
-  -- bod <- parseBody
-  -- return $ Let "got" val (\got ->
-    -- App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) bod args)]) got)
-
--- parseLetVal :: Parser Term -> Parser Term
--- parseLetVal parseBody = do
-  -- P.try $ string "let "
-  -- nam <- parseName
-  -- char '='
-  -- val <- parseTerm
-  -- bod <- parseBody
-  -- return $ Let nam val (\x -> bod)
-
--- This works, but now 'use' is still using the old syntax.
--- Update the commented-out code above so that 'use' also has the new syntaxes.
--- Do it in a way that minimizes code repetition (i.e., do not re-create a
--- parseUse, parseUseMch and parseUseVal functions; instead, create a generic
--- parseLoc, parseLocMch, parseLocVal functions, which will receive the header
--- name (either "let" or "use"), and the header ctor (either Let or Use). then,
--- make the specialized functions (parseLet, parseUse, etc.) by calling these.
-
 parseLocal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocal header ctor parseBody = withSrc $ P.choice
   [ parseLocalMch header ctor parseBody
@@ -449,13 +353,6 @@ parseOp2 = withSrc $ do
   char ')'
   return $ Op2 opr fst snd
 
--- parseTxt = withSrc $ do
-  -- char '"'
-  -- txt <- P.many (noneOf "\"")
-  -- char '"'
-  -- return $ Txt txt
-
--- FIXME: edit parseTxt to allow parsing escape sequences, identically to how JS works.
 parseTxt = withSrc $ do
   char '"'
   txt <- P.many parseTxtChr
@@ -580,23 +477,21 @@ parseDef = do
     char ':'
     t <- parseTerm
     return t
-
-  val <- P.choice [
-    do
-      char '='
-      val <- parseTerm
-      return val
-    ,
-    do
-      rules <- P.many1 $ do
-        char '|'
-        pats <- P.many parsePattern
+  val <- P.choice
+    [ do
         char '='
-        body <- parseTerm
-        return (pats, body)
-      let (mat, bods) = unzip rules
-      let flat = (flattenDef mat bods 0)
-      return $ trace (termShow flat) flat
+        val <- parseTerm
+        return val
+    , do
+        rules <- P.many1 $ do
+          char '|'
+          pats <- P.many parsePattern
+          char '='
+          body <- parseTerm
+          return (pats, body)
+        let (mat, bods) = unzip rules
+        let flat = clean (flattenDef mat bods 0) 0
+        return $ trace ("DONE: " ++ termShow flat) flat
     ]
   (_, uses) <- P.getState
   let name' = expandUses uses name
@@ -619,105 +514,190 @@ parsePattern = do
       return (PCtr name args)
     ]
 
--- Flattener for pattern matching equations.
--- We traverse the patterns in the equation left to right, top to bottom.
---
--- When encountering a nested (constructor) pattern, generate a match
--- expression and pull out its sub-patterns.
---
--- When encountering a variable pattern, generate a lambda and continue to the next pattern.
---
--- When no patterns left, return the first rule.
+-- Flattener
+-- ---------
+
+colName :: [Pattern] -> Maybe String
+colName col = foldr (A.<|>) Nothing $ map (\case PVar nam -> Just nam; _ -> Nothing) col
+
+isVar :: Pattern -> Bool
+isVar (PVar _) = True
+isVar _        = False
+
+countSubPatterns :: Pattern -> Int
+countSubPatterns (PCtr _ pats) = length pats
+countSubPatterns _             = 0
+
+extractConstructors :: [Pattern] -> [String]
+extractConstructors = foldr (\pat acc -> case pat of (PCtr nam _) -> nam:acc ; _ -> acc) []
+
+-- Flattener for pattern matching equations
 flattenDef :: [[Pattern]] -> [Term] -> Int -> Term
-flattenDef (pats:mat) (bod:bods) fresh = do
-  let isVar (PVar _) = True
-      isVar _        = False
-  if null pats then do
-    bod
-  else do
-    let bods' = bod:bods
-    let (col, mat') = unzip (catMaybes (map uncons (pats:mat)))
-    if all isVar col
-      then flattenVar col mat' bods' fresh
-      else flattenAdt col mat' bods' fresh
-flattenDef _ _ fresh = do
-  Hol "flatten error" []
+flattenDef (pats:mat) (bod:bods) fresh = 
+  trace ("Flattening definition with " ++ show (length (pats:mat)) ++ " rows") $
+  if null pats 
+    then trace "No patterns left, returning body" bod
+    else 
+      let bods' = bod:bods
+          (col, mat') = unzip (catMaybes (map uncons (pats:mat)))
+      in if all isVar col
+           then trace "All patterns are variables, flattening variables" $ flattenVar col mat' bods' fresh
+           else trace "ADT patterns found, flattening ADT" $ flattenAdt col mat' bods' fresh
+flattenDef _ _ fresh = trace "Error: No patterns or bodies left" $ Hol "flatten error" []
 
+-- Handle variable patterns
 flattenVar :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
-flattenVar col mat bods fresh = do
-    let var    = "%x" ++ show fresh
-    let fresh' = fresh + 1
-    let bods'  = map (\(pat, bod) -> case pat of
-            (PVar nam) -> Use nam (Ref var) (\x -> bod)
-            _          -> bod
-          ) (zip col bods)
-    let bod = flattenDef mat bods' fresh'
-    Lam var (\x -> bod)
+flattenVar col mat bods fresh = 
+  trace ("Flattening variable patterns: " ++ show col) $
+  let var'   = "%x" ++ show fresh ++ "-LAM"
+      fresh' = fresh + 1
+      var    = maybe var' id (colName col)
+      bods'  = zipWith useVarInBody col bods
+      bod    = flattenDef mat bods' fresh'
+  in Lam var (\x -> bod)
 
+useVarInBody :: Pattern -> Term -> Term
+useVarInBody (PVar nam) bod = Use nam (Ref nam) (\x -> bod)
+useVarInBody _          bod = bod
+
+-- Handle ADT patterns
 flattenAdt :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
-flattenAdt col mat bods fresh = do
-  let var   = "%x" ++ show fresh
-  let fresh' = fresh + 1
-  -- For each constructor, filter the rules that match, pull the sub-patterns and recurse.
-  -- Var patterns also match and must introduce the same amount of sub-patterns.
-  let ctrs  = foldr (\pat acc -> case pat of (PCtr nam _) -> nam:acc ; _ -> acc) [] col
-  let ctrs' = toList (fromList ctrs)
-  let nPats = maximum (map (\pat -> case pat of (PCtr _ pats) -> length pats ; _ -> 0) col)
-  let cse   = map (\ctr -> do
-        let (mat', bods') = foldr (\(pat, pats, bod) (mat, bods) -> do
-              case pat of
-                (PCtr nam newPats) -> do
-                  if nam == ctr
-                    then ((newPats ++ pats):mat, bod:bods)
-                    else (mat, bods)
-                (PVar nam) -> do
-                  let newPats = map (\i -> PVar (var ++ "." ++ show i)) [0..nPats]
-                  let bod' = Use nam (Ref var) (\x -> bod)
-                  ((newPats ++ pats):mat, bod':bods)
-              ) ([], []) (zip3 col mat bods)
-        let bod = flattenDef mat' bods' fresh'
-        (ctr, bod)
-        ) ctrs'
-  -- Since we don't know how many constructors in the ADT,
-  -- we add a default case if there are any Var patterns in this column.
-  -- let (dflMat, dflBods) = foldr (\(pat, pats, bod) (mat, bods) -> case pat of
-        -- PVar nam -> do
-          -- let bod' = Use nam (Ref var) (\x -> bod)
-          -- (pats:mat, bod':bods)
-        -- _ -> do
-          -- (mat, bods)
-        -- ) ([], []) (zip3 col mat bods)
-  -- let cse' = if null dflBods
-             -- then cse
-             -- else cse ++ [("_", flattenDef dflMat dflBods fresh')]
+flattenAdt col mat bods fresh = 
+  trace ("Flattening ADT patterns: " ++ show col ++ " name: " ++ maybe ("%x" ++ show fresh ++ "-ADT") id (colName col)) $
+  let var'  = "%x" ++ show fresh ++ "-ADT"
+      fresh'= fresh + 1
+      var   = maybe var' id (colName col)
+      ctrs' = toList (fromList (extractConstructors col))
+      nPats = maximum (map countSubPatterns col)
+      cse   = map (processCtr col mat bods nPats fresh' var) ctrs'
+      dfl   = processDefaultCase col mat bods var
+      cse'  = if null (snd dfl) then cse else cse ++ [("_", flattenDef (fst dfl) (snd dfl) fresh')]
+      bod   = App (Mat cse') (Ref var)
+  in Lam var (\x -> bod)
 
-  -- FIXME: @developedby please review below
-  -- ---------------------------------------
+processCtr :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> String -> String -> (String, Term)
+processCtr col mat bods nPats fresh' var ctr = 
+  trace ("Processing constructor: " ++ ctr) $
+  let (mat', bods') = foldr (processPattern ctr nPats var) ([], []) (zip3 col mat bods)
+      bod           = flattenDef mat' bods' fresh'
+  in (ctr, bod)
 
-  -- PROBLEM: this is desugaring a default case, like:
-  -- Foo : B/Bool -> B/Bool
-  -- | #True{} = #False
-  -- | other   = #True
-  -- To the following term:
-  -- λ%x0 (λ{ #True: #False{} #_: use other = @%x0; #True{} } @%x0)
-  -- But that's wrong; default cases need a lambda. The correct desugaring would be:
-  -- λ%x0 (λ{ #True: #False{} #_: λother #True{} } @%x0)
-  -- Fix the commented-out code o implement this
+processPattern :: String -> Int -> String -> (Pattern, [Pattern], Term) -> ([[Pattern]], [Term]) -> ([[Pattern]], [Term])
+processPattern ctr nPats var (pat, pats, bod) (mat, bods) = case pat of
+  (PCtr nam newPats) -> 
+    if nam == ctr
+      then ((newPats ++ pats):mat, bod:bods)
+      else (mat, bods)
+  (PVar nam) -> 
+    let newPats = [PVar (nam ++ "." ++ show i) | i <- [0..nPats-1]]
+        bod' = Use nam (Ref var) (\x -> bod)
+    in ((newPats ++ pats):mat, bod':bods)
 
-  let (dflMat, dflBods) = foldr (\(pat, pats, bod) (mat, bods) -> case pat of
-        PVar nam -> do
-          let newPats = map (\i -> PVar (var ++ "." ++ show i)) [0..nPats-1]
-          let bod' = Lam nam (\x -> bod)
-          (newPats:mat, bod':bods)
-        _ -> do
-          (mat, bods)
-        ) ([], []) (zip3 col mat bods)
-  let cse' = if null dflBods
-             then cse
-             else cse ++ [("_", flattenDef dflMat dflBods fresh')]
+processDefaultCase :: [Pattern] -> [[Pattern]] -> [Term] -> String -> ([[Pattern]], [Term])
+processDefaultCase col mat bods var = 
+  trace "Processing default case" $
+  foldr processDefaultPattern ([], []) (zip3 col mat bods)
 
-  let bod = (App (Mat cse') (Ref var))
-  Lam var (\x -> bod)
+processDefaultPattern :: (Pattern, [Pattern], Term) -> ([[Pattern]], [Term]) -> ([[Pattern]], [Term])
+processDefaultPattern (pat, pats, bod) (mat', bods') =
+  -- TODO: make the log above more expressive, by also logging all terms in bods'
+  -- write below the updated 'trace' statement
+  trace ("Processing default pattern: " ++ show pat ++ ", " ++ show pats ++ ", " ++ termShow bod ++ ", bods': " ++ show (map termShow bods')) $
+  case pat of
+    PVar nam -> 
+      let bod' = Use nam (Ref nam) (\x -> bod)
+      in ((pat:pats):mat', bod':bods')
+    _ -> (mat', bods')
+
+-- FIXME: refactor the flattener to avoid needing this
+clean :: Term -> Int -> Term
+clean term dep = {-trace ("clean " ++ termShower False term dep) $-} maybe (go term dep) id (fix term dep) where
+
+  fix (Lam nam bod) dep
+    | App (Mat cse) (Ref arg) <- bod (Var nam dep)
+    , nam == arg
+    = Just (clean (Mat cse) dep)
+  fix (Use nam (Ref val) bod) dep
+    | nam == val
+    = Just (clean (bod (Ref "??")) dep)
+  fix other dep
+    = Nothing
+
+  go (All nam typ bod) dep =
+    let typ' = clean typ dep
+        bod' = \x -> clean (bod x) (dep+1)
+    in All nam typ' bod'
+  go (Lam nam bod) dep = 
+    let bod' = \x -> clean (bod x) (dep+1)
+    in Lam nam bod'
+  go (App fun arg) dep =
+    let fun' = clean fun dep
+        arg' = clean arg dep
+    in App fun' arg'
+  go (Ann chk val typ) dep =
+    let val' = clean val dep
+        typ' = clean typ dep
+    in Ann chk val' typ'
+  go (Slf nam typ bod) dep =
+    let typ' = clean typ dep
+        bod' = \x -> clean (bod x) (dep+1)
+    in Slf nam typ' bod'
+  go (Ins val) dep =
+    let val' = clean val dep
+    in Ins val'
+  go (Dat scp cts) dep =
+    let scp' = map (\t -> clean t dep) scp
+        cts' = map (\(Ctr n t) -> Ctr n (cleanTele t dep)) cts
+    in Dat scp' cts'
+  go (Con nam args) dep =
+    let args' = map (\(n, t) -> (n, clean t dep)) args
+    in Con nam args'
+  go (Mat cse) dep =
+    let cse' = map (\(n, t) -> (n, clean t dep)) cse
+    in Mat cse'
+  go (Use nam val bod) dep =
+    let val' = clean val dep
+        bod' = \x -> clean (bod x) (dep+1)
+    in Use nam val' bod'
+  go (Let nam val bod) dep =
+    let val' = clean val dep
+        bod' = \x -> clean (bod x) (dep+1)
+    in Let nam val' bod'
+  go (Op2 op a b) dep =
+    let a' = clean a dep
+        b' = clean b dep
+    in Op2 op a' b'
+  go (Swi zero succ) dep =
+    let zero' = clean zero dep
+        succ' = clean succ dep
+    in Swi zero' succ'
+  go (Hol nam ctx) dep =
+    let ctx' = map (\t -> clean t dep) ctx
+    in Hol nam ctx'
+  go (Met idx ctx) dep =
+    let ctx' = map (\t -> clean t dep) ctx
+    in Met idx ctx'
+  go (Src cod term) dep =
+    let term' = clean term dep
+    in Src cod term'
+  go (Ref name) dep = Ref name
+  go Set dep = Set
+  go U32 dep = U32
+  go (Num n) dep = Num n
+  go (Txt s) dep = Txt s
+  go (Lst ts) dep =
+    let ts' = map (\t -> clean t dep) ts
+    in Lst ts'
+  go (Nat n) dep = Nat n
+  go (Var nam idx) dep = Var nam idx
+
+
+cleanTele :: Tele -> Int -> Tele
+cleanTele (TRet term) dep = TRet (clean term dep)
+cleanTele (TExt nam typ tele) dep =
+  let typ'  = clean typ dep
+      tele' = \x -> cleanTele (tele x) (dep+1)
+  in TExt nam typ' tele'
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do
@@ -735,150 +715,6 @@ expandUses uses name =
 
 -- Syntax Sugars
 -- -------------
-
--- TODO: implement a parser for Kind's do-notation:
--- do Name { // this starts a do-block
---   ask x = exp0 // this is parsed as a monadic binder
---   ask exp1     // this is parsed as a monadic sequencer
---   ret-val      // this is the monadic return
--- } // this ends a do block
-
--- The do-notation above is desugared to:
--- (Name/Monad/bind _ _ exp0 λx
--- (Name/Monad/bind _ _ exp1 λ_
--- ret-val))
--- Note this is just a series of applications:
--- (App (App (App (App (Ref "Name/Monad/bind") (Met 0 [])) (Met 0 [])) exp0) (Lam "x" λx ...
-
--- To make the code cleaner, create a DoBlock type.
--- Then, create a 'parseDoSugar' parser, that returns a DoBlock.
--- Then, create a 'desugarDo' function, that converts a DoBlock into a Term.
--- Finally, create a 'parseDo' parser, that parses a do-block as a Term.
-
--- actually, let's add another option:
--- - optionally, the user can end the block in 'wrap value'
--- - if they do, the end value will be `((Name/Monad/bind _) value)` instead of just `value`
--- rewrite the commented out code above to add this feature. keep all else the same. do it now:
-
--- this 'isDoWrap' logic is ugly. clean up the code above to avoid pattern-matching on (App (App ...)) like that. implement the wrap functionality in a more elegant fashion. rewrite the code now.
-
--- TODO: rewrite the code above to apply the expand-uses functionality to the generated refs. also, append just "bind" and "pure" (instad of "/Monad/bind" etc.)
-
--- Do-Notation:
--- ------------
-
--- data DoBlck = DoBlck String [DoStmt] Bool Term -- bool used for wrap
--- data DoStmt = DoBind String Term | DoSeq Term
-
--- parseDoSugar :: Parser DoBlck
--- parseDoSugar = do
-  -- string "do "
-  -- name <- parseName
-  -- char '{'
-  -- parseTrivia
-  -- stmts <- P.many (P.try parseDoStmt)
-  -- (wrap, ret) <- parseDoReturn
-  -- char '}'
-  -- return $ DoBlck name stmts wrap ret
-
--- parseDoStmt :: Parser DoStmt
--- parseDoStmt = P.try parseDoBind <|> parseDoSeq
-
--- parseDoBind :: Parser DoStmt
--- parseDoBind = do
-  -- string "ask "
-  -- name <- parseName
-  -- char '='
-  -- exp <- parseTerm
-  -- return $ DoBind name exp
-
--- parseDoSeq :: Parser DoStmt
--- parseDoSeq = do
-  -- string "ask "
-  -- exp <- parseTerm
-  -- return $ DoSeq exp
-
--- parseDoReturn :: Parser (Bool, Term)
--- parseDoReturn = do
-  -- wrap <- P.optionMaybe (P.try (string "ret "))
-  -- term <- parseTerm
-  -- return (maybe False (const True) wrap, term)
-
--- desugarDo :: DoBlck -> Parser Term
--- desugarDo (DoBlck name stmts wrap ret) = do
-  -- (_, uses) <- P.getState
-  -- let exName = expandUses uses name
-  -- let mkBind = \ x exp acc -> App (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp) (Lam x (\_ -> acc))
-  -- let mkWrap = \ ret -> App (App (Ref (exName ++ "/pure")) (Met 0 [])) ret
-  -- return $ foldr (\stmt acc ->
-    -- case stmt of
-      -- DoBind x exp -> mkBind x exp acc
-      -- DoSeq exp -> mkBind "_" exp acc
-    -- ) (if wrap then mkWrap ret else ret) stmts
-
--- parseDo :: Parser Term
--- parseDo = parseDoSugar >>= desugarDo
-
--- this is too contrived. let's make it simpler by removing the DoBlck and DoStmt types, and just returing the parsed application directly.
--- this will greatly shorten up the code above. include the following functions:
--- parseDo: returns a term. calls parseStmt.
--- parseStmt: parses a choice of parseDoAsk, parseDoRet, parseDoLet, parseDoUse, and parseTerm
--- parseDoAsk: parses the ask syntax, creates the name/bind application
--- parseDoRet: parses the ret syntax, creates the name/pure application
--- parseDoLet: uses the let parser, but continues the body with a parseStmt instead of parseTerm
--- parseDoUse: uses use parser, but continues the body with a parseStmt instead of parseTerm
--- parseTerm: when all above fail, we will just parse a term and return it.
-
--- parseDo :: Parser Term
--- parseDo = withSrc $ do
-  -- string "do "
-  -- name <- parseName
-  -- char '{'
-  -- parseTrivia
-  -- body <- parseStmt name
-  -- char '}'
-  -- return body
-
--- parseStmt :: String -> Parser Term
--- parseStmt name = P.choice
-  -- [ parseDoAsk name
-  -- , parseDoRet name
-  -- , parseLet (parseStmt name)
-  -- , parseUse (parseStmt name)
-  -- -- , parseMch (parseStmt name)
-  -- , parseTerm
-  -- ]
-
--- parseDoAsk :: String -> Parser Term
--- parseDoAsk name = do
-  -- P.try $ string "ask "
-  -- nam <- P.optionMaybe parseName
-  -- exp <- case nam of
-    -- Just var -> char '=' >> parseTerm
-    -- Nothing  -> parseTerm
-  -- next <- parseStmt name
-  -- (_, uses) <- P.getState
-  -- let exName = expandUses uses name
-  -- return $ App
-    -- (App (App (App (Ref (exName ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
-    -- (Lam (maybe "_" id nam) (\_ -> next))
-
--- parseDoRet :: String -> Parser Term
--- parseDoRet name = do
-  -- P.try $ string "ret "
-  -- exp <- parseTerm
-  -- (_, uses) <- P.getState
-  -- let exName = expandUses uses name
-  -- return $ App (App (Ref (exName ++ "/pure")) (Met 0 [])) exp
-
--- TODO: this is great, but the ask syntax can't pattern-match (like the 'let' syntax).
--- the following syntax:
--- do Name { ask #Pair{ a b } = value ...body... }
--- should be parsed identically to:
--- do Name { ask got = value match got { #Pair{ a b }: ...body... } }
--- use a similar approach to the one used in the let-parser (i.e., parseLetMch
--- and parseLetVal), in order to make the 'ask' syntax feature destructuring too
--- rewrite the commented out code above now:
 
 parseDo :: Parser Term
 parseDo = withSrc $ do
@@ -943,37 +779,6 @@ parseDoRet monad = do
   (_, uses) <- P.getState
   return $ App (App (Ref (monad ++ "/pure")) (Met 0 [])) exp
 
--- let's now implement a parseDoFor sugar.
--- 
--- parseDoFor:
--- for x in xs with s { body }
--- must be desugared to:
--- (MONAD/bind _ _ (List/for-given _ MONAD/Monad _ _ xs s λsλx(body)) λs body)
--- Note that 'x' and 's' are parsed as names.
--- Note that 'MONAD' is the name of the monad
--- implement below both of these syntaxes now:
--- here is a draft of this function:
--- it is wrong though, as it follows a different spec. specifically:
--- - in the old function, we used two versions: for and for-given. now, we'll only use for-given
--- - in the old function, we forgot to apply the monadic binder to access the final state. this must be fixed
--- implement the correct parseDoFor function below:
--- this is wrong. we should parse a 'loop' to use inside the List/for-given, and
--- a 'body' AFTER the '}' as the continuation of the current monadic block.
--- let's change this syntax. instead of:
--- for x in list with state { ... } body
--- it should now be:
--- ask state = for x in list { ... } body
--- note that, to avoid conflict with the 'ask' parser, we must try the "ask state = for" part with rollback
--- write the correct version below:
--- this is great, but there is a lot of repeated code.
--- let's merge these functions into a single doParseFor function.
--- create a SINGLE parseDoFor function merging both. do NOT create extra auxiliary functions like parseDoForWith, parseDoForSimple. make it inline.
--- return a (nam,lst,loop,body) tuple from each possibility.
--- then, create the term as usual.
--- this is wrong. you should NOT use a where block with extra definitions. inline these blocks.
--- this is wrong. now the state isn't being used. you must return stt too.  do
--- NOT change how strings are parsed. i.e., do not merge 'string "="' and
--- 'string "for"'. this will break how trivia is handled. don't do that.
 parseDoFor :: String -> Parser Term
 parseDoFor monad = do
   (stt, nam, lst, loop, body) <- P.choice
@@ -1020,12 +825,6 @@ parseDoFor monad = do
 -- Match
 -- -----
 
--- Let's now implement the 'parseMch sugar. The following syntax:
--- 'match x { #Foo: foo #Bar: bar ... }'
--- desugars to:
--- '(λ{ #Foo: foo #Bar: bar ... } x)
--- it parses the cases identically to parseMat.
--- TODO: edit this to use parseCse, making it shorter
 parseMch :: Parser Term -> Parser Term
 parseMch parseBody = withSrc $ do
   P.try $ string "match "
@@ -1037,8 +836,6 @@ parseMch parseBody = withSrc $ do
 
 -- Match
 -- -----
-
--- Nat: the '#123' expression is parsed into (Nat 123)
 
 parseNat :: Parser Term
 parseNat = withSrc $ P.try $ do
