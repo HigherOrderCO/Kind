@@ -140,18 +140,20 @@ parseTerm = (do
     , parseSlf
     , parseIns
     , parseDat
-    , parseNat -- sugar
+    , parseNat
     , parseCon
     , (parseUse parseTerm)
     , (parseLet parseTerm)
-    , parseMatInl -- sugar
-    , parseSwiInl -- sugar
-    , parseDo -- sugar
+    , parseIf
+    , parseWhen
+    , parseMatInl
+    , parseSwiInl
+    , parseDo
     , parseSet
     , parseNum
-    , parseTxt -- sugar
-    , parseLst -- sugar
-    , parseChr -- sugar
+    , parseTxt
+    , parseLst
+    , parseChr
     , parseHol
     , parseMet
     , parseRef
@@ -263,39 +265,10 @@ parseCon = withSrc $ do
     return args
   return $ Con nam args
 
-parseSwiCses :: Parser (Term, Term)
-parseSwiCses = do
-  zero <- do
-    P.try $ do
-      char '0'
-      char ':'
-    parseTerm
-  succ <- do
-    string "_"
-    pred <- P.optionMaybe $ do
-      char '{'
-      name <- parseName
-      char '}'
-      return name
-    char ':'
-    succ <- parseTerm
-    return $ maybe succ (\name -> Lam name (\_ -> succ)) pred
-  return (zero, succ)
-
-parseSwi = withSrc $ do
-  P.try $ do
-    char 'λ'
-    char '{'
-    P.lookAhead $ P.try $ do
-      P.char '0'
-  (zero, succ) <- parseSwiCses
-  char '}'
-  return $ Swi zero succ
-
-parseMatCses :: Parser [(String, Term)]
-parseMatCses = do
+parseCases :: String -> Parser [(String, Term)]
+parseCases prefix = do
   cse <- P.many $ P.try $ do
-    char '#'
+    string prefix
     cnam <- parseName
     args <- P.option [] $ P.try $ do
       char '{'
@@ -316,11 +289,46 @@ parseMatCses = do
     Just (dnam, dbod) -> cse ++ [("_", (Lam dnam (\_ -> dbod)))]
     Nothing           -> cse
 
+parseSwiElim :: Parser (Term, Term)
+parseSwiElim = do
+  zero <- do
+    P.try $ do
+      char '0'
+      char ':'
+    parseTerm
+  succ <- do
+    string "_"
+    pred <- P.optionMaybe $ do
+      char '{'
+      name <- parseName
+      char '}'
+      return name
+    char ':'
+    succ <- parseTerm
+    return $ maybe succ (\name -> Lam name (\_ -> succ)) pred
+  return (zero, succ)
+
+parseMatCases :: Parser [(String, Term)]
+parseMatCases = parseCases "#"
+
+parseSwiCases :: Parser [(String, Term)]
+parseSwiCases = parseCases ""
+
+parseSwi = withSrc $ do
+  P.try $ do
+    char 'λ'
+    char '{'
+    P.lookAhead $ P.try $ do
+      P.char '0'
+  (zero, succ) <- parseSwiElim
+  char '}'
+  return $ Swi zero succ
+
 parseMat = withSrc $ do
   P.try $ do
     string "λ"
     string "{"
-  cse <- parseMatCses
+  cse <- parseMatCases
   char '}'
   return $ Mat cse
 
@@ -379,54 +387,43 @@ parseOp2 = withSrc $ do
   char ')'
   return $ Op2 opr fst snd
 
-parseTxt = withSrc $ do
-  char '"'
-  txt <- P.many parseTxtChr
-  char '"'
-  return $ Txt (concat txt)
-
-parseTxtChr :: Parser String
-parseTxtChr = P.choice
-  [ P.try $ do
-      char '\\'
-      c <- oneOf "\\\"nrtbf"
-      return $ case c of
-        '\\' -> "\\"
-        '"'  -> "\""
-        'n'  -> "\n"
-        'r'  -> "\r"
-        't'  -> "\t"
-        'b'  -> "\b"
-        'f'  -> "\f"
-  , P.try $ do
-      string "\\u"
-      code <- P.count 4 P.hexDigit
-      return [toEnum (read ("0x" ++ code) :: Int)]
-  , fmap (:[]) (noneOf "\"\\")
-  ]
-
 parseLst = withSrc $ do
   char '['
   elems <- P.many parseTerm
   char ']'
   return $ Lst elems
 
-parseChr = withSrc $ do
-  char '\''
-  chr <- parseEscaped <|> noneOf "'\\"
-  char '\''
-  return $ Num (fromIntegral $ ord chr)
-  where
-    parseEscaped :: Parser Char
-    parseEscaped = do
+parseTxtChr :: Parser Char
+parseTxtChr = P.choice
+  [ P.try $ do
       char '\\'
-      c <- oneOf "\\\'nrt"
+      c <- oneOf "\\\"nrtbf"
       return $ case c of
         '\\' -> '\\'
-        '\'' -> '\''
+        '"'  -> '"'
         'n'  -> '\n'
         'r'  -> '\r'
         't'  -> '\t'
+        'b'  -> '\b'
+        'f'  -> '\f'
+  , P.try $ do
+      string "\\u"
+      code <- P.count 4 P.hexDigit
+      return $ toEnum (read ("0x" ++ code) :: Int)
+  , noneOf "\"\\"
+  ]
+
+parseChr = withSrc $ do
+  char '\''
+  chr <- parseTxtChr
+  char '\''
+  return $ Num (fromIntegral $ ord chr)
+
+parseTxt = withSrc $ do
+  char '"'
+  txt <- P.many parseTxtChr
+  char '"'
+  return $ Txt txt
 
 parseHol = withSrc $ do
   char '?'
@@ -684,6 +681,61 @@ parseDoFor monad = do
   let b4 = App b3 (Lam (maybe "" id stt) (\_ -> body))
   return b4
 
+-- If-Then-Else
+-- ------------
+
+-- if cond { t } else { f } 
+-- --------------------------------- desugars to
+-- match cond { #True: t #False: f }
+
+parseIf = withSrc $ do
+  P.try $ string "if "
+  cond <- parseTerm
+  char '{'
+  t <- parseTerm
+  char '}'
+  string "else"
+  f <- P.choice
+    [ P.try $ do
+        char '{'
+        f <- parseTerm
+        char '}'
+        return f
+    , parseIf
+    ]
+  return $ App (Mat [("True", t), ("False", f)]) cond
+
+-- When
+-- ----
+
+-- when fn x { c0: v0 c1: v1 _: df }
+-- -------------------------------------------------------- desugars to
+-- if (fn x c0) { v0 } else if (fn x c1) { v1 } else { df }
+
+parseWhen = withSrc $ do
+  P.try $ string "when "
+  fun <- parseTerm
+  val <- parseTerm
+  char '{'
+  cases <- P.many $ do
+    P.notFollowedBy (char '_')
+    cond <- parseTerm
+    char ':'
+    body <- parseTerm
+    return (cond, body)
+  defaultCase <- do
+    char '_'
+    char ':'
+    body <- parseTerm
+    return $ body
+  char '}'
+  return $ foldr
+    (\ (cond, body) acc -> App
+      (Mat [("True", body), ("False", acc)])
+      (App (App fun val) cond))
+    defaultCase
+    cases
+
 -- Match
 -- -----
 
@@ -692,7 +744,7 @@ parseMatInl = withSrc $ do
   P.try $ string "match "
   x <- parseTerm
   char '{'
-  cse <- parseMatCses
+  cse <- parseMatCases
   char '}'
   return $ App (Mat cse) x
 
@@ -701,12 +753,36 @@ parseSwiInl = withSrc $ do
   P.try $ string "switch "
   x <- parseTerm
   char '{'
-  (zero, succ) <- parseSwiCses
-  char '}'
-  return $ App (Swi zero succ) x
+  P.choice
+    [ do
+        (zero, succ) <- parseSwiElim
+        char '}'
+        return $ App (Swi zero succ) x
+    , do
+        cases <- parseSwiCases
+        char '}'
+        -- TODO: this should desugar to a chain of if-then-elses. Example:
+        -- switch x { 24: a 42: b _: d }
+        -- ----------------------------------------------------------------- desugars to
+        -- if (U60.eq x 24) { a } else { if (U60.eq x 42) { b } else { d } }
+        -- Your goal is to desugar the 'cases : [(String,Term)]' object.
+        -- Note that a default case ("_") is mandatory here. If it isn't
+        -- present, we should raise a parse error saying that numeric 
+        -- switch demands a default case. Do it now:
+        let defaultCase = find (\(name, _) -> name == "_") cases
+        case defaultCase of
+          Nothing -> error "Numeric switch requires a default case"
+          Just (_, defaultBody) -> do
+            let nonDefaultCases = filter (\(name, _) -> name /= "_") cases
+                buildIfChain [] = defaultBody
+                buildIfChain ((num, body):rest) = App
+                  (Mat [("True", body), ("False", buildIfChain rest)])
+                  (App (App (Ref "Base/U32/eq") x) (Num (read num)))
+            return $ buildIfChain nonDefaultCases
+    ]
 
--- Match
--- -----
+-- Nat
+-- ---
 
 parseNat :: Parser Term
 parseNat = withSrc $ P.try $ do
