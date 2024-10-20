@@ -605,17 +605,34 @@ parseDoAskMch monad = do
       App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) next args)]) got))
 
 parseDoAskVal :: String -> Parser Term
-parseDoAskVal monad = do
-  P.try $ string "ask "
-  nam <- P.optionMaybe parseName
-  exp <- case nam of
-    Just var -> char '=' >> parseTerm
-    Nothing  -> parseTerm
+parseDoAskVal monad = P.choice
+  [ parseDoAskValNamed monad
+  , parseDoAskValAnon monad
+  ]
+
+parseDoAskValNamed :: String -> Parser Term
+parseDoAskValNamed monad = do
+  nam <- P.try $ do
+    string "ask "
+    nam <- parseName
+    char '='
+    return nam
+  exp <- parseTerm
   next <- parseStmt monad
   (_, uses) <- P.getState
   return $ App
     (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
-    (Lam (maybe "_" id nam) (\_ -> next))
+    (Lam nam (\_ -> next))
+
+parseDoAskValAnon :: String -> Parser Term
+parseDoAskValAnon monad = do
+  P.try $ string "ask "
+  exp <- parseTerm
+  next <- parseStmt monad
+  (_, uses) <- P.getState
+  return $ App
+    (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
+    (Lam "_" (\_ -> next))
 
 parseDoRet :: String -> Parser Term
 parseDoRet monad = do
