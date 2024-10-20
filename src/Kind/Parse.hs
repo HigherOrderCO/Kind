@@ -28,8 +28,8 @@ type Parser a = P.ParsecT String PState Identity a
 data Pattern  = PVar String | PCtr String [Pattern] deriving Show
 
 -- Helper functions that consume trailing whitespace
-parseTrivia :: Parser ()
-parseTrivia = P.skipMany (parseSpace <|> parseComment)
+skip :: Parser ()
+skip = P.skipMany (parseSpace <|> parseComment)
   where
     parseSpace = (P.try $ do
       P.space
@@ -40,17 +40,33 @@ parseTrivia = P.skipMany (parseSpace <|> parseComment)
       P.char '\n'
       return ()) <?> "Comment"
 
-char :: Char -> Parser Char
-char c = P.char c <* parseTrivia
+char_end :: Char -> Parser Char
+char_end c = P.char c
 
-string :: String -> Parser String
-string s = P.string s <* parseTrivia
+string_end :: String -> Parser String
+string_end s = P.string s
 
-letter :: Parser Char
-letter = P.letter
+char_skp :: Char -> Parser Char
+char_skp c = P.char c <* skip
 
-parseNameChar :: Parser Char
-parseNameChar = P.satisfy (`elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/_.-$")
+string_skp :: String -> Parser String
+string_skp s = P.string s <* skip
+
+name_init :: Parser Char
+name_init = P.satisfy (`elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/_.-$")
+
+name_char :: Parser Char
+name_char = P.satisfy (`elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/_.-$")
+
+name_end :: Parser String
+name_end = do
+  head <- name_init
+  tail <- P.many name_char
+  skip
+  return (head : tail)
+
+name_skp :: Parser String
+name_skp = name_end <* skip
 
 digit :: Parser Char
 digit = P.digit
@@ -81,7 +97,7 @@ doParseUses filename input =
 doParseBook :: String -> String -> IO Book
 doParseBook filename input = do
   let parser = do
-        parseTrivia
+        skip
         uses <- parseUses
         setState (filename, uses)
         parseBook <* P.eof
@@ -118,6 +134,7 @@ withSrc parser = do
   val <- parser
   end <- getPosition
   (nam, _) <- P.getState
+  skip
   let iniLoc = Loc nam (sourceLine ini) (sourceColumn ini)
   let endLoc = Loc nam (sourceLine end) (sourceColumn end)
   return $ Src (Cod iniLoc endLoc) val
@@ -128,7 +145,7 @@ withSrc parser = do
 -- Main term parser
 parseTerm :: Parser Term
 parseTerm = (do
-  parseTrivia
+  skip
   term <- P.choice
     [ parseAll
     , parseSwi
@@ -156,133 +173,133 @@ parseTerm = (do
     , parseLst
     , parseChr
     , parseHol
-    , parseMet
+    -- , parseMet
     , parseRef
-    ] <* parseTrivia
+    ] <* skip
   parseSuffix term) <?> "Term"
 
 -- Individual term parsers
 parseAll = withSrc $ do
-  string "∀"
-  era <- P.optionMaybe (char '-')
-  char '('
-  nam <- parseName
-  char ':'
+  string_skp "∀"
+  era <- P.optionMaybe (char_skp '-')
+  char_skp '('
+  nam <- name_skp
+  char_skp ':'
   inp <- parseTerm
-  char ')'
+  char_skp ')'
   bod <- parseTerm
   return $ All nam inp (\x -> bod)
 
 parseLam = withSrc $ do
-  string "λ"
-  era <- P.optionMaybe (char '-')
-  nam <- parseName
+  string_skp "λ"
+  era <- P.optionMaybe (char_skp '-')
+  nam <- name_skp
   bod <- parseTerm
   return $ Lam nam (\x -> bod)
 
 parseEra = withSrc $ do
-  string "λ"
-  era <- P.optionMaybe (char '-')
-  nam <- char '_'
+  string_skp "λ"
+  era <- P.optionMaybe (char_skp '-')
+  nam <- char_skp '_'
   bod <- parseTerm
   return $ Lam "_" (\x -> bod)
 
 parseApp = withSrc $ do
-  char '('
+  char_skp '('
   fun <- parseTerm
   args <- P.many $ do
-    P.notFollowedBy (char ')')
-    era <- P.optionMaybe (char '-')
+    P.notFollowedBy (char_skp ')')
+    era <- P.optionMaybe (char_skp '-')
     arg <- parseTerm
     return (era, arg)
-  char ')'
+  char_end ')'
   return $ foldl (\f (era, a) -> App f a) fun args
 
 parseAnn = withSrc $ do
-  char '{'
+  char_skp '{'
   val <- parseTerm
-  char ':'
-  chk <- P.option False (char ':' >> return True)
+  char_skp ':'
+  chk <- P.option False (char_skp ':' >> return True)
   typ <- parseTerm
-  char '}'
+  char_end '}'
   return $ Ann chk val typ
 
 parseSlf = withSrc $ do
-  string "$("
-  nam <- parseName
-  char ':'
+  string_skp "$("
+  nam <- name_skp
+  char_skp ':'
   typ <- parseTerm
-  char ')'
+  char_skp ')'
   bod <- parseTerm
   return $ Slf nam typ (\x -> bod)
 
 parseIns = withSrc $ do
-  char '~'
+  char_skp '~'
   val <- parseTerm
   return $ Ins val
 
 parseDat = withSrc $ do
-  P.try $ P.choice [string "#[", string "data["]
+  P.try $ P.choice [string_skp "#[", string_skp "data["]
   scp <- P.many parseTerm
-  char ']'
-  char '{'
+  char_skp ']'
+  char_skp '{'
   cts <- P.many $ P.try $ do
-    char '#'
-    nm <- parseName
+    char_skp '#'
+    nm <- name_skp
     tele <- parseTele
     return $ Ctr nm tele
-  char '}'
+  char_end '}'
   return $ Dat scp cts
 
 parseTele :: Parser Tele
 parseTele = do
   fields <- P.option [] $ do
-    char '{'
+    char_skp '{'
     fields <- P.many $ P.try $ do
-      nam <- parseName
-      char ':'
+      nam <- name_skp
+      char_skp ':'
       typ <- parseTerm
       return (nam, typ)
-    char '}'
+    char_skp '}'
     return fields
-  char ':'
+  char_skp ':'
   ret <- parseTerm
   return $ foldr (\(nam, typ) acc -> TExt nam typ (\x -> acc)) (TRet ret) fields
 
 parseCon = withSrc $ do
-  char '#'
-  nam <- parseName
+  char_skp '#'
+  nam <- name_skp
   args <- P.option [] $ P.try $ do
-    char '{'
+    char_skp '{'
     args <- P.many $ do
-      P.notFollowedBy (char '}')
+      P.notFollowedBy (char_skp '}')
       name <- P.optionMaybe $ P.try $ do
-        name <- parseName
-        char ':'
+        name <- name_skp
+        char_skp ':'
         return name
       term <- parseTerm
       return (name, term)
-    char '}'
+    char_end '}'
     return args
   return $ Con nam args
 
 parseCases :: String -> Parser [(String, Term)]
 parseCases prefix = do
   cse <- P.many $ P.try $ do
-    string prefix
-    cnam <- parseName
+    string_skp prefix
+    cnam <- name_skp
     args <- P.option [] $ P.try $ do
-      char '{'
-      names <- P.many parseName
-      char '}'
+      char_skp '{'
+      names <- P.many name_skp
+      char_skp '}'
       return names
-    char ':'
+    char_skp ':'
     cbod <- parseTerm
     return (cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) cbod args)
   dflt <- P.optionMaybe $ do
     dnam <- P.try $ do
-      dnam <- parseName
-      string ":"
+      dnam <- name_skp
+      string_skp ":"
       return dnam
     dbod <- parseTerm
     return (dnam, dbod)
@@ -294,17 +311,17 @@ parseSwiElim :: Parser (Term, Term)
 parseSwiElim = do
   zero <- do
     P.try $ do
-      char '0'
-      char ':'
+      char_skp '0'
+      char_skp ':'
     parseTerm
   succ <- do
-    string "_"
+    string_skp "_"
     pred <- P.optionMaybe $ do
-      char '{'
-      name <- parseName
-      char '}'
+      char_skp '{'
+      name <- name_skp
+      char_skp '}'
       return name
-    char ':'
+    char_skp ':'
     succ <- parseTerm
     return $ maybe succ (\name -> Lam name (\_ -> succ)) pred
   return (zero, succ)
@@ -317,28 +334,29 @@ parseSwiCases = parseCases ""
 
 parseSwi = withSrc $ do
   P.try $ do
-    char 'λ'
-    char '{'
+    char_skp 'λ'
+    char_skp '{'
     P.lookAhead $ P.try $ do
-      P.char '0'
+      char_skp '0'
   (zero, succ) <- parseSwiElim
-  char '}'
+  char_end '}'
   return $ Swi zero succ
 
 parseMat = withSrc $ do
   P.try $ do
-    string "λ"
-    string "{"
+    string_skp "λ"
+    string_skp "{"
   cse <- parseMatCases
-  char '}'
+  char_end '}'
   return $ Mat cse
 
 parseRef = withSrc $ do
-  name <- parseName
+  name <- name_end
   (_, uses) <- P.getState
   let name' = expandUses uses name
   return $ case name' of
     "U32" -> U32
+    "_"   -> Met 0 []
     _     -> Ref name'
 
 parseLocal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
@@ -349,12 +367,12 @@ parseLocal header ctor parseBody = withSrc $ P.choice
 
 parseLocalMch :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocalMch header ctor parseBody = do
-  P.try $ string (header ++ " #")
-  cnam <- parseName
-  char '{'
-  args <- P.many parseName
-  char '}'
-  char '='
+  P.try $ string_skp (header ++ " #")
+  cnam <- name_skp
+  char_skp '{'
+  args <- P.many name_skp
+  char_skp '}'
+  char_skp '='
   val <- parseTerm
   bod <- parseBody
   return $ ctor "got" val (\got ->
@@ -362,9 +380,9 @@ parseLocalMch header ctor parseBody = do
 
 parseLocalVal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocalVal header ctor parseBody = do
-  P.try $ string (header ++ " ")
-  nam <- parseName
-  char '='
+  P.try $ string_skp (header ++ " ")
+  nam <- name_skp
+  char_skp '='
   val <- parseTerm
   bod <- parseBody
   return $ ctor nam val (\x -> bod)
@@ -375,29 +393,29 @@ parseLet = parseLocal "let" Let
 parseUse :: Parser Term -> Parser Term
 parseUse = parseLocal "use" Use
 
-parseSet = withSrc $ char '*' >> return Set
+parseSet = withSrc $ char_end '*' >> return Set
 
 parseNum = withSrc $ Num . read <$> P.many1 digit
 
 parseOp2 = withSrc $ do
   opr <- P.try $ do
-    char '('
+    char_skp '('
     parseOper
   fst <- parseTerm
   snd <- parseTerm
-  char ')'
+  char_end ')'
   return $ Op2 opr fst snd
 
 parseLst = withSrc $ do
-  char '['
+  char_skp '['
   elems <- P.many parseTerm
-  char ']'
+  char_end ']'
   return $ Lst elems
 
 parseTxtChr :: Parser Char
 parseTxtChr = P.choice
   [ P.try $ do
-      char '\\'
+      char_skp '\\'
       c <- oneOf "\\\"nrtbf"
       return $ case c of
         '\\' -> '\\'
@@ -408,62 +426,55 @@ parseTxtChr = P.choice
         'b'  -> '\b'
         'f'  -> '\f'
   , P.try $ do
-      string "\\u"
+      string_skp "\\u"
       code <- P.count 4 P.hexDigit
       return $ toEnum (read ("0x" ++ code) :: Int)
   , noneOf "\"\\"
   ]
 
 parseTxt = withSrc $ do
-  char '"'
+  char_skp '"'
   txt <- P.many parseTxtChr
-  char '"'
+  char_end '"'
   return $ Txt txt
 
 parseChr = withSrc $ do
-  char '\''
+  char_skp '\''
   chr <- parseTxtChr
-  char '\''
+  char_end '\''
   return $ Num (fromIntegral $ ord chr)
 
 parseHol = withSrc $ do
-  char '?'
-  nam <- parseName
+  char_skp '?'
+  nam <- name_skp
   ctx <- P.option [] $ do
-    char '['
-    terms <- P.sepBy parseTerm (char ',')
-    char ']'
+    char_skp '['
+    terms <- P.sepBy parseTerm (char_skp ',')
+    char_end ']'
     return terms
   return $ Hol nam ctx
 
-parseMet = withSrc $ do
-  char '_'
-  return $ Met 0 []
-
-parseName :: Parser String
-parseName = do
-  head <- letter
-  tail <- P.many parseNameChar
-  parseTrivia
-  return (head : tail)
+-- parseMet = withSrc $ do
+  -- char_end '_'
+  -- return $ Met 0 []
 
 parseOper = P.choice
-  [ P.try (string "+") >> return ADD
-  , P.try (string "-") >> return SUB
-  , P.try (string "*") >> return MUL
-  , P.try (string "/") >> return DIV
-  , P.try (string "%") >> return MOD
-  , P.try (string "<<") >> return LSH
-  , P.try (string ">>") >> return RSH
-  , P.try (string "<=") >> return LTE
-  , P.try (string ">=") >> return GTE
-  , P.try (string "<") >> return LT
-  , P.try (string ">") >> return GT
-  , P.try (string "==") >> return EQ
-  , P.try (string "!=") >> return NE
-  , P.try (string "&") >> return AND
-  , P.try (string "|") >> return OR
-  , P.try (string "^") >> return XOR
+  [ P.try (string_skp "+") >> return ADD
+  , P.try (string_skp "-") >> return SUB
+  , P.try (string_skp "*") >> return MUL
+  , P.try (string_skp "/") >> return DIV
+  , P.try (string_skp "%") >> return MOD
+  , P.try (string_skp "<<") >> return LSH
+  , P.try (string_skp ">>") >> return RSH
+  , P.try (string_skp "<=") >> return LTE
+  , P.try (string_skp ">=") >> return GTE
+  , P.try (string_skp "<") >> return LT
+  , P.try (string_skp ">") >> return GT
+  , P.try (string_skp "==") >> return EQ
+  , P.try (string_skp "!=") >> return NE
+  , P.try (string_skp "&") >> return AND
+  , P.try (string_skp "|") >> return OR
+  , P.try (string_skp "^") >> return XOR
   ]
 
 parseSuffix :: Term -> Parser Term
@@ -475,13 +486,13 @@ parseSuffix term = P.choice
 
 parseSuffArr :: Term -> Parser Term
 parseSuffArr term = do
-  P.try $ string "->"
+  P.try $ string_skp "->"
   ret <- parseTerm
   return $ All "_" term (\_ -> ret)
 
 parseSuffAnn :: Term -> Parser Term
 parseSuffAnn term = do
-  P.try $ string "::"
+  P.try $ string_skp "::"
   typ <- parseTerm
   return $ Ann False term typ
 
@@ -496,21 +507,21 @@ parseBook = M.fromList <$> P.many parseDef
 
 parseDef :: Parser (String, Term)
 parseDef = do
-  name <- parseName
+  name <- name_skp
   typ <- P.optionMaybe $ do
-    char ':'
+    char_skp ':'
     t <- parseTerm
     return t
   val <- P.choice
     [ do
-        char '='
+        char_skp '='
         val <- parseTerm
         return val
     , do
         rules <- P.many1 $ do
-          char '|'
+          char_skp '|'
           pats <- P.many parsePattern
-          char '='
+          char_skp '='
           body <- parseTerm
           return (pats, body)
         let (mat, bods) = unzip rules
@@ -529,25 +540,25 @@ parsePattern :: Parser Pattern
 parsePattern = do
   P.choice [
     do
-      name <- parseName
+      name <- name_skp
       return (PVar name),
     do
-      char '#'
-      name <- parseName
+      char_skp '#'
+      name <- name_skp
       args <- P.option [] $ P.try $ do
-        char '{'
+        char_skp '{'
         args <- P.many parsePattern
-        char '}'
+        char_skp '}'
         return args
       return (PCtr name args)
     ]
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do
-  string "use "
-  long <- parseName
-  string "as "
-  short <- parseName
+  string_skp "use "
+  long <- name_skp
+  string_skp "as "
+  short <- name_skp
   return (short, long)
 
 expandUses :: Uses -> String -> String
@@ -561,13 +572,13 @@ expandUses uses name =
 
 parseDo :: Parser Term
 parseDo = withSrc $ do
-  P.try $ string "do "
-  monad <- parseName
-  char '{'
-  parseTrivia
+  P.try $ string_skp "do "
+  monad <- name_skp
+  char_skp '{'
+  skip
   (_, uses) <- P.getState
   body <- parseStmt (expandUses uses monad)
-  char '}'
+  char_end '}'
   return body
 
 parseStmt :: String -> Parser Term
@@ -588,12 +599,12 @@ parseDoAsk monad = P.choice
 
 parseDoAskMch :: String -> Parser Term
 parseDoAskMch monad = do
-  P.try $ string "ask #"
-  cnam <- parseName
-  char '{'
-  args <- P.many parseName
-  char '}'
-  char '='
+  P.try $ string_skp "ask #"
+  cnam <- name_skp
+  char_skp '{'
+  args <- P.many name_skp
+  char_skp '}'
+  char_skp '='
   val <- parseTerm
   next <- parseStmt monad
   (_, uses) <- P.getState
@@ -611,9 +622,9 @@ parseDoAskVal monad = P.choice
 parseDoAskValNamed :: String -> Parser Term
 parseDoAskValNamed monad = do
   nam <- P.try $ do
-    string "ask "
-    nam <- parseName
-    char '='
+    string_skp "ask "
+    nam <- name_skp
+    char_skp '='
     return nam
   exp <- parseTerm
   next <- parseStmt monad
@@ -624,7 +635,7 @@ parseDoAskValNamed monad = do
 
 parseDoAskValAnon :: String -> Parser Term
 parseDoAskValAnon monad = do
-  P.try $ string "ask "
+  P.try $ string_skp "ask "
   exp <- parseTerm
   next <- parseStmt monad
   (_, uses) <- P.getState
@@ -634,7 +645,7 @@ parseDoAskValAnon monad = do
 
 parseDoRet :: String -> Parser Term
 parseDoRet monad = do
-  P.try $ string "ret "
+  P.try $ string_skp "ret "
   exp <- parseTerm
   (_, uses) <- P.getState
   return $ App (App (Ref (monad ++ "/pure")) (Met 0 [])) exp
@@ -644,27 +655,27 @@ parseDoFor monad = do
   (stt, nam, lst, loop, body) <- P.choice
     [ do
         stt <- P.try $ do
-          string "ask "
-          stt <- parseName
-          string "="
-          string "for"
+          string_skp "ask "
+          stt <- name_skp
+          string_skp "="
+          string_skp "for"
           return stt
-        nam <- parseName
-        string "in"
+        nam <- name_skp
+        string_skp "in"
         lst <- parseTerm
-        char '{'
+        char_skp '{'
         loop <- parseStmt monad
-        char '}'
+        char_skp '}'
         body <- parseStmt monad
         return (Just stt, nam, lst, loop, body)
     , do
-        P.try $ string "for "
-        nam <- parseName
-        string "in"
+        P.try $ string_skp "for "
+        nam <- name_skp
+        string_skp "in"
         lst <- parseTerm
-        char '{'
+        char_skp '{'
         loop <- parseStmt monad
-        char '}'
+        char_skp '}'
         body <- parseStmt monad
         return (Nothing, nam, lst, loop, body) ]
   let f0 = Ref "Base/List/for-given"
@@ -690,17 +701,17 @@ parseDoFor monad = do
 -- match cond { #True: t #False: f }
 
 parseIf = withSrc $ do
-  P.try $ string "if "
+  P.try $ string_skp "if "
   cond <- parseTerm
-  char '{'
+  char_skp '{'
   t <- parseTerm
-  char '}'
-  string "else"
+  char_skp '}'
+  string_skp "else"
   f <- P.choice
     [ P.try $ do
-        char '{'
+        char_skp '{'
         f <- parseTerm
-        char '}'
+        char_end '}'
         return f
     , parseIf
     ]
@@ -714,22 +725,22 @@ parseIf = withSrc $ do
 -- if (fn x c0) { v0 } else if (fn x c1) { v1 } else { df }
 
 parseWhen = withSrc $ do
-  P.try $ string "when "
+  P.try $ string_skp "when "
   fun <- parseTerm
   val <- parseTerm
-  char '{'
+  char_skp '{'
   cases <- P.many $ do
-    P.notFollowedBy (char '_')
+    P.notFollowedBy (char_skp '_')
     cond <- parseTerm
-    char ':'
+    char_skp ':'
     body <- parseTerm
     return (cond, body)
   defaultCase <- do
-    char '_'
-    char ':'
+    char_skp '_'
+    char_skp ':'
     body <- parseTerm
     return $ body
-  char '}'
+  char_end '}'
   return $ foldr
     (\ (cond, body) acc -> App
       (Mat [("True", body), ("False", acc)])
@@ -742,26 +753,26 @@ parseWhen = withSrc $ do
 
 parseMatInl :: Parser Term
 parseMatInl = withSrc $ do
-  P.try $ string "match "
+  P.try $ string_skp "match "
   x <- parseTerm
-  char '{'
+  char_skp '{'
   cse <- parseMatCases
-  char '}'
+  char_end '}'
   return $ App (Mat cse) x
 
 parseSwiInl :: Parser Term
 parseSwiInl = withSrc $ do
-  P.try $ string "switch "
+  P.try $ string_skp "switch "
   x <- parseTerm
-  char '{'
+  char_skp '{'
   P.choice
     [ do
         (zero, succ) <- parseSwiElim
-        char '}'
+        char_end '}'
         return $ App (Swi zero succ) x
     , do
         cases <- parseSwiCases
-        char '}'
+        char_end '}'
         -- TODO: this should desugar to a chain of if-then-elses. Example:
         -- switch x { 24: a 42: b _: d }
         -- ----------------------------------------------------------------- desugars to
@@ -787,7 +798,7 @@ parseSwiInl = withSrc $ do
 
 parseNat :: Parser Term
 parseNat = withSrc $ P.try $ do
-  char '#'
+  char_skp '#'
   num <- P.many1 digit
   return $ Nat (read num)
 
