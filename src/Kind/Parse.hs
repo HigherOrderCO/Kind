@@ -267,8 +267,9 @@ parseTele = do
 
 parseCon = withSrc $ do
   char_skp '#'
-  nam <- name_skp
+  nam <- name_end
   args <- P.option [] $ P.try $ do
+    skip
     char_skp '{'
     args <- P.many $ do
       P.notFollowedBy (char_skp '}')
