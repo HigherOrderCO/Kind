@@ -68,7 +68,7 @@ apiLoad basePath book name = do
         else do
           code  <- readFile filePath
           book0 <- doParseBook filePath code
-          let book1 = M.union book0 book
+          let book1 = M.union book book0
           let defs  = M.keys book0
           let deps  = concatMap (getDeps . snd) (M.toList book0)
           let defs' = M.singleton filePath defs

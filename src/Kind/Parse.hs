@@ -481,6 +481,7 @@ parseSuffix :: Term -> Parser Term
 parseSuffix term = P.choice
   [ parseSuffArr term
   , parseSuffAnn term
+  , parseSuffEql term
   , parseSuffVal term
   ]
 
@@ -495,6 +496,12 @@ parseSuffAnn term = do
   P.try $ string_skp "::"
   typ <- parseTerm
   return $ Ann False term typ
+
+parseSuffEql :: Term -> Parser Term
+parseSuffEql term = do
+  P.try $ string_skp "=="
+  other <- parseTerm
+  return $ App (App (App (Ref "Equal") (Met 0 [])) term) other
 
 parseSuffVal :: Term -> Parser Term
 parseSuffVal term = return term
