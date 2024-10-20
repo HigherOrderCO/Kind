@@ -81,6 +81,7 @@ doParseUses filename input =
 doParseBook :: String -> String -> IO Book
 doParseBook filename input = do
   let parser = do
+        parseTrivia
         uses <- parseUses
         setState (filename, uses)
         parseBook <* P.eof
@@ -413,17 +414,17 @@ parseTxtChr = P.choice
   , noneOf "\"\\"
   ]
 
-parseChr = withSrc $ do
-  char '\''
-  chr <- parseTxtChr
-  char '\''
-  return $ Num (fromIntegral $ ord chr)
-
 parseTxt = withSrc $ do
   char '"'
   txt <- P.many parseTxtChr
   char '"'
   return $ Txt txt
+
+parseChr = withSrc $ do
+  char '\''
+  chr <- parseTxtChr
+  char '\''
+  return $ Num (fromIntegral $ ord chr)
 
 parseHol = withSrc $ do
   char '?'
