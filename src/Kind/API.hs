@@ -27,12 +27,12 @@ import Debug.Trace
 -- Finds the directory named "book" or "monobook"
 findBookDir :: FilePath -> IO (Maybe FilePath)
 findBookDir dir = do
-  let bookDir = dir </> "book"
+  let kindBookDir = dir </> "kindbook"
   let monoBookDir = dir </> "monobook"
-  isBook <- doesDirectoryExist bookDir
+  isKindBook <- doesDirectoryExist kindBookDir
   isMonoBook <- doesDirectoryExist monoBookDir
-  if isBook
-    then return $ Just bookDir
+  if isKindBook
+    then return $ Just kindBookDir
     else if isMonoBook
       then return $ Just monoBookDir
       else if takeDirectory dir == dir
