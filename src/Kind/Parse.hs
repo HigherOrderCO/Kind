@@ -433,13 +433,13 @@ parseTxtChr = P.choice
   ]
 
 parseTxt = withSrc $ do
-  char_skp '"'
+  char_end '"'
   txt <- P.many parseTxtChr
   char_end '"'
   return $ Txt txt
 
 parseChr = withSrc $ do
-  char_skp '\''
+  char_end '\''
   chr <- parseTxtChr
   char_end '\''
   return $ Num (fromIntegral $ ord chr)
