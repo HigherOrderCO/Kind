@@ -62,7 +62,6 @@ name_end :: Parser String
 name_end = do
   head <- name_init
   tail <- P.many name_char
-  skip
   return (head : tail)
 
 name_skp :: Parser String
