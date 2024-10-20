@@ -154,7 +154,7 @@ apiPrintLogs :: State -> IO ()
 apiPrintLogs (State book fill susp logs) = do
   forM_ logs $ \log -> do
     result <- infoShow book fill log
-    putStrLn result
+    putStr result
 
 -- Prints a warning if there are unsolved metas
 apiPrintWarn :: Term -> State -> IO ()

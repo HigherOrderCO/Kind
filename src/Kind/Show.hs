@@ -69,17 +69,18 @@ termShower small term dep =
       Mat cse ->
         let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ termShower small cbod dep) cse)
         in concat ["λ{ ", cse', " }"]
-      Ref nam -> concat ["@", nam]
+      -- Ref nam -> concat ["@", nam]
+      Ref nam -> concat [nam]
       Let nam val bod ->
         let nam' = nam
             val' = termShower small val dep
             bod' = termShower small (bod (Var nam dep)) (dep + 1)
-        in concat ["let " , nam' , " = " , val' , "; " , bod']
+        in concat ["let " , nam' , " = " , val' , " " , bod']
       Use nam val bod ->
         let nam' = nam
             val' = termShower small val dep
             bod' = termShower small (bod (Var nam dep)) (dep + 1)
-        in concat ["use " , nam' , " = " , val' , "; " , bod']
+        in concat ["use " , nam' , " = " , val' , " " , bod']
       Set -> "*"
       U32 -> "U32"
       Num val ->
@@ -189,7 +190,7 @@ infoShow book fill info = case info of
         let highlighted = highlightError (iniLine, iniCol) (endLine, endCol) content
         -- FIXME: remove this cropping when the parse locations are fixed to exclude suffix trivia
         return (canonPath, unlines $ take 8 $ lines highlighted)
-      Nothing -> return ("unknown_file", "Could not read source file.")
+      Nothing -> return ("unknown_file", "Could not read source file.\n")
     let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
     return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
   Solve nam val dep ->
@@ -206,7 +207,7 @@ readSourceFile file = do
     Right content -> return content
     Left _ -> do
       result2 <- try (readFile (file ++ "/_.kind2")) :: IO (Either IOError String)
-      return $ either (const "Could not read source file.") id result2
+      return $ either (const "Could not read source file.\n") id result2
 
 resolveToAbsolutePath :: FilePath -> IO FilePath
 resolveToAbsolutePath relativePath = do

@@ -17,15 +17,15 @@ import Debug.Trace
 -- Type-Checking
 -- -------------
 
-infer :: Term -> Int -> Env Term
-infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep where
-  go (All nam inp bod) dep = do
+infer :: Maybe Cod -> Term -> Int -> Env Term
+infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src term dep where
+  go src (All nam inp bod) dep = do
     envSusp (Check Nothing inp Set dep)
     envSusp (Check Nothing (bod (Ann False (Var nam dep) inp)) Set (dep + 1))
     return Set
 
-  go (App fun arg) dep = do
-    ftyp <- infer fun dep
+  go src (App fun arg) dep = do
+    ftyp <- infer src fun dep
     book <- envGetBook
     fill <- envGetFill
     case reduce book fill 2 ftyp of
@@ -33,123 +33,124 @@ infer term dep = debug ("infer: " ++ termShower False term dep) $ go term dep wh
         envSusp (Check Nothing arg ftyp_inp dep)
         return $ ftyp_bod arg
       otherwise -> do
-        envLog (Error Nothing (Hol "function" []) ftyp (App fun arg) dep)
+        envLog (Error src (Ref "Function") ftyp (App fun arg) dep)
         envFail
 
-  go (Ann chk val typ) dep = do
+  go src (Ann chk val typ) dep = do
     if chk then do
+      -- check Nothing typ Set dep
       check Nothing val typ dep
     else do
       return ()
     return typ
 
-  go (Slf nam typ bod) dep = do
+  go src (Slf nam typ bod) dep = do
     envSusp (Check Nothing (bod (Ann False (Var nam dep) typ)) Set (dep + 1))
     return Set
 
-  go (Ins val) dep = do
-    vtyp <- infer val dep
+  go src (Ins val) dep = do
+    vtyp <- infer src val dep
     book <- envGetBook
     fill <- envGetFill
     case reduce book fill 2 vtyp of
       (Slf vtyp_nam vtyp_typ vtyp_bod) -> do
         return $ vtyp_bod (Ins val)
       otherwise -> do
-        envLog (Error Nothing (Hol "self-type" []) vtyp (Ins val) dep)
+        envLog (Error src (Ref "Self") vtyp (Ins val) dep)
         envFail
 
-  go (Dat scp cts) dep = do
+  go src (Dat scp cts) dep = do
     forM_ cts $ \ (Ctr _ tele) -> do
       checkTele Nothing tele Set dep
     return Set
 
-  go (Ref nam) dep = do
+  go src (Ref nam) dep = do
     book <- envGetBook
     case M.lookup nam book of
-      Just val -> infer val dep
+      Just val -> infer src val dep
       Nothing  -> do
-        envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) dep)
+        envLog (Error src (Ref "Term") (Ref "undefined") (Ref nam) dep)
         envFail
 
-  go Set dep = do
+  go src Set dep = do
     return Set
 
-  go U32 dep = do
+  go src U32 dep = do
     return Set
 
-  go (Num num) dep = do
+  go src (Num num) dep = do
     return U32
 
-  go (Op2 opr fst snd) dep = do
+  go src (Op2 opr fst snd) dep = do
     envSusp (Check Nothing fst U32 dep)
     envSusp (Check Nothing snd U32 dep)
     return U32
 
-  go (Swi zer suc) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_switch" []) (Swi zer suc) dep)
+  go src (Swi zer suc) dep = do
+    envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
     envFail
 
-  go (Let nam val bod) dep = do
-    typ <- infer val dep
-    infer (bod (Ann False (Var nam dep) typ)) dep
+  go src (Let nam val bod) dep = do
+    typ <- infer src val dep
+    infer src (bod (Ann False (Var nam dep) typ)) dep
 
-  go (Use nam val bod) dep = do
-    infer (bod val) dep
+  go src (Use nam val bod) dep = do
+    infer src (bod val) dep
 
-  go (Con nam arg) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_constructor" []) (Con nam arg) dep)
+  go src (Con nam arg) dep = do
+    envLog (Error src (Ref "annotation") (Ref "constructor") (Con nam arg) dep)
     envFail
 
-  go (Mat cse) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_match" []) (Mat cse) dep)
+  go src (Mat cse) dep = do
+    envLog (Error src (Ref "annotation") (Ref "match") (Mat cse) dep)
     envFail
 
-  go (Lam nam bod) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_lambda" []) (Lam nam bod) dep)
+  go src (Lam nam bod) dep = do
+    envLog (Error src (Ref "annotation") (Ref "lambda") (Lam nam bod) dep)
     envFail
 
-  go (Hol nam ctx) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_hole" []) (Hol nam ctx) dep)
+  go src (Hol nam ctx) dep = do
+    envLog (Error src (Ref "annotation") (Ref "hole") (Hol nam ctx) dep)
     envFail
 
-  go (Met uid spn) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_meta" []) (Met uid spn) dep)
+  go src (Met uid spn) dep = do
+    envLog (Error src (Ref "annotation") (Ref "meta") (Met uid spn) dep)
     envFail
 
-  go (Var nam idx) dep = do
-    envLog (Error Nothing (Hol "type_annotation" []) (Hol "untyped_variable" []) (Var nam idx) dep)
+  go src (Var nam idx) dep = do
+    envLog (Error src (Ref "annotation") (Ref "variable") (Var nam idx) dep)
     envFail
 
-  go (Src src val) dep = do
-    infer val dep
+  go _ (Src src val) dep = do
+    infer (Just src) val dep
 
-  go tm@(Txt txt) dep = do
+  go src tm@(Txt txt) dep = do
     book <- envGetBook
     fill <- envGetFill
-    go (reduce book fill 2 tm) dep
+    go src (reduce book fill 2 tm) dep
 
-  go tm@(Nat val) dep = do
+  go src tm@(Nat val) dep = do
     book <- envGetBook
     fill <- envGetFill
-    go (reduce book fill 2 tm) dep
+    go src (reduce book fill 2 tm) dep
 
-  go tm@(Lst lst) dep = do
+  go src tm@(Lst lst) dep = do
     book <- envGetBook
     fill <- envGetFill
-    go (reduce book fill 2 tm) dep
+    go src (reduce book fill 2 tm) dep
 
 check :: Maybe Cod -> Term -> Term -> Int -> Env ()
-check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    :: " ++ termShower True typ dep) $ go src val typ dep where
+check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :: " ++ termShower True typ dep) $ go src val typ dep where
 
   -- Case-Of: `(λ{...} x)`. NOTE: this is probably very slow due to 'replace'
   go src (App (Src _ val) arg) typx dep = go src (App val arg) typx dep
   go src (App (Mat cse) arg) typx dep = do
-    arg_ty <- infer arg dep
-    infer (App (Ann True (Mat cse) (All "x" arg_ty (\x -> replace arg x typx dep))) arg) dep
+    arg_ty <- infer src arg dep
+    infer src (App (Ann True (Mat cse) (All "x" arg_ty (\x -> replace arg x typx dep))) arg) dep
     return ()
   go src (App (Swi zer suc) arg) typx dep = do
-    arg_ty <- infer arg dep
-    infer (App (Ann True (Swi zer suc) (All "x" arg_ty (\x -> replace arg x typx dep))) arg) dep
+    arg_ty <- infer src arg dep
+    infer src (App (Ann True (Swi zer suc) (All "x" arg_ty (\x -> replace arg x typx dep))) arg) dep
     return ()
 
   go src (Lam nam bod) typx dep = do
@@ -160,7 +161,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
         let ann = Ann False (Var nam dep) typ_inp
         check Nothing (bod ann) (typ_bod ann) (dep + 1)
       otherwise -> do
-        infer (Lam nam bod) dep
+        infer src (Lam nam bod) dep
         return ()
 
   go src (Ins val) typx dep = do
@@ -170,7 +171,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
       Slf typ_nam typ_typ typ_bod -> do
         check Nothing val (typ_bod (Ins val)) dep
       _ -> do
-        infer (Ins val) dep
+        infer src (Ins val) dep
         return ()
 
   go src val@(Con nam arg) typx dep = do
@@ -186,7 +187,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
             envLog (Error src (Hol ("constructor_not_found:"++nam) []) (Hol "unknown_type" []) (Con nam arg) dep)
             envFail
       _ -> do
-        infer (Con nam arg) dep
+        infer src (Con nam arg) dep
         return ()
 
   go src (Mat cse) typx dep = do
@@ -225,10 +226,10 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
                   envLog (Error src (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
                   envFail
           _ -> do
-            infer (Mat cse) dep
+            infer src (Mat cse) dep
             return ()
       _ -> do
-        infer (Mat cse) dep
+        infer src (Mat cse) dep
         return ()
 
   go src (Swi zer suc) typx dep = do
@@ -247,14 +248,14 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
             let sucTyp = All "n" U32 (\x -> typ_bod (Op2 ADD (Num 1) x))
             check src suc sucTyp dep
           _ -> do
-            infer (Swi zer suc) dep
+            infer src (Swi zer suc) dep
             return ()
       _ -> do
-        infer (Swi zer suc) dep
+        infer src (Swi zer suc) dep
         return ()
 
   go src (Let nam val bod) typx dep = do
-    typ <- infer val dep
+    typ <- infer src val dep
     check src (bod (Ann False (Var nam dep) typ)) typx dep
 
   go src (Use nam val bod) typx dep = do
@@ -285,6 +286,7 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
   go src (Ann chk val typ) typx dep = do
     cmp src val typ typx dep
     if chk then do
+      -- check src typ Set dep
       check src val typ dep
     else do
       return ()
@@ -293,8 +295,8 @@ check src val typ dep = debug ("check: " ++ termShower True val dep ++ "\n    ::
     check (Just src) val typx dep
 
   go src term typx dep = do
-    infer <- infer term dep
-    cmp src term typx infer dep
+    inferred <- infer src term dep
+    cmp src term typx inferred dep
 
   cmp src term expected detected dep = do
     equal <- equal expected detected dep
@@ -351,14 +353,20 @@ extractEqualities (Dat as _) (Dat bs _) dep = zip as bs where
 extractEqualities a          b          dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
 
 doCheck :: Term -> Env ()
-doCheck (Ann _ val typ) = check Nothing val typ 0 >> return ()
-doCheck (Src _ val)     = doCheck val
-doCheck (Ref nam)       = doCheckRef nam
-doCheck term            = infer term 0 >> return ()
+doCheck (Ann _ val typ) = do
+  check Nothing typ Set 0
+  check Nothing val typ 0
+  return ()
+doCheck (Src _ val) = do
+  doCheck val
+doCheck (Ref nam) = do
+  doCheckRef nam
+doCheck term = do
+  infer Nothing term 0 >> return ()
 
 doCheckRef :: String -> Env ()
 doCheckRef nam = do
   book <- envGetBook
   case M.lookup nam book of
     Just val -> doCheck val
-    Nothing  -> envLog (Error Nothing (Hol "undefined_reference" []) (Hol "unknown_type" []) (Ref nam) 0) >> envFail
+    Nothing  -> envLog (Error Nothing (Ref "Term") (Ref "undefined") (Ref nam) 0) >> envFail

@@ -84,7 +84,7 @@ reduce book fill lv term = red term where
 
   ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
-    Nothing  -> trace ("Undefined reference: " ++ nam) (unsafePerformIO $ exitWith $ ExitFailure 1)
+    Nothing  -> Con "ERR" []
   ref nam = Ref nam
 
   txt []     = red (Con "Nil" [])
