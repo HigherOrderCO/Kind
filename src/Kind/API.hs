@@ -51,13 +51,20 @@ extractName basePath = dropBasePath . dropExtension where
 apiLoad :: FilePath -> Book -> String -> IO (Book, M.Map FilePath [String], M.Map FilePath [String])
 apiLoad basePath book name = do
   if M.member name book
-    then return (book, M.empty, M.empty)
-    else loadFile (basePath </> name ++ ".kind")
+    then do
+      return (book, M.empty, M.empty)
+    else do
+      let dirPath = basePath </> name
+      isDir <- doesDirectoryExist dirPath
+      if isDir
+        then loadFile (dirPath </> takeFileName name ++ ".kind")
+        else loadFile (basePath </> name ++ ".kind")
   where
     loadFile filePath = do
       fileExists <- doesFileExist filePath
       if not fileExists
-        then return (book, M.empty, M.empty)
+        then do
+          return (book, M.empty, M.empty)
         else do
           code  <- readFile filePath
           book0 <- doParseBook filePath code
@@ -67,7 +74,8 @@ apiLoad basePath book name = do
           let defs' = M.singleton filePath defs
           let deps' = M.singleton filePath deps
           foldDeps book1 defs' deps' deps filePath
-    foldDeps book defs deps [] _ = return (book, defs, deps)
+    foldDeps book defs deps [] _ = do
+      return (book, defs, deps)
     foldDeps book defs deps (dep:rest) originalFile = do
       (book', defs', deps') <- apiLoad basePath book dep
       foldDeps book' (M.union defs defs') (M.union deps deps') rest originalFile
