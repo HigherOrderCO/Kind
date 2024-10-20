@@ -559,7 +559,7 @@ parseUses = P.many $ P.try $ do
   long <- name_skp
   string_skp "as "
   short <- name_skp
-  return (short, long)
+  return (short ++ "/", long ++ "/")
 
 expandUses :: Uses -> String -> String
 expandUses uses name =
