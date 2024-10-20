@@ -416,7 +416,7 @@ parseTxtChr :: Parser Char
 parseTxtChr = P.choice
   [ P.try $ do
       char_skp '\\'
-      c <- oneOf "\\\"nrtbf"
+      c <- oneOf "\\\"nrtbf0"
       return $ case c of
         '\\' -> '\\'
         '"'  -> '"'
@@ -425,6 +425,7 @@ parseTxtChr = P.choice
         't'  -> '\t'
         'b'  -> '\b'
         'f'  -> '\f'
+        '0'  -> '\0'
   , P.try $ do
       string_skp "\\u"
       code <- P.count 4 P.hexDigit
