@@ -5,7 +5,7 @@ module Kind.Parse where
 import Data.Char (ord)
 import Data.Functor.Identity (Identity)
 import Data.List (intercalate, isPrefixOf, uncons, find)
-import Data.Maybe (catMaybes, fromJust)
+import Data.Maybe (catMaybes, fromJust, isJust)
 import Data.Set (toList, fromList)
 import Debug.Trace
 import Highlight (highlightError, highlight)
@@ -23,7 +23,7 @@ import qualified Data.Map.Strict as M
 import qualified Text.Parsec as P
 
 type Uses     = [(String, String)]
-type PState   = (String, Uses)
+type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
 data Pattern  = PVar String | PCtr String [Pattern] deriving Show
 
@@ -79,7 +79,7 @@ noneOf s = P.noneOf s
 -- Main parsing functions
 doParseTerm :: String -> String -> IO Term
 doParseTerm filename input =
-  case P.runParser (parseTerm <* P.eof) (filename, []) filename input of
+  case P.runParser (parseTerm <* P.eof) (filename, 0, []) filename input of
     Left err -> do
       showParseError filename input err
       die ""
@@ -87,7 +87,7 @@ doParseTerm filename input =
 
 doParseUses :: String -> String -> IO Uses
 doParseUses filename input =
-  case P.runParser (parseUses <* P.eof) (filename, []) filename input of
+  case P.runParser (parseUses <* P.eof) (filename, 0, []) filename input of
     Left err -> do
       showParseError filename input err
       die ""
@@ -98,9 +98,9 @@ doParseBook filename input = do
   let parser = do
         skip
         uses <- parseUses
-        setState (filename, uses)
+        setState (filename, 0, uses)
         parseBook <* P.eof
-  case P.runParser parser (filename, []) filename input of
+  case P.runParser parser (filename, 0, []) filename input of
     Left err -> do
       showParseError filename input err
       die ""
@@ -132,7 +132,7 @@ withSrc parser = do
   ini <- getPosition
   val <- parser
   end <- getPosition
-  (nam, _) <- P.getState
+  (nam, _, _) <- P.getState
   skip
   let iniLoc = Loc nam (sourceLine ini) (sourceColumn ini)
   let endLoc = Loc nam (sourceLine end) (sourceColumn end)
@@ -352,7 +352,7 @@ parseMat = withSrc $ do
 
 parseRef = withSrc $ do
   name <- name_end
-  (_, uses) <- P.getState
+  (_, _, uses) <- P.getState
   let name' = expandUses uses name
   return $ case name' of
     "U32" -> U32
@@ -514,6 +514,7 @@ parseBook = M.fromList <$> P.many parseDef
 
 parseDef :: Parser (String, Term)
 parseDef = do
+  numb <- P.optionMaybe $ char_skp '#'
   name <- name_skp
   typ <- P.optionMaybe $ do
     char_skp ':'
@@ -536,12 +537,16 @@ parseDef = do
         return
           -- $ trace ("DONE: " ++ termShow flat)
           flat
+    , do
+        return (Con "Refl" [])
     ]
-  (_, uses) <- P.getState
-  let name' = expandUses uses name
+  (filename, count, uses) <- P.getState
+  let name0 = expandUses uses name
+  let name1 = if isJust numb then name0 ++ "#" ++ show count else name0
+  P.setState (filename, if isJust numb then count + 1 else count, uses)
   case typ of
-    Nothing -> return (name', val)
-    Just t  -> return (name', bind (genMetas (Ann False val t)) [])
+    Nothing -> return (name1, val)
+    Just t  -> return (name1, bind (genMetas (Ann False val t)) [])
 
 parsePattern :: Parser Pattern
 parsePattern = do
@@ -583,7 +588,7 @@ parseDo = withSrc $ do
   monad <- name_skp
   char_skp '{'
   skip
-  (_, uses) <- P.getState
+  (_, _, uses) <- P.getState
   body <- parseStmt (expandUses uses monad)
   char_end '}'
   return body
@@ -614,7 +619,7 @@ parseDoAskMch monad = do
   char_skp '='
   val <- parseTerm
   next <- parseStmt monad
-  (_, uses) <- P.getState
+  (_, _, uses) <- P.getState
   return $ App
     (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
     (Lam "got" (\got ->
@@ -635,7 +640,7 @@ parseDoAskValNamed monad = do
     return nam
   exp <- parseTerm
   next <- parseStmt monad
-  (_, uses) <- P.getState
+  (_, _, uses) <- P.getState
   return $ App
     (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
     (Lam nam (\_ -> next))
@@ -645,7 +650,7 @@ parseDoAskValAnon monad = do
   P.try $ string_skp "ask "
   exp <- parseTerm
   next <- parseStmt monad
-  (_, uses) <- P.getState
+  (_, _, uses) <- P.getState
   return $ App
     (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) exp)
     (Lam "_" (\_ -> next))
@@ -654,7 +659,7 @@ parseDoRet :: String -> Parser Term
 parseDoRet monad = do
   P.try $ string_skp "ret "
   exp <- parseTerm
-  (_, uses) <- P.getState
+  (_, _, uses) <- P.getState
   return $ App (App (Ref (monad ++ "/pure")) (Met 0 [])) exp
 
 parseDoFor :: String -> Parser Term

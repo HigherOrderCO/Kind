@@ -13,6 +13,8 @@ import System.Directory (canonicalizePath)
 import Control.Exception (try)
 import Data.Word
 
+import Control.Applicative ((<|>))
+
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
@@ -107,7 +109,7 @@ termShower small term dep =
         else concat ["!", termShower small val dep]
 
 sugar :: Term -> Maybe String
-sugar term = sugarString term
+sugar term = sugarString term <|> sugarNat term
 
 sugarString :: Term -> Maybe String
 sugarString (Con "View" [(_, term)]) = do
@@ -121,6 +123,13 @@ sugarStringGo (Con "Cons" [(_, Num head), (_, tail)]) = do
   rest <- sugarStringGo tail
   return $ toEnum (fromIntegral head) : rest
 sugarStringGo _ = Nothing
+
+sugarNat :: Term -> Maybe String
+sugarNat (Con "Zero" []) = Just "#0"
+sugarNat term = go 0 term where
+  go n (Con "Succ" [(_, pred)]) = go (n + 1) pred
+  go n (Con "Zero" []) = Just $ "#" ++ show n
+  go _ _ = Nothing
 
 -- CHANGED: Added teleShower function
 teleShower :: Bool -> Tele -> Int -> String
