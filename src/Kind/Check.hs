@@ -33,7 +33,7 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
         envSusp (Check Nothing arg ftyp_inp dep)
         return $ ftyp_bod arg
       otherwise -> do
-        envLog (Error src (Ref "Function") ftyp (App fun arg) dep)
+        envLog (Error src (Ref "function") ftyp (App fun arg) dep)
         envFail
 
   go src (Ann chk val typ) dep = do
@@ -69,7 +69,7 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
     case M.lookup nam book of
       Just val -> infer src val dep
       Nothing  -> do
-        envLog (Error src (Ref "Term") (Ref "undefined") (Ref nam) dep)
+        envLog (Error src (Ref "expression") (Ref "undefined") (Ref nam) dep)
         envFail
 
   go src Set dep = do
@@ -369,4 +369,4 @@ doCheckRef nam = do
   book <- envGetBook
   case M.lookup nam book of
     Just val -> doCheck val
-    Nothing  -> envLog (Error Nothing (Ref "Term") (Ref "undefined") (Ref nam) 0) >> envFail
+    Nothing  -> envLog (Error Nothing (Ref "expression") (Ref "undefined") (Ref nam) 0) >> envFail

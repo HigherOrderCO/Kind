@@ -180,9 +180,9 @@ infoShow book fill info = case info of
         ctx' = contextShow book fill ctx dep
     in return $ concat ["\x1b[1mGOAL\x1b[0m ", nam', " : ", typ', "\n", ctx']
   Error src exp det bad dep -> do
-    let exp' = concat ["- expected: \x1b[32m", termShower True exp dep, "\x1b[0m"]
-        det' = concat ["- detected: \x1b[31m", termShower True det dep, "\x1b[0m"]
-        bad' = concat ["- bad_term: \x1b[2m", termShower True bad dep, "\x1b[0m"]
+    let exp' = concat ["- expected : \x1b[32m", termShower True exp dep, "\x1b[0m"]
+        det' = concat ["- detected : \x1b[31m", termShower True det dep, "\x1b[0m"]
+        bad' = concat ["- origin   : \x1b[2m", termShower True bad dep, "\x1b[0m"]
     (file, text) <- case src of
       Just (Cod (Loc fileName iniLine iniCol) (Loc _ endLine endCol)) -> do
         canonPath <- resolveToAbsolutePath fileName
