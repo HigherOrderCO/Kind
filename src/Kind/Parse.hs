@@ -797,7 +797,7 @@ parseDoFor monad = do
         char_skp '}'
         body <- parseStmt monad
         return (Nothing, nam, lst, loop, body) ]
-  let f0 = Ref "Base/List/for-given"
+  let f0 = Ref "List/for"
   let f1 = App f0 (Met 0 [])
   let f2 = App f1 (Ref (monad ++ "/Monad"))
   let f3 = App f2 (Met 0 [])
