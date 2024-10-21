@@ -118,7 +118,9 @@ identical a b dep = do
   go (Txt aTxt) (Txt bTxt) dep =
     return (aTxt == bTxt)
   go (Lst aLst) (Lst bLst) dep =
-    and <$> zipWithM (\a b -> identical a b dep) aLst bLst
+    if length aLst == length bLst
+      then and <$> zipWithM (\a b -> identical a b dep) aLst bLst
+      else return False
   go (Nat aVal) (Nat bVal) dep =
     return (aVal == bVal)
   go (Src aSrc aVal) b dep =
