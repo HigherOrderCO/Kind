@@ -5,12 +5,8 @@ module Kind.Show where
 import Prelude hiding (EQ, LT, GT)
 
 import Kind.Type
-import Kind.Reduce
 
 import Debug.Trace
-import System.IO (readFile)
-import System.Directory (canonicalizePath)
-import Control.Exception (try)
 import Data.Word
 
 import Control.Applicative ((<|>))
@@ -18,9 +14,6 @@ import Control.Applicative ((<|>))
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 
-import Highlight (highlightError)
-
-import System.Console.ANSI
 
 -- Stringification
 -- ---------------
@@ -195,55 +188,3 @@ operShow OR  = "|"
 operShow XOR = "^"
 operShow LSH = "<<"
 operShow RSH = ">>"
-
-contextShow :: Book -> Fill -> [Term] -> Int -> String
-contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) ctx
-
-contextShowAnn :: Book -> Fill -> Term -> Int -> String
-contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
-contextShowAnn book fill (Src _ val)       dep = contextShowAnn book fill val dep
-contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
-
--- normal :: Book -> Fill -> Int -> Term -> Int -> Term
-
-infoShow :: Book -> Fill -> Info -> IO String
-infoShow book fill info = case info of
-  Found nam typ ctx dep ->
-    let nam' = concat ["?", nam]
-        typ' = termShower True (normal book fill 0 typ dep) dep
-        ctx' = contextShow book fill ctx dep
-    in return $ concat ["\x1b[1mGOAL\x1b[0m ", nam', " : ", typ', "\n", ctx']
-  Error src exp det bad dep -> do
-    let exp' = concat ["- expected : \x1b[32m", termShower True (normal book fill 0 exp dep) dep, "\x1b[0m"]
-        det' = concat ["- detected : \x1b[31m", termShower True (normal book fill 0 det dep) dep, "\x1b[0m"]
-        bad' = concat ["- origin   : \x1b[2m", termShower True (normal book fill 0 bad dep) dep, "\x1b[0m"]
-    (file, text) <- case src of
-      Just (Cod (Loc fileName iniLine iniCol) (Loc _ endLine endCol)) -> do
-        canonPath <- resolveToAbsolutePath fileName
-        content   <- readSourceFile canonPath
-        let highlighted = highlightError (iniLine, iniCol) (endLine, endCol) content
-        -- FIXME: remove this cropping when the parse locations are fixed to exclude suffix trivia
-        return (canonPath, unlines $ take 8 $ lines highlighted)
-      Nothing -> return ("unknown_file", "Could not read source file.\n")
-    let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
-    return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
-  Solve nam val dep ->
-    return $ concat ["SOLVE: _", show nam, " = ", termShower True val dep]
-  Vague nam ->
-    return $ concat ["VAGUE: _", nam]
-  Print val dep ->
-    return $ termShower True val dep
-
-readSourceFile :: FilePath -> IO String
-readSourceFile file = do
-  result <- try (readFile file) :: IO (Either IOError String)
-  case result of
-    Right content -> return content
-    Left _ -> do
-      result2 <- try (readFile (file ++ "/_.kind2")) :: IO (Either IOError String)
-      return $ either (const "Could not read source file.\n") id result2
-
-resolveToAbsolutePath :: FilePath -> IO FilePath
-resolveToAbsolutePath relativePath = do
-    absPath <- canonicalizePath relativePath
-    return absPath

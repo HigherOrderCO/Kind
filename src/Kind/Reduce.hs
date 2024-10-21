@@ -6,6 +6,7 @@ import Prelude hiding (EQ, LT, GT)
 import Data.Bits ( (.&.), (.|.), xor, shiftL, shiftR )
 import Data.Char (ord)
 import Debug.Trace
+import Kind.Show
 import Kind.Type
 
 import qualified Data.Map.Strict as M
@@ -49,7 +50,7 @@ reduce book fill lv term = red term where
     Just cx -> red (foldl App cx (map snd carg))
     Nothing -> case lookup "_" cse of
       Just df -> red (App df (Con cnam carg))
-      Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match and no default case '_' provided."
+      Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match and no default case '_' provided :" ++ (termShower True (Mat cse) 0)
   mat cse arg = App (Mat cse) arg
 
   swi zer suc (Num 0)             = red zer
