@@ -112,7 +112,7 @@ termShower small term dep =
         else concat ["!", termShower small val dep]
 
 pretty :: Term -> Maybe String
-pretty term = prettyString term <|> prettyNat term <|> prettyList term
+pretty term = prettyString term <|> prettyNat term <|> prettyList term <|> prettyEqual term
 
 prettyString :: Term -> Maybe String
 prettyString (Con "View" [(_, term)]) = do
