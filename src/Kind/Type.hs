@@ -65,6 +65,9 @@ data Term
   -- Unification Metavar
   | Met Int [Term]
 
+  -- Logging
+  | Log Term Term
+
   -- Variable
   | Var String Int
 

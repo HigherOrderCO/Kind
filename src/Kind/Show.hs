@@ -106,6 +106,10 @@ termShower small term dep =
       Hol nam ctx -> concat ["?" , nam]
       -- Met uid spn -> concat ["_", show uid, "[", strSpn spn dep, " ]"]
       Met uid spn -> concat ["_", show uid]
+      Log msg nxt -> 
+        let msg' = termShower small msg dep
+            nxt' = termShower small nxt dep
+        in concat ["log ", msg', " ", nxt']
       Var nam idx -> nam
       Src src val -> if small
         then termShower small val dep

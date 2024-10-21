@@ -194,6 +194,7 @@ getDeps term = case term of
   Src _ val     -> getDeps val
   Hol _ args    -> concatMap getDeps args
   Met _ args    -> concatMap getDeps args
+  Log msg nxt   -> getDeps msg ++ getDeps nxt
   Var _ _       -> []
   Set           -> []
   U32           -> []

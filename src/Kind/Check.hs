@@ -117,6 +117,9 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
     envLog (Error src (Ref "annotation") (Ref "meta") (Met uid spn) dep)
     envFail
 
+  go src (Log msg nxt) dep =
+    go src nxt dep
+
   go src (Var nam idx) dep = do
     envLog (Error src (Ref "annotation") (Ref "variable") (Var nam idx) dep)
     envFail
@@ -267,6 +270,9 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
 
   go src (Met uid spn) typx dep = do
     return ()
+
+  go src (Log msg nxt) typx dep = do
+    go src nxt typx dep
 
   go src tm@(Txt txt) typx dep = do
     book <- envGetBook

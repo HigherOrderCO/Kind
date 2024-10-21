@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Equal where
 
 import Control.Monad (zipWithM)
@@ -100,6 +102,10 @@ identical a b dep = do
     case IM.lookup bUid fill of
       Just sol -> identical a sol dep
       Nothing  -> unify bUid bSpn a dep
+  go (Log aMsg aNxt) b dep =
+    identical aNxt b dep
+  go a (Log bMsg bNxt) dep =
+    identical a bNxt dep
   go (Hol aNam aCtx) b dep =
     return True
   go a (Hol bNam bCtx) dep =
@@ -298,6 +304,10 @@ occur book fill uid term dep = go term dep where
     let o_val = go val dep
         o_bod = go (bod (Var nam dep)) (dep + 1)
     in o_val || o_bod
+  go (Log msg nxt) dep =
+    let o_msg = go msg dep
+        o_nxt = go nxt dep
+    in o_msg || o_nxt
   go (Hol nam ctx) dep =
     False
   go (Op2 opr fst snd) dep =
@@ -380,6 +390,11 @@ same (Met aUid aSpn) b dep =
   False
 same a (Met bUid bSpn) dep =
   False
+-- TODO: Log
+same (Log aMsg aNxt) b dep =
+  same aNxt b dep
+same a (Log bMsg bNxt) dep =
+  same a bNxt dep
 same (Hol aNam aCtx) b dep =
   True
 same a (Hol bNam bCtx) dep =
@@ -446,6 +461,7 @@ subst lvl neo term = go term where
   go (Let nam val bod) = Let nam (go val) (\x -> go (bod x))
   go (Use nam val bod) = Use nam (go val) (\x -> go (bod x))
   go (Met uid spn)     = Met uid (map go spn)
+  go (Log msg nxt)     = Log (go msg) (go nxt)
   go (Hol nam ctx)     = Hol nam (map go ctx)
   go Set               = Set
   go U32               = U32
@@ -478,6 +494,7 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Let nam val bod)  = Let nam (replace old neo val dep) (\x -> replace old neo (bod x) (dep+1))
   go (Use nam val bod)  = Use nam (replace old neo val dep) (\x -> replace old neo (bod x) (dep+1))
   go (Met uid spn)      = Met uid (map (\x -> replace old neo x (dep+1)) spn)
+  go (Log msg nxt)      = Log (replace old neo msg dep) (replace old neo nxt dep)
   go (Hol nam ctx)      = Hol nam (map (\x -> replace old neo x (dep+1)) ctx)
   go Set                = Set
   go U32                = U32

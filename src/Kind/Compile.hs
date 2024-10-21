@@ -1,3 +1,5 @@
+-- //./Type.hs//
+
 module Kind.Compile where
 
 import Kind.Type
@@ -76,6 +78,10 @@ termToJS term dep = case term of
     "null"
   Met _ _ ->
     "null"
+  Log msg nxt ->
+    let msg' = termToJS msg dep
+        nxt' = termToJS nxt dep
+    in concat ["(console.log(", msg', "), ", nxt', ")"]
   Var nam idx ->
     nameToJS nam ++ "$" ++ show idx
   Src _ val ->

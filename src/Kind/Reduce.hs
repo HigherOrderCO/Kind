@@ -35,6 +35,7 @@ reduce book fill lv term = red term where
   red (Nat val)         = nat val
   red (Src src val)     = red val
   red (Met uid spn)     = met uid spn
+  red (Log msg nxt)     = log msg nxt
   red val               = val
 
   app (Ref nam)     arg | lv > 0 = app (ref nam) arg
@@ -96,6 +97,18 @@ reduce book fill lv term = red term where
   nat 0 = Con "Zero" []
   nat n = Con "Succ" [(Nothing, Nat (n - 1))]
 
+  log msg nxt = logMsg book fill lv msg nxt ""
+
+-- Logging
+-- -------
+
+logMsg :: Book -> Fill -> Int -> Term -> Term -> String -> Term
+logMsg book fill lv msg nxt txt = case (reduce book fill lv msg) of
+  Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
+    Num chr -> logMsg book fill lv tail nxt (txt ++ [toEnum (fromIntegral chr)])
+  Con "Nil" [] ->
+    trace txt nxt
+  _ -> nxt
 
 -- Normalization
 -- -------------
@@ -169,6 +182,10 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_val = normal book fill lv val dep in
     Src src nf_val
   go (Met uid spn) dep = Met uid spn -- TODO: normalize spine
+  go (Log msg nxt) dep =
+    let nf_msg = normal book fill lv msg dep in
+    let nf_nxt = normal book fill lv nxt dep in
+    Log nf_msg nf_nxt
 
 normalTele :: Book -> Fill -> Int -> Tele -> Int -> Tele
 normalTele book fill lv tele dep = case tele of
@@ -252,6 +269,10 @@ bind (Lst lst) ctx =
 bind (Nat val) ctx = Nat val
 bind (Hol nam ctxs) ctx = Hol nam (reverse (map snd ctx))
 bind (Met uid spn) ctx = Met uid []
+bind (Log msg nxt) ctx =
+  let msg' = bind msg ctx in
+  let nxt' = bind nxt ctx in
+  Log msg' nxt'
 bind (Var nam idx) ctx =
   case lookup nam ctx of
     Just x  -> x
@@ -312,6 +333,17 @@ genMetasGo (Use nam val bod) c =
 genMetasGo (Met _ spn) c = 
   let (spn', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) spn
   in (Met c1 spn', c1 + 1)
+genMetasGo (Op2 opr fst snd) c = 
+  let (fst', c1) = genMetasGo fst c
+      (snd', c2) = genMetasGo snd c1
+  in (Op2 opr fst' snd', c2)
+genMetasGo (Lst lst) c = 
+  let (lst', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) lst
+  in (Lst lst', c1)
+genMetasGo (Log msg nxt) c = 
+  let (msg', c1) = genMetasGo msg c
+      (nxt', c2) = genMetasGo nxt c1
+  in (Log msg' nxt', c2)
 genMetasGo (Hol nam ctx) c = 
   let (ctx', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) ctx
   in (Hol nam ctx', c1)
