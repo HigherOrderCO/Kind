@@ -642,35 +642,19 @@ parseDef = P.choice
 parsePattern :: Parser Pattern
 parsePattern = do
   P.choice [
-    parsePatternNat,
-    parsePatternCtr,
-    parsePatternVar
-    ] <* skip
-
-parsePatternNat :: Parser Pattern
-parsePatternNat = do
-  num <- P.try $ do
-    char_skp '#'
-    P.many1 digit
-  let n = read num
-  return $ (foldr (\_ acc -> PCtr "Succ" [acc]) (PCtr "Zero" []) [1..n])
-
-parsePatternCtr :: Parser Pattern
-parsePatternCtr = do
-  name <- P.try $ do
-    char_skp '#'
-    name_skp
-  args <- P.option [] $ P.try $ do
-    char_skp '{'
-    args <- P.many parsePattern
-    char_skp '}'
-    return args
-  return $ (PCtr name args)
-
-parsePatternVar :: Parser Pattern
-parsePatternVar = do
-  name <- P.try $ name_skp
-  return $ (PVar name)
+    do
+      name <- name_skp
+      return (PVar name),
+    do
+      char_skp '#'
+      name <- name_skp
+      args <- P.option [] $ P.try $ do
+        char_skp '{'
+        args <- P.many parsePattern
+        char_skp '}'
+        return args
+      return (PCtr name args)
+    ]
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do
