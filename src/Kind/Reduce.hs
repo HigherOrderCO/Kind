@@ -107,7 +107,7 @@ logMsg book fill lv msg nxt txt = case (reduce book fill lv msg) of
   Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
     Num chr -> logMsg book fill lv tail nxt (txt ++ [toEnum (fromIntegral chr)])
   Con "Nil" [] ->
-    trace txt nxt
+    trace txt (reduce book fill lv nxt)
   _ -> nxt
 
 -- Normalization
