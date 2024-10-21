@@ -207,7 +207,7 @@ parseApp = withSrc $ do
   char_skp '('
   fun <- parseTerm
   args <- P.many $ do
-    P.notFollowedBy (char_skp ')')
+    P.notFollowedBy (char_end ')')
     era <- P.optionMaybe (char_skp '-')
     arg <- parseTerm
     return (era, arg)
@@ -242,17 +242,20 @@ parseDat = withSrc $ do
   scp <- P.many parseTerm
   char_skp ']'
   char_skp '{'
-  cts <- P.many $ P.try $ do
-    char_skp '#'
-    nm <- name_skp
-    tele <- parseTele
-    return $ Ctr nm tele
+  cts <- P.many $ P.try parseDatCtr
   char_end '}'
   typ <- do
     skip
     char_skp ':'
     parseTerm
   return $ Dat scp cts typ
+
+parseDatCtr :: Parser Ctr
+parseDatCtr = do
+  char_skp '#'
+  name <- name_skp
+  tele <- parseTele
+  return $ Ctr name tele
 
 parseTele :: Parser Tele
 parseTele = do
@@ -265,8 +268,13 @@ parseTele = do
       return (nam, typ)
     char_skp '}'
     return fields
-  char_skp ':'
-  ret <- parseTerm
+  ret <- P.choice
+    [ do
+        P.try $ char_skp ':'
+        parseTerm
+    , do
+        return (Met 0 [])
+    ]
   return $ foldr (\(nam, typ) acc -> TExt nam typ (\x -> acc)) (TRet ret) fields
 
 parseCon = withSrc $ do
@@ -360,6 +368,7 @@ parseRef = withSrc $ do
   let name' = expandUses uses name
   return $ case name' of
     "U32" -> U32
+    "Set" -> Set
     "_"   -> Met 0 []
     _     -> Ref name'
 
@@ -517,8 +526,76 @@ parseSuffVal term = return term
 parseBook :: Parser Book
 parseBook = M.fromList <$> P.many parseDef
 
-parseDef :: Parser (String, Term)
-parseDef = do
+{-
+TODO: create a parseADT function. it is a sugar. example:
+
+data Name (p0: P0) (p1: P1) ... : (i0: I0) (i1: I1) -> (Name p0 p1 ... i0 i1 ...) {
+  #Ctr0 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
+  #Ctr1 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
+  ...
+}
+
+this should desugar to:
+
+Name
+: ∀(p0: P0) ∀(p1: P1) ... ∀(i0: I0) ∀(i1: I1) : (Name p0 p1 ... i0 i1 ...) 
+= data[i0 i1] {
+  #Ctr0 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
+  #Ctr1 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
+  ...
+} : (Name p0 p1 ... i0 i1 ...)
+
+reuse existing syntaxes whenever possible.
+implement the parseADT function below:
+
+-}
+
+parseDefADT :: Parser (String, Term)
+parseDefADT = do
+  P.try $ string_skp "data "
+  name <- name_skp
+  params <- P.many $ do
+    P.try $ char_skp '('
+    pname <- name_skp
+    char_skp ':'
+    ptype <- parseTerm
+    char_skp ')'
+    return (pname, ptype)
+  indices <- P.choice 
+    [ do
+        P.try $ char_skp '~'
+        P.many $ do
+          P.notFollowedBy (char_end '{')
+          char_skp '('
+          iname <- name_skp
+          char_skp ':'
+          itype <- parseTerm
+          char_skp ')'
+          return (iname, itype)
+    , return []
+    ]
+  char_skp '{'
+  ctrs <- P.many $ P.try parseDatCtr
+  char_skp '}'
+  let paramTypes = map snd params
+  let indexTypes = map snd indices
+  let paramNames = map fst params
+  let indexNames = map fst indices
+  let allParams  = params ++ indices
+  let selfType   = foldl (\ acc arg -> App acc (Ref arg)) (Ref name) (paramNames ++ indexNames)
+  let typeBody   = foldr (\ (pname, ptype) acc -> All pname ptype (\_ -> acc)) Set allParams
+  let newCtrs    = map (fillCtrRet selfType) ctrs -- fill ctr type when omitted
+  let dataBody   = Dat (map (\ (iNam,iTyp) -> Ref iNam) indices) newCtrs selfType
+  let fullBody   = foldr (\ (pname, _) acc -> Lam pname (\_ -> acc)) dataBody allParams
+  let term       = bind (genMetas (Ann False fullBody typeBody)) []
+  return $ {-trace ("parsed " ++ name ++ " = " ++ (termShower False term 0))-} (name, term)
+  where fillCtrRet  ret (Ctr nm tele)    = Ctr nm (fillTeleRet ret tele)
+        fillTeleRet ret (TRet (Met _ _)) = TRet ret
+        fillTeleRet _   (TRet ret)       = TRet ret
+        fillTeleRet ret (TExt nm tm bod) = TExt nm tm (\x -> fillTeleRet ret (bod x))
+        
+parseDefFun :: Parser (String, Term)
+parseDefFun = do
   numb <- P.optionMaybe $ char_skp '#'
   name <- name_skp
   typ <- P.optionMaybe $ do
@@ -550,8 +627,15 @@ parseDef = do
   let name1 = if isJust numb then name0 ++ "#" ++ show count else name0
   P.setState (filename, if isJust numb then count + 1 else count, uses)
   case typ of
-    Nothing -> return (name1, val)
+    Nothing -> return (name1, bind (genMetas val) [])
     Just t  -> return (name1, bind (genMetas (Ann False val t)) [])
+
+-- TODO: parseDef must try parseDefADT and then parseDefFun
+parseDef :: Parser (String, Term)
+parseDef = P.choice
+  [ parseDefADT
+  , parseDefFun
+  ]
 
 parsePattern :: Parser Pattern
 parsePattern = do
@@ -790,21 +874,14 @@ parseSwiInl = withSrc $ do
     , do
         cases <- parseSwiCases
         char_end '}'
-        -- TODO: this should desugar to a chain of if-then-elses. Example:
-        -- switch x { 24: a 42: b _: d }
-        -- ----------------------------------------------------------------- desugars to
-        -- if (U60.eq x 24) { a } else { if (U60.eq x 42) { b } else { d } }
-        -- Your goal is to desugar the 'cases : [(String,Term)]' object.
-        -- Note that a default case ("_") is mandatory here. If it isn't
-        -- present, we should raise a parse error saying that numeric 
-        -- switch demands a default case. Do it now:
         let defaultCase = find (\(name, _) -> name == "_") cases
         case defaultCase of
-          Nothing -> error "Numeric switch requires a default case"
+          Nothing -> do
+            error "Numeric switch requires a default case"
           Just (_, defaultBody) -> do
             let nonDefaultCases = filter (\(name, _) -> name /= "_") cases
                 buildIfChain [] = defaultBody
-                buildIfChain ((num, body):rest) = App
+                buildIfChain ((num,body):rest) = App
                   (Mat [("True", body), ("False", buildIfChain rest)])
                   (App (App (Ref "Base/U32/eq") x) (Num (read num)))
             return $ buildIfChain nonDefaultCases
