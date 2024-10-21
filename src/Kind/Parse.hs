@@ -429,9 +429,10 @@ parseTxtChr :: Parser Char
 parseTxtChr = P.choice
   [ P.try $ do
       char_skp '\\'
-      c <- oneOf "\\\"nrtbf0"
+      c <- oneOf "\\\"nrtbf0/"
       return $ case c of
         '\\' -> '\\'
+        '/'  -> '/'
         '"'  -> '"'
         'n'  -> '\n'
         'r'  -> '\r'
