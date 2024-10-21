@@ -27,7 +27,7 @@ import System.Console.ANSI
 
 termShower :: Bool -> Term -> Int -> String
 termShower small term dep =
-  case sugar term of
+  case pretty term of
     Just str -> str
     Nothing  -> case term of
       All nam inp bod ->
@@ -108,28 +108,46 @@ termShower small term dep =
         then termShower small val dep
         else concat ["!", termShower small val dep]
 
-sugar :: Term -> Maybe String
-sugar term = sugarString term <|> sugarNat term
+pretty :: Term -> Maybe String
+pretty term = prettyString term <|> prettyNat term <|> prettyList term <|> prettyEqual term
 
-sugarString :: Term -> Maybe String
-sugarString (Con "View" [(_, term)]) = do
-  chars <- sugarStringGo term
+prettyString :: Term -> Maybe String
+prettyString (Con "View" [(_, term)]) = do
+  chars <- prettyStringGo term
   return $ '"' : chars ++ "\""
-sugarString _ = Nothing
+prettyString _ = Nothing
 
-sugarStringGo :: Term -> Maybe String
-sugarStringGo (Con "Nil" []) = Just []
-sugarStringGo (Con "Cons" [(_, Num head), (_, tail)]) = do
-  rest <- sugarStringGo tail
+prettyStringGo :: Term -> Maybe String
+prettyStringGo (Con "Nil" []) = Just []
+prettyStringGo (Con "Cons" [(_, Num head), (_, tail)]) = do
+  rest <- prettyStringGo tail
   return $ toEnum (fromIntegral head) : rest
-sugarStringGo _ = Nothing
+prettyStringGo _ = Nothing
 
-sugarNat :: Term -> Maybe String
-sugarNat (Con "Zero" []) = Just "#0"
-sugarNat term = go 0 term where
+prettyNat :: Term -> Maybe String
+prettyNat (Con "Zero" []) = Just "#0"
+prettyNat term = go 0 term where
   go n (Con "Succ" [(_, pred)]) = go (n + 1) pred
   go n (Con "Zero" []) = Just $ "#" ++ show n
   go _ _ = Nothing
+
+prettyList :: Term -> Maybe String
+prettyList term = do
+  terms <- asList term
+  return $ "[" ++ unwords (map (\x -> termShower True x 0) terms) ++ "]"
+  where asList (Con "Nil" []) = do
+          Just []
+        asList (Con "Cons" [(_, head), (_, tail)]) = do
+          rest <- asList tail
+          return (head : rest)
+        asList _ = Nothing
+
+prettyEqual :: Term -> Maybe String
+prettyEqual (App (App (App (Ref "Equal") t) a) b) = do
+  let a' = termShower True a 0
+      b' = termShower True b 0
+  return $ a' ++ " == " ++ b'
+prettyEqual _ = Nothing
 
 -- CHANGED: Added teleShower function
 teleShower :: Bool -> Tele -> Int -> String
