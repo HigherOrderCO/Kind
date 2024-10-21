@@ -103,12 +103,13 @@ reduce book fill lv term = red term where
 -- -------
 
 logMsg :: Book -> Fill -> Int -> Term -> Term -> String -> Term
-logMsg book fill lv msg nxt txt = case (reduce book fill lv msg) of
-  Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
-    Num chr -> logMsg book fill lv tail nxt (txt ++ [toEnum (fromIntegral chr)])
-  Con "Nil" [] ->
-    trace txt (reduce book fill lv nxt)
-  _ -> nxt
+logMsg book fill lv msg nxt txt =
+  case (reduce book fill lv msg) of
+    Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
+      Num chr -> logMsg book fill lv tail nxt (txt ++ [toEnum (fromIntegral chr)])
+    Con "Nil" [] ->
+      trace txt (reduce book fill lv nxt)
+    _ -> nxt
 
 -- Normalization
 -- -------------

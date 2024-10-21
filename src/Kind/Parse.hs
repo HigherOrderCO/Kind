@@ -172,7 +172,7 @@ parseTerm = (do
     , parseLst
     , parseChr
     , parseHol
-    , parseLog
+    , (parseLog parseTerm)
     , parseRef
     ] <* skip
   parseSuffix term) <?> "Term"
@@ -470,10 +470,10 @@ parseHol = withSrc $ do
     return terms
   return $ Hol nam ctx
 
-parseLog = withSrc $ do
+parseLog parseBody = withSrc $ do
   P.try $ string_skp "log"
   msg <- parseTerm
-  val <- parseTerm
+  val <- parseBody
   return $ Log msg val
 
 parseOper = P.choice
@@ -693,6 +693,7 @@ parseStmt monad = P.choice
   , parseDoRet monad
   , parseLet (parseStmt monad)
   , parseUse (parseStmt monad)
+  , parseLog (parseStmt monad)
   , parseTerm
   ]
 
