@@ -31,7 +31,7 @@ termToJS term dep = case term of
     "null"
   Ins val ->
     termToJS val dep
-  Dat _ _ ->
+  Dat _ _ _ ->
     "null"
   Con nam arg ->
     let arg' = map (\(f, x) -> termToJS x dep) arg

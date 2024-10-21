@@ -51,16 +51,19 @@ termShower small term dep =
                    typ' = termShower small typ dep
               in concat ["{" , val' , ": " , typ' , "}"]
       Slf nam typ bod ->
-        termShower small typ dep
+        let nam' = nam
+            typ' = termShower small typ dep
+            bod' = termShower small (bod (Var nam dep)) (dep + 1)
+        in concat ["$(" , nam' , ": " , typ' , ") " , bod']
       Ins val ->
         let val' = termShower small val dep
         in concat ["~" , val']
       -- CHANGED: Updated Dat case to use new Ctr structure
-      Dat scp cts ->
+      Dat scp cts typ ->
         let scp' = unwords (map (\x -> termShower small x dep) scp)
-            cts' = unwords (map (\(Ctr nm tele) ->
-              "#" ++ nm ++ " " ++ teleShower small tele dep) cts)
-        in concat ["#[", scp', "]{ ", cts', " }"]
+            cts' = unwords (map (\(Ctr nm tele) -> "#" ++ nm ++ " " ++ teleShower small tele dep) cts)
+            typ' = termShower small typ dep
+        in concat ["#[", scp', "]{ ", cts', " } : ", typ']
       Con nam arg ->
         let arg' = unwords (map showArg arg)
         in concat ["#", nam, "{", arg', "}"]
@@ -109,7 +112,7 @@ termShower small term dep =
         else concat ["!", termShower small val dep]
 
 pretty :: Term -> Maybe String
-pretty term = prettyString term <|> prettyNat term <|> prettyList term <|> prettyEqual term
+pretty term = prettyString term <|> prettyNat term <|> prettyList term
 
 prettyString :: Term -> Maybe String
 prettyString (Con "View" [(_, term)]) = do

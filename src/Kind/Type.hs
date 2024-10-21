@@ -27,7 +27,7 @@ data Term
   | Ins Term
 
   -- Datatype: "#[i0 i1...]{ #C0 Tele0 #C1 Tele1 ... }
-  | Dat [Term] [Ctr]
+  | Dat [Term] [Ctr] Term
 
   -- Constructor: #CN { x0 x1 ... }
   | Con String [(Maybe String, Term)]

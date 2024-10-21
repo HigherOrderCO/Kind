@@ -248,14 +248,11 @@ parseDat = withSrc $ do
     tele <- parseTele
     return $ Ctr nm tele
   char_end '}'
-  ann <- P.optionMaybe $ P.try $ do
+  typ <- do
     skip
     char_skp ':'
     parseTerm
-  let dat = Dat scp cts
-  return $ case ann of
-    Just a  -> Slf "" a (\x -> dat)
-    Nothing -> dat
+  return $ Dat scp cts typ
 
 parseTele :: Parser Tele
 parseTele = do

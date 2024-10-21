@@ -45,7 +45,7 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
     return typ
 
   go src (Slf nam typ bod) dep = do
-    envSusp (Check Nothing (bod (Ann False (Var nam dep) typ)) Set (dep + 1))
+    envSusp (Check src (bod (Ann False (Var nam dep) typ)) Set (dep + 1))
     return Set
 
   go src (Ins val) dep = do
@@ -59,7 +59,7 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
         envLog (Error src (Ref "Self") vtyp (Ins val) dep)
         envFail
 
-  go src (Dat scp cts) dep = do
+  go src (Dat scp cts typ) dep = do
     forM_ cts $ \ (Ctr _ tele) -> do
       checkTele Nothing tele Set dep
     return Set
@@ -178,7 +178,7 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
     book <- envGetBook
     fill <- envGetFill
     case reduce book fill 2 typx of
-      (Dat adt_scp adt_cts) -> do
+      (Dat adt_scp adt_cts adt_typ) -> do
         case lookup nam (map (\(Ctr cnm tele) -> (cnm, tele)) adt_cts) of
           Just tele -> do
             rtyp <- checkConAgainstTele Nothing arg tele dep
@@ -196,7 +196,7 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
     case reduce book fill 2 typx of
       (All typ_nam typ_inp typ_bod) -> do
         case reduce book fill 2 typ_inp of
-          (Dat adt_scp adt_cts) -> do
+          (Dat adt_scp adt_cts adt_typ) -> do
             let adt_cts_map = M.fromList (map (\ (Ctr cnm tele) -> (cnm, tele)) adt_cts)
             -- Check if all cases are present
             let hasDefaultCase = any (\(cnm, _) -> cnm == "_") cse
@@ -349,8 +349,8 @@ teleToTerm tele dep = go tele [] dep where
   go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
 
 extractEqualities :: Term -> Term -> Int -> [(Term, Term)]
-extractEqualities (Dat as _) (Dat bs _) dep = zip as bs where
-extractEqualities a          b          dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
+extractEqualities (Dat as _ at) (Dat bs _ bt) dep = zip as bs where
+extractEqualities a             b             dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
 
 doCheck :: Term -> Env ()
 doCheck (Ann _ val typ) = do

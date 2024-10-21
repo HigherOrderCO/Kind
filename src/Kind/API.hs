@@ -184,7 +184,7 @@ getDeps term = case term of
   Ann _ val typ -> getDeps val ++ getDeps typ
   Slf _ typ bod -> getDeps typ ++ getDeps (bod Set)
   Ins val       -> getDeps val
-  Dat scp cts   -> concatMap getDeps scp ++ concatMap getDepsCtr cts
+  Dat scp cts t -> concatMap getDeps scp ++ concatMap getDepsCtr cts ++ getDeps t
   Con _ arg     -> concatMap (getDeps . snd) arg
   Mat cse       -> concatMap (getDeps . snd) cse
   Let _ val bod -> getDeps val ++ getDeps (bod Set)

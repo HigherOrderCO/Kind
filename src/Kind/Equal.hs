@@ -62,11 +62,12 @@ identical a b dep = do
     identical aVal b dep
   go a (Ins bVal) dep =
     identical a bVal dep
-  go (Dat aScp aCts) (Dat bScp bCts) dep = do
-    iSlf <- zipWithM (\ax bx -> identical ax bx dep) aScp bScp
-    if and iSlf && length aCts == length bCts
-      then and <$> zipWithM goCtr aCts bCts
-      else return False
+  go (Dat aScp aCts aTyp) (Dat bScp bCts bTyp) dep = do
+    identical aTyp bTyp dep
+    -- iSlf <- zipWithM (\ax bx -> identical ax bx dep) aScp bScp
+    -- if and iSlf && length aCts == length bCts
+      -- then and <$> zipWithM goCtr aCts bCts
+      -- else return False
   go (Con aNam aArg) (Con bNam bArg) dep = do
     if aNam == bNam && length aArg == length bArg
       then and <$> zipWithM (\(_, aVal) (_, bVal) -> identical aVal bVal dep) aArg bArg
@@ -168,11 +169,13 @@ similar a b dep = go a b dep where
   go (Slf aNam aTyp aBod) (Slf bNam bTyp bBod) dep = do
     book <- envGetBook
     similar (reduce book IM.empty 0 aTyp) (reduce book IM.empty 0 bTyp) dep
-  go (Dat aScp aCts) (Dat bScp bCts) dep = do
-    eSlf <- zipWithM (\ax bx -> equal ax bx dep) aScp bScp
-    if and eSlf && length aCts == length bCts
-      then and <$> zipWithM goCtr aCts bCts
-      else return False
+  go (Dat aScp aCts aTyp) (Dat bScp bCts bTyp) dep = do
+    book <- envGetBook
+    similar (reduce book IM.empty 0 aTyp) (reduce book IM.empty 0 bTyp) dep
+    -- eSlf <- zipWithM (\ax bx -> equal ax bx dep) aScp bScp
+    -- if and eSlf && length aCts == length bCts
+      -- then and <$> zipWithM goCtr aCts bCts
+      -- else return False
   go (Con aNam aArg) (Con bNam bArg) dep = do
     if aNam == bNam && length aArg == length bArg
       then and <$> zipWithM (\(_, aVal) (_, bVal) -> equal aVal bVal dep) aArg bArg
@@ -278,10 +281,11 @@ occur book fill uid term dep = go term dep where
   go (Ins val) dep =
     let o_val = go val dep
     in o_val
-  go (Dat scp cts) dep =
+  go (Dat scp cts typ) dep =
     let o_scp = any (\x -> go x dep) scp
         o_cts = any (\(Ctr _ tele) -> goTele tele dep) cts
-    in o_scp || o_cts
+        a_typ = go typ dep
+    in o_scp || o_cts || a_typ
   go (Con nam arg) dep =
     any (\(_, x) -> go x dep) arg
   go (Mat cse) dep =
@@ -346,10 +350,11 @@ same (Ins aVal) b dep =
   same aVal b dep
 same a (Ins bVal) dep =
   same a bVal dep
-same (Dat aScp aCts) (Dat bScp bCts) dep =
-  let sSlf = and $ zipWith (\ax bx -> same ax bx dep) aScp bScp
-      sCts = length aCts == length bCts && and (zipWith (\ a b -> sameCtr a b dep) aCts bCts)
-  in sSlf && sCts
+same (Dat aScp aCts aTyp) (Dat bScp bCts bTyp) dep =
+  -- let sSlf = and $ zipWith (\ax bx -> same ax bx dep) aScp bScp
+      -- sCts = length aCts == length bCts && and (zipWith (\ a b -> sameCtr a b dep) aCts bCts)
+  let sTyp = same aTyp bTyp dep
+  in sTyp
 same (Con aNam aArg) (Con bNam bArg) dep =
   let sNam = aNam == bNam
       sArg = length aArg == length bArg && and (zipWith (\(_, aVal) (_, bVal) -> same aVal bVal dep) aArg bArg)
@@ -433,7 +438,7 @@ subst lvl neo term = go term where
   go (Ann chk val typ) = Ann chk (go val) (go typ)
   go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
   go (Ins val)         = Ins (go val)
-  go (Dat scp cts)     = Dat (map go scp) (map goCtr cts)
+  go (Dat scp cts typ) = Dat (map go scp) (map goCtr cts) (go typ)
   go (Con nam arg)     = Con nam (map (\(f, t) -> (f, go t)) arg)
   go (Mat cse)         = Mat (map goCse cse)
   go (Swi zer suc)     = Swi (go zer) (go suc)
@@ -465,7 +470,7 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Ann chk val typ)  = Ann chk (replace old neo val dep) (replace old neo typ dep)
   go (Slf nam typ bod)  = Slf nam (replace old neo typ dep) (\x -> replace old neo (bod x) (dep+1))
   go (Ins val)          = Ins (replace old neo val dep)
-  go (Dat scp cts)      = Dat (map (\x -> replace old neo x (dep+1)) scp) (map goCtr cts)
+  go (Dat scp cts typ)  = Dat (map (\x -> replace old neo x (dep+1)) scp) (map goCtr cts) (replace old neo typ dep)
   go (Con nam arg)      = Con nam (map (\(f, t) -> (f, replace old neo t dep)) arg)
   go (Mat cse)          = Mat (map goCse cse)
   go (Swi zer suc)      = Swi (replace old neo zer dep) (replace old neo suc dep)

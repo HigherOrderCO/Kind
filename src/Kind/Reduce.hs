@@ -124,13 +124,14 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Ins val) dep =
     let nf_val = normal book fill lv val dep in
     Ins nf_val
-  go (Dat scp cts) dep =
+  go (Dat scp cts typ) dep =
     let go_ctr = (\ (Ctr nm tele) ->
           let nf_tele = normalTele book fill lv tele dep in
           Ctr nm nf_tele) in
     let nf_scp = map (\x -> normal book fill lv x dep) scp in
     let nf_cts = map go_ctr cts in
-    Dat nf_scp nf_cts
+    let nf_typ = normal book fill lv typ dep in
+    Dat nf_scp nf_cts nf_typ
   go (Con nam arg) dep =
     let nf_arg = map (\(f, t) -> (f, normal book fill lv t dep)) arg in
     Con nam nf_arg
@@ -206,10 +207,11 @@ bind (Slf nam typ bod) ctx =
 bind (Ins val) ctx =
   let val' = bind val ctx in
   Ins val'
-bind (Dat scp cts) ctx =
+bind (Dat scp cts typ) ctx =
   let scp' = map (\x -> bind x ctx) scp in
   let cts' = map (\x -> bindCtr x ctx) cts in
-  Dat scp' cts'
+  let typ' = bind typ ctx in
+  Dat scp' cts' typ'
   where
     bindCtr (Ctr nm tele)       ctx = Ctr nm (bindTele tele ctx)
     bindTele (TRet term)        ctx = TRet (bind term ctx)
@@ -284,10 +286,11 @@ genMetasGo (Slf nam typ bod) c =
 genMetasGo (Ins val) c = 
   let (val', c1) = genMetasGo val c
   in (Ins val', c1)
-genMetasGo (Dat scp cts) c = 
+genMetasGo (Dat scp cts typ) c = 
   let (scp', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) scp
       (cts', c2) = foldr (\(Ctr nm tele) (acc, c') -> let (tele', c'') = genMetasGoTele tele c' in (Ctr nm tele' : acc, c'')) ([], c1) cts
-  in (Dat scp' cts', c2)
+      (typ', c3) = genMetasGo typ c2
+  in (Dat scp' cts' typ', c3)
 genMetasGo (Con nam arg) c = 
   let (arg', c1) = foldr (\(f, t) (acc, c') -> let (t', c'') = genMetasGo t c' in ((f, t'):acc, c'')) ([], c) arg
   in (Con nam arg', c1)
