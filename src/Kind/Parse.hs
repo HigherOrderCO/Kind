@@ -410,22 +410,26 @@ parseUse = parseLocal "use" Use
 
 parseSet = withSrc $ char_end '*' >> return Set
 
-parseFloat = withSrc $ do
+parseFloat = withSrc $ P.try $ do
   -- Parse integer part
   intPart <- P.many1 digit
-  -- Parse decimal part
-  decPart <- P.option "0" $ P.try $ do
+  
+  -- Parse decimal part (this must succeed, or we fail the whole parser)
+  decPart <- do
     char_end '.'
     P.many1 digit
+  
   -- Parse optional exponent
   expPart <- P.option 0 $ P.try $ do
     oneOf "eE"
     sign <- P.option '+' (oneOf "+-")
     exp <- read <$> P.many1 digit
     return $ if sign == '-' then -exp else exp
+  
   -- Combine parts into final float
   let floatStr = intPart ++ "." ++ decPart
   let value = (read floatStr :: Double) * (10 ^^ expPart)
+  
   return $ FNum value
 
 parseNum = withSrc $ Num . read <$> P.many1 digit
