@@ -99,10 +99,7 @@ reduce book fill lv term = red term where
   op2 AND (FNum _) (FNum _) = error "Bitwise AND not supported for floating-point numbers"
   op2 OR  (FNum _) (FNum _) = error "Bitwise OR not supported for floating-point numbers"
   op2 XOR (FNum _) (FNum _) = error "Bitwise XOR not supported for floating-point numbers"
-
   op2 opr fst       snd       = Op2 opr fst snd
-  
-
 
   ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
