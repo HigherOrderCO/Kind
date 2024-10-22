@@ -7,12 +7,13 @@ import Control.Monad (forM, forM_, foldM)
 import Data.List (stripPrefix, isSuffixOf, nub)
 import Highlight (highlightError)
 import Kind.Check
-import Kind.Compile
+import Kind.CompileJS
 import Kind.Env
 import Kind.Parse
 import Kind.Reduce
 import Kind.Show
 import Kind.Type
+import Kind.Util
 import System.Console.ANSI
 import System.Directory (canonicalizePath, getCurrentDirectory, doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.Environment (getArgs)
@@ -177,55 +178,6 @@ apiPrintWarn term (State _ fill _ _) = do
     putStrLn $ "WARNING: " ++ show (metaCount - fillCount) ++ " unsolved metas."
   else
     return ()
-
--- Gets dependencies of a term
-getDeps :: Term -> [String]
-getDeps term = case term of
-  Ref nam       -> [nam]
-  All _ inp out -> getDeps inp ++ getDeps (out Set)
-  Lam _ bod     -> getDeps (bod Set)
-  App fun arg   -> getDeps fun ++ getDeps arg
-  Ann _ val typ -> getDeps val ++ getDeps typ
-  Slf _ typ bod -> getDeps typ ++ getDeps (bod Set)
-  Ins val       -> getDeps val
-  Dat scp cts t -> concatMap getDeps scp ++ concatMap getDepsCtr cts ++ getDeps t
-  Con _ arg     -> concatMap (getDeps . snd) arg
-  Mat cse       -> concatMap (getDeps . snd) cse
-  Let _ val bod -> getDeps val ++ getDeps (bod Set)
-  Use _ val bod -> getDeps val ++ getDeps (bod Set)
-  Op2 _ fst snd -> getDeps fst ++ getDeps snd
-  Swi zer suc   -> getDeps zer ++ getDeps suc
-  Src _ val     -> getDeps val
-  Hol _ args    -> concatMap getDeps args
-  Met _ args    -> concatMap getDeps args
-  Log msg nxt   -> getDeps msg ++ getDeps nxt
-  Var _ _       -> []
-  Set           -> []
-  U32           -> []
-  Num _         -> []
-  Txt _         -> []
-  Lst elems     -> concatMap getDeps elems
-  Nat _         -> []
-
-
--- Gets dependencies of a constructor
-getDepsCtr :: Ctr -> [String]
-getDepsCtr (Ctr _ tele) = getDepsTele tele
-
--- Gets dependencies of a telescope
-getDepsTele :: Tele -> [String]
-getDepsTele (TRet term) = getDeps term
-getDepsTele (TExt _ typ bod) = getDeps typ ++ getDepsTele (bod Set)
-
--- Gets all dependencies (direct and indirect) of a term
-getAllDeps :: Book -> String -> S.Set String
-getAllDeps book name = go S.empty [name] where
-  go visited [] = visited
-  go visited (x:xs)
-    | S.member x visited = go visited xs
-    | otherwise = case M.lookup x book of
-        Just term -> go (S.insert x visited) (getDeps term ++ xs)
-        Nothing   -> go (S.insert x visited) xs
 
 -- Stringification of results
 infoShow :: Book -> Fill -> Info -> IO String

@@ -1,19 +1,19 @@
 -- //./Type.hs//
 
-module Kind.Compile where
+module Kind.CompileJS where
 
-import Kind.Type
 import Kind.Reduce
+import Kind.Type
+import Kind.Util
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 import Data.List (intercalate)
 
-
 import Prelude hiding (EQ, LT, GT)
 
 nameToJS :: String -> String
-nameToJS = map (\c -> if c == '/' || c == '.' then '$' else c)
+nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
 
 termToJS :: Term -> Int -> String
 termToJS term dep = case term of
@@ -38,10 +38,16 @@ termToJS term dep = case term of
   Con nam arg ->
     let arg' = map (\(f, x) -> termToJS x dep) arg
         fds' = concat (zipWith (\i x -> concat [", x", show i, ": ", x]) [0..] arg')
-    in concat ["{$: \"", nameToJS nam, "\", length: ", show (length arg), fds', "}"]
+    in concat ["({$: \"", nam, "\", _: ", show (length arg), fds', "})"]
   Mat cse ->
-    let cse' = map (\(cnam, cbod) -> concat ["case \"", nameToJS cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
-    in concat ["(x => ({ switch (x.$) { ", unwords cse', " } }))"]
+    -- let cse' = map (\(cnam, cbod) -> concat ["case \"", nameToJS cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
+    -- in concat ["(x => { switch (x.$) { ", unwords cse', " } })"]
+    -- TODO: refactor this so that a case named "_" is compiled to a "default" in JS (instead of 'case "_"'):
+    let cse' = map (\(cnam, cbod) ->
+                if cnam == "_"
+                  then concat ["default: return (", termToJS cbod dep, ")(x);"]
+                  else concat ["case \"", cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
+    in concat ["(x => { switch (x.$) { ", unwords cse', " } })"]
   Ref nam ->
     nameToJS nam
   Let nam val bod ->
@@ -50,9 +56,7 @@ termToJS term dep = case term of
         bod' = termToJS (bod (Var nam dep)) (dep + 1)
     in concat ["((", nam', " => ", bod', ")(", val', "))"]
   Use nam val bod ->
-    let val' = termToJS val dep
-        bod' = termToJS (bod val) dep
-    in concat ["((", val', ") => ", bod', ")"]
+    termToJS (bod val) dep
   Set ->
     "null"
   U32 ->
@@ -69,11 +73,19 @@ termToJS term dep = case term of
         suc' = termToJS suc dep
     in concat ["((x => x === 0 ? ", zer', " : ", suc', "(x - 1)))"]
   Txt txt ->
-    show txt
+    let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
+        nil  = Con "Nil" []
+    in  termToJS (foldr cons nil (map (Num . fromIntegral . fromEnum) txt)) dep
   Lst lst ->
-    "[" ++ intercalate " " (map (\x -> termToJS x dep) lst) ++ "]"
+    let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
+        nil  = Con "Nil" []
+    in  termToJS (foldr cons nil lst) dep
   Nat val ->
-    show val
+    -- TODO: this must be compiled to (Con "Succ" ... and (Con "Zero"
+    -- similar to the Txt/Lst cases. do it now:
+    let succ = \x -> Con "Succ" [(Nothing, x)]
+        zero = Con "Zero" []
+    in  termToJS (foldr (\_ acc -> succ acc) zero [1..val]) dep
   Hol _ _ ->
     "null"
   Met _ _ ->
@@ -81,7 +93,7 @@ termToJS term dep = case term of
   Log msg nxt ->
     let msg' = termToJS msg dep
         nxt' = termToJS nxt dep
-    in concat ["(console.log(", msg', "), ", nxt', ")"]
+    in concat ["(console.log(LIST_TO_STRING(", msg', ")), ", nxt', ")"]
   Var nam idx ->
     nameToJS nam ++ "$" ++ show idx
   Src _ val ->
@@ -106,13 +118,13 @@ operToJS LSH = "<<"
 operToJS RSH = ">>"
 
 bookToJS :: Book -> String
-bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", termToJS tm 0, ";"]) (M.toList book)
+bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", termToJS tm 0, ";"]) (topoSortBook book)
 
 compileJS :: Book -> String
 compileJS book =
   let prelude = unlines [
         "function APPLY(f, x) {",
-        "  switch (x.length) {",
+        "  switch (x._) {",
         "    case 0: return f;",
         "    case 1: return f(x.x0);",
         "    case 2: return f(x.x0)(x.x1);",
@@ -123,11 +135,26 @@ compileJS book =
         "    case 7: return f(x.x0)(x.x1)(x.x2)(x.x3)(x.x4)(x.x5)(x.x6);",
         "    case 8: return f(x.x0)(x.x1)(x.x2)(x.x3)(x.x4)(x.x5)(x.x6)(x.x7);",
         "    default:",
-        "      for (let i = 0; i < x.length; i++) {",
+        "      for (let i = 0; i < x._; i++) {",
         "        f = f(x['x' + i]);",
         "      }",
         "      return f;",
         "  }",
-        "}"]
+        "}",
+        "function LIST_TO_STRING(list) {",
+        "  try {",
+        "    let result = '';",
+        "    let current = list;",
+        "    while (current.$ === 'Cons') {",
+        "      result += String.fromCodePoint(current.x0);",
+        "      current = current.x1;",
+        "    }",
+        "    if (current.$ === 'Nil') {",
+        "      return result;",
+        "    }",
+        "  } catch (e) {}",
+        "  return list;",
+        "}"
+        ]
       bookJS  = bookToJS book
   in concat [prelude, "\n\n", bookJS]

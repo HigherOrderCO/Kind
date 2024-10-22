@@ -17,13 +17,14 @@ library
     exposed-modules:  Kind
                     , Kind.API
                     , Kind.Check
-                    , Kind.Compile
+                    , Kind.CompileJS
                     , Kind.Env
                     , Kind.Equal
                     , Kind.Parse
                     , Kind.Reduce
                     , Kind.Show
                     , Kind.Type
+                    , Kind.Util
     other-modules:    
     build-depends:    base ^>=4.20.0.0
                     , containers ==0.7
