@@ -53,7 +53,13 @@ data Term
   -- U32 Value
   | Num Word32
 
-  -- U32 Binary Operation
+  -- F64 Type
+  | F64
+
+  -- F64 value
+  | FNum Double
+
+  -- Binary Operation
   | Op2 Oper Term Term
 
   -- U32 Elimination (updated to use splitting lambda)

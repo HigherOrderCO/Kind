@@ -81,7 +81,11 @@ termShower small term dep =
         in concat ["use " , nam' , " = " , val' , " " , bod']
       Set -> "*"
       U32 -> "U32"
+      F64 -> "F64"
       Num val ->
+        let val' = show val
+        in concat [val']
+      FNum val ->
         let val' = show val
         in concat [val']
       Op2 opr fst snd ->

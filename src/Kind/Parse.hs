@@ -167,6 +167,7 @@ parseTerm = (do
     , parseSwiInl
     , parseDo
     , parseSet
+    , parseFloat
     , parseNum
     , parseTxt
     , parseLst
@@ -368,6 +369,7 @@ parseRef = withSrc $ do
   let name' = expandUses uses name
   return $ case name' of
     "U32" -> U32
+    "F64" -> F64
     "Set" -> Set
     "_"   -> Met 0 []
     _     -> Ref name'
@@ -407,6 +409,24 @@ parseUse :: Parser Term -> Parser Term
 parseUse = parseLocal "use" Use
 
 parseSet = withSrc $ char_end '*' >> return Set
+
+parseFloat = withSrc $ do
+  -- Parse integer part
+  intPart <- P.many1 digit
+  -- Parse decimal part
+  decPart <- P.option "0" $ P.try $ do
+    char_end '.'
+    P.many1 digit
+  -- Parse optional exponent
+  expPart <- P.option 0 $ P.try $ do
+    oneOf "eE"
+    sign <- P.option '+' (oneOf "+-")
+    exp <- read <$> P.many1 digit
+    return $ if sign == '-' then -exp else exp
+  -- Combine parts into final float
+  let floatStr = intPart ++ "." ++ decPart
+  let value = (read floatStr :: Double) * (10 ^^ expPart)
+  return $ FNum value
 
 parseNum = withSrc $ Num . read <$> P.many1 digit
 

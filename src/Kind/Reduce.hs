@@ -82,7 +82,27 @@ reduce book fill lv term = red term where
   op2 XOR (Num fst) (Num snd) = Num (fst `xor` snd)
   op2 LSH (Num fst) (Num snd) = Num (shiftL fst (fromIntegral snd))
   op2 RSH (Num fst) (Num snd) = Num (shiftR fst (fromIntegral snd))
+
+  op2 op  (Ref nam)  (FNum snd) | lv > 0 = op2 op (ref nam) (FNum snd)
+  op2 op  (FNum fst) (Ref nam)  | lv > 0 = op2 op (FNum fst) (ref nam)
+  op2 ADD (FNum fst) (FNum snd) = FNum (fst + snd)
+  op2 SUB (FNum fst) (FNum snd) = FNum (fst - snd)
+  op2 MUL (FNum fst) (FNum snd) = FNum (fst * snd)
+  op2 DIV (FNum fst) (FNum snd) = FNum (fst / snd)
+  op2 MOD (FNum fst) (FNum snd) = error "Modulo is not supported for floating point numbers."
+  op2 EQ  (FNum fst) (FNum snd) = Num (if fst == snd then 1 else 0)
+  op2 NE  (FNum fst) (FNum snd) = Num (if fst /= snd then 1 else 0)
+  op2 LT  (FNum fst) (FNum snd) = Num (if fst < snd then 1 else 0)
+  op2 GT  (FNum fst) (FNum snd) = Num (if fst > snd then 1 else 0)
+  op2 LTE (FNum fst) (FNum snd) = Num (if fst <= snd then 1 else 0)
+  op2 GTE (FNum fst) (FNum snd) = Num (if fst >= snd then 1 else 0)
+  op2 AND (FNum _) (FNum _) = error "Bitwise AND not supported for floating-point numbers"
+  op2 OR  (FNum _) (FNum _) = error "Bitwise OR not supported for floating-point numbers"
+  op2 XOR (FNum _) (FNum _) = error "Bitwise XOR not supported for floating-point numbers"
+
   op2 opr fst       snd       = Op2 opr fst snd
+  
+
 
   ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
@@ -170,7 +190,9 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Hol nam ctx) dep = Hol nam ctx
   go Set dep = Set
   go U32 dep = U32
+  go F64 dep = F64
   go (Num val) dep = Num val
+  go (FNum val) dep = FNum val
   go (Op2 opr fst snd) dep =
     let nf_fst = normal book fill lv fst dep in
     let nf_snd = normal book fill lv snd dep in
@@ -260,7 +282,9 @@ bind (Use nam val bod) ctx =
   Use nam val' bod'
 bind Set ctx = Set
 bind U32 ctx = U32
+bind F64 ctx = F64
 bind (Num val) ctx = Num val
+bind (FNum val) ctx = FNum val
 bind (Op2 opr fst snd) ctx =
   let fst' = bind fst ctx in
   let snd' = bind snd ctx in

@@ -78,8 +78,14 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
   go src U32 dep = do
     return Set
 
+  go src F64 dep = do
+    return Set
+
   go src (Num num) dep = do
     return U32
+
+  go src (FNum num) dep = do
+    return F64
 
   go src (Op2 opr fst snd) dep = do
     envSusp (Check Nothing fst U32 dep)
