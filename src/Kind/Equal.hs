@@ -112,7 +112,11 @@ identical a b dep = do
     return True
   go U32 U32 dep =
     return True
+  go F64 F64 dep =
+    return True
   go (Num aVal) (Num bVal) dep =
+    return (aVal == bVal)
+  go (FNum aVal) (FNum bVal) dep =
     return (aVal == bVal)
   go (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep = do
     iFst <- identical aFst bFst dep
@@ -401,7 +405,11 @@ same a (Hol bNam bCtx) dep =
   True
 same U32 U32 dep =
   True
+same F64 F64 dep =
+  True
 same (Num aVal) (Num bVal) dep =
+  aVal == bVal
+same (FNum aVal) (FNum bVal) dep =
   aVal == bVal
 same (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep =
   same aFst bFst dep && same aSnd bSnd dep
@@ -465,7 +473,9 @@ subst lvl neo term = go term where
   go (Hol nam ctx)     = Hol nam (map go ctx)
   go Set               = Set
   go U32               = U32
+  go F64               = F64
   go (Num n)           = Num n
+  go (FNum n)          = FNum n
   go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
   go (Txt txt)         = Txt txt
   go (Lst lst)         = Lst (map go lst)
@@ -498,7 +508,9 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Hol nam ctx)      = Hol nam (map (\x -> replace old neo x (dep+1)) ctx)
   go Set                = Set
   go U32                = U32
+  go F64                = F64
   go (Num n)            = Num n
+  go (FNum n)           = FNum n
   go (Op2 opr fst snd)  = Op2 opr (replace old neo fst dep) (replace old neo snd dep)
   go (Txt txt)          = Txt txt
   go (Lst lst)          = Lst (map (\x -> replace old neo x dep) lst)
