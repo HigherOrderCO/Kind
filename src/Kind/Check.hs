@@ -88,9 +88,23 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
     return F64
 
   go src (Op2 opr fst snd) dep = do
-    envSusp (Check Nothing fst U32 dep)
-    envSusp (Check Nothing snd U32 dep)
-    return U32
+    fstType <- infer src fst dep
+    sndType <- infer src snd dep
+
+    case (fstType, sndType) of
+      (U32 , U32) -> do
+        return U32
+      (F64 , F64) -> do
+        return F64
+      (F64 , _)   -> do
+        envLog (Error src (Ref "F64") (Ref (termShower False sndType dep)) (Op2 opr fst snd) dep)
+        envFail
+      (U32 , _)   -> do
+        envLog (Error src (Ref "U32") (Ref (termShower False sndType dep)) (Op2 opr fst snd) dep)
+        envFail
+      (_ , _)     -> do
+        envLog (Error src (Ref "U32 / F64") (Ref ((termShower True fstType dep) ++ " , " ++ (termShower True sndType dep))) (Op2 opr fst snd) dep)
+        envFail
 
   go src (Swi zer suc) dep = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
