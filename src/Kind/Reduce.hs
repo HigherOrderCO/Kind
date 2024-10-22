@@ -86,7 +86,7 @@ reduce book fill lv term = red term where
 
   ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
-    Nothing  -> Con "ERR" []
+    Nothing  -> Con ("undefined-reference:"++nam) []
   ref nam = Ref nam
 
   txt []     = red (Con "Nil" [])
@@ -98,19 +98,20 @@ reduce book fill lv term = red term where
   nat 0 = Con "Zero" []
   nat n = Con "Succ" [(Nothing, Nat (n - 1))]
 
-  log msg nxt = logMsg book fill lv msg nxt ""
+  log msg nxt = logMsg book fill lv msg msg nxt ""
 
 -- Logging
 -- -------
 
-logMsg :: Book -> Fill -> Int -> Term -> Term -> String -> Term
-logMsg book fill lv msg nxt txt =
+logMsg :: Book -> Fill -> Int -> Term -> Term -> Term -> String -> Term
+logMsg book fill lv msg' msg nxt txt =
   case (reduce book fill lv msg) of
     Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
-      Num chr -> logMsg book fill lv tail nxt (txt ++ [toEnum (fromIntegral chr)])
+      Num chr -> logMsg book fill lv msg' tail nxt (txt ++ [toEnum (fromIntegral chr)])
     Con "Nil" [] ->
       trace txt (reduce book fill lv nxt)
-    _ -> nxt
+    _ ->
+      trace (">> " ++ (termShow (normal book fill 1 msg' 0))) $ (reduce book fill lv nxt)
 
 -- Normalization
 -- -------------

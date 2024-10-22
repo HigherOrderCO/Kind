@@ -809,19 +809,25 @@ parseDoFor monad = do
 parseIf = withSrc $ do
   P.try $ string_skp "if "
   cond <- parseTerm
-  char_skp '{'
-  t <- parseTerm
-  char_skp '}'
+  t <- parseBranch True
   string_skp "else"
-  f <- P.choice
-    [ P.try $ do
-        char_skp '{'
-        f <- parseTerm
-        char_end '}'
-        return f
-    , parseIf
-    ]
+  f <- P.choice [parseBranch False, parseIf]
   return $ App (Mat [("True", t), ("False", f)]) cond
+  where
+    parseBranch isIf = P.choice
+      [ do
+          string_skp "do "
+          monad <- name_skp
+          char_skp '{'
+          t <- parseStmt monad
+          if isIf then char_skp '}' else char_end '}'
+          return t
+      , do
+          char_skp '{'
+          t <- parseTerm
+          if isIf then char_skp '}' else char_end '}'
+          return t
+      ]
 
 -- When
 -- ----
