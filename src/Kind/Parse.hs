@@ -4,7 +4,7 @@ module Kind.Parse where
 
 import Data.Char (ord)
 import Data.Functor.Identity (Identity)
-import Data.List (intercalate, isPrefixOf, uncons, find)
+import Data.List (intercalate, isPrefixOf, uncons, find, transpose)
 import Data.Maybe (catMaybes, fromJust, isJust)
 import Data.Set (toList, fromList)
 import Debug.Trace
@@ -619,7 +619,7 @@ parseDefFun = do
           body <- parseTerm
           return (pats, body)
         let (mat, bods) = unzip rules
-        let flat = flattenDef mat bods 0 0
+        let flat = flattenDef mat bods 0
         return
           -- $ trace ("DONE: " ++ termShow flat)
           flat
@@ -929,62 +929,60 @@ parseNat = withSrc $ P.try $ do
 -- FIXME: the functions below are still a little bit messy and can be improved
 
 -- Flattener for pattern matching equations
-flattenDef :: [[Pattern]] -> [Term] -> Int -> Int -> Term
-flattenDef pats bods fresh depth =
+flattenDef :: [[Pattern]] -> [Term] -> Int -> Term
+flattenDef pats bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "flattenDef: pats = " ++ show pats ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh) $
-  go pats bods fresh depth
+  go pats bods depth
   where
-    go ([]:mat)   (bod:bods) fresh depth = bod
-    go (pats:mat) (bod:bods) fresh depth
-      | all isVar col  = flattenVarCol col mat' (bod:bods) fresh (depth + 1)
-      | otherwise      = flattenAdtCol col mat' (bod:bods) fresh (depth + 1)
+    go ([]:mat)   (bod:bods) depth = bod
+    go (pats:mat) (bod:bods) depth
+      | all isVar col  = flattenVarCol col mat' (bod:bods) (depth + 1)
+      | otherwise      = flattenAdtCol col mat' (bod:bods) (depth + 1)
       where (col,mat') = getCol (pats:mat)
-    go _ _ _ _ = error "internal error"
+    go _ _ _ = error "internal error"
 
 -- Flattens a column with only variables
-flattenVarCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> Term
-flattenVarCol col mat bods fresh depth =
+flattenVarCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
+flattenVarCol col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "flattenVarCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
-  let nam = maybe ("%x" ++ show fresh) id (getColName col)
-      bod = flattenDef mat bods (fresh + 1) depth
+  let nam = maybe "_" id (getVarColName col)
+      bod = flattenDef mat bods depth
   in Lam nam (\x -> bod)
 
 -- Flattens a column with constructors and possibly variables
-flattenAdtCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> Term
-flattenAdtCol col mat bods fresh depth =
+flattenAdtCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
+flattenAdtCol col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "flattenAdtCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
-  let nam = maybe ("%f" ++ show fresh) id (getColName col)
-      ctr = map (makeCtrCase col mat bods (fresh+1) nam depth) (getColCtrs col)
-      dfl = makeDflCase col mat bods fresh depth
+  let ctr = map (makeCtrCase col mat bods depth) (getColCtrs col)
+      dfl = makeDflCase col mat bods depth
   in Mat (ctr++dfl)
 
 -- Creates a constructor case: '#Name: body'
-makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> String -> Int -> String -> (String, Term)
-makeCtrCase col mat bods fresh var depth ctr =
+makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> String -> (String, Term)
+makeCtrCase col mat bods depth ctr =
   -- trace (replicate (depth * 2) ' ' ++ "makeCtrCase: col = " ++ show col ++ ", mat = " ++ show mat ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh ++ ", var = " ++ var ++ ", ctr = " ++ ctr) $
-  let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
-      bod           = flattenDef mat' bods' fresh (depth + 1)
+  let var           = getCtrColNames col ctr
+      (mat', bods') = foldr (go var) ([], []) (zip3 col mat bods)
+      bod           = flattenDef mat' bods' (depth + 1)
   in (ctr, bod)
-  where go ((PCtr nam ps), pats, bod) (mat, bods)
+  where go var ((PCtr nam ps), pats, bod) (mat, bods)
           | nam == ctr = ((ps ++ pats):mat, bod:bods)
           | otherwise  = (mat, bods)
-        go ((PVar "_"), pats, bod) (mat, bods) =
-          let ari = getCtrArity col ctr
-              pat = [PVar "_" | _ <- [0..ari-1]]
+        go var ((PVar "_"), pats, bod) (mat, bods) =
+          let pat = map (maybe (PVar "_") PVar) var
           in ((pat ++ pats):mat, bod:bods)
-        go ((PVar nam), pats, bod) (mat, bods) =
-          let ari = getCtrArity col ctr
-              var = [nam++"."++show i | i <- [0..ari-1]]
-              pat = map PVar var
-              bo2 = Let nam (foldl (\f a -> App f (Ref a)) (Ref ctr) var) (\x -> bod)
+        go var ((PVar nam), pats, bod) (mat, bods) =
+          let vr2 = [maybe (nam++"."++show i) id vr | (vr, i) <- zip var [0..]]
+              pat = map PVar vr2
+              bo2 = Use nam (Con ctr (map (\x -> (Nothing, Ref x)) vr2)) (\x -> bod)
           in ((pat ++ pats):mat, bo2:bods)
 
 -- Creates a default case: '#_: body'
-makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Int -> [(String, Term)]
-makeDflCase col mat bods fresh depth =
+makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> [(String, Term)]
+makeDflCase col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "makeDflCase: col = " ++ show col ++ ", fresh = " ++ show fresh) $
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods) in
-  if null bods' then [] else [("_", flattenDef mat' bods' (fresh+1) (depth + 1))]
+  if null bods' then [] else [("_", flattenDef mat' bods' (depth + 1))]
   where go ((PVar nam), pats, bod) (mat, bods) = (((PVar nam):pats):mat, bod:bods)
         go (ctr,        pats, bod) (mat, bods) = (mat, bods)
 
@@ -994,21 +992,25 @@ isVar :: Pattern -> Bool
 isVar (PVar _) = True
 isVar _        = False
 
-getCtrArity :: [Pattern] -> String -> Int
-getCtrArity ((PCtr nam ps):pats) ctr
-  | nam == ctr           = length ps
-  | otherwise            = getCtrArity pats ctr
-getCtrArity (_:pats) ctr = getCtrArity pats ctr
-getCtrArity []        _  = 0
-
 getCol :: [[Pattern]] -> ([Pattern], [[Pattern]])
 getCol (pats:mat) = unzip (catMaybes (map uncons (pats:mat)))
 
 getColCtrs :: [Pattern] -> [String]
 getColCtrs col = toList . fromList $ foldr (\pat acc -> case pat of (PCtr nam _) -> nam:acc ; _ -> acc) [] col
 
-getColName :: [Pattern] -> Maybe String
-getColName col = foldr (A.<|>) Nothing $ map go col
+getVarColName :: [Pattern] -> Maybe String
+getVarColName col = foldr (A.<|>) Nothing $ map go col
   where go (PVar "_") = Nothing
         go (PVar nam) = Just nam
         go _          = Nothing
+
+-- For a column of patterns that will become a Mat,
+-- return the name of the inner fields or Nothing if they are also Mats.
+getCtrColNames :: [Pattern] -> String -> [Maybe String]
+getCtrColNames col ctr = 
+  let mat = foldr go [] col
+  in map getVarColName (transpose mat)
+  where go (PCtr nam ps) acc
+          | nam == ctr  = ps:acc
+          | otherwise   = acc
+        go _ acc        = acc
