@@ -156,11 +156,3 @@ getType _               = error "?"
 getTerm :: Term -> Term
 getTerm (Ann _ val typ) = val
 getTerm _               = error "?"
-
-
-
-
-
-
-
-
