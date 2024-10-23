@@ -1,4 +1,5 @@
--- //./Type.hs//
+-- old compiler:
+-- //./old_compiler.txt//
 
 module Kind.CompileJS where
 
@@ -9,95 +10,100 @@ import Kind.Util
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 import Data.List (intercalate)
+import qualified Control.Monad.State.Lazy as ST
 
 import Prelude hiding (EQ, LT, GT)
 
-nameToJS :: String -> String
-nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
-
-termToJS :: Term -> Int -> String
-termToJS term dep = case term of
+termToJS :: Maybe String -> Term -> Int -> ST.State Int String
+termToJS var term dep = case term of
   All _ _ _ ->
-    "null"
-  Lam nam bod ->
-    let nam' = nameToJS nam ++ "$" ++ show dep
-        bod' = termToJS (bod (Var nam dep)) (dep + 1)
-    in concat ["(", nam', " => ", bod', ")"]
-  App fun arg   ->
-    let fun' = termToJS fun dep
-        arg' = termToJS arg dep
-    in concat ["(", fun', ")(", arg', ")"]
+    ret var "null"
+  -- on the lam case, let's group lambdas, allowing us to give a fresh name to the body
+  tm@(Lam nam bod) -> do
+    let (names, body) = lams tm dep []
+    bodyName <- fresh
+    bodyStmt <- termToJS (Just bodyName) body (dep + length names)
+    ret var $ concat ["(", intercalate " => " names, " => {", bodyStmt, "return ", bodyName, ";", "})"]
+    where lams (Lam n b) dep names = lams (b (Var n dep)) (dep+1) ((nameToJS n ++ "$" ++ show dep) : names)
+          lams (Src x v) dep names = lams v dep names
+          lams t         dep names = (reverse names, t)
+  App fun arg -> do
+    funExpr <- termToJS Nothing fun dep
+    argExpr <- termToJS Nothing arg dep
+    ret var $ concat ["(", funExpr, ")(", argExpr, ")"]
   Ann _ val _ ->
-    termToJS val dep
+    termToJS var val dep
   Slf _ _ _ ->
-    "null"
+    ret var "null"
   Ins val ->
-    termToJS val dep
+    termToJS var val dep
   Dat _ _ _ ->
-    "null"
-  Con nam arg ->
-    let arg' = map (\(f, x) -> termToJS x dep) arg
-        fds' = concat (zipWith (\i x -> concat [", x", show i, ": ", x]) [0..] arg')
-    in concat ["({$: \"", nam, "\", _: ", show (length arg), fds', "})"]
-  Mat cse ->
-    -- let cse' = map (\(cnam, cbod) -> concat ["case \"", nameToJS cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
-    -- in concat ["(x => { switch (x.$) { ", unwords cse', " } })"]
-    -- TODO: refactor this so that a case named "_" is compiled to a "default" in JS (instead of 'case "_"'):
-    let cse' = map (\ (cnam, cbod) ->
-                if cnam == "_"
-                  then concat ["default: return (", termToJS cbod dep, ")(x);"]
-                  else concat ["case \"", cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
-    in concat ["(x => { switch (x.$) { ", unwords cse', " } })"]
+    ret var "null"
+  Con nam arg -> do
+    argExpr <- mapM (\(f, x) -> termToJS Nothing x dep) arg
+    let fields = concat (zipWith (\i x -> concat [", x", show i, ": ", x]) [0..] argExpr)
+    ret var $ concat ["({$: \"", nam, "\", _: ", show (length arg), fields, "})"]
+  Mat cse -> do
+    cseExpr <- mapM (\(cnam, cbod) -> do
+      cbodExpr <- termToJS Nothing cbod dep
+      return $ if cnam == "_"
+        then concat ["default: return (", cbodExpr, ")(x);"]
+        else concat ["case \"", cnam, "\": return APPLY(", cbodExpr, ", x);"]
+      ) cse
+    ret var $ concat ["(x => { switch (x.$) { ", unwords cseExpr, " } })"]
   Ref nam ->
-    nameToJS nam
+    ret var $ nameToJS nam
   Let nam val bod ->
-    let nam' = nameToJS nam ++ "$" ++ show dep
-        val' = termToJS val dep
-        bod' = termToJS (bod (Var nam dep)) (dep + 1)
-    in concat ["((", nam', " => ", bod', ")(", val', "))"]
-  Use nam val bod ->
-    termToJS (bod val) dep
+    case var of
+      Just var -> do
+        valExpr <- termToJS (Just (nameToJS nam ++ "$" ++ show dep)) val dep
+        bodExpr <- termToJS (Just var) (bod (Var nam dep)) (dep + 1)
+        return $ concat [valExpr, bodExpr]
+      Nothing -> do
+        valExpr <- termToJS (Just (nameToJS nam ++ "$" ++ show dep)) val dep
+        bodExpr <- termToJS Nothing (bod (Var nam dep)) (dep + 1)
+        return $ concat ["(() => {", valExpr, "return ", bodExpr, ";})()"]
+  Use nam val bod -> do
+    termToJS var (bod val) dep
   Set ->
-    "null"
+    ret var "null"
   U32 ->
-    "null"
+    ret var "null"
   Num val ->
-    show val
-  Op2 opr fst snd ->
+    ret var $ show val
+  Op2 opr fst snd -> do
     let opr' = operToJS opr
-        fst' = termToJS fst dep
-        snd' = termToJS snd dep
-    in concat ["((", fst', " ", opr', " ", snd', ") >>> 0)"]
-  Swi zer suc ->
-    let zer' = termToJS zer dep
-        suc' = termToJS suc dep
-    in concat ["((x => x === 0 ? ", zer', " : ", suc', "(x - 1)))"]
+    fstExpr <- termToJS Nothing fst dep
+    sndExpr <- termToJS Nothing snd dep
+    ret var $ concat ["((", fstExpr, " ", opr', " ", sndExpr, ") >>> 0)"]
+  Swi zer suc -> do
+    zerExpr <- termToJS Nothing zer dep
+    sucExpr <- termToJS Nothing suc dep
+    ret var $ concat ["((x => x === 0 ? ", zerExpr, " : ", sucExpr, "(x - 1)))"]
   Txt txt ->
     let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
         nil  = Con "Nil" []
-    in  termToJS (foldr cons nil (map (Num . fromIntegral . fromEnum) txt)) dep
+    in  termToJS var (foldr cons nil (map (Num . fromIntegral . fromEnum) txt)) dep
   Lst lst ->
     let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
         nil  = Con "Nil" []
-    in  termToJS (foldr cons nil lst) dep
+    in  termToJS var (foldr cons nil lst) dep
   Nat val ->
-    -- TODO: this must be compiled to (Con "Succ" ... and (Con "Zero"
-    -- similar to the Txt/Lst cases. do it now:
     let succ = \x -> Con "Succ" [(Nothing, x)]
         zero = Con "Zero" []
-    in  termToJS (foldr (\_ acc -> succ acc) zero [1..val]) dep
+    in  termToJS var (foldr (\_ acc -> succ acc) zero [1..val]) dep
   Hol _ _ ->
-    "null"
+    ret var "null"
   Met _ _ ->
-    "null"
-  Log msg nxt ->
-    let msg' = termToJS msg dep
-        nxt' = termToJS nxt dep
-    in concat ["(console.log(LIST_TO_STRING(", msg', ")), ", nxt', ")"]
+    ret var "null"
+  Log msg nxt -> do
+    msgExpr <- termToJS Nothing msg dep
+    nxtExpr <- termToJS Nothing nxt dep
+    ret var $ concat ["(console.log(LIST_TO_STRING(", msgExpr, ")), ", nxtExpr, ")"]
   Var nam idx ->
-    nameToJS nam ++ "$" ++ show idx
+    ret var $ nameToJS nam ++ "$" ++ show idx
   Src _ val ->
-    termToJS val dep
+    termToJS var val dep
 
 operToJS :: Oper -> String
 operToJS ADD = "+"
@@ -118,7 +124,21 @@ operToJS LSH = "<<"
 operToJS RSH = ">>"
 
 bookToJS :: Book -> String
-bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", termToJS tm 0, ";"]) (topoSortBook book)
+bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", ST.evalState (termToJS Nothing tm 0) 0, ";"]) (topoSortBook book)
+
+nameToJS :: String -> String
+nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
+
+fresh :: ST.State Int String
+fresh = do
+  n <- ST.get
+  ST.put (n + 1)
+  return $ "$x" ++ show n
+
+-- Assigns an expression to a name, or return it directly
+ret :: Maybe String -> String -> ST.State Int String
+ret (Just name) expr = return $ "var " ++ name ++ " = " ++ expr ++ ";"
+ret Nothing     expr = return $ expr
 
 compileJS :: Book -> String
 compileJS book =
@@ -158,3 +178,5 @@ compileJS book =
         ]
       bookJS  = bookToJS book
   in concat [prelude, "\n\n", bookJS]
+
+
