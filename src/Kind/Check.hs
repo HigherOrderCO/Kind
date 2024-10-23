@@ -228,38 +228,51 @@ check sus src val typ dep = debug ("check: " ++ showTermGo False val dep ++ "\n 
       (All typNam typInp typBod) -> do
         case reduce book fill 2 typInp of
           (ADT adtScp adtCts adtTyp) -> do
-            -- Check every expected case of the match, skipping redundant cases
-            let presentCases = M.fromList $ reverse cse
-            cseA <- forM adtCts $ \ (Ctr cNam cTel) -> do
-              case M.lookup cNam presentCases of
-                Just cBod -> do
-                  let a_r = teleToTerms cTel dep
-                  let eqs = zip (getDatIndices (reduce book fill 2 typInp)) (getDatIndices (reduce book fill 2 (snd a_r)))
-                  let rt0 = teleToType cTel (typBod (Ann False (Con cNam (fst a_r)) typInp)) dep
-                  let rt1 = foldl' (\ ty (a,b) -> replace a b ty dep) rt0 eqs
-                  if any (\(a,b) -> incompatible a b dep) eqs then
-                    checkUnreachable Nothing cNam cBod dep
-                  else do
-                    cBodA <- check sus src cBod rt1 dep
-                    return (cNam, cBodA)
-                Nothing -> case M.lookup "_" presentCases of
-                  Just defaultCase -> do
-                    defaultA <- check sus src defaultCase (All "" typInp typBod) dep
-                    return (cNam, defaultA)
-                  Nothing -> do
-                    envLog (Error src (Hol ("missing_case:" ++ cNam) []) (Hol "incomplete_match" []) (Mat cse) dep)
-                    envFail
-            -- Check if all cases refer to an expected constructor
+            -- Check each unique case and mark redundant cases as unreachable
             let adtCtsMap = M.fromList (map (\ (Ctr cNam cTel) -> (cNam, cTel)) adtCts)
-            forM_ cse $ \ (cNam, cBod) -> do
-              when (cNam /= "_") $ case M.lookup cNam adtCtsMap of
-                Just _ -> return ()
-                Nothing -> do
-                  envLog (Error src (Hol ("constructor_not_found:"++cNam) []) (Hol "unknown_type" []) (Mat cse) dep)
-                  envFail
+            (cseA, uCse) <- checkCse cse M.empty book fill typInp typBod adtCtsMap
+            -- Check if all expected cases are present
+            forM_ adtCts $ \ (Ctr cNam cTel) -> do
+              if (M.notMember cNam uCse) && (M.notMember "_" uCse) then do
+                envLog (Error src (Hol ("missing_case:" ++ cNam) []) (Hol "incomplete_match" []) (Mat cse) dep)
+                envFail
+              else return ()
             return $ Ann False (Mat cseA) typx
           otherwise -> infer sus src (Mat cse) dep
       otherwise -> infer sus src (Mat cse) dep
+    where
+      checkCse []                 uCse book fill typInp typBod adtCtsMap = do
+        return ([], uCse)
+      checkCse ((cNam, cBod):cse) uCse book fill typInp typBod adtCtsMap = do
+        cse1 <- do
+          -- Redundant case
+          if M.member cNam uCse then do
+            fillUnreachableMet cBod
+            checkUnreachable Nothing cNam cBod dep
+          else case M.lookup cNam adtCtsMap of
+            -- New ctr case
+            Just cTel -> do
+              let a_r = teleToTerms cTel dep
+              let eqs = zip (getDatIndices (reduce book fill 2 typInp)) (getDatIndices (reduce book fill 2 (snd a_r)))
+              let rt0 = teleToType cTel (typBod (Ann False (Con cNam (fst a_r)) typInp)) dep
+              let rt1 = foldl' (\ ty (a,b) -> replace a b ty dep) rt0 eqs
+              if any (\(a,b) -> incompatible a b dep) eqs then do
+                fillUnreachableMet cBod
+                checkUnreachable Nothing cNam cBod dep
+              else do
+                cBodA <- check sus src cBod rt1 dep
+                return (cNam, cBodA)
+            Nothing -> do
+              if "_" == cNam then do
+                -- Default case
+                defaultA <- check sus src cBod (All "" typInp typBod) dep
+                return (cNam, defaultA)
+              else do
+                envLog (Error src (Hol ("constructor_not_found:"++cNam) []) (Hol "unknown_type" []) (Mat cse) dep)
+                envFail
+        let uCse' = if (M.member cNam uCse) then uCse else (M.insert cNam cBod uCse)
+        (cseA, uCse) <- checkCse cse uCse' book fill typInp typBod adtCtsMap
+        return (cse1:cseA, uCse)
 
   go src (Swi zer suc) typx dep = do
     book <- envGetBook
@@ -365,6 +378,65 @@ checkUnreachable src cNam term dep = go src cNam term dep where
   go _   cNam (Src src val)     dep = go (Just src) cNam val dep
   go src cNam (Hol nam ctx)     dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> go src cNam Set dep
   go src cNam term              dep = return (cNam, Ann False (Num 0) U32)
+
+fillUnreachableMet :: Term -> Env ()
+fillUnreachableMet (Met uid spn) = 
+  envFill uid (Hol "unreachable" spn)
+fillUnreachableMet (All nam inp bod) = do
+  fillUnreachableMet inp
+  fillUnreachableMet (bod (Con "void" []))
+fillUnreachableMet (Lam nam bod) = do
+  fillUnreachableMet (bod (Con "void" []))
+fillUnreachableMet (App fun arg) = do
+  fillUnreachableMet fun
+  fillUnreachableMet arg
+fillUnreachableMet (Ann _ val typ) = do
+  fillUnreachableMet val
+  fillUnreachableMet typ
+fillUnreachableMet (Slf nam typ bod) = do
+  fillUnreachableMet typ
+  fillUnreachableMet (bod (Con "void" []))
+fillUnreachableMet (Ins val) = do
+  fillUnreachableMet val
+fillUnreachableMet (ADT scp cts typ) = do
+  forM_ cts $ \ (Ctr _ tele) -> fillTele tele
+  fillUnreachableMet typ
+  where fillTele (TRet term) = do
+          fillUnreachableMet term
+        fillTele (TExt nam typ bod) = do
+          fillUnreachableMet typ
+fillUnreachableMet (Con nam arg) = do
+  forM_ arg $ \ (maybeField, term) -> fillUnreachableMet term
+fillUnreachableMet (Mat cse) = do
+  forM_ cse $ \ (cnam, cbod) -> fillUnreachableMet cbod
+fillUnreachableMet (Ref nam) = return ()
+fillUnreachableMet (Let nam val bod) = do
+  fillUnreachableMet val
+  fillUnreachableMet (bod (Con "void" []))
+fillUnreachableMet (Use nam val bod) = do
+  fillUnreachableMet val
+  fillUnreachableMet (bod (Con "void" []))
+fillUnreachableMet Set = return ()
+fillUnreachableMet U32 = return ()
+fillUnreachableMet (Num val) = return ()
+fillUnreachableMet (Op2 opr fst snd) = do
+  fillUnreachableMet fst
+  fillUnreachableMet snd
+fillUnreachableMet (Swi zer suc) = do
+  fillUnreachableMet zer
+  fillUnreachableMet suc
+fillUnreachableMet (Hol nam ctx) = return ()
+fillUnreachableMet (Log msg nxt) = do
+  fillUnreachableMet msg
+  fillUnreachableMet nxt
+fillUnreachableMet (Var nam idx) = return ()
+fillUnreachableMet (Src src val) = do
+  fillUnreachableMet val
+fillUnreachableMet (Txt txt) = return ()
+fillUnreachableMet (Lst lst) = do
+  forM_ lst $ \ val -> do
+    fillUnreachableMet val
+fillUnreachableMet (Nat val) = return ()
 
 checkLater :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
 checkLater False src term typx dep = check False src term typx dep
