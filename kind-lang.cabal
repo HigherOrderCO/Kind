@@ -33,6 +33,7 @@ library
                     , directory==1.3.8.3
                     , hs-highlight == 1.0.3
                     , filepath==1.5.2.0
+                    , mtl==2.3.1
     hs-source-dirs:   src
     default-language: GHC2024
 
@@ -45,5 +46,6 @@ executable kind
                     , directory==1.3.8.3
                     , hs-highlight == 1.0.3
                     , filepath==1.5.2.0
+                    , mtl==2.3.1
     hs-source-dirs:   app
     default-language: GHC2024
