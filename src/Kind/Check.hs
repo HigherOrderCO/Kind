@@ -59,11 +59,6 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
         envLog (Error src (Ref "Self") vtyp (Ins val) dep)
         envFail
 
-  go src (Dat scp cts typ) dep = do
-    forM_ cts $ \ (Ctr _ tele) -> do
-      checkTele Nothing tele Set dep
-    return Set
-
   go src (Ref nam) dep = do
     book <- envGetBook
     case M.lookup nam book of
@@ -96,6 +91,18 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
 
   go src (Use nam val bod) dep = do
     infer src (bod val) dep
+
+  go src (Dat scp cts typ) dep = do
+    forM_ cts $ \ (Ctr _ tele) -> do
+      checkTele Nothing tele Set dep
+    return Set
+    where
+      checkTele :: Maybe Cod -> Tele -> Term -> Int -> Env ()
+      checkTele src tele typ dep = case tele of
+        TRet term -> check src term typ dep
+        TExt nam inp bod -> do
+          check src inp Set dep
+          checkTele src (bod (Ann False (Var nam dep) inp)) typ (dep + 1)
 
   go src (Con nam arg) dep = do
     envLog (Error src (Ref "annotation") (Ref "constructor") (Con nam arg) dep)
@@ -192,6 +199,21 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
       _ -> do
         infer src (Con nam arg) dep
         return ()
+    where
+      checkConAgainstTele :: Maybe Cod -> [(Maybe String, Term)] -> Tele -> Int -> Env Term
+      checkConAgainstTele src [] (TRet ret) _ = return ret
+      checkConAgainstTele src ((maybeField, arg):args) (TExt nam inp bod) dep = do
+        case maybeField of
+          Just field -> if field /= nam
+            then do
+              envLog (Error src (Hol ("expected:" ++ nam) []) (Hol ("detected:" ++ field) []) (Hol "field_mismatch" []) dep)
+              envFail
+            else check src arg inp dep
+          Nothing -> check src arg inp dep
+        checkConAgainstTele src args (bod arg) (dep + 1)
+      checkConAgainstTele src _ _ dep = do
+        envLog (Error src (Hol "constructor_arity_mismatch" []) (Hol "unknown_type" []) (Hol "constructor" []) dep)
+        envFail
 
   go src (Mat cse) typx dep = do
     book <- envGetBook
@@ -234,6 +256,27 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
       _ -> do
         infer src (Mat cse) dep
         return ()
+    where
+      unreachable :: Maybe Cod -> Term -> Int -> Env ()
+      unreachable src (Lam nam bod)     dep = unreachable src (bod (Con "void" [])) (dep+1)
+      unreachable src (Hol nam ctx)     dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> return ()
+      unreachable src (Let nam val bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
+      unreachable src (Use nam val bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
+      unreachable _   (Src src val)     dep = unreachable (Just src) val dep
+      unreachable src term              dep = return ()
+
+      teleToType :: Tele -> Term -> Int -> Term
+      teleToType (TRet _)           ret _   = ret
+      teleToType (TExt nam inp bod) ret dep = All nam inp (\x -> teleToType (bod x) ret (dep + 1))
+
+      teleToTerm :: Tele -> Int -> ([(Maybe String, Term)], Term)
+      teleToTerm tele dep = go tele [] dep where
+        go (TRet ret)         args _   = (reverse args, ret)
+        go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
+
+      extractEqualities :: Term -> Term -> Int -> [(Term, Term)]
+      extractEqualities (Dat as _ at) (Dat bs _ bt) dep = zip as bs where
+      extractEqualities a             b             dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
 
   go src (Swi zer suc) typx dep = do
     book <- envGetBook
@@ -314,49 +357,6 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
     else do
       envLog (Error src expected detected term dep)
       envFail
-
-unreachable :: Maybe Cod -> Term -> Int -> Env ()
-unreachable src (Lam nam bod)     dep = unreachable src (bod (Con "void" [])) (dep+1)
-unreachable src (Hol nam ctx)     dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> return ()
-unreachable src (Let nam val bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
-unreachable src (Use nam val bod) dep = unreachable src (bod (Con "void" [])) (dep+1)
-unreachable _   (Src src val)     dep = unreachable (Just src) val dep
-unreachable src term              dep = return ()
-
-checkTele :: Maybe Cod -> Tele -> Term -> Int -> Env ()
-checkTele src tele typ dep = case tele of
-  TRet term -> check src term typ dep
-  TExt nam inp bod -> do
-    check src inp Set dep
-    checkTele src (bod (Ann False (Var nam dep) inp)) typ (dep + 1)
-
-checkConAgainstTele :: Maybe Cod -> [(Maybe String, Term)] -> Tele -> Int -> Env Term
-checkConAgainstTele src [] (TRet ret) _ = return ret
-checkConAgainstTele src ((maybeField, arg):args) (TExt nam inp bod) dep = do
-  case maybeField of
-    Just field -> if field /= nam
-      then do
-        envLog (Error src (Hol ("expected:" ++ nam) []) (Hol ("detected:" ++ field) []) (Hol "field_mismatch" []) dep)
-        envFail
-      else check src arg inp dep
-    Nothing -> check src arg inp dep
-  checkConAgainstTele src args (bod arg) (dep + 1)
-checkConAgainstTele src _ _ dep = do
-  envLog (Error src (Hol "constructor_arity_mismatch" []) (Hol "unknown_type" []) (Hol "constructor" []) dep)
-  envFail
-
-teleToType :: Tele -> Term -> Int -> Term
-teleToType (TRet _)           ret _   = ret
-teleToType (TExt nam inp bod) ret dep = All nam inp (\x -> teleToType (bod x) ret (dep + 1))
-
-teleToTerm :: Tele -> Int -> ([(Maybe String, Term)], Term)
-teleToTerm tele dep = go tele [] dep where
-  go (TRet ret)         args _   = (reverse args, ret)
-  go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
-
-extractEqualities :: Term -> Term -> Int -> [(Term, Term)]
-extractEqualities (Dat as _ at) (Dat bs _ bt) dep = zip as bs where
-extractEqualities a             b             dep = trace ("Unexpected terms: " ++ termShower True a dep ++ " and " ++ termShower True b dep) []
 
 doCheck :: Term -> Env ()
 doCheck (Ann _ val typ) = do
