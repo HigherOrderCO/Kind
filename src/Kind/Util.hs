@@ -129,11 +129,33 @@ topoSortBook book = go (M.keysSet book) [] where
         (mustInclude'', done'') = includeDeps mustInclude' done' deps
     in (mustInclude'', done'')
 
+-- Converts:
+-- - from a Tele: `{ x:A y:(B x) ... }: (C x y ...)`
+-- - to a type: `∀(x: A) ∀(y: (B x)) ... (C x y ...)`
+teleToType :: Tele -> Term -> Int -> Term
+teleToType (TRet _)           ret _   = ret
+teleToType (TExt nam inp bod) ret dep = All nam inp (\x -> teleToType (bod x) ret (dep + 1))
 
+-- Converts:
+-- - from a Tele : `{ x:A y:(B x) ... }: (C x y ...)`
+-- - to terms    : `([(Just "x", <A>), [(Just "y", <(B x)>)], ...], <(C x y ...)>)`
+teleToTerms :: Tele -> Int -> ([(Maybe String, Term)], Term)
+teleToTerms tele dep = go tele [] dep where
+  go (TRet ret)         args _   = (reverse args, ret)
+  go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
 
+getDatIndices :: Term -> [Term]
+getDatIndices term = case term of
+  Dat idxs _ _ -> idxs
+  _            -> []
 
+getType :: Term -> Term
+getType (Ann _ val typ) = typ
+getType _               = error "?"
 
-
+getTerm :: Term -> Term
+getTerm (Ann _ val typ) = val
+getTerm _               = error "?"
 
 
 

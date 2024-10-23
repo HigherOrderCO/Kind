@@ -1,16 +1,19 @@
--- old compiler:
--- //./old_compiler.txt//
+-- Checker:
+-- //./Check.hs//
 
 module Kind.CompileJS where
 
 import Kind.Reduce
 import Kind.Type
 import Kind.Util
+import Kind.Equal
 
 import qualified Data.Map.Strict as M
 import qualified Data.IntMap.Strict as IM
 import Data.List (intercalate)
 import qualified Control.Monad.State.Lazy as ST
+
+import Control.Monad (forM)
 
 import Prelude hiding (EQ, LT, GT)
 
