@@ -43,7 +43,7 @@ termToJS term dep = case term of
     -- let cse' = map (\(cnam, cbod) -> concat ["case \"", nameToJS cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
     -- in concat ["(x => { switch (x.$) { ", unwords cse', " } })"]
     -- TODO: refactor this so that a case named "_" is compiled to a "default" in JS (instead of 'case "_"'):
-    let cse' = map (\(cnam, cbod) ->
+    let cse' = map (\ (cnam, cbod) ->
                 if cnam == "_"
                   then concat ["default: return (", termToJS cbod dep, ")(x);"]
                   else concat ["case \"", cnam, "\": return APPLY(", termToJS cbod dep, ", x);"]) cse
