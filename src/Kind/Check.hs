@@ -18,6 +18,10 @@ import Debug.Trace
 -- Type-Checking
 -- -------------
 
+-- Modes:
+-- sus=True  : suspended checks on / better unification / wont return annotated term 
+-- sus=False : suspended checks off / worse unification / will return annotated term
+
 infer :: Bool -> Maybe Cod -> Term -> Int -> Env Term
 infer sus src term dep = debug ("infer: " ++ termShower False term dep) $ go src term dep where
 
