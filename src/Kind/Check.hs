@@ -97,10 +97,10 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
       (F64 , F64) -> do
         return F64
       (F64 , _)   -> do
-        envLog (Error src (Ref "F64") (Ref (termShower False sndType dep)) (Op2 opr fst snd) dep)
+        envLog (Error src (Ref "F64") sndType (Op2 opr fst snd) dep)
         envFail
       (U32 , _)   -> do
-        envLog (Error src (Ref "U32") (Ref (termShower False sndType dep)) (Op2 opr fst snd) dep)
+        envLog (Error src (Ref "U32") sndType (Op2 opr fst snd) dep)
         envFail
       (_ , _)     -> do
         envLog (Error src (Ref "U32 / F64") (Ref ((termShower True fstType dep) ++ " , " ++ (termShower True sndType dep))) (Op2 opr fst snd) dep)
