@@ -23,7 +23,7 @@ import Debug.Trace
 -- sus=False : suspended checks off / worse unification / will return annotated term
 
 infer :: Bool -> Maybe Cod -> Term -> Int -> Env Term
-infer sus src term dep = debug ("infer: " ++ termShower False term dep) $ go src term dep where
+infer sus src term dep = debug ("infer: " ++ showTermGo False term dep) $ go src term dep where
 
   go src (All nam inp bod) dep = do
     inpA <- checkLater sus src inp Set dep
@@ -154,7 +154,7 @@ infer sus src term dep = debug ("infer: " ++ termShower False term dep) $ go src
     go src (reduce book fill 2 tm) dep
 
 check :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
-check sus src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :: " ++ termShower True typ dep) $ go src val typ dep where
+check sus src val typ dep = debug ("check: " ++ showTermGo False val dep ++ "\n    :: " ++ showTermGo True typ dep) $ go src val typ dep where
 
   go src (App (Src _ val) arg) typx dep =
     go src (App val arg) typx dep

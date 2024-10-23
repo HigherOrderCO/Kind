@@ -20,7 +20,7 @@ import Debug.Trace
 import Prelude hiding (EQ, LT, GT)
 
 termToJS :: Maybe String -> Term -> Maybe Term -> Int -> ST.State Int String
-termToJS var term typx dep = trace ("termToJS: " ++ termShower False term dep ++ maybe "" (\t -> " :: " ++ termShower True t dep) typx) $ go var term typx dep where
+termToJS var term typx dep = trace ("termToJS: " ++ showTermGo False term dep ++ maybe "" (\t -> " :: " ++ showTermGo True t dep) typx) $ go var term typx dep where
   go var (All _ _ _) _ _ =
     ret var "null"
   go var tm@(Lam nam bod) _ dep = do
