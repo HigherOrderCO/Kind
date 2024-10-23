@@ -71,9 +71,13 @@ termToJS var term typx dep = trace ("termToJS: " ++ showTermGo False term dep ++
     termToJS var (bod val) typx dep
   go var Set _ _ =
     ret var "null"
-  go var U32 _ _ =
+  go var U64 _ _ =
+    ret var "null"
+  go var F64 _ _ =
     ret var "null"
   go var (Num val) _ _ =
+    ret var $ show val
+  go var (Flt val) _ _ =
     ret var $ show val
   go var (Op2 opr fst snd) _ dep = do
     let opr' = operToJS opr

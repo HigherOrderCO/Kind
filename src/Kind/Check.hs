@@ -77,16 +77,16 @@ infer sus src term dep = debug ("infer: " ++ showTermGo False term dep) $ go src
   go src Set dep = do
     return $ Ann False Set Set
 
-  go src U32 dep = do
-    return $ Ann False U32 Set
+  go src U64 dep = do
+    return $ Ann False U64 Set
 
   go src (Num num) dep = do
-    return $ Ann False (Num num) U32
+    return $ Ann False (Num num) U64
 
   go src (Op2 opr fst snd) dep = do
-    fstA <- checkLater sus src fst U32 dep
-    sndA <- checkLater sus src snd U32 dep
-    return $ Ann False (Op2 opr fstA sndA) U32
+    fstA <- checkLater sus src fst U64 dep
+    sndA <- checkLater sus src snd U64 dep
+    return $ Ann False (Op2 opr fstA sndA) U64
 
   go src (Swi zer suc) dep = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
@@ -267,12 +267,12 @@ check sus src val typ dep = debug ("check: " ++ showTermGo False val dep ++ "\n 
     case reduce book fill 2 typx of
       (All typNam typInp typBod) -> do
         case reduce book fill 2 typInp of
-          U32 -> do
+          U64 -> do
             -- Check zero case
-            let zerAnn = Ann False (Num 0) U32
+            let zerAnn = Ann False (Num 0) U64
             zerA <- check sus src zer (typBod zerAnn) dep
             -- Check successor case
-            let sucAnn = Ann False (Var "n" dep) U32
+            let sucAnn = Ann False (Var "n" dep) U64
             let sucTyp = All "n" U32 (\x -> typBod (Op2 ADD (Num 1) x))
             sucA <- check sus src suc sucTyp dep
             return $ Ann False (Swi zerA sucA) typx
