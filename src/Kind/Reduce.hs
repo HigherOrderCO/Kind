@@ -4,6 +4,7 @@ module Kind.Reduce where
 
 import Prelude hiding (EQ, LT, GT)
 import Data.Bits ( (.&.), (.|.), xor, shiftL, shiftR )
+import Data.Fixed (mod')
 import Data.Char (ord)
 import Debug.Trace
 import Kind.Show
@@ -89,7 +90,7 @@ reduce book fill lv term = red term where
   op2 SUB (Flt fst) (Flt snd) = Flt (fst - snd)
   op2 MUL (Flt fst) (Flt snd) = Flt (fst * snd)
   op2 DIV (Flt fst) (Flt snd) = Flt (fst / snd)
-  op2 MOD (Flt fst) (Flt snd) = error "Modulo is not supported for floating point numbers."
+  op2 MOD (Flt fst) (Flt snd) = Flt (mod' fst snd)
   op2 EQ  (Flt fst) (Flt snd) = Num (if fst == snd then 1 else 0)
   op2 NE  (Flt fst) (Flt snd) = Num (if fst /= snd then 1 else 0)
   op2 LT  (Flt fst) (Flt snd) = Num (if fst < snd then 1 else 0)
