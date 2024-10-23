@@ -50,10 +50,16 @@ data Term
   -- U64 Type
   | U64
 
+  -- F64 Type
+  | F64
+
   -- U64 Value
   | Num Word64
 
-  -- U64 Binary Operation
+  -- F64 Value
+  | Flt Double
+
+  -- Binary Operation
   | Op2 Oper Term Term
 
   -- U64 Elimination (updated to use splitting lambda)

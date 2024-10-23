@@ -80,13 +80,34 @@ infer sus src term dep = debug ("infer: " ++ showTermGo False term dep) $ go src
   go src U64 dep = do
     return $ Ann False U64 Set
 
+  go src F64 dep = do
+    return Set
+
   go src (Num num) dep = do
     return $ Ann False (Num num) U64
 
+  go src (Flt num) dep = do
+    return F64
+
   go src (Op2 opr fst snd) dep = do
-    fstA <- checkLater sus src fst U64 dep
-    sndA <- checkLater sus src snd U64 dep
-    return $ Ann False (Op2 opr fstA sndA) U64
+    fstType <- infer src fst dep
+    sndType <- infer src snd dep
+
+    case (fstType, sndType) of
+      (U64 , U64) -> do
+        return U64
+      (F64 , F64) -> do
+        return F64
+      (F64 , _)   -> do
+        envLog (Error src (Ref "F64") sndType (Op2 opr fst snd) dep)
+        envFail
+      (U64 , _)   -> do
+        envLog (Error src (Ref "U64") sndType (Op2 opr fst snd) dep)
+        envFail
+      (_ , _)     -> do
+        envLog (Error src (Ref "U64 / F64") fstType (Op2 opr fst snd) dep)
+        envLog (Error src (Ref "U64 / F64") sndType (Op2 opr fst snd) dep)
+        envFail
 
   go src (Swi zer suc) dep = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
