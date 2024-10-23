@@ -23,7 +23,7 @@ import Debug.Trace
 import Prelude hiding (EQ, LT, GT)
 
 termToJS :: Book -> Fill -> Maybe String -> Term -> Maybe Term -> Int -> ST.State Int String
-termToJS book fill var term typx dep = {-trace ("termToJS: " ++ showTermGo False term dep ++ maybe "" (\t -> " :: " ++ showTermGo True t dep) typx) $ -} go term where
+termToJS book fill var term typx dep = {- trace ("termToJS: " ++ showTermGo False term dep ++ maybe "" (\t -> " :: " ++ showTermGo True t dep) typx) $ -} go term where
   go (All _ _ _) =
     ret var "null"
   go tm@(Lam nam bod) = do
@@ -31,7 +31,7 @@ termToJS book fill var term typx dep = {-trace ("termToJS: " ++ showTermGo False
     bodyName <- fresh
     bodyStmt <- termToJS book fill (Just bodyName) bodyTerm bodyType (dep + length names)
     ret var $ concat ["(", intercalate " => " names, " => {", bodyStmt, "return ", bodyName, ";", "})"]
-    where lams (Lam n b)   ty dep names = let uid = nameToJS nam ++ "$" ++ show dep
+    where lams (Lam n b)   ty dep names = let uid = nameToJS n ++ "$" ++ show dep
                                           in lams (b (Var uid dep)) Nothing (dep+1) (uid : names)
           lams (Src x v)   ty dep names = lams v ty       dep names
           lams (Ann c v t) _  dep names = lams v (Just t) dep names
