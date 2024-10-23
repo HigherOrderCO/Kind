@@ -111,7 +111,7 @@ termToJS book fill var term typx dep = {-trace ("termToJS: " ++ showTermGo False
     sucExpr <- termToJS book fill Nothing suc Nothing dep
     ret var $ concat ["((x => x === 0 ? ", zerExpr, " : ", sucExpr, "(x - 1)))"]
   go (Txt txt) =
-    ret var $ "JSTR_TO_LIST(\"" ++ txt ++ "\")"
+    ret var $ "JSTR_TO_LIST(`" ++ txt ++ "`)"
   go (Lst lst) =
     let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
         nil  = Con "Nil" []
