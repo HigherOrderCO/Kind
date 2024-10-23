@@ -76,7 +76,7 @@ printHelp = do
 -- Normalizes the target definition
 apiNormal :: Command
 apiNormal bookPath (book, _, _) defName defPath =
-  case M.lookup defName book of
+  case M.lookup "main" book of
     Just term -> do
       result <- showInfo book IM.empty (Print term 0)
       putStrLn result
