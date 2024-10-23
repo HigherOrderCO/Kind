@@ -51,7 +51,7 @@ data Term
   | U64
 
   -- U64 Value
-  | Num Word32
+  | Num Word64
 
   -- U64 Binary Operation
   | Op2 Oper Term Term
