@@ -121,6 +121,9 @@ showTeleGo small tele dep = "{ " ++ go tele dep where
     let term' = showTermGo small term dep
     in concat ["}: ", term']
 
+showTele :: Tele -> String
+showTele tele = showTeleGo True tele 0
+
 showTerm :: Term -> String
 showTerm term = showTermGo True term 0
 

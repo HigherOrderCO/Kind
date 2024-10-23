@@ -1,8 +1,10 @@
 -- Checker:
--- //./Check.hs//
+-- //./Type.hs//
 
 module Kind.CompileJS where
 
+import Kind.Check
+import Kind.Env
 import Kind.Equal
 import Kind.Reduce
 import Kind.Show
@@ -11,6 +13,7 @@ import Kind.Util
 
 import Control.Monad (forM)
 import Data.List (intercalate)
+import Data.Maybe (fromJust)
 import qualified Control.Monad.State.Lazy as ST
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
@@ -19,97 +22,116 @@ import Debug.Trace
 
 import Prelude hiding (EQ, LT, GT)
 
-termToJS :: Maybe String -> Term -> Maybe Term -> Int -> ST.State Int String
-termToJS var term typx dep = trace ("termToJS: " ++ showTermGo False term dep ++ maybe "" (\t -> " :: " ++ showTermGo True t dep) typx) $ go var term typx dep where
-  go var (All _ _ _) _ _ =
+termToJS :: Book -> Fill -> Maybe String -> Term -> Maybe Term -> Int -> ST.State Int String
+termToJS book fill var term typx dep = {-trace ("termToJS: " ++ showTermGo False term dep ++ maybe "" (\t -> " :: " ++ showTermGo True t dep) typx) $ -} go term where
+  go (All _ _ _) =
     ret var "null"
-  go var tm@(Lam nam bod) _ dep = do
-    let (names, body) = lams tm dep []
+  go tm@(Lam nam bod) = do
+    let (names, bodyTerm, bodyType) = lams tm typx dep []
     bodyName <- fresh
-    bodyStmt <- termToJS (Just bodyName) body Nothing (dep + length names)
+    bodyStmt <- termToJS book fill (Just bodyName) bodyTerm bodyType (dep + length names)
     ret var $ concat ["(", intercalate " => " names, " => {", bodyStmt, "return ", bodyName, ";", "})"]
-    where lams (Lam n b) dep names = lams (b (Var n dep)) (dep+1) ((nameToJS n ++ "$" ++ show dep) : names)
-          lams (Src x v) dep names = lams v dep names
-          lams t         dep names = (reverse names, t)
-  go var (App fun arg) _ dep = do
-    funExpr <- termToJS Nothing fun Nothing dep
-    argExpr <- termToJS Nothing arg Nothing dep
+    where lams (Lam n b)   ty dep names = let uid = nameToJS nam ++ "$" ++ show dep
+                                          in lams (b (Var uid dep)) Nothing (dep+1) (uid : names)
+          lams (Src x v)   ty dep names = lams v ty       dep names
+          lams (Ann c v t) _  dep names = lams v (Just t) dep names
+          lams tm          ty dep names = (reverse names, tm, ty)
+  go (App fun arg) = do
+    funExpr <- termToJS book fill Nothing fun Nothing dep
+    argExpr <- termToJS book fill Nothing arg Nothing dep
     ret var $ concat ["(", funExpr, ")(", argExpr, ")"]
-  go var (Ann _ val typ) _ dep =
-    termToJS var val (Just typ) dep
-  go var (Slf _ _ _) _ _ =
+  go (Ann _ val typ) =
+    termToJS book fill var val (Just typ) dep
+  go (Slf _ _ _) =
     ret var "null"
-  go var (Ins val) typx dep =
-    termToJS var val typx dep
-  go var (ADT _ _ _) _ _ =
+  go (Ins val) =
+    termToJS book fill var val typx dep
+  go (ADT _ _ _) =
     ret var "null"
-  go var (Con nam arg) _ dep = do
-    argExpr <- mapM (\(f, x) -> termToJS Nothing x Nothing dep) arg
-    let fields = concat (zipWith (\i x -> concat [", x", show i, ": ", x]) [0..] argExpr)
-    ret var $ concat ["({$: \"", nam, "\", _: ", show (length arg), fields, "})"]
-  go var (Mat cse) _ dep = do
-    cseExpr <- mapM (\(cnam, cbod) -> do
-      cbodExpr <- termToJS Nothing cbod Nothing dep
-      return $ if cnam == "_"
-        then concat ["default: return (", cbodExpr, ")(x);"]
-        else concat ["case \"", cnam, "\": return APPLY(", cbodExpr, ", x);"]
-      ) cse
-    ret var $ concat ["(x => { switch (x.$) { ", unwords cseExpr, " } })"]
-  go var (Ref nam) _ _ =
+  go (Con nam arg) = do
+    let adt = reduce book fill 2 (fromJust typx)
+    let cts = getADTCts adt
+    case lookup nam cts of
+      Just (Ctr _ tele) -> do
+        let fieldNames = getTeleNames tele dep []
+        argExprs <- forM (zip fieldNames arg) $ \ (fieldName, (_, argTerm)) -> do
+          expr <- termToJS book fill Nothing argTerm Nothing dep
+          return (fieldName, expr)
+        let fields = concatMap (\ (fname, expr) -> ", " ++ fname ++ ": " ++ expr) argExprs
+        ret var $ concat ["({$: \"", nam, "\"", fields, "})"]
+      Nothing -> error $ "constructor-not-found:" ++ nam
+  go (Mat cse) = do
+    case (reduce book fill 2 (fromJust typx)) of
+      (All _ adt _) -> do
+        let cts = getADTCts (reduce book fill 2 adt)
+        cases <- forM cse $ \ (cnam, cbod) ->
+          if cnam == "_" then do
+            retName <- fresh
+            retStmt <- termToJS book fill (Just retName) (App cbod (Var "x" 0)) Nothing dep
+            return $ concat ["default: { " ++ retStmt, " return " ++ retName ++ "; }"]
+          else case lookup cnam cts of
+            Just (Ctr _ tele) -> do
+              let fieldNames = getTeleNames tele dep []
+              let cbodApps = foldl App cbod (map (\f -> (Var ("x."++f) 0)) fieldNames)
+              retName <- fresh
+              retStmt <- termToJS book fill (Just retName) cbodApps Nothing dep
+              return $ concat ["case \"", cnam, "\": { ", retStmt, " return " ++ retName ++ "; }"]
+            Nothing -> error $ "constructor-not-found:" ++ cnam
+        ret var $ concat ["(x => { switch (x.$) { ", unwords cases, " } })"]
+      otherwise -> error "?"
+  go (Ref nam) =
     ret var $ nameToJS nam
-  go var (Let nam val bod) typx dep =
+  go (Let nam val bod) =
     case var of
       Just var -> do
-        valExpr <- termToJS (Just (nameToJS nam ++ "$" ++ show dep)) val Nothing dep
-        bodExpr <- termToJS (Just var) (bod (Var nam dep)) Nothing (dep + 1)
+        let uid = nameToJS nam ++ "$" ++ show dep
+        valExpr <- termToJS book fill (Just uid) val Nothing dep
+        bodExpr <- termToJS book fill (Just var) (bod (Var uid dep)) Nothing (dep + 1)
         return $ concat [valExpr, bodExpr]
       Nothing -> do
-        valExpr <- termToJS (Just (nameToJS nam ++ "$" ++ show dep)) val Nothing dep
-        bodExpr <- termToJS Nothing (bod (Var nam dep)) Nothing (dep + 1)
+        let uid = nameToJS nam ++ "$" ++ show dep
+        valExpr <- termToJS book fill (Just uid) val Nothing dep
+        bodExpr <- termToJS book fill Nothing (bod (Var uid dep)) Nothing (dep + 1)
         return $ concat ["(() => {", valExpr, "return ", bodExpr, ";})()"]
-  go var (Use nam val bod) typx dep =
-    termToJS var (bod val) typx dep
-  go var Set _ _ =
+  go (Use nam val bod) =
+    termToJS book fill var (bod val) typx dep
+  go Set =
     ret var "null"
-  go var U32 _ _ =
+  go U32 =
     ret var "null"
-  go var (Num val) _ _ =
+  go (Num val) =
     ret var $ show val
-  go var (Op2 opr fst snd) _ dep = do
+  go (Op2 opr fst snd) = do
     let opr' = operToJS opr
-    fstExpr <- termToJS Nothing fst Nothing dep
-    sndExpr <- termToJS Nothing snd Nothing dep
+    fstExpr <- termToJS book fill Nothing fst Nothing dep
+    sndExpr <- termToJS book fill Nothing snd Nothing dep
     ret var $ concat ["((", fstExpr, " ", opr', " ", sndExpr, ") >>> 0)"]
-  go var (Swi zer suc) _ dep = do
-    zerExpr <- termToJS Nothing zer Nothing dep
-    sucExpr <- termToJS Nothing suc Nothing dep
+  go (Swi zer suc) = do
+    zerExpr <- termToJS book fill Nothing zer Nothing dep
+    sucExpr <- termToJS book fill Nothing suc Nothing dep
     ret var $ concat ["((x => x === 0 ? ", zerExpr, " : ", sucExpr, "(x - 1)))"]
-  go var (Txt txt) typx dep =
+  go (Txt txt) =
+    ret var $ "JSTR_TO_LIST(" ++ show txt ++ ")"
+  go (Lst lst) =
     let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
         nil  = Con "Nil" []
-    in  termToJS var (foldr cons nil (map (Num . fromIntegral . fromEnum) txt)) typx dep
-  go var (Lst lst) typx dep =
-    let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
-        nil  = Con "Nil" []
-    in  termToJS var (foldr cons nil lst) typx dep
-  go var (Nat val) typx dep =
+    in  termToJS book fill var (foldr cons nil lst) typx dep
+  go (Nat val) =
     let succ = \x -> Con "Succ" [(Nothing, x)]
         zero = Con "Zero" []
-    in  termToJS var (foldr (\_ acc -> succ acc) zero [1..val]) typx dep
-  go var (Hol _ _) _ _ =
+    in  termToJS book fill var (foldr (\_ acc -> succ acc) zero [1..val]) typx dep
+  go (Hol _ _) =
     ret var "null"
-  go var (Met _ _) _ _ =
+  go (Met _ _) =
     ret var "null"
-  go var (Log msg nxt) _ dep = do
-    msgExpr <- termToJS Nothing msg Nothing dep
-    nxtExpr <- termToJS Nothing nxt Nothing dep
-    ret var $ concat ["(console.log(LIST_TO_STRING(", msgExpr, ")), ", nxtExpr, ")"]
-  go var (Var nam idx) _ _ =
-    ret var $ nameToJS nam ++ "$" ++ show idx
-  go var (Src _ val) typx dep =
-    termToJS var val typx dep
-
-
+  go (Log msg nxt) = do
+    msgExpr <- termToJS book fill Nothing msg Nothing dep
+    nxtExpr <- termToJS book fill Nothing nxt Nothing dep
+    ret var $ concat ["(console.log(LIST_TO_JSTR(", msgExpr, ")), ", nxtExpr, ")"]
+  go (Var nam _) =
+    ret var nam
+  go (Src _ val) =
+    termToJS book fill var val typx dep
 
 operToJS :: Oper -> String
 operToJS ADD = "+"
@@ -129,9 +151,6 @@ operToJS XOR = "^"
 operToJS LSH = "<<"
 operToJS RSH = ">>"
 
-bookToJS :: Book -> String
-bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", ST.evalState (termToJS Nothing tm Nothing 0) 0, ";"]) (topoSortBook book)
-
 nameToJS :: String -> String
 nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
 
@@ -146,43 +165,66 @@ ret :: Maybe String -> String -> ST.State Int String
 ret (Just name) expr = return $ "var " ++ name ++ " = " ++ expr ++ ";"
 ret Nothing     expr = return $ expr
 
+
+-- bookToJS :: Book -> String
+-- bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", ST.evalState (termToJS book Nothing tm Nothing 0) 0, ";"]) (topoSortBook book)
+
+prelude :: String
+prelude = unlines [
+  "function LIST_TO_JSTR(list) {",
+  "  try {",
+  "    let result = '';",
+  "    let current = list;",
+  "    while (current.$ === 'Cons') {",
+  "      result += String.fromCodePoint(current.head);",
+  "      current = current.tail;",
+  "    }",
+  "    if (current.$ === 'Nil') {",
+  "      return result;",
+  "    }",
+  "  } catch (e) {}",
+  "  return list;",
+  "}",
+  "function JSTR_TO_LIST(str) {",
+  "  let list = {$: 'Nil'};",
+  "  for (let i = str.length - 1; i >= 0; i--) {",
+  "    list = {$: 'Cons', head: str.charCodeAt(i), tail: list};",
+  "  }",
+  "  return list;",
+  "}"
+  ]
+
+
+-- compileJS :: Book -> String
+-- compileJS book = M.foldrWithKey compileDef "" book where
+  -- compileDef name term acc =
+    -- case envRun (doAnnotate term) book of
+      -- Done _ (term,fill) ->
+        -- let uid = nameToJS name
+            -- val = bind term []
+            -- def = ST.evalState (termToJS book fill (Just uid) val Nothing 0) 0
+        -- in acc ++ def ++ "\n\n"
+      -- Fail _  ->
+        -- error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
+
+-- PROBLEM: the function above isn't topologically sorting the book.
+-- fortunatelly, we already have a funcionality to do the topological sorting:
+-- topoSortBook :: Book -> [(String, Term)]
+-- your goal is to refactor 'compileJS' to use topoSortBook, outputting js definitions in a topologically sorted order.
+-- do it now:
+
+
 compileJS :: Book -> String
-compileJS book =
-  let prelude = unlines [
-        "function APPLY(f, x) {",
-        "  switch (x._) {",
-        "    case 0: return f;",
-        "    case 1: return f(x.x0);",
-        "    case 2: return f(x.x0)(x.x1);",
-        "    case 3: return f(x.x0)(x.x1)(x.x2);",
-        "    case 4: return f(x.x0)(x.x1)(x.x2)(x.x3);",
-        "    case 5: return f(x.x0)(x.x1)(x.x2)(x.x3)(x.x4);",
-        "    case 6: return f(x.x0)(x.x1)(x.x2)(x.x3)(x.x4)(x.x5);",
-        "    case 7: return f(x.x0)(x.x1)(x.x2)(x.x3)(x.x4)(x.x5)(x.x6);",
-        "    case 8: return f(x.x0)(x.x1)(x.x2)(x.x3)(x.x4)(x.x5)(x.x6)(x.x7);",
-        "    default:",
-        "      for (let i = 0; i < x._; i++) {",
-        "        f = f(x['x' + i]);",
-        "      }",
-        "      return f;",
-        "  }",
-        "}",
-        "function LIST_TO_STRING(list) {",
-        "  try {",
-        "    let result = '';",
-        "    let current = list;",
-        "    while (current.$ === 'Cons') {",
-        "      result += String.fromCodePoint(current.x0);",
-        "      current = current.x1;",
-        "    }",
-        "    if (current.$ === 'Nil') {",
-        "      return result;",
-        "    }",
-        "  } catch (e) {}",
-        "  return list;",
-        "}"
-        ]
-      bookJS  = bookToJS book
-  in concat [prelude, "\n\n", bookJS]
+compileJS book = prelude ++ "\n\n" ++ concatMap compileDef (topoSortBook book) where
+  compileDef (name, term) =
+    case envRun (doAnnotate term) book of
+      Done _ (term, fill) ->
+        let uid = nameToJS name
+            val = bind term []
+            def = ST.evalState (termToJS book fill (Just uid) val Nothing 0) 0
+        in def ++ "\n\n"
+      Fail _ ->
+        error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
+
 
 

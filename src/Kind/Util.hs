@@ -2,10 +2,12 @@
 
 module Kind.Util where
 
+import Kind.Show
 import Kind.Type
-import qualified Data.Set as S
-import qualified Data.Map.Strict as M
+
 import Debug.Trace
+import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 
 -- Gets dependencies of a term
 getDeps :: Term -> [String]
@@ -55,51 +57,6 @@ getAllDeps book name = go S.empty [name] where
         Just term -> go (S.insert x visited) (getDeps term ++ xs)
         Nothing   -> go (S.insert x visited) xs
 
--- TODO: implement an algorithm that topologically sorts a book. that is, given
--- a book, it will return a list of terms, sorted by direct dependencies. terms
--- with no direct dependencies are placed in the beginning of the list. then,
--- each term that appears is such that all its dependencies come before it.
--- It works as follows:
--- first, we convert the book to a SET of names to be included.
--- then, we pop a name from that set, and pass it to the 'include' function.
--- the include function includes a give name in the result list.
--- that function receives a name, the set of names to be included, etc.
--- then, it checks if the name is on the set. if it isn't, we skip.
--- then, it REMOVES the name from the set.
--- then, it gets this term's list of dependencies (getDeps), and includes each (recursion).
--- then, we will push the term to the result list.
--- at the end, we will have just a list of (name,term) in topologically sorted order.
-
-
--- Topologically sorts a book
--- topoSortBook :: Book -> [(String, Term)]
--- topoSortBook book = go (M.keysSet book) [] where
-  -- go names done = case S.lookupMin names of
-    -- Nothing   -> done
-    -- Just name -> include name names done
-
-  -- include :: String -> S.Set String -> [(String, Term)] -> [(String, Term)]
-  -- include name names done = 
-    -- if not (S.member name names) then
-      -- go names done
-    -- else case M.lookup name book of
-      -- Nothing ->
-        -- go names done
-      -- Just term ->
-        -- let deps   = getDeps term
-            -- names' = S.delete name names
-            -- done'  = foldl (\acc dep -> include dep names' acc) done deps
-        -- in (name, term) : go names' done'
-
--- This is wrong.
--- 1. the 'names' argument must be the first, and should be renamed to "mustInclude"
--- 2. the 'done' argument must be the second.
--- 3. 'include' should return the updated 'names' object, as well as the new 'done' list.
--- 4. to compute "done'", we must create an aux recursive function called
--- 'includeDeps' that receives the mustInclude set, the 'done' list, a list of
--- dep names. then, it recurses through the list of dep names, passing the
--- updated mustIncluded set down the recursion.
-
 -- Topologically sorts a book
 topoSortBook :: Book -> [(String, Term)]
 topoSortBook book = go (M.keysSet book) [] where
@@ -144,6 +101,10 @@ teleToTerms tele dep = go tele [] dep where
   go (TRet ret)         args _   = (reverse args, ret)
   go (TExt nam inp bod) args dep = go (bod (Var nam dep)) ((Just nam, Var nam dep) : args) (dep + 1)
 
+getTeleNames :: Tele -> Int -> [String] -> [String]
+getTeleNames (TRet _)           dep acc = reverse acc
+getTeleNames (TExt name _ next) dep acc = getTeleNames (next (Var name dep)) (dep+1) (name:acc)
+
 getDatIndices :: Term -> [Term]
 getDatIndices term = case term of
   ADT idxs _ _ -> idxs
@@ -156,3 +117,11 @@ getType _               = error "?"
 getTerm :: Term -> Term
 getTerm (Ann _ val typ) = val
 getTerm _               = error "?"
+
+getCtrName :: Ctr -> String
+getCtrName (Ctr name _) = name
+
+getADTCts :: Term -> [(String,Ctr)]
+getADTCts (ADT _ cts _) = map (\ ctr -> (getCtrName ctr, ctr)) cts
+getADTCts (Src loc val) = getADTCts val
+getADTCts term          = error ("not-an-adt:" ++ showTerm term)

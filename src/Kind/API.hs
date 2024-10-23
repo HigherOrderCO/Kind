@@ -42,11 +42,11 @@ main = do
     Just bookPath -> do
       result <- case args of
         -- ["check"]      -> runWithAll bookPath apiCheckAll
+        ["run", arg]   -> runWithOne bookPath arg apiNormal
         ["check"]      -> runWithAll bookPath apiCheck
         ["check", arg] -> runWithOne bookPath arg apiCheck
-        ["run", arg]   -> runWithOne bookPath arg apiNormal
-        ["show", arg]  -> runWithOne bookPath arg apiShow
         ["to-js", arg] -> runWithOne bookPath arg apiToJS
+        ["show", arg]  -> runWithOne bookPath arg apiShow
         ["deps", arg]  -> runWithOne bookPath arg apiDeps
         ["rdeps", arg] -> runWithOne bookPath arg apiRDeps
         _              -> printHelp
@@ -93,7 +93,7 @@ apiCheck bookPath (book, defs, _) defName defPath = do
         case M.lookup fileDefName book of
           Just term -> do
             case envRun (doCheck term) book of
-              Done state value -> do
+              Done state _ -> do
                 apiPrintLogs state
                 apiPrintWarn term state
                 putStrLn $ "\x1b[32m✓ " ++ fileDefName ++ "\x1b[0m"
@@ -109,6 +109,12 @@ apiCheck bookPath (book, defs, _) defName defPath = do
     Nothing -> do
       return $ Left $ "No definitions found in file: " ++ defPath
 
+-- Compiles the whole book to JS
+apiToJS :: Command
+apiToJS bookPath (book, _, _) _ _ = do
+  putStrLn $ compileJS book
+  return $ Right ()
+
 -- Shows a definition
 apiShow :: Command
 apiShow bookPath (book, _, _) defName _ = 
@@ -118,13 +124,6 @@ apiShow bookPath (book, _, _) defName _ =
       return $ Right ()
     Nothing -> do
       return $ Left $ "Error: Definition '" ++ defName ++ "' not found."
-
--- Compiles the whole book to JS
-apiToJS :: Command
-apiToJS bookPath (book, _, _) defName _ = do
-  let jsCode = compileJS book
-  putStrLn jsCode
-  return $ Right ()
 
 -- Shows immediate dependencies of a definition
 apiDeps :: Command
