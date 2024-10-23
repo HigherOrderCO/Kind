@@ -31,7 +31,9 @@ getDeps term = case term of
   Var _ _       -> []
   Set           -> []
   U32           -> []
+  F64           -> []
   Num _         -> []
+  FNum _        -> []
   Txt _         -> []
   Lst elems     -> concatMap getDeps elems
   Nat _         -> []
