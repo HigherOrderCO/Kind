@@ -78,7 +78,7 @@ apiNormal :: Command
 apiNormal bookPath (book, _, _) defName defPath =
   case M.lookup defName book of
     Just term -> do
-      result <- infoShow book IM.empty (Print term 0)
+      result <- showInfo book IM.empty (Print term 0)
       putStrLn result
       return $ Right ()
     Nothing -> do
@@ -108,22 +108,6 @@ apiCheck bookPath (book, defs, _) defName defPath = do
       return $ sequence_ results
     Nothing -> do
       return $ Left $ "No definitions found in file: " ++ defPath
-
--- apiCheckAll :: Command
--- apiCheckAll bookPath (book, defs, _) _ _ = do
-  -- results <- forM (M.toList defs) $ \(filePath, defNames) -> do
-    -- forM defNames $ \defName -> do
-      -- case M.lookup defName book of
-        -- Just term -> case envRun (doCheck term) book of
-          -- Done state _ -> do
-            -- putStrLn $ "\x1b[32m✓ " ++ defName ++ "\x1b[0m"
-            -- return $ Right ()
-          -- Fail state -> do
-            -- putStrLn $ "\x1b[31m✗ " ++ defName ++ "\x1b[0m"
-            -- return $ Left $ "Error."
-        -- Nothing -> do
-          -- return $ Left $ "Definition not found: " ++ defName
-  -- return $ sequence_ (concat results)
 
 -- Shows a definition
 apiShow :: Command
@@ -264,12 +248,12 @@ getDefPath bookPath name = bookPath </> name ++ ".kind"
 -- Stringification
 -- ---------------
 
-infoShow :: Book -> Fill -> Info -> IO String
-infoShow book fill info = case info of
+showInfo :: Book -> Fill -> Info -> IO String
+showInfo book fill info = case info of
   Found nam typ ctx dep ->
     let nam' = concat ["?", nam]
         typ' = termShower True (normal book fill 0 typ dep) dep
-        ctx' = contextShow book fill ctx dep
+        ctx' = showContext book fill ctx dep
     in return $ concat ["\x1b[1mGOAL\x1b[0m ", nam', " : ", typ', "\n", ctx']
   Error src exp det bad dep -> do
     let exp' = concat ["- expected : \x1b[32m", termShower True (normal book fill 0 exp dep) dep, "\x1b[0m"]
@@ -291,19 +275,19 @@ infoShow book fill info = case info of
   Print val dep ->
     return $ termShower True (normal book fill 2 val dep) dep
 
-contextShow :: Book -> Fill -> [Term] -> Int -> String
-contextShow book fill ctx dep = unlines $ map (\term -> "- " ++ contextShowAnn book fill term dep) ctx
+showContext :: Book -> Fill -> [Term] -> Int -> String
+showContext book fill ctx dep = unlines $ map (\term -> "- " ++ showContextAnn book fill term dep) ctx
 
-contextShowAnn :: Book -> Fill -> Term -> Int -> String
-contextShowAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
-contextShowAnn book fill (Src _ val)       dep = contextShowAnn book fill val dep
-contextShowAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
+showContextAnn :: Book -> Fill -> Term -> Int -> String
+showContextAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
+showContextAnn book fill (Src _ val)       dep = showContextAnn book fill val dep
+showContextAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
 
 -- Prints logs from the type-checker
 apiPrintLogs :: State -> IO ()
 apiPrintLogs (State book fill susp logs) = do
   forM_ logs $ \log -> do
-    result <- infoShow book fill log
+    result <- showInfo book fill log
     putStr result
 
 -- Prints a warning if there are unsolved metas

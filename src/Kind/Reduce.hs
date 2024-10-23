@@ -50,7 +50,7 @@ reduce book fill lv term = red term where
     Just cx -> red (foldl App cx (map snd carg))
     Nothing -> case lookup "_" cse of
       Just df -> red (App df (Con cnam carg))
-      Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match and no default case '_' provided :" ++ (termShower True (Mat cse) 0)
+      Nothing -> error $ "Constructor " ++ cnam ++ " not found in pattern match and no default case '_' provided :" ++ (showTermGo True (Mat cse) 0)
   mat cse arg = App (Mat cse) arg
 
   swi zer suc (Num 0)             = red zer
@@ -111,7 +111,7 @@ logMsg book fill lv msg' msg nxt txt =
     Con "Nil" [] ->
       trace txt (reduce book fill lv nxt)
     _ ->
-      trace (">> " ++ (termShow (normal book fill 1 msg' 0))) $ (reduce book fill lv nxt)
+      trace (">> " ++ (showTerm (normal book fill 1 msg' 0))) $ (reduce book fill lv nxt)
 
 -- Normalization
 -- -------------

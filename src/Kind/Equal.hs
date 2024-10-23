@@ -19,7 +19,7 @@ import qualified Data.IntMap.Strict as IM
 
 -- Checks if two terms are equal, after reduction steps
 equal :: Term -> Term -> Int -> Env Bool
-equal a b dep = debug ("== " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep) $ do
+equal a b dep = debug ("== " ++ showTermGo False a dep ++ "\n.. " ++ showTermGo False b dep) $ do
   -- If both terms are identical, return true
   state <- envSnapshot
   is_id <- identical a b dep
@@ -46,7 +46,7 @@ equal a b dep = debug ("== " ++ termShower False a dep ++ "\n.. " ++ termShower 
 identical :: Term -> Term -> Int -> Env Bool
 identical a b dep = do
   fill <- envGetFill
-  debug ("ID " ++ termShower False a dep ++ "\n.. " ++ termShower False b dep ++ "\n" ++ (unlines $ map (\(k,v) -> "~" ++ show k ++ " = " ++ termShower False v dep) $ IM.toList fill)) $ go a b dep
+  debug ("ID " ++ showTermGo False a dep ++ "\n.. " ++ showTermGo False b dep ++ "\n" ++ (unlines $ map (\(k,v) -> "~" ++ show k ++ " = " ++ showTermGo False v dep) $ IM.toList fill)) $ go a b dep
  where
   go (All aNam aInp aBod) (All bNam bInp bBod) dep = do
     iInp <- identical aInp bInp dep
@@ -236,10 +236,10 @@ unify uid spn b dep = do
   -- is the solution not recursive?
   let no_loops = not $ occur book fill uid b dep
 
-  debug ("unify: " ++ show uid ++ " " ++ termShower False b dep ++ " | " ++ show solved ++ " " ++ show solvable ++ " " ++ show no_loops) $ do
+  debug ("unify: " ++ show uid ++ " " ++ showTermGo False b dep ++ " | " ++ show solved ++ " " ++ show solvable ++ " " ++ show no_loops) $ do
     if not solved && solvable && no_loops then do
       let solution = solve book fill uid spn b
-      debug ("solve: " ++ show uid ++ " " ++ termShower False solution dep ++ " | spn: " ++ show (map (\t -> termShower False t dep) spn)) $ envFill uid solution
+      debug ("solve: " ++ show uid ++ " " ++ showTermGo False solution dep ++ " | spn: " ++ show (map (\t -> showTermGo False t dep) spn)) $ envFill uid solution
       return True
 
     -- Otherwise, return true iff both are identical metavars
