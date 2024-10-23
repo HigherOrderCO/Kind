@@ -80,7 +80,7 @@ termShower small term dep =
             bod' = termShower small (bod (Var nam dep)) (dep + 1)
         in concat ["use " , nam' , " = " , val' , " " , bod']
       Set -> "*"
-      U32 -> "U32"
+      U64 -> "U64"
       F64 -> "F64"
       Num val ->
         let val' = show val

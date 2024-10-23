@@ -70,14 +70,14 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
   go src Set dep = do
     return Set
 
-  go src U32 dep = do
+  go src U64 dep = do
     return Set
 
   go src F64 dep = do
     return Set
 
   go src (Num num) dep = do
-    return U32
+    return U64
 
   go src (Flt num) dep = do
     return F64
@@ -87,18 +87,19 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
     sndType <- infer src snd dep
 
     case (fstType, sndType) of
-      (U32 , U32) -> do
-        return U32
+      (U64 , U64) -> do
+        return U64
       (F64 , F64) -> do
         return F64
       (F64 , _)   -> do
         envLog (Error src (Ref "F64") sndType (Op2 opr fst snd) dep)
         envFail
-      (U32 , _)   -> do
-        envLog (Error src (Ref "U32") sndType (Op2 opr fst snd) dep)
+      (U64 , _)   -> do
+        envLog (Error src (Ref "U64") sndType (Op2 opr fst snd) dep)
         envFail
       (_ , _)     -> do
-        envLog (Error src (Ref "U32 / F64") (Ref ((termShower True fstType dep) ++ " , " ++ (termShower True sndType dep))) (Op2 opr fst snd) dep)
+        envLog (Error src (Ref "U64 / F64") fstType (Op2 opr fst snd) dep)
+        envLog (Error src (Ref "U64 / F64") sndType (Op2 opr fst snd) dep)
         envFail
 
   go src (Swi zer suc) dep = do
@@ -305,14 +306,14 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
     case reduce book fill 2 typx of
       (All typ_nam typ_inp typ_bod) -> do
         case reduce book fill 2 typ_inp of
-          U32 -> do
+          U64 -> do
             -- Check zero case
-            let zerAnn = Ann False (Num 0) U32
+            let zerAnn = Ann False (Num 0) U64
             check src zer (typ_bod zerAnn) dep
             -- Check successor case
             let n = Var "n" dep
-            let sucAnn = Ann False n U32
-            let sucTyp = All "n" U32 (\x -> typ_bod (Op2 ADD (Num 1) x))
+            let sucAnn = Ann False n U64
+            let sucTyp = All "n" U64 (\x -> typ_bod (Op2 ADD (Num 1) x))
             check src suc sucTyp dep
           _ -> do
             infer src (Swi zer suc) dep

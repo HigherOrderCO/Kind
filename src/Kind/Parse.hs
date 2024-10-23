@@ -368,7 +368,7 @@ parseRef = withSrc $ do
   (_, _, uses) <- P.getState
   let name' = expandUses uses name
   return $ case name' of
-    "U32" -> U32
+    "U64" -> U64
     "F64" -> F64
     "Set" -> Set
     "_"   -> Met 0 []
@@ -934,7 +934,7 @@ parseSwiInl = withSrc $ do
                 buildIfChain [] = defaultBody
                 buildIfChain ((num,body):rest) = App
                   (Mat [("True", body), ("False", buildIfChain rest)])
-                  (App (App (Ref "Base/U32/eq") x) (Num (read num)))
+                  (App (App (Ref "Base/U64/eq") x) (Num (read num)))
             return $ buildIfChain nonDefaultCases
     ]
 

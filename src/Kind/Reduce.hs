@@ -187,7 +187,7 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     Use nam nf_val nf_bod
   go (Hol nam ctx) dep = Hol nam ctx
   go Set dep = Set
-  go U32 dep = U32
+  go U64 dep = U64
   go F64 dep = F64
   go (Num val) dep = Num val
   go (Flt val) dep = Flt val
@@ -279,7 +279,7 @@ bind (Use nam val bod) ctx =
   let bod' = \x -> bind (bod (Var nam 0)) ((nam, x) : ctx) in
   Use nam val' bod'
 bind Set ctx = Set
-bind U32 ctx = U32
+bind U64 ctx = U64
 bind F64 ctx = F64
 bind (Num val) ctx = Num val
 bind (Flt val) ctx = Flt val

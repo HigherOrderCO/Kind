@@ -67,7 +67,7 @@ termToJS var term dep = case term of
     termToJS var (bod val) dep
   Set ->
     ret var "null"
-  U32 ->
+  U64 ->
     ret var "null"
   Num val ->
     ret var $ show val
