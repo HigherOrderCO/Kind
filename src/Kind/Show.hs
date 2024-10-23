@@ -53,8 +53,8 @@ showTermGo small term dep =
       Ins val ->
         let val' = showTermGo small val dep
         in concat ["~" , val']
-      -- CHANGED: Updated Dat case to use new Ctr structure
-      Dat scp cts typ ->
+      -- CHANGED: Updated ADT case to use new Ctr structure
+      ADT scp cts typ ->
         let scp' = unwords (map (\x -> showTermGo small x dep) scp)
             cts' = unwords (map (\(Ctr nm tele) -> "#" ++ nm ++ " " ++ showTeleGo small tele dep) cts)
             typ' = showTermGo small typ dep

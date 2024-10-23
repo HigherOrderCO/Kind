@@ -19,8 +19,8 @@ import Debug.Trace
 -- -------------
 
 -- Modes:
--- sus=True  : suspended checks on / better unification / wont return annotated term 
--- sus=False : suspended checks off / worse unification / will return annotated term
+-- - sus=True  : suspended checks on / better unification / wont return annotated term 
+-- - sus=False : suspended checks off / worse unification / will return annotated term
 
 infer :: Bool -> Maybe Cod -> Term -> Int -> Env Term
 infer sus src term dep = debug ("infer: " ++ showTermGo False term dep) $ go src term dep where
@@ -101,10 +101,10 @@ infer sus src term dep = debug ("infer: " ++ showTermGo False term dep) $ go src
     infer sus src (bod val) dep
 
   -- TODO: annotate inside ADT for completion (not needed)
-  go src (Dat scp cts typ) dep = do
+  go src (ADT scp cts typ) dep = do
     forM_ cts $ \ (Ctr _ tele) -> do
       checkTele sus src tele Set dep
-    return $ Ann False (Dat scp cts typ) Set
+    return $ Ann False (ADT scp cts typ) Set
 
   go src (Con nam arg) dep = do
     envLog (Error src (Ref "annotation") (Ref "constructor") (Con nam arg) dep)
@@ -191,7 +191,7 @@ check sus src val typ dep = debug ("check: " ++ showTermGo False val dep ++ "\n 
     book <- envGetBook
     fill <- envGetFill
     case reduce book fill 2 typx of
-      (Dat adtScp adtCts adtTyp) -> do
+      (ADT adtScp adtCts adtTyp) -> do
         case lookup nam (map (\(Ctr cNam cTel) -> (cNam, cTel)) adtCts) of
           Just cTel -> do
             argA <- checkConstructor src arg cTel dep
@@ -227,7 +227,7 @@ check sus src val typ dep = debug ("check: " ++ showTermGo False val dep ++ "\n 
     case reduce book fill 2 typx of
       (All typNam typInp typBod) -> do
         case reduce book fill 2 typInp of
-          (Dat adtScp adtCts adtTyp) -> do
+          (ADT adtScp adtCts adtTyp) -> do
             -- Check every expected case of the match, skipping redundant cases
             let presentCases = M.fromList $ reverse cse
             cseA <- forM adtCts $ \ (Ctr cNam cTel) -> do

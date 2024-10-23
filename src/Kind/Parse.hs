@@ -156,7 +156,7 @@ parseTerm = (do
     , parseAnn
     , parseSlf
     , parseIns
-    , parseDat
+    , parseADT
     , parseNat
     , parseCon
     , (parseUse parseTerm)
@@ -237,21 +237,21 @@ parseIns = withSrc $ do
   val <- parseTerm
   return $ Ins val
 
-parseDat = withSrc $ do
+parseADT = withSrc $ do
   P.try $ P.choice [string_skp "#[", string_skp "data["]
   scp <- P.many parseTerm
   char_skp ']'
   char_skp '{'
-  cts <- P.many $ P.try parseDatCtr
+  cts <- P.many $ P.try parseADTCtr
   char_end '}'
   typ <- do
     skip
     char_skp ':'
     parseTerm
-  return $ Dat scp cts typ
+  return $ ADT scp cts typ
 
-parseDatCtr :: Parser Ctr
-parseDatCtr = do
+parseADTCtr :: Parser Ctr
+parseADTCtr = do
   char_skp '#'
   name <- name_skp
   tele <- parseTele
@@ -579,7 +579,7 @@ parseDefADT = do
     , return []
     ]
   char_skp '{'
-  ctrs <- P.many $ P.try parseDatCtr
+  ctrs <- P.many $ P.try parseADTCtr
   char_skp '}'
   let paramTypes = map snd params
   let indexTypes = map snd indices
@@ -589,7 +589,7 @@ parseDefADT = do
   let selfType   = foldl (\ acc arg -> App acc (Ref arg)) (Ref name) (paramNames ++ indexNames)
   let typeBody   = foldr (\ (pname, ptype) acc -> All pname ptype (\_ -> acc)) Set allParams
   let newCtrs    = map (fillCtrRet selfType) ctrs -- fill ctr type when omitted
-  let dataBody   = Dat (map (\ (iNam,iTyp) -> Ref iNam) indices) newCtrs selfType
+  let dataBody   = ADT (map (\ (iNam,iTyp) -> Ref iNam) indices) newCtrs selfType
   let fullBody   = foldr (\ (pname, _) acc -> Lam pname (\_ -> acc)) dataBody allParams
   let term       = bind (genMetas (Ann False fullBody typeBody)) []
   return $ {-trace ("parsed " ++ name ++ " = " ++ (termShower False term 0))-} (name, term)

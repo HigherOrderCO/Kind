@@ -41,7 +41,7 @@ termToJS var term typx dep = trace ("termToJS: " ++ showTermGo False term dep ++
     ret var "null"
   go var (Ins val) typx dep =
     termToJS var val typx dep
-  go var (Dat _ _ _) _ _ =
+  go var (ADT _ _ _) _ _ =
     ret var "null"
   go var (Con nam arg) _ dep = do
     argExpr <- mapM (\(f, x) -> termToJS Nothing x Nothing dep) arg

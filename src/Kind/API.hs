@@ -114,7 +114,7 @@ apiShow :: Command
 apiShow bookPath (book, _, _) defName _ = 
   case M.lookup defName book of
     Just term -> do
-      putStrLn $ termShow term
+      putStrLn $ showTerm term
       return $ Right ()
     Nothing -> do
       return $ Left $ "Error: Definition '" ++ defName ++ "' not found."
@@ -252,13 +252,13 @@ showInfo :: Book -> Fill -> Info -> IO String
 showInfo book fill info = case info of
   Found nam typ ctx dep ->
     let nam' = concat ["?", nam]
-        typ' = termShower True (normal book fill 0 typ dep) dep
+        typ' = showTermGo True (normal book fill 0 typ dep) dep
         ctx' = showContext book fill ctx dep
     in return $ concat ["\x1b[1mGOAL\x1b[0m ", nam', " : ", typ', "\n", ctx']
   Error src exp det bad dep -> do
-    let exp' = concat ["- expected : \x1b[32m", termShower True (normal book fill 0 exp dep) dep, "\x1b[0m"]
-        det' = concat ["- detected : \x1b[31m", termShower True (normal book fill 0 det dep) dep, "\x1b[0m"]
-        bad' = concat ["- origin   : \x1b[2m", termShower True (normal book fill 0 bad dep) dep, "\x1b[0m"]
+    let exp' = concat ["- expected : \x1b[32m", showTermGo True (normal book fill 0 exp dep) dep, "\x1b[0m"]
+        det' = concat ["- detected : \x1b[31m", showTermGo True (normal book fill 0 det dep) dep, "\x1b[0m"]
+        bad' = concat ["- origin   : \x1b[2m", showTermGo True (normal book fill 0 bad dep) dep, "\x1b[0m"]
     (file, text) <- case src of
       Just (Cod (Loc fileName iniLine iniCol) (Loc _ endLine endCol)) -> do
         canonPath <- canonicalizePath fileName
@@ -269,19 +269,19 @@ showInfo book fill info = case info of
     let src' = concat ["\x1b[4m", file, "\x1b[0m\n", text]
     return $ concat ["\x1b[1mERROR:\x1b[0m\n", exp', "\n", det', "\n", bad', "\n", src']
   Solve nam val dep ->
-    return $ concat ["SOLVE: _", show nam, " = ", termShower True val dep]
+    return $ concat ["SOLVE: _", show nam, " = ", showTermGo True val dep]
   Vague nam ->
     return $ concat ["VAGUE: _", nam]
   Print val dep ->
-    return $ termShower True (normal book fill 2 val dep) dep
+    return $ showTermGo True (normal book fill 2 val dep) dep
 
 showContext :: Book -> Fill -> [Term] -> Int -> String
 showContext book fill ctx dep = unlines $ map (\term -> "- " ++ showContextAnn book fill term dep) ctx
 
 showContextAnn :: Book -> Fill -> Term -> Int -> String
-showContextAnn book fill (Ann chk val typ) dep = concat [termShower True (normal book fill 0 val dep) dep, " : ", termShower True (normal book fill 0 typ dep) dep]
+showContextAnn book fill (Ann chk val typ) dep = concat [showTermGo True (normal book fill 0 val dep) dep, " : ", showTermGo True (normal book fill 0 typ dep) dep]
 showContextAnn book fill (Src _ val)       dep = showContextAnn book fill val dep
-showContextAnn book fill term              dep = termShower True (normal book fill 0 term dep) dep
+showContextAnn book fill term              dep = showTermGo True (normal book fill 0 term dep) dep
 
 -- Prints logs from the type-checker
 apiPrintLogs :: State -> IO ()
