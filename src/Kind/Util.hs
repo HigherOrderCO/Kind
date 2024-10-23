@@ -33,7 +33,7 @@ getDeps term = case term of
   U32           -> []
   F64           -> []
   Num _         -> []
-  FNum _        -> []
+  Flt _        -> []
   Txt _         -> []
   Lst elems     -> concatMap getDeps elems
   Nat _         -> []

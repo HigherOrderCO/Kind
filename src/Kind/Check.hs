@@ -84,7 +84,7 @@ infer src term dep = debug ("infer: " ++ termShower False term dep) $ go src ter
   go src (Num num) dep = do
     return U32
 
-  go src (FNum num) dep = do
+  go src (Flt num) dep = do
     return F64
 
   go src (Op2 opr fst snd) dep = do

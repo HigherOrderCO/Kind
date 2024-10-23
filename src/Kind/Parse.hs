@@ -430,7 +430,7 @@ parseFloat = withSrc $ P.try $ do
   let floatStr = intPart ++ "." ++ decPart
   let value = (read floatStr :: Double) * (10 ^^ expPart)
   
-  return $ FNum value
+  return $ Flt value
 
 parseNum = withSrc $ Num . read <$> P.many1 digit
 

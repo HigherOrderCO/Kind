@@ -85,7 +85,7 @@ termShower small term dep =
       Num val ->
         let val' = show val
         in concat [val']
-      FNum val ->
+      Flt val ->
         let val' = show val
         in concat [val']
       Op2 opr fst snd ->

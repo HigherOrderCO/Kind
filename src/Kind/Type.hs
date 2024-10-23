@@ -57,7 +57,7 @@ data Term
   | F64
 
   -- F64 value
-  | FNum Double
+  | Flt Double
 
   -- Binary Operation
   | Op2 Oper Term Term
