@@ -89,25 +89,37 @@ infer sus src term dep = debug ("infer: " ++ showTermGo False term dep) $ go src
   go src (Flt num) dep = do
     return F64
 
+
   go src (Op2 opr fst snd) dep = do
     fstType <- infer src fst dep
     sndType <- infer src snd dep
+    
+    let isType typ term = equal term typ dep
+    let isNumericType term = or <$> sequence [ isType U64 term, isType F64 term ]
+    
+    typeMatches <- sequence [
+        (,) <$> isType U64 fstType <*> isType U64 sndType,
+        (,) <$> isType F64 fstType <*> isType F64 sndType
+        ]
 
-    case (fstType, sndType) of
-      (U64 , U64) -> do
-        return U64
-      (F64 , F64) -> do
-        return F64
-      (F64 , _)   -> do
-        envLog (Error src (Ref "F64") sndType (Op2 opr fst snd) dep)
-        envFail
-      (U64 , _)   -> do
-        envLog (Error src (Ref "U64") sndType (Op2 opr fst snd) dep)
-        envFail
-      (_ , _)     -> do
-        envLog (Error src (Ref "U64 / F64") fstType (Op2 opr fst snd) dep)
-        envLog (Error src (Ref "U64 / F64") sndType (Op2 opr fst snd) dep)
-        envFail
+    case findMatchingType typeMatches of
+      Just resultType -> return resultType
+      Nothing -> do
+        isFirstNumeric <- isNumericType fstType
+        isSecondNumeric <- isNumericType sndType
+        if isFirstNumeric && not isSecondNumeric
+          then envLog (Error src fstType sndType (Op2 opr fst snd) dep) >> envFail
+          else if isSecondNumeric && not isFirstNumeric
+            then envLog (Error src sndType fstType (Op2 opr fst snd) dep) >> envFail
+            else do
+              envLog (Error src (Ref "Operators should be of the same numeric type.") (Ref ((termShower True fstType dep) ++ " and " ++ (termShower True sndType dep))) (Op2 opr fst snd) dep)
+              envFail
+    
+    where
+      findMatchingType :: [(Bool, Bool)] -> Maybe Term
+      findMatchingType matches = case [ typ | (match, typ) <- zip matches [U64, F64], uncurry (&&) match ] of
+        (resultType:_) -> Just resultType
+        [] -> Nothing
 
   go src (Swi zer suc) dep = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
