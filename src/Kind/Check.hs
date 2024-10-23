@@ -222,23 +222,12 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
       (All typ_nam typ_inp typ_bod) -> do
         case reduce book fill 2 typ_inp of
           (Dat adt_scp adt_cts adt_typ) -> do
-            let adt_cts_map = M.fromList (map (\ (Ctr cnm tele) -> (cnm, tele)) adt_cts)
-            -- Check if all cases are present
-            let hasDefaultCase = any (\(cnm, _) -> cnm == "_") cse
-            unless hasDefaultCase $ do
-              let presentCases = M.fromList cse
-              forM_ adt_cts $ \ (Ctr cnm _) -> do
-                unless (M.member cnm presentCases) $ do
-                  envLog (Error src (Hol ("missing_case:" ++ cnm) []) (Hol "incomplete_match" []) (Mat cse) dep)
-                  envFail
-            -- If there is a default case, check that it is well-typed
-            when hasDefaultCase $ do
-              let defaultCase = snd $ head $ filter (\(cnm, _) -> cnm == "_") cse
-              check Nothing defaultCase (All "" typ_inp typ_bod) dep
-            -- Check if all concrete cases are well-typed
-            forM_ cse $ \ (cnm, cbod) -> do
-              when (cnm /= "_") $ case M.lookup cnm adt_cts_map of
-                Just tele -> do
+            -- Check every expected case of the match
+            -- Skips redundant cases
+            let presentCases = M.fromList $ reverse cse
+            forM_ adt_cts $ \ (Ctr cnm tele) -> do
+              case M.lookup cnm presentCases of
+                Just cbod -> do
                   let a_r = teleToTerm tele dep
                   let eqs = extractEqualities (reduce book fill 2 typ_inp) (reduce book fill 2 (snd a_r)) dep
                   let rt0 = teleToType tele (typ_bod (Ann False (Con cnm (fst a_r)) typ_inp)) dep
@@ -247,6 +236,18 @@ check src val typ dep = debug ("check: " ++ termShower False val dep ++ "\n    :
                     unreachable Nothing cbod dep
                   else
                     check Nothing cbod rt1 dep
+                Nothing -> case M.lookup "_" presentCases of
+                  Just defaultCase -> do
+                    check Nothing defaultCase (All "" typ_inp typ_bod) dep
+                  Nothing -> do
+                    envLog (Error src (Hol ("missing_case:" ++ cnm) []) (Hol "incomplete_match" []) (Mat cse) dep)
+                    envFail
+
+            -- Check if all cases refer to an expected constructor
+            let adt_cts_map = M.fromList (map (\ (Ctr cnm tele) -> (cnm, tele)) adt_cts)
+            forM_ cse $ \ (cnm, cbod) -> do
+              when (cnm /= "_") $ case M.lookup cnm adt_cts_map of
+                Just _ -> return ()
                 Nothing -> do
                   envLog (Error src (Hol ("constructor_not_found:"++cnm) []) (Hol "unknown_type" []) (Mat cse) dep)
                   envFail
