@@ -111,7 +111,7 @@ termToJS book fill var term typx dep = {-trace ("termToJS: " ++ showTermGo False
     sucExpr <- termToJS book fill Nothing suc Nothing dep
     ret var $ concat ["((x => x === 0 ? ", zerExpr, " : ", sucExpr, "(x - 1)))"]
   go (Txt txt) =
-    ret var $ "JSTR_TO_LIST(" ++ show txt ++ ")"
+    ret var $ "JSTR_TO_LIST(\"" ++ txt ++ "\")"
   go (Lst lst) =
     let cons = \x acc -> Con "Cons" [(Nothing, x), (Nothing, acc)]
         nil  = Con "Nil" []
@@ -165,10 +165,6 @@ ret :: Maybe String -> String -> ST.State Int String
 ret (Just name) expr = return $ "var " ++ name ++ " = " ++ expr ++ ";"
 ret Nothing     expr = return $ expr
 
-
--- bookToJS :: Book -> String
--- bookToJS book = unlines $ map (\(nm, tm) -> concat [nameToJS nm, " = ", ST.evalState (termToJS book Nothing tm Nothing 0) 0, ";"]) (topoSortBook book)
-
 prelude :: String
 prelude = unlines [
   "function LIST_TO_JSTR(list) {",
@@ -185,6 +181,7 @@ prelude = unlines [
   "  } catch (e) {}",
   "  return list;",
   "}",
+  "",
   "function JSTR_TO_LIST(str) {",
   "  let list = {$: 'Nil'};",
   "  for (let i = str.length - 1; i >= 0; i--) {",
@@ -193,26 +190,6 @@ prelude = unlines [
   "  return list;",
   "}"
   ]
-
-
--- compileJS :: Book -> String
--- compileJS book = M.foldrWithKey compileDef "" book where
-  -- compileDef name term acc =
-    -- case envRun (doAnnotate term) book of
-      -- Done _ (term,fill) ->
-        -- let uid = nameToJS name
-            -- val = bind term []
-            -- def = ST.evalState (termToJS book fill (Just uid) val Nothing 0) 0
-        -- in acc ++ def ++ "\n\n"
-      -- Fail _  ->
-        -- error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
-
--- PROBLEM: the function above isn't topologically sorting the book.
--- fortunatelly, we already have a funcionality to do the topological sorting:
--- topoSortBook :: Book -> [(String, Term)]
--- your goal is to refactor 'compileJS' to use topoSortBook, outputting js definitions in a topologically sorted order.
--- do it now:
-
 
 compileJS :: Book -> String
 compileJS book = prelude ++ "\n\n" ++ concatMap compileDef (topoSortBook book) where
@@ -225,6 +202,3 @@ compileJS book = prelude ++ "\n\n" ++ concatMap compileDef (topoSortBook book) w
         in def ++ "\n\n"
       Fail _ ->
         error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
-
-
-
