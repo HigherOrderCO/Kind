@@ -95,14 +95,8 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
     sndT <- infer sus src snd dep
  
     let validTypes = [F64, U64]
-    let checkValidType typ = do
-          isValid <- foldr (\t acc -> do
-                              isEqual <- equal typ t dep
-                              if isEqual then return True else acc
-                           ) (return False) validTypes
-          return isValid
+    isValidType <- checkValidType (getType fstT) validTypes dep
 
-    isValidType <- checkValidType (getType fstT)
     if not isValidType then do
       envLog (Error src (Ref "Valid numeric type") (getType fstT) (Op2 opr fst snd) dep)
       envFail

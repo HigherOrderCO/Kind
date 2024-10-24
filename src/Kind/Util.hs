@@ -4,6 +4,7 @@ module Kind.Util where
 
 import Kind.Show
 import Kind.Type
+import Kind.Equal
 
 import Prelude hiding (LT, GT, EQ)
 
@@ -152,3 +153,10 @@ getOpReturnType XOR U64 = U64
 getOpReturnType LSH U64 = U64
 getOpReturnType RSH U64 = U64
 getOpReturnType opr trm = error ("Invalid opertor: " ++ (show opr) ++ " Invalid operand type: " ++ (showTerm trm))
+
+checkValidType :: Term -> [Term] -> Int -> Env Bool
+checkValidType typ validTypes dep = foldr (\t acc -> do
+    isEqual <- equal typ t dep
+    if isEqual then return True else acc
+  ) (return False) validTypes
+
