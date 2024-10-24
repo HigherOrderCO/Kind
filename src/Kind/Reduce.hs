@@ -5,6 +5,7 @@ module Kind.Reduce where
 import Prelude hiding (EQ, LT, GT)
 import Data.Bits ( (.&.), (.|.), xor, shiftL, shiftR )
 import Data.Char (ord)
+import Data.Fixed (mod')
 import Debug.Trace
 import Kind.Show
 import Kind.Type
@@ -82,6 +83,22 @@ reduce book fill lv term = red term where
   op2 XOR (Num fst) (Num snd) = Num (fst `xor` snd)
   op2 LSH (Num fst) (Num snd) = Num (shiftL fst (fromIntegral snd))
   op2 RSH (Num fst) (Num snd) = Num (shiftR fst (fromIntegral snd))
+  op2 op  (Ref nam) (Flt snd)  | lv > 0 = op2 op (ref nam) (Flt snd)
+  op2 op  (Flt fst) (Ref nam)  | lv > 0 = op2 op (Flt fst) (ref nam)
+  op2 ADD (Flt fst) (Flt snd) = Flt (fst + snd)
+  op2 SUB (Flt fst) (Flt snd) = Flt (fst - snd)
+  op2 MUL (Flt fst) (Flt snd) = Flt (fst * snd)
+  op2 DIV (Flt fst) (Flt snd) = Flt (fst / snd)
+  op2 MOD (Flt fst) (Flt snd) = Flt (mod' fst snd)
+  op2 EQ  (Flt fst) (Flt snd) = Num (if fst == snd then 1 else 0)
+  op2 NE  (Flt fst) (Flt snd) = Num (if fst /= snd then 1 else 0)
+  op2 LT  (Flt fst) (Flt snd) = Num (if fst < snd then 1 else 0)
+  op2 GT  (Flt fst) (Flt snd) = Num (if fst > snd then 1 else 0)
+  op2 LTE (Flt fst) (Flt snd) = Num (if fst <= snd then 1 else 0)
+  op2 GTE (Flt fst) (Flt snd) = Num (if fst >= snd then 1 else 0)
+  op2 AND (Flt _)   (Flt _)   = error "Bitwise AND not supported for floating-point numbers"
+  op2 OR  (Flt _)   (Flt _)   = error "Bitwise OR not supported for floating-point numbers"
+  op2 XOR (Flt _)   (Flt _)   = error "Bitwise XOR not supported for floating-point numbers"
   op2 opr fst       snd       = Op2 opr fst snd
 
   ref nam | lv > 0 = case M.lookup nam book of
@@ -170,7 +187,9 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Hol nam ctx) dep = Hol nam ctx
   go Set dep = Set
   go U64 dep = U64
+  go F64 dep = F64
   go (Num val) dep = Num val
+  go (Flt val) dep = Flt val
   go (Op2 opr fst snd) dep =
     let nf_fst = normal book fill lv fst dep in
     let nf_snd = normal book fill lv snd dep in
@@ -260,7 +279,9 @@ bind (Use nam val bod) ctx =
   Use nam val' bod'
 bind Set ctx = Set
 bind U64 ctx = U64
+bind F64 ctx = F64
 bind (Num val) ctx = Num val
+bind (Flt val) ctx = Flt val
 bind (Op2 opr fst snd) ctx =
   let fst' = bind fst ctx in
   let snd' = bind snd ctx in

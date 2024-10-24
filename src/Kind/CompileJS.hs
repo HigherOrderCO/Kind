@@ -99,7 +99,11 @@ termToJS book fill var term typx dep = {- trace ("termToJS: " ++ showTermGo Fals
     ret var "null"
   go U64 =
     ret var "null"
+  go F64 =
+    ret var "null"
   go (Num val) =
+    ret var $ show val
+  go (Flt val) =
     ret var $ show val
   go (Op2 opr fst snd) = do
     let opr' = operToJS opr
