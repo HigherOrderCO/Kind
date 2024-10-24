@@ -167,6 +167,7 @@ parseTerm = (do
     , parseSwiInl
     , parseDo
     , parseSet
+    , parseFloat
     , parseNum
     , parseTxt
     , parseLst
@@ -367,7 +368,8 @@ parseRef = withSrc $ do
   (_, _, uses) <- P.getState
   let name' = expandUses uses name
   return $ case name' of
-    "U32" -> U32
+    "U64" -> U64
+    "F64" -> F64
     "Set" -> Set
     "_"   -> Met 0 []
     _     -> Ref name'
@@ -407,6 +409,33 @@ parseUse :: Parser Term -> Parser Term
 parseUse = parseLocal "use" Use
 
 parseSet = withSrc $ char_end '*' >> return Set
+
+
+parseFloat = withSrc $ P.try $ do
+  -- Parse optional negative sign
+  sign <- P.option id $ P.char '-' >> return negate
+
+  -- Parse integer part
+  intPart <- P.many1 digit
+
+  -- Parse decimal part (this must succeed, or we fail the whole parser)
+  decPart <- do
+    char_end '.'
+    P.many1 digit
+
+  -- Parse optional exponent
+  expPart <- P.option 0 $ P.try $ do
+    oneOf "eE"
+    expSign <- P.option '+' (oneOf "+-")
+    exp <- read <$> P.many1 digit
+    return $ if expSign == '-' then -exp else exp
+
+  -- Combine parts into final float
+  let floatStr = intPart ++ "." ++ decPart
+  let value = (read floatStr :: Double) * (10 ^^ expPart)
+
+  -- Apply the sign to the final value
+  return $ Flt (sign value)
 
 parseNum = withSrc $ Num . read <$> P.many1 digit
 
@@ -910,7 +939,7 @@ parseSwiInl = withSrc $ do
                 buildIfChain [] = defaultBody
                 buildIfChain ((num,body):rest) = App
                   (Mat [("True", body), ("False", buildIfChain rest)])
-                  (App (App (Ref "Base/U32/eq") x) (Num (read num)))
+                  (App (App (Ref "Base/U64/eq") x) (Num (read num)))
             return $ buildIfChain nonDefaultCases
     ]
 

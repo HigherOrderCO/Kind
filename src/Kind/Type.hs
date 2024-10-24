@@ -4,7 +4,7 @@ import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 
 import Debug.Trace
-import Data.Word (Word32)
+import Data.Word (Word64)
 
 -- Kind's AST
 data Term
@@ -47,16 +47,22 @@ data Term
   -- Type : Type
   | Set
 
-  -- U32 Type
-  | U32
+  -- U64 Type
+  | U64
 
-  -- U32 Value
-  | Num Word32
+  -- F64 Type
+  | F64
 
-  -- U32 Binary Operation
+  -- U64 Value
+  | Num Word64
+
+  -- F64 Value
+  | Flt Double
+
+  -- Binary Operation
   | Op2 Oper Term Term
 
-  -- U32 Elimination (updated to use splitting lambda)
+  -- U64 Elimination (updated to use splitting lambda)
   | Swi Term Term
 
   -- Inspection Hole

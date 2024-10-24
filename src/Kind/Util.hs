@@ -32,8 +32,10 @@ getDeps term = case term of
   Log msg nxt   -> getDeps msg ++ getDeps nxt
   Var _ _       -> []
   Set           -> []
-  U32           -> []
+  U64           -> []
+  F64           -> []
   Num _         -> []
+  Flt _         -> []
   Txt _         -> []
   Lst elems     -> concatMap getDeps elems
   Nat _         -> []
