@@ -229,9 +229,30 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
       (All typNam typInp typBod) -> do
         case reduce book fill 2 typInp of
           (ADT adtScp adtCts adtTyp) -> do
-            -- Checks if all unique cases are well-typed, discarding redundant ones
+            -- Checks if all cases are well-typed
             let adtCtsMap = M.fromList (map (\ (Ctr cNam cTel) -> (cNam, cTel)) adtCts)
-            (cseA, coveredCases) <- checkCse cse M.empty book fill adtCtsMap typInp typBod dep
+            let coveredCases = M.fromList cse
+            cseA <- forM cse $ \ (cNam, cBod) -> do
+              if cNam == "_" then do
+                if null (adtCtsMap `M.difference` coveredCases) then do
+                  checkUnreachable Nothing cNam cBod dep
+                else do
+                  cBodA <- check sus src cBod (All "" typInp typBod) dep
+                  return (cNam, cBodA)
+              else case M.lookup cNam adtCtsMap of
+                Just cTel -> do
+                  let a_r = teleToTerms cTel dep
+                  let eqs = zip (getDatIndices (reduce book fill 2 typInp)) (getDatIndices (reduce book fill 2 (snd a_r)))
+                  let rt0 = teleToType cTel (typBod (Ann False (Con cNam (fst a_r)) typInp)) dep
+                  let rt1 = foldl' (\ ty (a,b) -> replace a b ty dep) rt0 eqs
+                  if any (\(a,b) -> incompatible a b dep) eqs then
+                    checkUnreachable Nothing cNam cBod dep
+                  else do
+                    cBodA <- check sus src cBod rt1 dep
+                    return (cNam, cBodA)
+                Nothing -> do
+                  envLog (Error src (Hol ("constructor_not_found:"++cNam) []) (Hol "unknown_type" []) (Mat cse) dep)
+                  envFail
             -- Check if all constructors are covered
             forM_ adtCts $ \ (Ctr cNam _) ->
               unless (M.member cNam coveredCases || M.member "_" coveredCases) $ do
@@ -240,40 +261,6 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
             return $ Ann False (Mat cseA) typx
           otherwise -> infer sus src (Mat cse) dep
       otherwise -> infer sus src (Mat cse) dep
-    where checkCse [] coveredCases book fill adtCtsMap typInp typBod dep = do
-            return ([], coveredCases)
-          checkCse ((cNam, cBod):cse) coveredCases book fill adtCtsMap typInp typBod dep = do
-            cse1 <- do
-              if M.member cNam coveredCases then
-                -- Redundant case
-                return []
-              else if cNam == "_" then do
-                if null ((M.map (const ()) adtCtsMap) `M.difference` coveredCases) then
-                  -- All concrete cases already covered, redundant default case
-                  return []
-                else do
-                  -- Default case
-                  cBodA <- check sus src cBod (All "" typInp typBod) dep
-                  return [(cNam, cBodA)]
-              else case M.lookup cNam adtCtsMap of
-                Just cTel -> do
-                  -- New concrete case
-                  let a_r = teleToTerms cTel dep
-                  let eqs = zip (getDatIndices (reduce book fill 2 typInp)) (getDatIndices (reduce book fill 2 (snd a_r)))
-                  let rt0 = teleToType cTel (typBod (Ann False (Con cNam (fst a_r)) typInp)) dep
-                  let rt1 = foldl' (\ ty (a,b) -> replace a b ty dep) rt0 eqs
-                  if any (\(a,b) -> incompatible a b dep) eqs then do
-                    cse1 <- checkUnreachable Nothing cNam cBod dep
-                    return [cse1]
-                  else do
-                    cBodA <- check sus src cBod rt1 dep
-                    return [(cNam, cBodA)]
-                Nothing -> do
-                  envLog (Error src (Hol ("constructor_not_found:"++cNam) []) (Hol "unknown_type" []) (Mat cse) dep)
-                  envFail
-            let coveredCases' = M.insert cNam () coveredCases
-            (cse', coveredCases) <- checkCse cse coveredCases' book fill adtCtsMap typInp typBod dep
-            return ((cse1 ++ cse1), coveredCases)
 
   go (Swi zer suc) = do
     book <- envGetBook
