@@ -82,7 +82,7 @@ showTermGo small term dep =
             bod' = showTermGo small (bod (Var nam dep)) (dep + 1)
         in concat ["use " , nam' , " = " , val' , " " , bod']
       Set -> "*"
-      U32 -> "U32"
+      U64 -> "U64"
       Num val ->
         let val' = show val
         in concat [val']

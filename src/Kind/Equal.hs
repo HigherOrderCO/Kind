@@ -110,7 +110,7 @@ identical a b dep = do
     return True
   go a (Hol bNam bCtx) dep =
     return True
-  go U32 U32 dep =
+  go U64 U64 dep =
     return True
   go (Num aVal) (Num bVal) dep =
     return (aVal == bVal)
@@ -399,7 +399,7 @@ same (Hol aNam aCtx) b dep =
   True
 same a (Hol bNam bCtx) dep =
   True
-same U32 U32 dep =
+same U64 U64 dep =
   True
 same (Num aVal) (Num bVal) dep =
   aVal == bVal
@@ -464,7 +464,7 @@ subst lvl neo term = go term where
   go (Log msg nxt)     = Log (go msg) (go nxt)
   go (Hol nam ctx)     = Hol nam (map go ctx)
   go Set               = Set
-  go U32               = U32
+  go U64               = U64
   go (Num n)           = Num n
   go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
   go (Txt txt)         = Txt txt
@@ -497,7 +497,7 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Log msg nxt)      = Log (replace old neo msg dep) (replace old neo nxt dep)
   go (Hol nam ctx)      = Hol nam (map (\x -> replace old neo x (dep+1)) ctx)
   go Set                = Set
-  go U32                = U32
+  go U64                = U64
   go (Num n)            = Num n
   go (Op2 opr fst snd)  = Op2 opr (replace old neo fst dep) (replace old neo snd dep)
   go (Txt txt)          = Txt txt

@@ -77,16 +77,16 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go Set = do
     return $ Ann False Set Set
 
-  go U32 = do
-    return $ Ann False U32 Set
+  go U64 = do
+    return $ Ann False U64 Set
 
   go (Num num) = do
-    return $ Ann False (Num num) U32
+    return $ Ann False (Num num) U64
 
   go (Op2 opr fst snd) = do
-    fstA <- checkLater sus src fst U32 dep
-    sndA <- checkLater sus src snd U32 dep
-    return $ Ann False (Op2 opr fstA sndA) U32
+    fstA <- checkLater sus src fst U64 dep
+    sndA <- checkLater sus src snd U64 dep
+    return $ Ann False (Op2 opr fstA sndA) U64
 
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
@@ -265,13 +265,13 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
     case reduce book fill 2 typx of
       (All typNam typInp typBod) -> do
         case reduce book fill 2 typInp of
-          U32 -> do
+          U64 -> do
             -- Check zero case
-            let zerAnn = Ann False (Num 0) U32
+            let zerAnn = Ann False (Num 0) U64
             zerA <- check sus src zer (typBod zerAnn) dep
             -- Check successor case
-            let sucAnn = Ann False (Var "n" dep) U32
-            let sucTyp = All "n" U32 (\x -> typBod (Op2 ADD (Num 1) x))
+            let sucAnn = Ann False (Var "n" dep) U64
+            let sucTyp = All "n" U64 (\x -> typBod (Op2 ADD (Num 1) x))
             sucA <- check sus src suc sucTyp dep
             return $ Ann False (Swi zerA sucA) typx
           otherwise -> infer sus src (Swi zer suc) dep
@@ -357,7 +357,7 @@ checkUnreachable src cNam term dep = go src cNam term dep where
   go src cNam (Use nam val bod) dep = go src cNam (bod (Con "void" [])) (dep+1)
   go _   cNam (Src src val)     dep = go (Just src) cNam val dep
   go src cNam (Hol nam ctx)     dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> go src cNam Set dep
-  go src cNam term              dep = return (cNam, Ann False (Num 0) U32)
+  go src cNam term              dep = return (cNam, Ann False (Num 0) U64)
 
 checkLater :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
 checkLater False src term typx dep = check False src term typx dep
