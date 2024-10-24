@@ -25,7 +25,10 @@ import qualified Text.Parsec as P
 type Uses     = [(String, String)]
 type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
+-- Types used for flattening pattern-matching equations
+type Rule     = ([Pattern], With)
 data Pattern  = PVar String | PCtr String [Pattern] deriving Show
+data With     = WBod Term | WWit [Term] [Rule]
 
 -- Helper functions that consume trailing whitespace
 skip :: Parser ()
@@ -559,29 +562,11 @@ parseSuffVal term = return term
 parseBook :: Parser Book
 parseBook = M.fromList <$> P.many parseDef
 
-{-
-TODO: create a parseADT function. it is a sugar. example:
-
-data Name (p0: P0) (p1: P1) ... : (i0: I0) (i1: I1) -> (Name p0 p1 ... i0 i1 ...) {
-  #Ctr0 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
-  #Ctr1 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
-  ...
-}
-
-this should desugar to:
-
-Name
-: ∀(p0: P0) ∀(p1: P1) ... ∀(i0: I0) ∀(i1: I1) : (Name p0 p1 ... i0 i1 ...)
-= data[i0 i1] {
-  #Ctr0 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
-  #Ctr1 { x0: T0 x1: T1 ... } : (Name p0 p1 ... i0 i1 ...)
-  ...
-} : (Name p0 p1 ... i0 i1 ...)
-
-reuse existing syntaxes whenever possible.
-implement the parseADT function below:
-
--}
+parseDef :: Parser (String, Term)
+parseDef = P.choice
+  [ parseDefADT
+  , parseDefFun
+  ]
 
 parseDefADT :: Parser (String, Term)
 parseDefADT = do
@@ -641,14 +626,8 @@ parseDefFun = do
         val <- parseTerm
         return val
     , do
-        rules <- P.many1 $ do
-          char_skp '|'
-          pats <- P.many parsePattern
-          char_skp '='
-          body <- parseTerm
-          return (pats, body)
-        let (mat, bods) = unzip rules
-        let flat = flattenDef mat bods 0
+        rules <- P.many1 (parseRule 0)
+        let flat = flattenDef rules 0
         return
           -- $ trace ("DONE: " ++ termShow flat)
           flat
@@ -663,26 +642,39 @@ parseDefFun = do
     Nothing -> return (name1, bind (genMetas val) [])
     Just t  -> return (name1, bind (genMetas (Ann False val t)) [])
 
--- TODO: parseDef must try parseDefADT and then parseDefFun
-parseDef :: Parser (String, Term)
-parseDef = P.choice
-  [ parseDefADT
-  , parseDefFun
-  ]
+parseRule :: Int -> Parser Rule
+parseRule dep = P.try $ do
+  P.count dep $ char_skp '.'
+  char_skp '|'
+  pats <- P.many parsePattern
+  with <- P.choice 
+    [ P.try $ do
+      string_skp "with"
+      wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
+      rul <- P.many1 $ parseRule (dep + 1)
+      return $ WWit wth rul
+    , P.try $ do
+      char_skp '='
+      body <- parseTerm
+      return $ WBod body
+    ]
+  return $ (pats, with)
 
 parsePattern :: Parser Pattern
 parsePattern = do
+  P.notFollowedBy $ string_skp "with"
   P.choice [
     parsePatternNat,
     parsePatternCtr,
     parsePatternVar
-    ] <* skip
+    ]
 
 parsePatternNat :: Parser Pattern
 parsePatternNat = do
   num <- P.try $ do
     char_skp '#'
     P.many1 digit
+  skip
   let n = read num
   return $ (foldr (\_ acc -> PCtr "Succ" [acc]) (PCtr "Zero" []) [1..n])
 
@@ -958,24 +950,32 @@ parseNat = withSrc $ P.try $ do
 -- FIXME: the functions below are still a little bit messy and can be improved
 
 -- Flattener for pattern matching equations
-flattenDef :: [[Pattern]] -> [Term] -> Int -> Term
-flattenDef pats bods depth =
-  -- trace (replicate (depth * 2) ' ' ++ "flattenDef: pats = " ++ show pats ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh) $
-  go pats bods depth
-  where
-    go ([]:mat)   (bod:bods) depth = bod
-    go (pats:mat) (bod:bods) depth
-      | all isVar col  = flattenVarCol col mat' (bod:bods) (depth + 1)
-      | otherwise      = flattenAdtCol col mat' (bod:bods) (depth + 1)
-      where (col,mat') = getCol (pats:mat)
-    go _ _ _ = error "internal error"
+flattenDef :: [Rule] -> Int -> Term
+flattenDef rules depth =
+  let (pats, with) = unzip rules
+      bods         = map (flattenWith 0) with
+  in flattenRules pats bods depth
+
+flattenWith :: Int -> With -> Term
+flattenWith dep (WBod bod)     = bod
+flattenWith dep (WWit wth rul) =
+  let bod = flattenDef rul (dep + 1)
+  in foldl App bod wth
+
+flattenRules :: [[Pattern]] -> [Term] -> Int -> Term
+flattenRules ([]:mat)   (bod:bods) depth = bod
+flattenRules (pats:mat) (bod:bods) depth
+  | all isVar col  = flattenVarCol col mat' (bod:bods) (depth + 1)
+  | otherwise      = flattenAdtCol col mat' (bod:bods) (depth + 1)
+  where (col,mat') = getCol (pats:mat)
+flattenRules _ _ _ = error "internal error"
 
 -- Flattens a column with only variables
 flattenVarCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
 flattenVarCol col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "flattenVarCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
   let nam = maybe "_" id (getVarColName col)
-      bod = flattenDef mat bods depth
+      bod = flattenRules mat bods depth
   in Lam nam (\x -> bod)
 
 -- Flattens a column with constructors and possibly variables
@@ -992,7 +992,7 @@ makeCtrCase col mat bods depth ctr =
   -- trace (replicate (depth * 2) ' ' ++ "makeCtrCase: col = " ++ show col ++ ", mat = " ++ show mat ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh ++ ", var = " ++ var ++ ", ctr = " ++ ctr) $
   let var           = getCtrColNames col ctr
       (mat', bods') = foldr (go var) ([], []) (zip3 col mat bods)
-      bod           = flattenDef mat' bods' (depth + 1)
+      bod           = flattenRules mat' bods' (depth + 1)
   in (ctr, bod)
   where go var ((PCtr nam ps), pats, bod) (mat, bods)
           | nam == ctr = ((ps ++ pats):mat, bod:bods)
@@ -1011,7 +1011,7 @@ makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> [(String, Term)]
 makeDflCase col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "makeDflCase: col = " ++ show col ++ ", fresh = " ++ show fresh) $
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods) in
-  if null bods' then [] else [("_", flattenDef mat' bods' (depth + 1))]
+  if null bods' then [] else [("_", flattenRules mat' bods' (depth + 1))]
   where go ((PVar nam), pats, bod) (mat, bods) = (((PVar nam):pats):mat, bod:bods)
         go (ctr,        pats, bod) (mat, bods) = (mat, bods)
 
