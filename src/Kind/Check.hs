@@ -80,14 +80,40 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go U64 = do
     return $ Ann False U64 Set
 
+  go F64 = do
+    return $ Ann False F64 Set
+
   go (Num num) = do
     return $ Ann False (Num num) U64
 
-  go (Op2 opr fst snd) = do
-    fstA <- checkLater sus src fst U64 dep
-    sndA <- checkLater sus src snd U64 dep
-    return $ Ann False (Op2 opr fstA sndA) U64
+  go (Flt num) = do
+    return $ Ann False (Flt num) F64
 
+
+  go (Op2 opr fst snd) = do
+    fstT <- infer sus src fst dep
+    sndT <- infer sus src snd dep
+
+    let validTypes = [F64, U64]
+    let checkValidType typ = do
+          isValid <- foldr (\t acc -> do
+                              isEqual <- equal typ t dep
+                              if isEqual then return True else acc
+                           ) (return False) validTypes
+          return isValid
+
+    isValidType <- checkValidType (getType fstT)
+    if not isValidType then do
+      envLog (Error src (Ref "Valid numeric type") (getType fstT) (Op2 opr fst snd) dep)
+      envFail
+    else do
+      typesEqual <- equal (getType fstT) (getType sndT) dep
+      if not typesEqual then do
+        envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
+        envFail
+      else do
+        return $ Ann False (Op2 opr fstT sndT) (getType fstT)
+  
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
     envFail
