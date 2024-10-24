@@ -93,16 +93,10 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go (Op2 opr fst snd) = do
     fstT <- infer sus src fst dep
     sndT <- infer sus src snd dep
-
+ 
     let validTypes = [F64, U64]
-    let checkValidType typ = do
-          isValid <- foldr (\t acc -> do
-                              isEqual <- equal typ t dep
-                              if isEqual then return True else acc
-                           ) (return False) validTypes
-          return isValid
+    isValidType <- checkValidType (getType fstT) validTypes dep
 
-    isValidType <- checkValidType (getType fstT)
     if not isValidType then do
       envLog (Error src (Ref "Valid numeric type") (getType fstT) (Op2 opr fst snd) dep)
       envFail
@@ -112,7 +106,11 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
         envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
         envFail
       else do
-        return $ Ann False (Op2 opr fstT sndT) (getType fstT)
+        book <- envGetBook
+        fill <- envGetFill
+        let reducedFst = reduce book fill 1 (getType fstT)
+        let returnType = getOpReturnType opr reducedFst
+        return $ Ann False (Op2 opr fstT sndT) returnType
   
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
@@ -257,10 +255,14 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
           (ADT adtScp adtCts adtTyp) -> do
             -- Checks if all cases are well-typed
             let adtCtsMap = M.fromList (map (\ (Ctr cNam cTel) -> (cNam, cTel)) adtCts)
+            let coveredCases = M.fromList cse
             cseA <- forM cse $ \ (cNam, cBod) -> do
               if cNam == "_" then do
-                cBodA <- check sus src cBod (All "" typInp typBod) dep
-                return (cNam, cBodA)
+                if null (adtCtsMap `M.difference` coveredCases) then do
+                  checkUnreachable Nothing cNam cBod dep
+                else do
+                  cBodA <- check sus src cBod (All "" typInp typBod) dep
+                  return (cNam, cBodA)
               else case M.lookup cNam adtCtsMap of
                 Just cTel -> do
                   let a_r = teleToTerms cTel dep
@@ -276,7 +278,6 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
                   envLog (Error src (Hol ("constructor_not_found:"++cNam) []) (Hol "unknown_type" []) (Mat cse) dep)
                   envFail
             -- Check if all constructors are covered
-            let coveredCases = M.fromList cseA
             forM_ adtCts $ \ (Ctr cNam _) ->
               unless (M.member cNam coveredCases || M.member "_" coveredCases) $ do
                 envLog (Error src (Hol ("missing_case:" ++ cNam) []) (Hol "incomplete_match" []) (Mat cse) dep)

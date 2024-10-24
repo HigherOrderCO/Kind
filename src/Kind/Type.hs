@@ -94,11 +94,12 @@ data Loc = Loc String Int Int
 data Cod = Cod Loc Loc
 
 -- Numeric Operators
-data Oper
+data Oper 
   = ADD | SUB | MUL | DIV
   | MOD | EQ  | NE  | LT
   | GT  | LTE | GTE | AND
   | OR  | XOR | LSH | RSH
+  deriving Show
 
 -- Telescope
 data Tele
