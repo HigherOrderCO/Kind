@@ -1,8 +1,10 @@
-# Kind-Core
+# Kind
 
 Kind is a minimal Proof Checker.
 
-Examples on [MonoBook](https://github.com/HigherOrderCO/MonoBook) (search for `.kind` files)
+This repository is a full rewrite of Kind from the old JS implementation to
+Haskell. It is being actively developed. See examples on
+[KindBook](https://github.com/HigherOrderCO/KingBood).
 
 # Usage
 
@@ -10,44 +12,6 @@ Examples on [MonoBook](https://github.com/HigherOrderCO/MonoBook) (search for `.
 
 2. Use the `kind` command to check/run terms
 
-## Grammar:
+---
 
-```
-<Name> ::=
-  <alphanumeric-string>
-
-<Numb> ::=
-  <json-number-literal>
-
-<Term> ::=
-  | ALL: "∀(" <Name> ":" <Term> ")" <Term>
-  | LAM: "λ" <Name> <Term>
-  | APP: "(" <Term> <Term> ")"
-  | ANN: "{" <Name> ":" <Term> "}"
-  | SLF: "$(" <Name> ":" <Term> ")" <Term>
-  | INS: "~" <Term>
-  | DAT: "#[" <Term>* "]" "{" (<Ctor>)* "}"
-  | CON: "#" <Name> "{" <Term>* "}"
-  | SWI: "λ{0:" <Term> "_:" <Term> "}"
-  | MAT: "λ{" ("#" <Name> ":" <Term>)* "}"
-  | REF: <Name>
-  | LET: "let" <Name> "=" <Term> <Term>
-  | SET: "*"
-  | NUM: <Numb>
-  | OP2: "(" <Oper> <Term> <Term> ")"
-  | TXT: '"' <string-literal> '"'
-  | HOL: "?" <Name> ("[" <Term> ("," <Term>)* "]")?
-  | MET: "_" <Numb>
-
-<Ctor> ::=
-  | "#" <Name> <Tele>
-
-<Tele> ::=
-  | "{" (<Name> ":" <Term>)* "}" ":" <Term>
-
-<Oper> ::=
-  | "+" | "-"  | "*"  | "/"
-  | "%" | "<=" | ">=" | "<"
-  | ">" | "==" | "!=" | "&"
-  | "|" | "^"  | "<<" | ">>"
-```
+We will write a proper README later (:
