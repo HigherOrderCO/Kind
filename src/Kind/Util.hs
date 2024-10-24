@@ -5,6 +5,8 @@ module Kind.Util where
 import Kind.Show
 import Kind.Type
 
+import Prelude hiding (LT, GT, EQ)
+
 import Debug.Trace
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
@@ -127,3 +129,26 @@ getADTCts :: Term -> [(String,Ctr)]
 getADTCts (ADT _ cts _) = map (\ ctr -> (getCtrName ctr, ctr)) cts
 getADTCts (Src loc val) = getADTCts val
 getADTCts term          = error ("not-an-adt:" ++ showTerm term)
+
+getOpReturnType :: Oper -> Term -> Term
+getOpReturnType ADD U64 = U64
+getOpReturnType ADD F64 = F64
+getOpReturnType SUB U64 = U64
+getOpReturnType SUB F64 = F64
+getOpReturnType MUL U64 = U64
+getOpReturnType MUL F64 = F64
+getOpReturnType DIV U64 = U64
+getOpReturnType DIV F64 = F64
+getOpReturnType MOD U64 = U64
+getOpReturnType EQ  _   = U64
+getOpReturnType NE  _   = U64
+getOpReturnType LT  _   = U64
+getOpReturnType GT  _   = U64
+getOpReturnType LTE _   = U64
+getOpReturnType GTE _   = U64
+getOpReturnType AND U64 = U64
+getOpReturnType OR  U64 = U64
+getOpReturnType XOR U64 = U64
+getOpReturnType LSH U64 = U64
+getOpReturnType RSH U64 = U64
+getOpReturnType opr trm = error ("Invalid opertor: " ++ (show opr) ++ " Invalid operand type: " ++ (showTerm trm))

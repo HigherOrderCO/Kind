@@ -93,7 +93,7 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go (Op2 opr fst snd) = do
     fstT <- infer sus src fst dep
     sndT <- infer sus src snd dep
-
+ 
     let validTypes = [F64, U64]
     let checkValidType typ = do
           isValid <- foldr (\t acc -> do
@@ -112,7 +112,11 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
         envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
         envFail
       else do
-        return $ Ann False (Op2 opr fstT sndT) (getType fstT)
+        book <- envGetBook
+        fill <- envGetFill
+        let reducedFst = reduce book fill 1 (getType fstT)
+        let returnType = getOpReturnType opr reducedFst
+        return $ Ann False (Op2 opr fstT sndT) returnType
   
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
