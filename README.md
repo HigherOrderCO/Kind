@@ -4,7 +4,7 @@ Kind is a minimal Proof Checker.
 
 This repository is a full rewrite of Kind from the old JS implementation to
 Haskell. It is being actively developed. See examples on
-[KindBook](https://github.com/HigherOrderCO/KingBood).
+[KindBook](https://github.com/HigherOrderCO/KindBook).
 
 # Usage
 
