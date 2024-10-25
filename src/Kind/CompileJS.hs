@@ -155,7 +155,7 @@ ctToFn :: String -> [String] -> CT -> FN
 ctToFn func args ct =
   let (arity, body) = pull ct 0 0 0
   in 
-      trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $
+      -- trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $
       FN [var i | i <- [0..arity-1]] (bindCT body [])
   where
 
@@ -170,7 +170,7 @@ ctToFn func args ct =
 
   pull :: CT -> Int -> Int -> Int -> (Int, CT)
   pull ct dep ari skp =
-    trace ("pull " ++ showCT ct ++ " ### dep=" ++ show dep ++ " ari=" ++ show ari ++ " skp=" ++ show skp) $
+    -- trace ("pull " ++ showCT ct ++ " ### dep=" ++ show dep ++ " ari=" ++ show ari ++ " skp=" ++ show skp) $
     go ct dep ari skp where
 
     go (CLam nam bod) dep ari 0 =
@@ -231,7 +231,7 @@ inlineFn book (FN args body) = FN args (inlineCT body) where
   inlineCT (CNat val)         = CNat val
   inlineCT (CRef nam)         = if inlineable nam
     then case M.lookup nam book of
-      Just (FN _ def) -> trace ("INLINED: " ++ nam) $ inlineCT def
+      Just (FN _ def) -> {-trace ("INLINED: " ++ nam) $-} inlineCT def
       Nothing         -> CRef nam
     else CRef nam
 
@@ -437,7 +437,8 @@ genCmp book (name, term) =
     Done _ (term, fill) ->
       let ct = termToCT book fill (bind term []) Nothing 0
           fn = ctToFn name (getArgNames (bind term [])) ct
-          db = trace ("~" ++ showCT ct ++ "\n~" ++ showCT (fnCT fn))
+          -- db = trace ("~" ++ showCT ct ++ "\n~" ++ showCT (fnCT fn))
+          db = id
       in db (name, book, fill, fn)
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
