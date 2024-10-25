@@ -30,6 +30,9 @@ import Debug.Trace
 type FileCtx = (Book, M.Map FilePath [String], M.Map FilePath [String])
 type Command = String -> FileCtx -> String -> String -> IO (Either String ())
 
+-- main :: IO ()
+-- main = ctest
+
 main :: IO ()
 main = do
   args     <- getArgs

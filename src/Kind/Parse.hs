@@ -606,7 +606,9 @@ parseDefADT = do
   let dataBody   = ADT (map (\ (iNam,iTyp) -> Ref iNam) indices) newCtrs selfType
   let fullBody   = foldr (\ (pname, _) acc -> Lam pname (\_ -> acc)) dataBody allParams
   let term       = bind (genMetas (Ann False fullBody typeBody)) []
-  return $ {-trace ("parsed " ++ name ++ " = " ++ (termShower False term 0))-} (name, term)
+  return $
+    -- trace ("parsed " ++ name ++ " = " ++ (showTermGo False term 0))
+    (name, term)
   where fillCtrRet  ret (Ctr nm tele)    = Ctr nm (fillTeleRet ret tele)
         fillTeleRet ret (TRet (Met _ _)) = TRet ret
         fillTeleRet _   (TRet ret)       = TRet ret
@@ -629,7 +631,7 @@ parseDefFun = do
         rules <- P.many1 (parseRule 0)
         let flat = flattenDef rules 0
         return
-          -- $ trace ("DONE: " ++ termShow flat)
+          -- $ trace ("DONE: " ++ showTerm flat)
           flat
     , do
         return (Con "Refl" [])
@@ -973,7 +975,7 @@ flattenRules _ _ _ = error "internal error"
 -- Flattens a column with only variables
 flattenVarCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
 flattenVarCol col mat bods depth =
-  -- trace (replicate (depth * 2) ' ' ++ "flattenVarCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
+  -- trace (replicate (depth * 2) ' ' ++ "flattenVarCol: col = " ++ show col ++ ", depth = " ++ show depth) $
   let nam = maybe "_" id (getVarColName col)
       bod = flattenRules mat bods depth
   in Lam nam (\x -> bod)
@@ -981,7 +983,7 @@ flattenVarCol col mat bods depth =
 -- Flattens a column with constructors and possibly variables
 flattenAdtCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
 flattenAdtCol col mat bods depth =
-  -- trace (replicate (depth * 2) ' ' ++ "flattenAdtCol: col = " ++ show col ++ ", fresh = " ++ show fresh) $
+  -- trace (replicate (depth * 2) ' ' ++ "flattenAdtCol: col = " ++ show col ++ ", depth = " ++ show depth) $
   let ctr = map (makeCtrCase col mat bods depth) (getColCtrs col)
       dfl = makeDflCase col mat bods depth
   in Mat (ctr++dfl)
@@ -989,7 +991,7 @@ flattenAdtCol col mat bods depth =
 -- Creates a constructor case: '#Name: body'
 makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> String -> (String, Term)
 makeCtrCase col mat bods depth ctr =
-  -- trace (replicate (depth * 2) ' ' ++ "makeCtrCase: col = " ++ show col ++ ", mat = " ++ show mat ++ ", bods = " ++ show (map termShow bods) ++ ", fresh = " ++ show fresh ++ ", var = " ++ var ++ ", ctr = " ++ ctr) $
+  -- trace (replicate (depth * 2) ' ' ++ "makeCtrCase: col = " ++ show col ++ ", mat = " ++ show mat ++ ", bods = " ++ show (map showTerm bods) ++ ", depth = " ++ show depth ++ ", ctr = " ++ ctr) $
   let var           = getCtrColNames col ctr
       (mat', bods') = foldr (go var) ([], []) (zip3 col mat bods)
       bod           = flattenRules mat' bods' (depth + 1)
@@ -1009,7 +1011,7 @@ makeCtrCase col mat bods depth ctr =
 -- Creates a default case: '#_: body'
 makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> [(String, Term)]
 makeDflCase col mat bods depth =
-  -- trace (replicate (depth * 2) ' ' ++ "makeDflCase: col = " ++ show col ++ ", fresh = " ++ show fresh) $
+  -- trace (replicate (depth * 2) ' ' ++ "makeDflCase: col = " ++ show col ++ ", depth = " ++ show depth) $
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods) in
   if null bods' then [] else [("_", flattenRules mat' bods' (depth + 1))]
   where go ((PVar nam), pats, bod) (mat, bods) = (((PVar nam):pats):mat, bod:bods)

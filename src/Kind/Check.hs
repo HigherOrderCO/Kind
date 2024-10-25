@@ -384,7 +384,7 @@ checkUnreachable src cNam term dep = go src cNam term dep where
   go src cNam (Use nam val bod) dep = go src cNam (bod (Con "void" [])) (dep+1)
   go _   cNam (Src src val)     dep = go (Just src) cNam val dep
   go src cNam (Hol nam ctx)     dep = envLog (Found nam (Hol "unreachable" []) ctx dep) >> go src cNam Set dep
-  go src cNam term              dep = return (cNam, Ann False (Num 0) U64)
+  go src cNam term              dep = return (cNam, Ann False Set U64)
 
 checkLater :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
 checkLater False src term typx dep = check False src term typx dep

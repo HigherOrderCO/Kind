@@ -8,9 +8,10 @@ import Kind.Equal
 
 import Prelude hiding (LT, GT, EQ)
 
-import Debug.Trace
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+
+import Debug.Trace
 
 -- Gets dependencies of a term
 getDeps :: Term -> [String]
@@ -130,6 +131,18 @@ getADTCts :: Term -> [(String,Ctr)]
 getADTCts (ADT _ cts _) = map (\ ctr -> (getCtrName ctr, ctr)) cts
 getADTCts (Src loc val) = getADTCts val
 getADTCts term          = error ("not-an-adt:" ++ showTerm term)
+
+-- Given a typed term, return its argument's names
+getArgNames :: Term -> [String]
+getArgNames (Ann _ _ typ) = getForallNames typ
+getArgNames (Src _ val)   = getArgNames val
+getArgNames _             = []
+
+-- Returns the names in a chain of foralls
+getForallNames :: Term -> [String]
+getForallNames (All nam _ bod) = nam : getForallNames (bod Set)
+getForallNames (Src _ val)     = getForallNames val
+getForallNames _               = []
 
 getOpReturnType :: Oper -> Term -> Term
 getOpReturnType ADD U64 = U64
