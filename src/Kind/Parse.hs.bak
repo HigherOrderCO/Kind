@@ -44,7 +44,7 @@ skip = P.skipMany (parseSpace <|> parseComment)
       return ()) <?> "Comment"
 
 char_end :: Char -> Parser Char
-char_end  = P.char c
+char_end c = P.char c
 
 string_end :: String -> Parser String
 string_end s = P.string s
@@ -183,7 +183,7 @@ parseTerm = (do
 
 -- Individual term parsers
 parseAll = withSrc $ do
-  string_skp "@"
+  string_skp "∀"
   era <- P.optionMaybe (char_skp '-')
   char_skp '('
   nam <- name_skp
@@ -194,14 +194,14 @@ parseAll = withSrc $ do
   return $ All nam inp (\x -> bod)
 
 parseLam = withSrc $ do
-  string_skp "@"
+  string_skp "λ"
   era <- P.optionMaybe (char_skp '-')
   nam <- name_skp
   bod <- parseTerm
   return $ Lam nam (\x -> bod)
 
 parseEra = withSrc $ do
-  string_skp "@"
+  string_skp "λ"
   era <- P.optionMaybe (char_skp '-')
   nam <- char_skp '_'
   bod <- parseTerm
@@ -350,7 +350,7 @@ parseSwiCases = parseCases ""
 
 parseSwi = withSrc $ do
   P.try $ do
-    char_skp '@'
+    char_skp 'λ'
     char_skp '{'
     P.lookAhead $ P.try $ do
       char_skp '0'
@@ -360,7 +360,7 @@ parseSwi = withSrc $ do
 
 parseMat = withSrc $ do
   P.try $ do
-    string_skp "@"
+    string_skp "λ"
     string_skp "{"
   cse <- parseMatCases
   char_end '}'

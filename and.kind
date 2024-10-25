@@ -1,0 +1,8 @@
+B/and
+: ∀(a: B/Bool)
+  ∀(b: B/Bool)
+  B/Bool
+= λ{
+  #True: λb b
+  #False: λb #False{}
+}
