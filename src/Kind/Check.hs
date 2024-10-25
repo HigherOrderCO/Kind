@@ -227,7 +227,9 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
       otherwise -> infer sus src (Con nam arg) dep
     where
       checkConstructor :: Maybe Cod -> [(Maybe String, Term)] -> Tele -> Int -> Env [(Maybe String, Term)]
-      checkConstructor src [] (TRet ret) _ = return []
+      checkConstructor src [] (TRet ret) dep = do
+        cmp src val ret typx dep
+        return []
       checkConstructor src ((field, arg):args) (TExt nam inp bod) dep =
         case field of
           Just field -> if field /= nam
