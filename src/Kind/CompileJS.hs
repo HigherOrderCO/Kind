@@ -12,7 +12,7 @@ import Kind.Type
 import Kind.Util
 
 import Control.Monad (forM)
-import Data.List (intercalate)
+import Data.List (intercalate, isSuffixOf)
 import Data.Maybe (fromJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
@@ -154,8 +154,9 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 ctToFn :: String -> [String] -> CT -> FN
 ctToFn func args ct =
   let (arity, body) = pull ct 0 0 0
-  in trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $
-     FN [var i | i <- [0..arity-1]] (bindCT body [])
+  in 
+      trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $
+      FN [var i | i <- [0..arity-1]] (bindCT body [])
   where
 
   -- if the int is in args, return it. otherwise, return "v" ++ show i
@@ -205,6 +206,35 @@ ctToFn func args ct =
     go term dep ari s =
       (ari, term)
 
+-- TODO
+inlineFn :: M.Map String FN -> FN -> FN
+inlineFn book (FN args body) = FN args (inlineCT body) where
+  inlineable :: String -> Bool
+  inlineable name
+    =  "pure" `isSuffixOf` name
+    || "bind" `isSuffixOf` name
+    || "bind/go" `isSuffixOf` name
+  inlineCT CNul               = CNul 
+  inlineCT (CLam nam bod)     = CLam nam (\x -> inlineCT (bod x))
+  inlineCT (CApp fun arg)     = CApp (inlineCT fun) (inlineCT arg)
+  inlineCT (CCon nam fields)  = CCon nam (map (\ (f, t) -> (f, inlineCT t)) fields)
+  inlineCT (CMat val cse)     = CMat (inlineCT val) (map (\ (cn, fs, cb) -> (cn, fs, inlineCT cb)) cse)
+  inlineCT (CLet nam val bod) = CLet nam (inlineCT val) (\x -> inlineCT (bod x))
+  inlineCT (CNum val)         = CNum val
+  inlineCT (CFlt val)         = CFlt val
+  inlineCT (COp2 opr fst snd) = COp2 opr (inlineCT fst) (inlineCT snd)
+  inlineCT (CSwi val zer suc) = CSwi (inlineCT val) (inlineCT zer) (inlineCT suc)
+  inlineCT (CLog msg nxt)     = CLog (inlineCT msg) (inlineCT nxt)
+  inlineCT (CVar nam idx)     = CVar nam idx
+  inlineCT (CTxt txt)         = CTxt txt
+  inlineCT (CLst lst)         = CLst (map inlineCT lst)
+  inlineCT (CNat val)         = CNat val
+  inlineCT (CRef nam)         = if inlineable nam
+    then case M.lookup nam book of
+      Just (FN _ def) -> trace ("INLINED: " ++ nam) $ inlineCT def
+      Nothing         -> CRef nam
+    else CRef nam
+
 -- JavaScript Codegen
 -- ------------------
 
@@ -229,7 +259,13 @@ fnToJS book fill aMap func (FN args term) = do
   ret (Just name) expr = return $ "var " ++ name ++ " = " ++ expr ++ ";"
   ret Nothing     expr = return $ expr
 
-  ctToJS tail var term dep = go term where
+  -- Inliner
+  red (CApp fun arg)     = app (red fun) arg
+  red val                = val
+  app (CLam nam bod) arg = red (bod (red arg))
+  app fun            arg = CApp fun arg
+
+  ctToJS tail var term dep = go (red term) where
     go CNul =
       ret var "null"
     go tm@(CLam nam bod) = do
@@ -262,8 +298,6 @@ fnToJS book fill aMap func (FN args term) = do
                       isSameArity = length args' == length args
                   in isSameFunc && isSameArity
                 _ -> False
-    go (CApp fun@(CLam nam bod) arg) = do
-      ctToJS tail var (bod arg) dep
     go (CApp fun arg) = do
       funExpr <- ctToJS False Nothing fun dep
       argExpr <- ctToJS False Nothing arg dep
@@ -411,6 +445,9 @@ genCmp book (name, term) =
 genArityMap :: [(String, Book, Fill, FN)] -> M.Map String Int
 genArityMap cmps = M.fromList [(name, fnArity fn) | (name, _, _, fn) <- cmps]
 
+genFnMap :: [(String, Book, Fill, FN)] -> M.Map String FN
+genFnMap cmps = M.fromList [(name, fn) | (name, _, _, fn) <- cmps]
+
 cmpToJS :: ArityMap -> (String, Book, Fill, FN) -> String
 cmpToJS aMap (name, book, fill, fn@(FN arity ct)) = ST.evalState (fnToJS book fill aMap name (FN arity ct)) 0 ++ "\n\n"
 
@@ -419,7 +456,9 @@ compileJS book =
   let sortedBook = topoSortBook book
       sortedCmps = map (genCmp book) sortedBook
       arityMap   = genArityMap sortedCmps
-      sortedFuns = concatMap (cmpToJS arityMap) sortedCmps
+      -- fnMap      = genFnMap sortedCmps
+      -- inlineCmps = map (\ (name, book, fill, func) -> (name, book, fill, inlineFn fnMap func)) sortedCmps
+      sortedFuns = concatMap (cmpToJS arityMap) sortedFuns
   in prelude ++ "\n\n" ++ sortedFuns
 
 -- Utils
