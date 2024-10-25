@@ -39,7 +39,7 @@ data CT
   | CNum Word64
   | CFlt Double
   | COp2 Oper CT CT
-  | CSwi CT CT
+  | CSwi CT CT CT
   | CLog CT CT
   | CVar String Int
   | CTxt String
@@ -97,8 +97,12 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
                     let fNames = getTeleNames tele dep []
                     in (cnam, fNames, t2ct cbod Nothing dep)
                   Nothing -> error $ "constructor-not-found:" ++ cnam) cse
-          in CLam "x" $ \x -> CMat x cses
+          in CLam ("__" ++ show dep) $ \x -> CMat x cses
         otherwise -> error "match-without-type"
+    go (Swi zer suc) =
+      let zer' = t2ct zer Nothing dep
+          suc' = t2ct suc Nothing dep
+      in CLam ("__" ++ show dep) $ \x -> CSwi x zer' suc'
     go (All _ _ _) =
       CNul
     go (Ref nam) =
@@ -123,10 +127,6 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
       let fst' = t2ct fst Nothing dep
           snd' = t2ct snd Nothing dep
       in COp2 opr fst' snd'
-    go (Swi zer suc) =
-      let zer' = t2ct zer Nothing dep
-          suc' = t2ct suc Nothing dep
-      in CSwi zer' suc'
     go (Txt txt) =
       CTxt txt
     go (Lst lst) =
@@ -154,7 +154,7 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 ctToFn :: String -> [String] -> CT -> FN
 ctToFn func args ct =
   let (arity, body) = pull ct 0 0 0
-  in {-trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $-}
+  in trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $
      FN [var i | i <- [0..arity-1]] (bindCT body [])
   where
 
@@ -163,9 +163,13 @@ ctToFn func args ct =
   var i | i < length args = args !! i ++ show i
   var i | otherwise       = "v"       ++ show i
 
+  isReachable :: CT -> Bool
+  isReachable CNul = False
+  isReachable _    = True
+
   pull :: CT -> Int -> Int -> Int -> (Int, CT)
   pull ct dep ari skp =
-    -- trace ("pull " ++ showCT ct ++ " ### dep=" ++ show dep ++ " ari=" ++ show ari ++ " skp=" ++ show skp) $
+    trace ("pull " ++ showCT ct ++ " ### dep=" ++ show dep ++ " ari=" ++ show ari ++ " skp=" ++ show skp) $
     go ct dep ari skp where
 
     go (CLam nam bod) dep ari 0 =
@@ -174,25 +178,27 @@ ctToFn func args ct =
     go (CLam nam bod) dep ari skp =
       let (ari', bod') = pull (bod (CVar nam dep)) (dep+1) ari (skp-1)
       in (ari', CLam nam (\x -> bod'))
-    go app@(CApp _ _) dep ari skp =
-      let (fun, args) = getAppChain app
-      in case fun of
-        CRef nm ->
-          if nm == func && length args == ari
-            then (ari, app)
-            else (0, app)
-        otherwise ->
-          (0, app)
-    go (CMat val cse) dep ari skp | length cse > 0 =
+    go (CApp (CLam nam bod) arg) dep ari skp =
+      go (bod arg) dep ari skp
+    go term@(CMat val cse) dep ari skp | length cse > 0 =
       let rec   = flip map cse $ \ (cnam, cfds, cbod) -> pull cbod dep ari (skp + length cfds)
-          aris  = map (\(a,_) -> a) rec
           cnams = flip map cse $ \ (n,_,_) -> n
           cflds = flip map cse $ \ (_,f,_) -> f
-          cbods = flip map rec $ \ (_,b)   -> b
-          warn  = if all (== head aris) aris
-            then id
-            else trace ("WARNING: inconsistent cross-branch lambda count on: " ++ showCT ct)
-      in warn (head aris, CMat val (zip3 cnams cflds cbods))
+          cbods = flip map rec $ \ (_,b) -> b
+          ari'  = fst (head rec)
+          valid = all (\ (a,t) -> not (isReachable t) || a == ari') rec
+          in if valid
+            then (ari', CMat val (zip3 cnams cflds cbods))
+            else (ari, term)
+    go term@(CSwi val zer suc) dep ari skp =
+      let recZer = pull zer dep ari skp
+          recSuc = pull suc dep ari (skp + 1)
+          ariZer = fst recZer
+          ariSuc = fst recSuc
+          valid  = ariZer == ariSuc
+          in if valid
+            then (ariZer, CSwi val (snd recZer) (snd recSuc))
+            else (ari, term)
     go (CLet nam val bod) dep ari skp =
       let (ari', bod') = pull (bod (CVar nam dep)) (dep+1) ari skp
       in (ari', CLet nam val (\x -> bod'))
@@ -223,18 +229,6 @@ fnToJS book fill aMap func (FN args term) = do
   ret (Just name) expr = return $ "var " ++ name ++ " = " ++ expr ++ ";"
   ret Nothing     expr = return $ expr
 
-  -- TODO: convert to (func', args') using getAppChain. then, check if func is (Ref nm) with nm == func, and length args == length args'
-  -- FIXME: we must also track if we're in a tail position
-  isRecCall :: CT -> Bool
-  isRecCall app =
-    let (func', args') = getAppChain app
-    in case func' of
-      CRef fNam ->
-        let isSameFunc  = fNam == func
-            isSameArity = length args' == length args
-        in isSameFunc && isSameArity
-      _ -> False
-
   ctToJS tail var term dep = go term where
     go CNul =
       ret var "null"
@@ -259,6 +253,15 @@ fnToJS book fill aMap func (FN args term) = do
         return (argStmt, paramName ++ " = " ++ argName ++ ";")
       let (argStmts, paramDefs) = unzip argDefs
       return $ concat argStmts ++ concat paramDefs ++ " continue;"
+      where isRecCall :: CT -> Bool
+            isRecCall app =
+              let (func', args') = getAppChain app
+              in case func' of
+                CRef fNam ->
+                  let isSameFunc  = fNam == func
+                      isSameArity = length args' == length args
+                  in isSameFunc && isSameArity
+                _ -> False
     go (CApp fun@(CLam nam bod) arg) = do
       ctToJS tail var (bod arg) dep
     go (CApp fun arg) = do
@@ -288,7 +291,19 @@ fnToJS book fill aMap func (FN args term) = do
       let switch = concat [valStmt, "switch (", valName, ".$) { ", unwords cases, " }"]
       case var of
         Just var -> return $ switch
-        Nothing  -> ret var $ concat ["(()=>{", switch, "})()"]
+        Nothing  -> ret var $ concat ["(() => { var ", retName, ";", switch, " return ", retName, " })()"]
+    go (CSwi val zer suc) = do
+      valName <- fresh
+      valStmt <- ctToJS False (Just valName) val dep
+      retName <- case var of
+        Just var -> return var
+        Nothing  -> fresh
+      zerStmt <- ctToJS tail (Just retName) zer dep
+      sucStmt <- ctToJS tail (Just retName) (CApp suc (COp2 SUB (CVar valName 0) (CNum 1))) dep
+      let ifelse = concat [valStmt, "if (", valName, " === 0) { ", zerStmt, " } else { ", sucStmt, " }"]
+      case var of
+        Just var -> return $ ifelse
+        Nothing  -> ret var $ concat ["(() => { var ", retName, ";", ifelse, " return ", retName, " })()"]
     go (CRef nam) =
       ret var $ nameToJS nam
     go (CLet nam val bod) =
@@ -312,11 +327,6 @@ fnToJS book fill aMap func (FN args term) = do
       fstExpr <- ctToJS False Nothing fst dep
       sndExpr <- ctToJS False Nothing snd dep
       ret var $ concat ["((", fstExpr, " ", opr', " ", sndExpr, ") >>> 0)"]
-    -- FIXME: must transform like we did with Mat. this is currently wrong
-    go (CSwi zer suc) = do
-      zerExpr <- ctToJS tail Nothing zer dep
-      sucExpr <- ctToJS tail Nothing suc dep
-      ret var $ concat ["((x => x === 0 ? ", zerExpr, " : ", sucExpr, "(x - 1)))"]
     go (CLog msg nxt) = do
       msgExpr <- ctToJS False Nothing msg dep
       nxtExpr <- ctToJS tail Nothing nxt dep
@@ -393,7 +403,8 @@ genCmp book (name, term) =
     Done _ (term, fill) ->
       let ct = termToCT book fill (bind term []) Nothing 0
           fn = ctToFn name (getArgNames (bind term [])) ct
-      in (name, book, fill, fn)
+          db = trace ("~" ++ showCT ct ++ "\n~" ++ showCT (fnCT fn))
+      in db (name, book, fill, fn)
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
 
@@ -444,10 +455,11 @@ bindCT (COp2 opr fst snd) ctx =
   let fst' = bindCT fst ctx in
   let snd' = bindCT snd ctx in
   COp2 opr fst' snd'
-bindCT (CSwi zer suc) ctx =
+bindCT (CSwi val zer suc) ctx =
+  let val' = bindCT val ctx in
   let zer' = bindCT zer ctx in
   let suc' = bindCT suc ctx in
-  CSwi zer' suc'
+  CSwi val' zer' suc'
 bindCT (CLog msg nxt) ctx =
   let msg' = bindCT msg ctx in
   let nxt' = bindCT nxt ctx in
@@ -483,7 +495,7 @@ showCT (CLet nam val bod) = "let " ++ nam ++ " = " ++ showCT val ++ "; " ++ show
 showCT (CNum val)         = show val
 showCT (CFlt val)         = show val
 showCT (COp2 opr fst snd) = "(<op> " ++ showCT fst ++ " " ++ showCT snd ++ ")"
-showCT (CSwi zer suc)     = "switch(" ++ showCT zer ++ "," ++ showCT suc ++ ")"
+showCT (CSwi val zer suc) = "switch " ++ showCT val ++ " {0:" ++ showCT zer ++ " _: " ++ showCT suc ++ "}"
 showCT (CLog msg nxt)     = "log(" ++ showCT msg ++ "," ++ showCT nxt ++ ")"
 showCT (CVar nam _)       = nam
 showCT (CTxt txt)         = show txt
@@ -559,28 +571,3 @@ ctest :: IO ()
 ctest = do
   putStrLn $ showCT test1
   putStrLn $ showCT $ fnCT (ctToFn "foo" [] test1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
