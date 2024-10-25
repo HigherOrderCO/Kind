@@ -459,7 +459,7 @@ compileJS book =
       arityMap   = genArityMap sortedCmps
       -- fnMap      = genFnMap sortedCmps
       -- inlineCmps = map (\ (name, book, fill, func) -> (name, book, fill, inlineFn fnMap func)) sortedCmps
-      sortedFuns = concatMap (cmpToJS arityMap) sortedFuns
+      sortedFuns = concatMap (cmpToJS arityMap) sortedCmps
   in prelude ++ "\n\n" ++ sortedFuns
 
 -- Utils
