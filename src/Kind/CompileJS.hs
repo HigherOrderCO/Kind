@@ -48,8 +48,10 @@ data CT
   | CLst [CT]
   | CNat Integer
 
--- Transformations
--- ---------------
+type CTBook = M.Map String CT
+
+-- Term to CT
+-- ----------
 
 -- Converts a Term into a Compilable Term
 -- Uses type information to:
@@ -142,13 +144,15 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go (Src _ val) =
       t2ct val typx dep
 
--- Converts a term to a top-level Function.
--- - Returns the arity and whether it is tail recursive.
--- - Lifts shareable lambdas across branches:
---     from λx match v { #Foo{a b}: (λy λz A) #Bar: (λy λz B) ... }
---       to λx λy λz match v { #Foo{a b}: A #Bar: B ... }
-ctToFn :: String -> [String] -> CT -> CT
-ctToFn func args ct =
+
+-- CT Transformations
+-- ------------------
+
+-- Lifts shareable lambdas across branches:
+-- - from: λx match v { #Foo{a b}: (λy λz A) #Bar: (λy λz B) ... }
+-- -   to: λx λy λz match v { #Foo{a b}: A #Bar: B ... }
+liftLams :: String -> [String] -> CT -> CT
+liftLams func args ct =
   let (arity, body) = pull ct 0 0 0
   in bindCT (lams arity body 0) []
   where
@@ -204,34 +208,36 @@ ctToFn func args ct =
     go term dep ari s =
       (ari, term)
 
--- TODO
--- inlineFn :: M.Map String FN -> FN -> FN
--- inlineFn book (FN args body) = FN args (inlineCT body) where
-  -- inlineable :: String -> Bool
-  -- inlineable name
-    -- =  "pure" `isSuffixOf` name
-    -- || "bind" `isSuffixOf` name
-    -- || "bind/go" `isSuffixOf` name
-  -- inlineCT CNul               = CNul 
-  -- inlineCT (CLam nam bod)     = CLam nam (\x -> inlineCT (bod x))
-  -- inlineCT (CApp fun arg)     = CApp (inlineCT fun) (inlineCT arg)
-  -- inlineCT (CCon nam fields)  = CCon nam (map (\ (f, t) -> (f, inlineCT t)) fields)
-  -- inlineCT (CMat val cse)     = CMat (inlineCT val) (map (\ (cn, fs, cb) -> (cn, fs, inlineCT cb)) cse)
-  -- inlineCT (CLet nam val bod) = CLet nam (inlineCT val) (\x -> inlineCT (bod x))
-  -- inlineCT (CNum val)         = CNum val
-  -- inlineCT (CFlt val)         = CFlt val
-  -- inlineCT (COp2 opr fst snd) = COp2 opr (inlineCT fst) (inlineCT snd)
-  -- inlineCT (CSwi val zer suc) = CSwi (inlineCT val) (inlineCT zer) (inlineCT suc)
-  -- inlineCT (CLog msg nxt)     = CLog (inlineCT msg) (inlineCT nxt)
-  -- inlineCT (CVar nam idx)     = CVar nam idx
-  -- inlineCT (CTxt txt)         = CTxt txt
-  -- inlineCT (CLst lst)         = CLst (map inlineCT lst)
-  -- inlineCT (CNat val)         = CNat val
-  -- inlineCT (CRef nam)         = if inlineable nam
-    -- then case M.lookup nam book of
-      -- Just (FN _ def) -> [>trace ("INLINED: " ++ nam) $<] inlineCT def
-      -- Nothing         -> CRef nam
-    -- else CRef nam
+-- Inliner
+inliner :: CTBook -> CT -> CT
+inliner book CNul               = CNul 
+inliner book (CLam nam bod)     = CLam nam (\x -> inliner book (bod x))
+inliner book (CApp fun arg)     = CApp (inliner book fun) (inliner book arg)
+inliner book (CCon nam fields)  = CCon nam (map (\ (f, t) -> (f, inliner book t)) fields)
+inliner book (CMat val cse)     = CMat (inliner book val) (map (\ (cn, fs, cb) -> (cn, fs, inliner book cb)) cse)
+inliner book (CLet nam val bod) = CLet nam (inliner book val) (\x -> inliner book (bod x))
+inliner book (CNum val)         = CNum val
+inliner book (CFlt val)         = CFlt val
+inliner book (COp2 opr fst snd) = COp2 opr (inliner book fst) (inliner book snd)
+inliner book (CSwi val zer suc) = CSwi (inliner book val) (inliner book zer) (inliner book suc)
+inliner book (CLog msg nxt)     = CLog (inliner book msg) (inliner book nxt)
+inliner book (CVar nam idx)     = CVar nam idx
+inliner book (CTxt txt)         = CTxt txt
+inliner book (CLst lst)         = CLst (map (inliner book) lst)
+inliner book (CNat val)         = CNat val
+inliner book (CRef nam)
+  | inlineable nam =
+    case M.lookup nam book of
+      Just def -> trace ("INLINED: " ++ nam) $ inliner book def
+      Nothing  -> CRef nam
+  | otherwise = CRef nam
+  where
+    inlineable :: String -> Bool
+    inlineable name
+      =  "pure" `isSuffixOf` name
+      || "bind" `isSuffixOf` name
+      || "bind/go" `isSuffixOf` name
+
 
 -- JavaScript Codegen
 -- ------------------
@@ -243,19 +249,60 @@ getArguments term = go term 0 where
     in (nam:args, body)
   go body dep = ([], body)
 
--- Converts a compilable term into JavaScript source
-fnToJS :: Book -> Fill -> String -> CT -> ST.State Int String
-fnToJS book fill func (getArguments -> (args, body)) = do
+-- Converts a function to JavaScript
+fnToJS :: String -> CT -> ST.State Int String
+fnToJS func (getArguments -> (args, body)) = do
   bodyName <- fresh
   bodyStmt <- ctToJS True (Just bodyName) body 0
   
-  -- TODO: must wrap ct with lambdas, one per argument, and assign to a global const. ex:
-  -- const <func-name> = arg0 => arg1 => arg2 => .. => { <bodyStmt> return bodyName }
-  let bodyStr = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
-  let termStr = if null args
-        then concat ["(() => ", bodyStr, ")()"]
-        else concat [intercalate " => " args, " => ", bodyStr]
-  return $ concat ["const ", nameToJS func, " = ", termStr]
+  -- let bodyStr = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
+  -- let termStr = if null args
+        -- then concat ["(() => ", bodyStr, ")()"]
+        -- else concat [intercalate " => " args, " => ", bodyStr]
+  -- return $ concat ["const ", nameToJS func, " = ", termStr]
+
+  -- TODO: update the script above to generate two copies of the function: one
+  -- curried, and the other uncurried. the curried calls the uncurried version.
+  -- that is, change it from:
+  -- const foo = a => b => c => ... function here ...;
+  -- to:
+  -- const foo$ = (a,b,c) => ... function here ...;
+  -- const foo  = a => b => c => foo$(a,b,c);
+  -- note the uncurried version has a '$' after its name
+  -- do not replicate the body twice. one calls the other.
+
+  
+  -- let bodyStr = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
+  -- let uncArgs = if null args then "" else "(" ++ intercalate "," args ++ ") => "
+  -- let uncStr  = concat ["const ", nameToJS func, "$ = ", uncArgs, bodyStr]
+  -- let curStr  = if null args
+        -- then concat ["const ", nameToJS func, " = ", "(() => ", nameToJS func, "$)()"]
+        -- else concat ["const ", nameToJS func, " = ", intercalate " => " args, " => ", nameToJS func, "$", "(", intercalate "," args, ")"]
+  -- return $ uncStr ++ "\n" ++ curStr
+
+  -- this is bad code. let's instead use:
+
+  -- let wrapArgs cur args body
+        -- | not (null args) = if cur
+        --     then (... a => b => ... => <body>)
+        --     else (a,b,...) => <body>
+        -- | otherwise = ... (() => <body>)()
+
+  -- implement the refactored code below. make it clean.
+  let wrapArgs cur args body
+        | null args = concat ["(() => ", body, ")()"]
+        | otherwise = if cur
+            then concat [intercalate " => " args, " => ", body]
+            else concat ["(", intercalate "," args, ") => ", body]
+  let uncBody = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
+  let curBody = nameToJS func ++ "$" ++ (if null args then "" else "(" ++ intercalate "," args ++ ")")
+  let uncFunc = concat ["const ", nameToJS func, "$ = ", wrapArgs False args uncBody]
+  let curFunc = concat ["const ", nameToJS func, " = ", wrapArgs True args curBody]
+  return $ uncFunc ++ "\n" ++ curFunc
+
+
+
+
 
   where
 
@@ -339,7 +386,7 @@ fnToJS book fill func (getArguments -> (args, body)) = do
         Nothing  -> fresh
       zerStmt <- ctToJS tail (Just retName) zer dep
       sucStmt <- ctToJS tail (Just retName) (CApp suc (COp2 SUB (CVar valName 0) (CNum 1))) dep
-      let ifelse = concat [valStmt, "if (", valName, " === 0) { ", zerStmt, " } else { ", sucStmt, " }"]
+      let ifelse = concat [valStmt, "if (", valName, " === 0n) { ", zerStmt, " } else { ", sucStmt, " }"]
       case var of
         Just var -> return $ ifelse
         Nothing  -> ret var $ concat ["(() => { var ", retName, ";", ifelse, " return ", retName, " })()"]
@@ -358,14 +405,14 @@ fnToJS book fill func (getArguments -> (args, body)) = do
           bodExpr <- ctToJS tail Nothing (bod (CVar uid dep)) (dep + 1)
           return $ concat ["(() => {", valExpr, "return ", bodExpr, ";})()"]
     go (CNum val) =
-      ret var $ show val
+      ret var $ show val ++ "n"
     go (CFlt val) =
       ret var $ show val
     go (COp2 opr fst snd) = do
       let opr' = operToJS opr
       fstExpr <- ctToJS False Nothing fst dep
       sndExpr <- ctToJS False Nothing snd dep
-      ret var $ concat ["((", fstExpr, " ", opr', " ", sndExpr, ") >>> 0)"]
+      ret var $ concat ["BigInt.asUintN(64, ", fstExpr, " ", opr', " ", sndExpr, ")"]
     go (CLog msg nxt) = do
       msgExpr <- ctToJS False Nothing msg dep
       nxtExpr <- ctToJS tail Nothing nxt dep
@@ -436,33 +483,28 @@ prelude = unlines [
   "}"
   ]
 
-genCmp :: Book -> (String, Term) -> (String, Book, Fill, CT)
-genCmp book (name, term) =
+compileTerm :: Book -> (String, Term) -> (String, CT)
+compileTerm book (name, term) =
   case envRun (doAnnotate term) book of
     Done _ (term, fill) ->
       let ct = termToCT book fill (bind term []) Nothing 0
-          fn = ctToFn name (getArgNames (bind term [])) ct
+          fn = liftLams name (getArgNames (bind term [])) ct
           -- db = trace ("~" ++ showCT ct ++ "\n~" ++ showCT (fnCT fn))
           db = id
-      in db (name, book, fill, fn)
+      in db (name, fn)
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
 
-genFnMap :: [(String, Book, Fill, CT)] -> M.Map String CT
-genFnMap cmps = M.fromList [(name, fn) | (name, _, _, fn) <- cmps]
-
-cmpToJS :: (String, Book, Fill, CT) -> String
-cmpToJS (name, book, fill, fn) = ST.evalState (fnToJS book fill name fn) 0 ++ "\n\n"
+generateJS :: (String, CT) -> String
+generateJS (name, ct) = ST.evalState (fnToJS name ct) 0 ++ "\n\n"
 
 compileJS :: Book -> String
 compileJS book =
-  let sortedBook = topoSortBook book
-      sortedCmps = map (genCmp book) sortedBook
-      sortedFuns = concatMap cmpToJS sortedCmps
-      -- fnMap      = genFnMap sortedCmps
-      -- inlineCmps = map (\ (name, book, fill, func) -> (name, book, fill, inlineFn fnMap func)) sortedCmps
-      -- sortedFuns = concatMap cmpToJS inlineCmps
-  in prelude ++ "\n\n" ++ sortedFuns
+  let ctDefs  = map (compileTerm book) (topoSortBook book)
+      ctBook  = M.fromList ctDefs
+      -- ctDefs' = map (\ (name, ct) -> (name, inliner ctBook ct)) ctDefs
+      jsFns   = concatMap generateJS ctDefs
+  in prelude ++ "\n\n" ++ jsFns
 
 -- Utils
 -- -----
@@ -606,4 +648,4 @@ test1 = CLam "x" $ \x -> CMat x [
 ctest :: IO ()
 ctest = do
   putStrLn $ showCT test1
-  putStrLn $ showCT $ ctToFn "foo" [] test1
+  putStrLn $ showCT $ liftLams "foo" [] test1
