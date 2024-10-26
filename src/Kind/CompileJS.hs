@@ -144,7 +144,6 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go (Src _ val) =
       t2ct val typx dep
 
-
 -- CT Transformations
 -- ------------------
 
@@ -208,36 +207,6 @@ liftLams func args ct =
     go term dep ari s =
       (ari, term)
 
--- Inliner
-inliner :: CTBook -> CT -> CT
-inliner book CNul               = CNul 
-inliner book (CLam nam bod)     = CLam nam (\x -> inliner book (bod x))
-inliner book (CApp fun arg)     = CApp (inliner book fun) (inliner book arg)
-inliner book (CCon nam fields)  = CCon nam (map (\ (f, t) -> (f, inliner book t)) fields)
-inliner book (CMat val cse)     = CMat (inliner book val) (map (\ (cn, fs, cb) -> (cn, fs, inliner book cb)) cse)
-inliner book (CLet nam val bod) = CLet nam (inliner book val) (\x -> inliner book (bod x))
-inliner book (CNum val)         = CNum val
-inliner book (CFlt val)         = CFlt val
-inliner book (COp2 opr fst snd) = COp2 opr (inliner book fst) (inliner book snd)
-inliner book (CSwi val zer suc) = CSwi (inliner book val) (inliner book zer) (inliner book suc)
-inliner book (CLog msg nxt)     = CLog (inliner book msg) (inliner book nxt)
-inliner book (CVar nam idx)     = CVar nam idx
-inliner book (CTxt txt)         = CTxt txt
-inliner book (CLst lst)         = CLst (map (inliner book) lst)
-inliner book (CNat val)         = CNat val
-inliner book (CRef nam)
-  | inlineable nam =
-    case M.lookup nam book of
-      Just def -> trace ("INLINED: " ++ nam) $ inliner book def
-      Nothing  -> CRef nam
-  | otherwise = CRef nam
-  where
-    inlineable :: String -> Bool
-    inlineable name
-      =  "pure" `isSuffixOf` name
-      || "bind" `isSuffixOf` name
-      || "bind/go" `isSuffixOf` name
-
 -- JavaScript Codegen
 -- ------------------
 
@@ -248,36 +217,94 @@ getArguments term = go term 0 where
     in (nam:args, body)
   go body dep = ([], body)
 
+arityOf :: CTBook -> String -> Int
+arityOf book name = case M.lookup name book of
+  Just ct -> length $ fst $ getArguments ct
+  Nothing -> 0
+
+isRecCall :: String -> Int -> CT -> Bool
+isRecCall fnName arity app =
+  let (appFun, appArgs) = getAppChain app
+  in case appFun of
+    CRef appFunName ->
+      let isSameFunc  = appFunName == fnName
+          isSameArity = length appArgs == arity
+      in isSameFunc && isSameArity
+    _ -> False
+
+isSatCall :: CTBook -> CT -> [CT] -> Bool
+isSatCall book (CRef funName) appArgs = arityOf book funName == length appArgs
+isSatCall book _              _       = False
+
 -- Converts a function to JavaScript
-fnToJS :: String -> CT -> ST.State Int String
-fnToJS func (getArguments -> (args, body)) = do
+fnToJS :: CTBook -> String -> CT -> ST.State Int String
+fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
+
+  -- Compiles the top-level function to JS
   bodyName <- fresh
-  bodyStmt <- ctToJS True (Just bodyName) body 0 
-  let wrapArgs cur args body
-        | null args = concat ["(() => ", body, ")()"]
+  bodyStmt <- ctToJS True (Just bodyName) fnBody 0 
+  let wrapArgs cur args fnBody
+        | null args = concat ["(() => ", fnBody, ")()"]
         | otherwise = if cur
-            then concat [intercalate " => " args, " => ", body]
-            else concat ["(", intercalate "," args, ") => ", body]
+            then concat [intercalate " => " args, " => ", fnBody]
+            else concat ["(", intercalate "," args, ") => ", fnBody]
   let uncBody = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
-  let curBody = nameToJS func ++ "$" ++ (if null args then "" else "(" ++ intercalate "," args ++ ")")
-  let uncFunc = concat ["const ", nameToJS func, "$ = ", wrapArgs False args uncBody]
-  let curFunc = concat ["const ", nameToJS func, " = ", wrapArgs True args curBody]
+  let curBody = nameToJS fnName ++ "$" ++ (if null fnArgs then "" else "(" ++ intercalate "," fnArgs ++ ")")
+  let uncFunc = concat ["const ", nameToJS fnName, "$ = ", wrapArgs False fnArgs uncBody]
+  let curFunc = concat ["const ", nameToJS fnName, " = ", wrapArgs True fnArgs curBody]
   return $ uncFunc ++ "\n" ++ curFunc
 
   where
+
+  -- Inliner
+  red :: CT -> CT
+  red (CApp fun arg)     = app (red fun) arg
+  red val                = val
+
+  -- Inliner APP
+  app :: CT -> CT -> CT
+  app (CLam nam bod) arg = red (bod (red arg))
+  app fun            arg = CApp fun arg
+
+  -- TODO: inline REFs with heuristic
+
+  -- Genreates a fresh name
+  fresh :: ST.State Int String
+  fresh = do
+    n <- ST.get
+    ST.put (n + 1)
+    return $ "$x" ++ show n
 
   -- Assigns an expression to a name, or return it directly
   ret :: Maybe String -> String -> ST.State Int String
   ret (Just name) expr = return $ "var " ++ name ++ " = " ++ expr ++ ";"
   ret Nothing     expr = return $ expr
 
-  -- Inliner
-  red (CApp fun arg)     = app (red fun) arg
-  red val                = val
-  app (CLam nam bod) arg = red (bod (red arg))
-  app fun            arg = CApp fun arg
+  -- Compiles a name to JS
+  nameToJS :: String -> String
+  nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
+
+  -- Compiles an Oper to JS
+  operToJS :: Oper -> String
+  operToJS ADD = "+"
+  operToJS SUB = "-"
+  operToJS MUL = "*"
+  operToJS DIV = "/"
+  operToJS MOD = "%"
+  operToJS EQ  = "==="
+  operToJS NE  = "!=="
+  operToJS LT  = "<"
+  operToJS GT  = ">"
+  operToJS LTE = "<="
+  operToJS GTE = ">="
+  operToJS AND = "&"
+  operToJS OR  = "|"
+  operToJS XOR = "^"
+  operToJS LSH = "<<"
+  operToJS RSH = ">>"
 
   -- Compiles a CT to JS
+  ctToJS :: Bool -> Maybe String -> CT -> Int -> ST.State Int String
   ctToJS tail var term dep = go (red term) where
     go CNul =
       ret var "null"
@@ -292,29 +319,28 @@ fnToJS func (getArguments -> (args, body)) = do
           let uid = nameToJS n ++ "$" ++ show dep
           in lams (b (CVar uid dep)) (dep + 1) (uid : names)
         lams term       dep names = (reverse names, term, Nothing)
-    go app@(CApp fun arg) | tail && isRecCall app = do
-      -- TODO: here, we will mutably set the function's arguments with the new argList values, and 'continue'
-      -- TODO: AI generated, review
-      let (func', argTerms) = getAppChain app
-      argDefs <- forM (zip args argTerms) $ \(paramName, argTerm) -> do
-        argName <- fresh
-        argStmt <- ctToJS False (Just argName) argTerm dep
-        return (argStmt, paramName ++ " = " ++ argName ++ ";")
-      let (argStmts, paramDefs) = unzip argDefs
-      return $ concat argStmts ++ concat paramDefs ++ " continue;"
-      where isRecCall :: CT -> Bool
-            isRecCall app =
-              let (func', args') = getAppChain app
-              in case func' of
-                CRef fNam ->
-                  let isSameFunc  = fNam == func
-                      isSameArity = length args' == length args
-                  in isSameFunc && isSameArity
-                _ -> False
-    go (CApp fun arg) = do
-      funExpr <- ctToJS False Nothing fun dep
-      argExpr <- ctToJS False Nothing arg dep
-      ret var $ concat ["(", funExpr, ")(", argExpr, ")"]
+    go app@(CApp fun arg) = do
+      let (appFun, appArgs) = getAppChain app
+      -- Tail Recursive Call
+      if tail && isRecCall fnName (length fnArgs) app then do
+        -- TODO: here, we will mutably set the function's arguments with the new argList values, and 'continue'
+        -- TODO: AI generated, review
+        argDefs <- forM (zip fnArgs appArgs) $ \(paramName, appArgs) -> do
+          argName <- fresh
+          argStmt <- ctToJS False (Just argName) appArgs dep
+          return (argStmt, paramName ++ " = " ++ argName ++ ";")
+        let (argStmts, paramDefs) = unzip argDefs
+        return $ concat argStmts ++ concat paramDefs ++ " continue;"
+      -- Saturated Call Optimization
+      else if isSatCall book appFun appArgs then do
+        let (CRef funName) = appFun
+        argExprs <- mapM (\arg -> ctToJS False Nothing arg dep) appArgs
+        ret var $ concat [nameToJS funName, "$(", intercalate ", " argExprs, ")"]
+      -- Normal Application
+      else do
+        funExpr <- ctToJS False Nothing fun dep
+        argExpr <- ctToJS False Nothing arg dep
+        ret var $ concat ["(", funExpr, ")(", argExpr, ")"]
     go (CCon nam fields) = do
       fieldExprs <- forM fields $ \ (fname, fterm) -> do
         expr <- ctToJS False Nothing fterm dep
@@ -391,34 +417,6 @@ fnToJS func (getArguments -> (args, body)) = do
           zero = CCon "Zero" []
       in  ctToJS False var (foldr (\_ acc -> succ acc) zero [1..val]) dep
 
-  -- Compiles an Oper to JS
-  operToJS :: Oper -> String
-  operToJS ADD = "+"
-  operToJS SUB = "-"
-  operToJS MUL = "*"
-  operToJS DIV = "/"
-  operToJS MOD = "%"
-  operToJS EQ  = "==="
-  operToJS NE  = "!=="
-  operToJS LT  = "<"
-  operToJS GT  = ">"
-  operToJS LTE = "<="
-  operToJS GTE = ">="
-  operToJS AND = "&"
-  operToJS OR  = "|"
-  operToJS XOR = "^"
-  operToJS LSH = "<<"
-  operToJS RSH = ">>"
-
-nameToJS :: String -> String
-nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
-
-fresh :: ST.State Int String
-fresh = do
-  n <- ST.get
-  ST.put (n + 1)
-  return $ "$x" ++ show n
-
 prelude :: String
 prelude = unlines [
   "function LIST_TO_JSTR(list) {",
@@ -457,15 +455,14 @@ compileTerm book (name, term) =
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
 
-generateJS :: (String, CT) -> String
-generateJS (name, ct) = ST.evalState (fnToJS name ct) 0 ++ "\n\n"
+generateJS :: CTBook -> (String, CT) -> String
+generateJS book (name, ct) = ST.evalState (fnToJS book name ct) 0 ++ "\n\n"
 
 compileJS :: Book -> String
 compileJS book =
   let ctDefs  = map (compileTerm book) (topoSortBook book)
       ctBook  = M.fromList ctDefs
-      -- ctDefs' = map (\ (name, ct) -> (name, inliner ctBook ct)) ctDefs
-      jsFns   = concatMap generateJS ctDefs
+      jsFns   = concatMap (generateJS ctBook) ctDefs
   in prelude ++ "\n\n" ++ jsFns
 
 -- Utils
@@ -520,6 +517,12 @@ bindCT (CLst lst) ctx =
   CLst lst'
 bindCT (CNat val) ctx = CNat val
 
+getAppChain :: CT -> (CT, [CT])
+getAppChain (CApp fun arg) =
+  let (f, args) = getAppChain fun
+  in (f, args ++ [arg])
+getAppChain term = (term, [])
+
 -- Stringification
 -- ---------------
 
@@ -541,15 +544,6 @@ showCT (CVar nam _)       = nam
 showCT (CTxt txt)         = show txt
 showCT (CLst lst)         = "[" ++ unwords (map showCT lst) ++ "]"
 showCT (CNat val)         = show val
-
--- Utils
--- -----
-
-getAppChain :: CT -> (CT, [CT])
-getAppChain (CApp fun arg) =
-  let (f, args) = getAppChain fun
-  in (f, args ++ [arg])
-getAppChain term = (term, [])
 
 -- Tests
 -- -----
