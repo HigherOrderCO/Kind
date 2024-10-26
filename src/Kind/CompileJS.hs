@@ -1,6 +1,8 @@
 -- Checker:
 -- //./Type.hs//
 
+{-# LANGUAGE ViewPatterns #-}
+
 module Kind.CompileJS where
 
 import Kind.Check
@@ -45,12 +47,6 @@ data CT
   | CTxt String
   | CLst [CT]
   | CNat Integer
-
-data FN
-  = FN [String] CT
-
-type ArityMap
-  = M.Map String Int
 
 -- Transformations
 -- ---------------
@@ -151,13 +147,15 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 -- - Lifts shareable lambdas across branches:
 --     from λx match v { #Foo{a b}: (λy λz A) #Bar: (λy λz B) ... }
 --       to λx λy λz match v { #Foo{a b}: A #Bar: B ... }
-ctToFn :: String -> [String] -> CT -> FN
+ctToFn :: String -> [String] -> CT -> CT
 ctToFn func args ct =
   let (arity, body) = pull ct 0 0 0
-  in 
-      -- trace ("RET ARITY = " ++ show arity ++ " ARGS = " ++ show [var i | i <- [0..arity-1]]) $
-      FN [var i | i <- [0..arity-1]] (bindCT body [])
+  in bindCT (lams arity body 0) []
   where
+
+  lams :: Int -> CT -> Int -> CT
+  lams 0 term i = term
+  lams n term i = CLam (var i) (\x -> lams (n-1) term (i+1))
 
   -- if the int is in args, return it. otherwise, return "v" ++ show i
   var :: Int -> String
@@ -207,50 +205,57 @@ ctToFn func args ct =
       (ari, term)
 
 -- TODO
-inlineFn :: M.Map String FN -> FN -> FN
-inlineFn book (FN args body) = FN args (inlineCT body) where
-  inlineable :: String -> Bool
-  inlineable name
-    =  "pure" `isSuffixOf` name
-    || "bind" `isSuffixOf` name
-    || "bind/go" `isSuffixOf` name
-  inlineCT CNul               = CNul 
-  inlineCT (CLam nam bod)     = CLam nam (\x -> inlineCT (bod x))
-  inlineCT (CApp fun arg)     = CApp (inlineCT fun) (inlineCT arg)
-  inlineCT (CCon nam fields)  = CCon nam (map (\ (f, t) -> (f, inlineCT t)) fields)
-  inlineCT (CMat val cse)     = CMat (inlineCT val) (map (\ (cn, fs, cb) -> (cn, fs, inlineCT cb)) cse)
-  inlineCT (CLet nam val bod) = CLet nam (inlineCT val) (\x -> inlineCT (bod x))
-  inlineCT (CNum val)         = CNum val
-  inlineCT (CFlt val)         = CFlt val
-  inlineCT (COp2 opr fst snd) = COp2 opr (inlineCT fst) (inlineCT snd)
-  inlineCT (CSwi val zer suc) = CSwi (inlineCT val) (inlineCT zer) (inlineCT suc)
-  inlineCT (CLog msg nxt)     = CLog (inlineCT msg) (inlineCT nxt)
-  inlineCT (CVar nam idx)     = CVar nam idx
-  inlineCT (CTxt txt)         = CTxt txt
-  inlineCT (CLst lst)         = CLst (map inlineCT lst)
-  inlineCT (CNat val)         = CNat val
-  inlineCT (CRef nam)         = if inlineable nam
-    then case M.lookup nam book of
-      Just (FN _ def) -> {-trace ("INLINED: " ++ nam) $-} inlineCT def
-      Nothing         -> CRef nam
-    else CRef nam
+-- inlineFn :: M.Map String FN -> FN -> FN
+-- inlineFn book (FN args body) = FN args (inlineCT body) where
+  -- inlineable :: String -> Bool
+  -- inlineable name
+    -- =  "pure" `isSuffixOf` name
+    -- || "bind" `isSuffixOf` name
+    -- || "bind/go" `isSuffixOf` name
+  -- inlineCT CNul               = CNul 
+  -- inlineCT (CLam nam bod)     = CLam nam (\x -> inlineCT (bod x))
+  -- inlineCT (CApp fun arg)     = CApp (inlineCT fun) (inlineCT arg)
+  -- inlineCT (CCon nam fields)  = CCon nam (map (\ (f, t) -> (f, inlineCT t)) fields)
+  -- inlineCT (CMat val cse)     = CMat (inlineCT val) (map (\ (cn, fs, cb) -> (cn, fs, inlineCT cb)) cse)
+  -- inlineCT (CLet nam val bod) = CLet nam (inlineCT val) (\x -> inlineCT (bod x))
+  -- inlineCT (CNum val)         = CNum val
+  -- inlineCT (CFlt val)         = CFlt val
+  -- inlineCT (COp2 opr fst snd) = COp2 opr (inlineCT fst) (inlineCT snd)
+  -- inlineCT (CSwi val zer suc) = CSwi (inlineCT val) (inlineCT zer) (inlineCT suc)
+  -- inlineCT (CLog msg nxt)     = CLog (inlineCT msg) (inlineCT nxt)
+  -- inlineCT (CVar nam idx)     = CVar nam idx
+  -- inlineCT (CTxt txt)         = CTxt txt
+  -- inlineCT (CLst lst)         = CLst (map inlineCT lst)
+  -- inlineCT (CNat val)         = CNat val
+  -- inlineCT (CRef nam)         = if inlineable nam
+    -- then case M.lookup nam book of
+      -- Just (FN _ def) -> [>trace ("INLINED: " ++ nam) $<] inlineCT def
+      -- Nothing         -> CRef nam
+    -- else CRef nam
 
 -- JavaScript Codegen
 -- ------------------
 
+getArguments :: CT -> ([String], CT)
+getArguments term = go term 0 where
+  go (CLam nam bod) dep =
+    let (args, body) = go (bod (CVar nam dep)) (dep+1)
+    in (nam:args, body)
+  go body dep = ([], body)
+
 -- Converts a compilable term into JavaScript source
-fnToJS :: Book -> Fill -> ArityMap -> String -> FN -> ST.State Int String
-fnToJS book fill aMap func (FN args term) = do
+fnToJS :: Book -> Fill -> String -> CT -> ST.State Int String
+fnToJS book fill func (getArguments -> (args, body)) = do
   bodyName <- fresh
-  bodyStmt <- ctToJS True (Just bodyName) term 0
+  bodyStmt <- ctToJS True (Just bodyName) body 0
   
   -- TODO: must wrap ct with lambdas, one per argument, and assign to a global const. ex:
   -- const <func-name> = arg0 => arg1 => arg2 => .. => { <bodyStmt> return bodyName }
-  let body = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
-  let expr = if null args
-        then concat ["(() => ", body, ")()"]
-        else concat [intercalate " => " args, " => ", body]
-  return $ concat ["const ", nameToJS func, " = ", expr]
+  let bodyStr = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
+  let termStr = if null args
+        then concat ["(() => ", bodyStr, ")()"]
+        else concat [intercalate " => " args, " => ", bodyStr]
+  return $ concat ["const ", nameToJS func, " = ", termStr]
 
   where
 
@@ -431,7 +436,7 @@ prelude = unlines [
   "}"
   ]
 
-genCmp :: Book -> (String, Term) -> (String, Book, Fill, FN)
+genCmp :: Book -> (String, Term) -> (String, Book, Fill, CT)
 genCmp book (name, term) =
   case envRun (doAnnotate term) book of
     Done _ (term, fill) ->
@@ -443,23 +448,20 @@ genCmp book (name, term) =
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
 
-genArityMap :: [(String, Book, Fill, FN)] -> M.Map String Int
-genArityMap cmps = M.fromList [(name, fnArity fn) | (name, _, _, fn) <- cmps]
-
-genFnMap :: [(String, Book, Fill, FN)] -> M.Map String FN
+genFnMap :: [(String, Book, Fill, CT)] -> M.Map String CT
 genFnMap cmps = M.fromList [(name, fn) | (name, _, _, fn) <- cmps]
 
-cmpToJS :: ArityMap -> (String, Book, Fill, FN) -> String
-cmpToJS aMap (name, book, fill, fn@(FN arity ct)) = ST.evalState (fnToJS book fill aMap name (FN arity ct)) 0 ++ "\n\n"
+cmpToJS :: (String, Book, Fill, CT) -> String
+cmpToJS (name, book, fill, fn) = ST.evalState (fnToJS book fill name fn) 0 ++ "\n\n"
 
 compileJS :: Book -> String
 compileJS book =
   let sortedBook = topoSortBook book
       sortedCmps = map (genCmp book) sortedBook
-      arityMap   = genArityMap sortedCmps
+      sortedFuns = concatMap cmpToJS sortedCmps
       -- fnMap      = genFnMap sortedCmps
       -- inlineCmps = map (\ (name, book, fill, func) -> (name, book, fill, inlineFn fnMap func)) sortedCmps
-      sortedFuns = concatMap (cmpToJS arityMap) sortedCmps
+      -- sortedFuns = concatMap cmpToJS inlineCmps
   in prelude ++ "\n\n" ++ sortedFuns
 
 -- Utils
@@ -513,12 +515,6 @@ bindCT (CLst lst) ctx =
   let lst' = map (\x -> bindCT x ctx) lst in
   CLst lst'
 bindCT (CNat val) ctx = CNat val
-
-fnArity :: FN -> Int
-fnArity (FN args _) = length args
-
-fnCT :: FN -> CT
-fnCT (FN _ ct) = ct
 
 -- Stringification
 -- ---------------
@@ -610,4 +606,4 @@ test1 = CLam "x" $ \x -> CMat x [
 ctest :: IO ()
 ctest = do
   putStrLn $ showCT test1
-  putStrLn $ showCT $ fnCT (ctToFn "foo" [] test1)
+  putStrLn $ showCT $ ctToFn "foo" [] test1
