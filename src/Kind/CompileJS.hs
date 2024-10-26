@@ -238,7 +238,6 @@ inliner book (CRef nam)
       || "bind" `isSuffixOf` name
       || "bind/go" `isSuffixOf` name
 
-
 -- JavaScript Codegen
 -- ------------------
 
@@ -253,42 +252,7 @@ getArguments term = go term 0 where
 fnToJS :: String -> CT -> ST.State Int String
 fnToJS func (getArguments -> (args, body)) = do
   bodyName <- fresh
-  bodyStmt <- ctToJS True (Just bodyName) body 0
-  
-  -- let bodyStr = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
-  -- let termStr = if null args
-        -- then concat ["(() => ", bodyStr, ")()"]
-        -- else concat [intercalate " => " args, " => ", bodyStr]
-  -- return $ concat ["const ", nameToJS func, " = ", termStr]
-
-  -- TODO: update the script above to generate two copies of the function: one
-  -- curried, and the other uncurried. the curried calls the uncurried version.
-  -- that is, change it from:
-  -- const foo = a => b => c => ... function here ...;
-  -- to:
-  -- const foo$ = (a,b,c) => ... function here ...;
-  -- const foo  = a => b => c => foo$(a,b,c);
-  -- note the uncurried version has a '$' after its name
-  -- do not replicate the body twice. one calls the other.
-
-  
-  -- let bodyStr = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
-  -- let uncArgs = if null args then "" else "(" ++ intercalate "," args ++ ") => "
-  -- let uncStr  = concat ["const ", nameToJS func, "$ = ", uncArgs, bodyStr]
-  -- let curStr  = if null args
-        -- then concat ["const ", nameToJS func, " = ", "(() => ", nameToJS func, "$)()"]
-        -- else concat ["const ", nameToJS func, " = ", intercalate " => " args, " => ", nameToJS func, "$", "(", intercalate "," args, ")"]
-  -- return $ uncStr ++ "\n" ++ curStr
-
-  -- this is bad code. let's instead use:
-
-  -- let wrapArgs cur args body
-        -- | not (null args) = if cur
-        --     then (... a => b => ... => <body>)
-        --     else (a,b,...) => <body>
-        -- | otherwise = ... (() => <body>)()
-
-  -- implement the refactored code below. make it clean.
+  bodyStmt <- ctToJS True (Just bodyName) body 0 
   let wrapArgs cur args body
         | null args = concat ["(() => ", body, ")()"]
         | otherwise = if cur
@@ -299,10 +263,6 @@ fnToJS func (getArguments -> (args, body)) = do
   let uncFunc = concat ["const ", nameToJS func, "$ = ", wrapArgs False args uncBody]
   let curFunc = concat ["const ", nameToJS func, " = ", wrapArgs True args curBody]
   return $ uncFunc ++ "\n" ++ curFunc
-
-
-
-
 
   where
 
@@ -317,6 +277,7 @@ fnToJS func (getArguments -> (args, body)) = do
   app (CLam nam bod) arg = red (bod (red arg))
   app fun            arg = CApp fun arg
 
+  -- Compiles a CT to JS
   ctToJS tail var term dep = go (red term) where
     go CNul =
       ret var "null"
@@ -430,23 +391,24 @@ fnToJS func (getArguments -> (args, body)) = do
           zero = CCon "Zero" []
       in  ctToJS False var (foldr (\_ acc -> succ acc) zero [1..val]) dep
 
-operToJS :: Oper -> String
-operToJS ADD = "+"
-operToJS SUB = "-"
-operToJS MUL = "*"
-operToJS DIV = "/"
-operToJS MOD = "%"
-operToJS EQ  = "==="
-operToJS NE  = "!=="
-operToJS LT  = "<"
-operToJS GT  = ">"
-operToJS LTE = "<="
-operToJS GTE = ">="
-operToJS AND = "&"
-operToJS OR  = "|"
-operToJS XOR = "^"
-operToJS LSH = "<<"
-operToJS RSH = ">>"
+  -- Compiles an Oper to JS
+  operToJS :: Oper -> String
+  operToJS ADD = "+"
+  operToJS SUB = "-"
+  operToJS MUL = "*"
+  operToJS DIV = "/"
+  operToJS MOD = "%"
+  operToJS EQ  = "==="
+  operToJS NE  = "!=="
+  operToJS LT  = "<"
+  operToJS GT  = ">"
+  operToJS LTE = "<="
+  operToJS GTE = ">="
+  operToJS AND = "&"
+  operToJS OR  = "|"
+  operToJS XOR = "^"
+  operToJS LSH = "<<"
+  operToJS RSH = ">>"
 
 nameToJS :: String -> String
 nameToJS x = "$" ++ map (\c -> if c == '/' || c == '.' || c == '-' || c == '#' then '$' else c) x
@@ -464,7 +426,7 @@ prelude = unlines [
   "    let result = '';",
   "    let current = list;",
   "    while (current.$ === 'Cons') {",
-  "      result += String.fromCodePoint(current.head);",
+  "      result += String.fromCodePoint(Number(current.head));",
   "      current = current.tail;",
   "    }",
   "    if (current.$ === 'Nil') {",
@@ -477,7 +439,7 @@ prelude = unlines [
   "function JSTR_TO_LIST(str) {",
   "  let list = {$: 'Nil'};",
   "  for (let i = str.length - 1; i >= 0; i--) {",
-  "    list = {$: 'Cons', head: str.charCodeAt(i), tail: list};",
+  "    list = {$: 'Cons', head: BigInt(str.charCodeAt(i)), tail: list};",
   "  }",
   "  return list;",
   "}"
