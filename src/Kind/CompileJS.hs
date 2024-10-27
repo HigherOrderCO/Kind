@@ -150,8 +150,8 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 -- Lifts shareable lambdas across branches:
 -- - from: λx match v { #Foo{a b}: (λy λz A) #Bar: (λy λz B) ... }
 -- -   to: λx λy λz match v { #Foo{a b}: A #Bar: B ... }
-liftLams :: String -> [String] -> CT -> CT
-liftLams func args ct =
+liftLams :: [String] -> CT -> CT
+liftLams args ct =
   let (arity, body) = pull ct 0 0 0
   in bindCT (lams arity body 0) []
   where
@@ -182,8 +182,8 @@ liftLams func args ct =
       in (ari', CLam nam (\x -> bod'))
     go (CApp (CLam nam bod) arg) dep ari skp =
       go (bod arg) dep ari skp
-    go term@(CMat val cse) dep ari skp | length cse > 0 =
-      let rec   = flip map cse $ \ (cnam, cfds, cbod) -> pull cbod dep ari (skp + length cfds)
+    go ct@(CMat val cse) dep ari skp | length cse > 0 =
+      let rec   = flip map cse $ liftCase
           cnams = flip map cse $ \ (n,_,_) -> n
           cflds = flip map cse $ \ (_,f,_) -> f
           cbods = flip map rec $ \ (_,b) -> b
@@ -191,7 +191,10 @@ liftLams func args ct =
           valid = all (\ (a,t) -> not (isReachable t) || a == ari') rec
           in if valid
             then (ari', CMat val (zip3 cnams cflds cbods))
-            else (ari, term)
+            else (ari, ct)
+      where liftCase (cnam, cfds, cbod) =
+              let cbod' = liftLams cfds cbod
+              in pull cbod' dep ari (skp + length cfds)
     go term@(CSwi val zer suc) dep ari skp =
       let recZer = pull zer dep ari skp
           recSuc = pull suc dep ari (skp + 1)
@@ -448,9 +451,9 @@ compileTerm book (name, term) =
   case envRun (doAnnotate term) book of
     Done _ (term, fill) ->
       let ct = termToCT book fill (bind term []) Nothing 0
-          fn = liftLams name (getArgNames (bind term [])) ct
-          -- db = trace ("~" ++ showCT ct ++ "\n~" ++ showCT (fnCT fn))
-          db = id
+          fn = liftLams (getArgNames (bind term [])) ct
+          db = trace ("~" ++ showCT ct ++ "\n~" ++ showCT fn)
+          -- db = id
       in db (name, fn)
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
@@ -604,4 +607,4 @@ test1 = CLam "x" $ \x -> CMat x [
 ctest :: IO ()
 ctest = do
   putStrLn $ showCT test1
-  putStrLn $ showCT $ liftLams "foo" [] test1
+  putStrLn $ showCT $ liftLams [] test1
