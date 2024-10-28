@@ -969,8 +969,11 @@ flattenDef rules depth =
 flattenWith :: Int -> With -> Term
 flattenWith dep (WBod bod)     = bod
 flattenWith dep (WWit wth rul) =
-  let bod = flattenDef rul (dep + 1)
-  in foldl App bod wth
+  -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
+  let wthA = foldr1 (\x acc -> Con "Pair" [(Nothing, x), (Nothing, acc)]) wth
+      rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr "Pair" [x, acc]) pat], wth)) rul
+      bod  = flattenDef rulA (dep + 1)
+  in App bod wthA
 
 flattenRules :: [[Pattern]] -> [Term] -> Int -> Term
 flattenRules ([]:mat)   (bod:bods) depth = bod
