@@ -80,6 +80,9 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go U64 = do
     return $ Ann False U64 Set
 
+  go I64 = do
+    return $ Ann False I64 Set
+
   go F64 = do
     return $ Ann False F64 Set
 
@@ -88,6 +91,9 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
 
   go (Flt num) = do
     return $ Ann False (Flt num) F64
+
+  go (Int num) = do
+    return $ Ann False (Int num) I64
 
   go (Op2 opr fst snd) = do
     envLog (Error src (Ref "annotation") (Ref "Op2") (Op2 opr fst snd) dep)
