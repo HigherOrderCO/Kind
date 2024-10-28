@@ -740,6 +740,7 @@ parsePattern = do
   P.notFollowedBy $ string_skp "with"
   P.choice [
     parsePatternNat,
+    parsePatternLst,
     parsePatternCtr,
     parsePatternVar
     ]
@@ -752,6 +753,13 @@ parsePatternNat = do
   skip
   let n = read num
   return $ (foldr (\_ acc -> PCtr "Succ" [acc]) (PCtr "Zero" []) [1..n])
+
+parsePatternLst :: Parser Pattern
+parsePatternLst = do
+  P.try $ char_skp '['
+  elems <- P.many parsePattern
+  char_skp ']'
+  return $ foldr (\x acc -> PCtr "Cons" [x, acc]) (PCtr "Nil" []) elems
 
 parsePatternCtr :: Parser Pattern
 parsePatternCtr = do
