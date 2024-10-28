@@ -784,13 +784,14 @@ parseUses = P.many $ P.try $ do
   long <- name_skp
   string_skp "as "
   short <- name_skp
-  return (short ++ "/", long ++ "/")
+  return (short, long)
 
 expandUses :: Uses -> String -> String
-expandUses uses name =
-  case filter (\(short, _) -> short `isPrefixOf` name) uses of
-    (short, long):_ -> long ++ drop (length short) name
-    []              -> name
+expandUses ((short, long):uses) name
+  | short == name                    = long
+  | (short ++ "/") `isPrefixOf` name = long ++ drop (length short) name
+  | otherwise                        = expandUses uses name
+expandUses [] name                   = name
 
 -- Syntax Sugars
 -- -------------
