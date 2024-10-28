@@ -69,6 +69,9 @@ data Term
   -- Binary Operation
   | Op2 Oper Term Term
 
+  -- Unary Operation
+  | Op1 Oper1 Term
+
   -- U64 Elimination (updated to use splitting lambda)
   | Swi Term Term
 
@@ -99,6 +102,9 @@ data Term
 -- Location: Name, Line, Column
 data Loc = Loc String Int Int
 data Cod = Cod Loc Loc
+
+data Oper1
+  = COS | SIN | TAN
 
 -- Numeric Operators
 data Oper 

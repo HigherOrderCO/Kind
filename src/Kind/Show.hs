@@ -94,6 +94,10 @@ showTermGo small term dep =
       Int val ->
         let val' = show val
         in concat [val']
+      Op1 opr fst ->
+        let opr' = showOper1 opr
+            fst' = showTermGo small fst dep
+        in concat ["(" , opr' , " ", fst', ")"]
       Op2 opr fst snd ->
         let opr' = showOper opr
             fst' = showTermGo small fst dep
@@ -156,6 +160,11 @@ showOper OR  = "|"
 showOper XOR = "^"
 showOper LSH = "<<"
 showOper RSH = ">>"
+
+showOper1 :: Oper1 -> String
+showOper1 COS = "cos"
+showOper1 SIN = "sin"
+showOper1 TAN = "tan"
 
 -- Pretty Printing (Sugars)
 -- ------------------------
