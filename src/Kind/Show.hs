@@ -83,11 +83,15 @@ showTermGo small term dep =
         in concat ["use " , nam' , " = " , val' , " " , bod']
       Set -> "*"
       U64 -> "U64"
+      I64 -> "I64"
       F64 -> "F64"
       Num val ->
         let val' = show val
         in concat [val']
       Flt val ->
+        let val' = show val
+        in concat [val']
+      Int val ->
         let val' = show val
         in concat [val']
       Op2 opr fst snd ->

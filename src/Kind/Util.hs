@@ -38,8 +38,10 @@ getDeps term = case term of
   Set           -> []
   U64           -> []
   F64           -> []
+  I64           -> []
   Num _         -> []
   Flt _         -> []
+  Int _         -> []
   Txt _         -> []
   Lst elems     -> concatMap getDeps elems
   Nat _         -> []
@@ -148,21 +150,30 @@ getForallNames _               = []
 getOpReturnType :: Oper -> Term -> Term -> Term
 getOpReturnType ADD U64 _    = U64
 getOpReturnType ADD F64 _    = F64
+getOpReturnType ADD I64 _    = I64
 getOpReturnType ADD _   U64  = U64
 getOpReturnType ADD _   F64  = F64
+getOpReturnType ADD _   I64  = F64
 getOpReturnType SUB U64 _    = U64
 getOpReturnType SUB F64 _    = F64
+getOpReturnType SUB I64 _    = I64
 getOpReturnType SUB _   U64  = U64
 getOpReturnType SUB _   F64  = F64
+getOpReturnType SUB _   I64  = I64
 getOpReturnType MUL U64 _    = U64
 getOpReturnType MUL F64 _    = F64
+getOpReturnType MUL I64 _    = I64
 getOpReturnType MUL _   U64  = U64
 getOpReturnType MUL _   F64  = F64
+getOpReturnType MUL _   I64  = I64
 getOpReturnType DIV U64 _    = U64
 getOpReturnType DIV F64 _    = F64
+getOpReturnType DIV I64 _    = I64
 getOpReturnType DIV _   U64  = U64
 getOpReturnType DIV _   F64  = F64
+getOpReturnType DIV _   I64  = I64
 getOpReturnType MOD U64 _    = U64
+getOpReturnType MOD I64 _    = I64
 getOpReturnType EQ  _   _    = U64
 getOpReturnType NE  _   _    = U64
 getOpReturnType LT  _   _    = U64

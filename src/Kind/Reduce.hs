@@ -99,6 +99,19 @@ reduce book fill lv term = red term where
   op2 AND (Flt _)   (Flt _)   = error "Bitwise AND not supported for floating-point numbers"
   op2 OR  (Flt _)   (Flt _)   = error "Bitwise OR not supported for floating-point numbers"
   op2 XOR (Flt _)   (Flt _)   = error "Bitwise XOR not supported for floating-point numbers"
+  op2 op  (Ref nam) (Int snd) | lv > 0 = op2 op (ref nam) (Int snd)
+  op2 op  (Int fst) (Ref nam) | lv > 0 = op2 op (Int fst) (ref nam)
+  op2 ADD (Int fst) (Int snd) = Int (fst + snd)
+  op2 SUB (Int fst) (Int snd) = Int (fst - snd)
+  op2 MUL (Int fst) (Int snd) = Int (fst * snd)
+  op2 DIV (Int fst) (Int snd) = Int (div fst snd)
+  op2 MOD (Int fst) (Int snd) = Int (mod fst snd)
+  op2 EQ  (Int fst) (Int snd) = Num (if fst == snd then 1 else 0)
+  op2 NE  (Int fst) (Int snd) = Num (if fst /= snd then 1 else 0)
+  op2 LT  (Int fst) (Int snd) = Num (if fst < snd then 1 else 0)
+  op2 GT  (Int fst) (Int snd) = Num (if fst > snd then 1 else 0)
+  op2 LTE (Int fst) (Int snd) = Num (if fst <= snd then 1 else 0)
+  op2 GTE (Int fst) (Int snd) = Num (if fst >= snd then 1 else 0)
   op2 opr fst       snd       = Op2 opr fst snd
 
   ref nam | lv > 0 = case M.lookup nam book of
@@ -188,8 +201,10 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go Set dep = Set
   go U64 dep = U64
   go F64 dep = F64
+  go I64 dep = I64
   go (Num val) dep = Num val
   go (Flt val) dep = Flt val
+  go (Int val) dep = Int val
   go (Op2 opr fst snd) dep =
     let nf_fst = normal book fill lv fst dep in
     let nf_snd = normal book fill lv snd dep in
@@ -280,8 +295,10 @@ bind (Use nam val bod) ctx =
 bind Set ctx = Set
 bind U64 ctx = U64
 bind F64 ctx = F64
+bind I64 ctx = I64
 bind (Num val) ctx = Num val
 bind (Flt val) ctx = Flt val
+bind (Int val) ctx = Int val
 bind (Op2 opr fst snd) ctx =
   let fst' = bind fst ctx in
   let snd' = bind snd ctx in

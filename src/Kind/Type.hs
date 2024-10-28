@@ -5,6 +5,7 @@ import qualified Data.Map.Strict as M
 
 import Debug.Trace
 import Data.Word (Word64)
+import Data.Int (Int64)
 
 -- Kind's AST
 data Term
@@ -53,11 +54,17 @@ data Term
   -- F64 Type
   | F64
 
+  -- I64 Type
+  | I64
+
   -- U64 Value
   | Num Word64
 
   -- F64 Value
   | Flt Double
+
+  -- I64 Value
+  | Int Int64
 
   -- Binary Operation
   | Op2 Oper Term Term
