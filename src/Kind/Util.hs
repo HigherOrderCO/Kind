@@ -144,32 +144,35 @@ getForallNames (All nam _ bod) = nam : getForallNames (bod Set)
 getForallNames (Src _ val)     = getForallNames val
 getForallNames _               = []
 
-getOpReturnType :: Oper -> Term -> Term
-getOpReturnType ADD U64 = U64
-getOpReturnType ADD F64 = F64
-getOpReturnType SUB U64 = U64
-getOpReturnType SUB F64 = F64
-getOpReturnType MUL U64 = U64
-getOpReturnType MUL F64 = F64
-getOpReturnType DIV U64 = U64
-getOpReturnType DIV F64 = F64
-getOpReturnType MOD U64 = U64
-getOpReturnType EQ  _   = U64
-getOpReturnType NE  _   = U64
-getOpReturnType LT  _   = U64
-getOpReturnType GT  _   = U64
-getOpReturnType LTE _   = U64
-getOpReturnType GTE _   = U64
-getOpReturnType AND U64 = U64
-getOpReturnType OR  U64 = U64
-getOpReturnType XOR U64 = U64
-getOpReturnType LSH U64 = U64
-getOpReturnType RSH U64 = U64
-getOpReturnType opr trm = error ("Invalid opertor: " ++ (show opr) ++ " Invalid operand type: " ++ (showTerm trm))
-
-checkValidType :: Term -> [Term] -> Int -> Env Bool
-checkValidType typ validTypes dep = foldr (\t acc -> do
-    isEqual <- equal typ t dep
-    if isEqual then return True else acc
-  ) (return False) validTypes
+-- Returns the type of a numeric operation given its operands.
+getOpReturnType :: Oper -> Term -> Term -> Term
+getOpReturnType ADD U64 _    = U64
+getOpReturnType ADD F64 _    = F64
+getOpReturnType ADD _   U64  = U64
+getOpReturnType ADD _   F64  = F64
+getOpReturnType SUB U64 _    = U64
+getOpReturnType SUB F64 _    = F64
+getOpReturnType SUB _   U64  = U64
+getOpReturnType SUB _   F64  = F64
+getOpReturnType MUL U64 _    = U64
+getOpReturnType MUL F64 _    = F64
+getOpReturnType MUL _   U64  = U64
+getOpReturnType MUL _   F64  = F64
+getOpReturnType DIV U64 _    = U64
+getOpReturnType DIV F64 _    = F64
+getOpReturnType DIV _   U64  = U64
+getOpReturnType DIV _   F64  = F64
+getOpReturnType MOD U64 _    = U64
+getOpReturnType EQ  _   _    = U64
+getOpReturnType NE  _   _    = U64
+getOpReturnType LT  _   _    = U64
+getOpReturnType GT  _   _    = U64
+getOpReturnType LTE _   _    = U64
+getOpReturnType GTE _   _    = U64
+getOpReturnType AND U64 _    = U64
+getOpReturnType OR  U64 _    = U64
+getOpReturnType XOR U64 _    = U64
+getOpReturnType LSH U64 _    = U64
+getOpReturnType RSH U64 _    = U64
+getOpReturnType opr trm1 trm2 = error ("Invalid operator: " ++ (show opr) ++ " Invalid operand types: " ++ (showTerm trm1) ++ ", " ++ (showTerm trm2))
 
