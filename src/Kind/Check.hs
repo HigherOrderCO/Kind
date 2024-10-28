@@ -89,29 +89,10 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go (Flt num) = do
     return $ Ann False (Flt num) F64
 
-
   go (Op2 opr fst snd) = do
-    fstT <- infer sus src fst dep
-    sndT <- infer sus src snd dep
- 
-    let validTypes = [F64, U64]
-    isValidType <- checkValidType (getType fstT) validTypes dep
+    envLog (Error src (Ref "annotation") (Ref "Op2") (Op2 opr fst snd) dep)
+    envFail
 
-    if not isValidType then do
-      envLog (Error src (Ref "Valid numeric type") (getType fstT) (Op2 opr fst snd) dep)
-      envFail
-    else do
-      typesEqual <- equal (getType fstT) (getType sndT) dep
-      if not typesEqual then do
-        envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
-        envFail
-      else do
-        book <- envGetBook
-        fill <- envGetFill
-        let reducedFst = reduce book fill 1 (getType fstT)
-        let returnType = getOpReturnType opr reducedFst
-        return $ Ann False (Op2 opr fstT sndT) returnType
-  
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
     envFail
@@ -287,6 +268,28 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
             return $ Ann False (Mat cseA) typx
           otherwise -> infer sus src (Mat cse) dep
       otherwise -> infer sus src (Mat cse) dep
+
+  go (Op2 opr fst snd) = do
+    fstT <- infer sus src fst dep
+    sndT <- infer sus src snd dep
+
+    t1 <- equal (getType fstT) typx dep
+    t2 <- equal (getType fstT) (getType sndT) dep
+
+    if not t1 then do
+      envLog (Error src typx (getType fstT) (Op2 opr fst snd) dep)
+      envFail
+    else if not t2 then do
+      envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
+      envFail
+    else do
+      book <- envGetBook
+      fill <- envGetFill
+      let reducedFst = reduce book fill 1 (getType fstT)
+      let reducedSnd = reduce book fill 1 (getType sndT)
+      let returnType = getOpReturnType opr reducedFst reducedSnd
+
+      return $ Ann False (Op2 opr fst snd) returnType
 
   go (Swi zer suc) = do
     book <- envGetBook
