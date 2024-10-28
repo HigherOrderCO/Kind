@@ -214,7 +214,7 @@ parseApp = withSrc $ do
   fun <- parseTerm
   args <- P.many $ do
     P.notFollowedBy (char_end ')')
-    era <- P.optionMaybe (char_skp '-')
+    era <- P.optionMaybe (char_skp '~')
     arg <- parseTerm
     return (era, arg)
   char_end ')'
