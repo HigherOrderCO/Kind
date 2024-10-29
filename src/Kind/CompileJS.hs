@@ -220,8 +220,8 @@ liftLambdas nms ct depth = gen (liftLen ct depth 0 0) [] ct depth where
   liftVal :: [CT] -> CT -> Int -> Int -> Int -> CT
   liftVal ctx ct dep lifts skip = go ct dep lifts skip where
     go (CLam nam bod)     dep lifts 0    = liftVal ctx (bod (var ctx lifts)) (dep+1) (lifts+1) 0
-    go (CLam nam bod)     dep lifts skip = CLam nam (\x -> liftVal ctx (bod x) (dep+1) lifts (skip-1))
-    go (CLet nam val bod) dep lifts skip = CLet nam val (\x -> liftVal ctx (bod x) (dep+1) lifts skip)
+    go (CLam nam bod)     dep lifts skip = CLam nam     $ \x -> liftVal ctx (bod x) (dep+1) lifts (skip-1)
+    go (CLet nam val bod) dep lifts skip = CLet nam val $ \x -> liftVal ctx (bod x) (dep+1) lifts skip
     go ct@(CMat val cse)  dep lifts skip | length cse > 0 =
       let recsV = flip map cse $ \ (_,f,b) -> liftVal ctx (liftLambdas f b dep) dep lifts (skip + length f)
           recsL = flip map cse $ \ (_,f,b) -> liftLen     (liftLambdas f b dep) dep lifts (skip + length f)
@@ -497,8 +497,8 @@ compileTerm book (name, term) =
           ct0 = termToCT book fill tm Nothing 0
           ct1 = removeUnreachables ct0
           ct2 = liftLambdas arg ct1 0
-          dbg = trace ("~" ++ showCT ct0 0 ++ "\n~" ++ showCT (rnCT ct0 []) 0 ++ "\n~" ++ showCT ct2 0 ++ "\n")
-          -- db = id
+          -- dbg = trace ("~" ++ showCT ct0 0 ++ "\n~" ++ showCT (rnCT ct0 []) 0 ++ "\n~" ++ showCT ct2 0 ++ "\n")
+          dbg = id
       in dbg (name, ct2)
     Fail _ ->
       error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
