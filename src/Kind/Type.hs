@@ -105,6 +105,7 @@ data Cod = Cod Loc Loc
 
 data Oper1
   = COS | SIN | TAN
+  deriving Show
 
 -- Numeric Operators
 data Oper 
