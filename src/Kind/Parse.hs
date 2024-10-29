@@ -155,6 +155,7 @@ parseTerm = (do
     , parseMat
     , parseLam
     , parseEra
+    , parseOp1
     , parseOp2
     , parseApp
     , parseAnn
@@ -451,6 +452,14 @@ parseOp2 = withSrc $ do
   char_end ')'
   return $ Op2 opr fst snd
 
+parseOp1 = withSrc $ do
+  opr <- P.try $ do
+    char_skp '('
+    parseOper1
+  fst <- parseTerm
+  char_end ')'
+  return $ Op1 opr fst
+
 parseLst = withSrc $ do
   char_skp '['
   elems <- P.many parseTerm
@@ -525,6 +534,12 @@ parseOper = P.choice
   , P.try (string_skp "&") >> return AND
   , P.try (string_skp "|") >> return OR
   , P.try (string_skp "^") >> return XOR
+  ]
+
+parseOper1 = P.choice
+  [ P.try (string_skp "cos") >> return COS
+  , P.try (string_skp "sin") >> return SIN
+  , P.try (string_skp "tan") >> return TAN
   ]
 
 parseSuffix :: Term -> Parser Term

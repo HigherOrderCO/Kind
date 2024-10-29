@@ -31,6 +31,7 @@ reduce book fill lv term = red term where
   red (Ref nam)         = ref nam
   red (Let nam val bod) = red (bod (red val))
   red (Use nam val bod) = red (bod (red val))
+  red (Op1 opr fst)     = op1 opr (red fst)
   red (Op2 opr fst snd) = op2 opr (red fst) (red snd)
   red (Txt val)         = txt val
   red (Lst val)         = lst val
@@ -113,6 +114,12 @@ reduce book fill lv term = red term where
   op2 LTE (Int fst) (Int snd) = Num (if fst <= snd then 1 else 0)
   op2 GTE (Int fst) (Int snd) = Num (if fst >= snd then 1 else 0)
   op2 opr fst       snd       = Op2 opr fst snd
+
+  op1 op  (Ref nam)  | lv > 0 = op1 op (ref nam)
+  op1 COS (Flt fst)           = Flt (cos fst)
+  op1 SIN (Flt fst)           = Flt (sin fst)
+  op1 TAN (Flt fst)           = Flt (tan fst)
+  op1 opr fst                 = Op1 opr fst
 
   ref nam | lv > 0 = case M.lookup nam book of
     Just val -> red val
@@ -209,6 +216,9 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_fst = normal book fill lv fst dep in
     let nf_snd = normal book fill lv snd dep in
     Op2 opr nf_fst nf_snd
+  go (Op1 opr fst) dep =
+    let nf_fst = normal book fill lv fst dep in
+    Op1 opr nf_fst
   go (Txt val) dep = Txt val
   go (Lst val) dep =
     let nf_val = map (\x -> normal book fill lv x dep) val in
@@ -303,6 +313,9 @@ bind (Op2 opr fst snd) ctx =
   let fst' = bind fst ctx in
   let snd' = bind snd ctx in
   Op2 opr fst' snd'
+bind (Op1 opr fst) ctx = 
+  let fst' = bind fst ctx in
+  Op1 opr fst'
 bind (Txt txt) ctx = Txt txt
 bind (Lst lst) ctx =
   let lst' = map (\x -> bind x ctx) lst in
@@ -378,6 +391,9 @@ genMetasGo (Op2 opr fst snd) c =
   let (fst', c1) = genMetasGo fst c
       (snd', c2) = genMetasGo snd c1
   in (Op2 opr fst' snd', c2)
+genMetasGo (Op1 opr fst) c =
+  let (fst', c1) = genMetasGo fst c
+  in (Op1 opr fst', c1)
 genMetasGo (Lst lst) c = 
   let (lst', c1) = foldr (\t (acc, c') -> let (t', c'') = genMetasGo t c' in (t':acc, c'')) ([], c) lst
   in (Lst lst', c1)

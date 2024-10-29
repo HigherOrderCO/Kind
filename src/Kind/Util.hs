@@ -29,6 +29,7 @@ getDeps term = case term of
   Let _ val bod -> getDeps val ++ getDeps (bod Set)
   Use _ val bod -> getDeps val ++ getDeps (bod Set)
   Op2 _ fst snd -> getDeps fst ++ getDeps snd
+  Op1 _ fst     -> getDeps fst 
   Swi zer suc   -> getDeps zer ++ getDeps suc
   Src _ val     -> getDeps val
   Hol _ args    -> concatMap getDeps args
@@ -185,5 +186,12 @@ getOpReturnType OR  U64 _    = U64
 getOpReturnType XOR U64 _    = U64
 getOpReturnType LSH U64 _    = U64
 getOpReturnType RSH U64 _    = U64
-getOpReturnType opr trm1 trm2 = error ("Invalid operator: " ++ (show opr) ++ " Invalid operand types: " ++ (showTerm trm1) ++ ", " ++ (showTerm trm2))
+getOpReturnType opr t1  t2   = error ("Invalid operator: " ++ (show opr) ++ " Invalid operand types: " ++ (showTerm t1) ++ ", " ++ (showTerm t2))
+
+
+getOp1ReturnType :: Oper1 -> Term -> Term
+getOp1ReturnType COS F64 = F64
+getOp1ReturnType SIN F64 = F64
+getOp1ReturnType TAN F64 = F64
+getOp1ReturnType opr t   = error ("Invalid operator: " ++ (show opr) ++ " Invalid operand type: " ++ (showTerm t))
 

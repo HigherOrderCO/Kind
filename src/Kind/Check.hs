@@ -98,6 +98,10 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go (Op2 opr fst snd) = do
     envLog (Error src (Ref "annotation") (Ref "Op2") (Op2 opr fst snd) dep)
     envFail
+  
+  go (Op1 opr fst) = do
+    envLog (Error src (Ref "annotation") (Ref "Op1") (Op1 opr fst) dep)
+    envFail
 
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
@@ -296,6 +300,20 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
       let returnType = getOpReturnType opr reducedFst reducedSnd
 
       return $ Ann False (Op2 opr fst snd) returnType
+
+  go (Op1 opr fst) = do
+    fstT <- infer sus src fst dep
+
+    t1 <- equal (getType fstT) typx dep
+    if not t1 then do
+      envLog (Error src typx (getType fstT) (Op1 opr fst) dep)
+      envFail
+    else do
+      book <- envGetBook
+      fill <- envGetFill
+      let reducedFst = reduce book fill 1 (getType fstT)
+      let returnType = getOp1ReturnType opr reducedFst
+      return $ Ann False (Op1 opr fst) returnType
 
   go (Swi zer suc) = do
     book <- envGetBook
