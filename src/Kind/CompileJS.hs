@@ -199,8 +199,8 @@ removeUnreachables ct = go ct where
     CNul
 
 -- Lifts shareable lambdas across branches:
--- - from: λx match v { #Foo{a b}: (λy λz A) #Bar: (λy λz B) ... }
--- -   to: λx λy λz match v { #Foo{a b}: A #Bar: B ... }
+-- - from: λx       match v { #Foo{a b}: λy λz A #Bar: λy λz B ... }
+-- -   to: λx λy λz match v { #Foo{a b}:       A #Bar:       B ... }
 -- TODO: document why this is (and has to be) terrible
 liftLambdas :: [String] -> CT -> Int -> CT
 liftLambdas nms ct depth = gen (liftLen ct depth 0 0) [] ct depth where
