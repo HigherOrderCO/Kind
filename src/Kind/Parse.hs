@@ -3,6 +3,7 @@
 module Kind.Parse where
 
 import Data.Char (ord)
+import Data.Int (Int64)
 import Data.Functor.Identity (Identity)
 import Data.List (intercalate, isPrefixOf, uncons, find, transpose)
 import Data.Maybe (catMaybes, fromJust, isJust)
@@ -154,6 +155,7 @@ parseTerm = (do
     , parseMat
     , parseLam
     , parseEra
+    , parseOp1
     , parseOp2
     , parseApp
     , parseAnn
@@ -171,6 +173,7 @@ parseTerm = (do
     , parseDo
     , parseSet
     , parseFloat
+    , parseInt
     , parseNum
     , parseTxt
     , parseLst
@@ -212,7 +215,7 @@ parseApp = withSrc $ do
   fun <- parseTerm
   args <- P.many $ do
     P.notFollowedBy (char_end ')')
-    era <- P.optionMaybe (char_skp '-')
+    era <- P.optionMaybe (char_skp '~')
     arg <- parseTerm
     return (era, arg)
   char_end ')'
@@ -373,6 +376,7 @@ parseRef = withSrc $ do
   return $ case name' of
     "U64" -> U64
     "F64" -> F64
+    "I64" -> I64
     "Set" -> Set
     "_"   -> Met 0 []
     _     -> Ref name'
@@ -415,30 +419,27 @@ parseSet = withSrc $ char_end '*' >> return Set
 
 
 parseFloat = withSrc $ P.try $ do
-  -- Parse optional negative sign
   sign <- P.option id $ P.char '-' >> return negate
-
-  -- Parse integer part
   intPart <- P.many1 digit
-
-  -- Parse decimal part (this must succeed, or we fail the whole parser)
   decPart <- do
     char_end '.'
     P.many1 digit
-
-  -- Parse optional exponent
   expPart <- P.option 0 $ P.try $ do
     oneOf "eE"
     expSign <- P.option '+' (oneOf "+-")
     exp <- read <$> P.many1 digit
     return $ if expSign == '-' then -exp else exp
 
-  -- Combine parts into final float
   let floatStr = intPart ++ "." ++ decPart
   let value = (read floatStr :: Double) * (10 ^^ expPart)
 
-  -- Apply the sign to the final value
   return $ Flt (sign value)
+
+parseInt = withSrc $ P.try $ do
+  sign <- P.choice [P.char '+' >> return id, P.char '-' >> return negate]
+  intPart <- P.many1 P.digit
+  let value = sign (read intPart :: Int64)
+  return $ Int value
 
 parseNum = withSrc $ Num . read <$> P.many1 digit
 
@@ -450,6 +451,14 @@ parseOp2 = withSrc $ do
   snd <- parseTerm
   char_end ')'
   return $ Op2 opr fst snd
+
+parseOp1 = withSrc $ do
+  opr <- P.try $ do
+    char_skp '('
+    parseOper1
+  fst <- parseTerm
+  char_end ')'
+  return $ Op1 opr fst
 
 parseLst = withSrc $ do
   char_skp '['
@@ -525,6 +534,12 @@ parseOper = P.choice
   , P.try (string_skp "&") >> return AND
   , P.try (string_skp "|") >> return OR
   , P.try (string_skp "^") >> return XOR
+  ]
+
+parseOper1 = P.choice
+  [ P.try (string_skp "cos") >> return COS
+  , P.try (string_skp "sin") >> return SIN
+  , P.try (string_skp "tan") >> return TAN
   ]
 
 parseSuffix :: Term -> Parser Term

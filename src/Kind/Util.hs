@@ -29,6 +29,7 @@ getDeps term = case term of
   Let _ val bod -> getDeps val ++ getDeps (bod Set)
   Use _ val bod -> getDeps val ++ getDeps (bod Set)
   Op2 _ fst snd -> getDeps fst ++ getDeps snd
+  Op1 _ fst     -> getDeps fst 
   Swi zer suc   -> getDeps zer ++ getDeps suc
   Src _ val     -> getDeps val
   Hol _ args    -> concatMap getDeps args
@@ -38,8 +39,10 @@ getDeps term = case term of
   Set           -> []
   U64           -> []
   F64           -> []
+  I64           -> []
   Num _         -> []
   Flt _         -> []
+  Int _         -> []
   Txt _         -> []
   Lst elems     -> concatMap getDeps elems
   Nat _         -> []
@@ -144,32 +147,51 @@ getForallNames (All nam _ bod) = nam : getForallNames (bod Set)
 getForallNames (Src _ val)     = getForallNames val
 getForallNames _               = []
 
-getOpReturnType :: Oper -> Term -> Term
-getOpReturnType ADD U64 = U64
-getOpReturnType ADD F64 = F64
-getOpReturnType SUB U64 = U64
-getOpReturnType SUB F64 = F64
-getOpReturnType MUL U64 = U64
-getOpReturnType MUL F64 = F64
-getOpReturnType DIV U64 = U64
-getOpReturnType DIV F64 = F64
-getOpReturnType MOD U64 = U64
-getOpReturnType EQ  _   = U64
-getOpReturnType NE  _   = U64
-getOpReturnType LT  _   = U64
-getOpReturnType GT  _   = U64
-getOpReturnType LTE _   = U64
-getOpReturnType GTE _   = U64
-getOpReturnType AND U64 = U64
-getOpReturnType OR  U64 = U64
-getOpReturnType XOR U64 = U64
-getOpReturnType LSH U64 = U64
-getOpReturnType RSH U64 = U64
-getOpReturnType opr trm = error ("Invalid opertor: " ++ (show opr) ++ " Invalid operand type: " ++ (showTerm trm))
+-- Returns the type of a numeric operation given its operands.
+getOpReturnType :: Oper -> Term -> Term -> Term
+getOpReturnType ADD U64 _    = U64
+getOpReturnType ADD F64 _    = F64
+getOpReturnType ADD I64 _    = I64
+getOpReturnType ADD _   U64  = U64
+getOpReturnType ADD _   F64  = F64
+getOpReturnType ADD _   I64  = F64
+getOpReturnType SUB U64 _    = U64
+getOpReturnType SUB F64 _    = F64
+getOpReturnType SUB I64 _    = I64
+getOpReturnType SUB _   U64  = U64
+getOpReturnType SUB _   F64  = F64
+getOpReturnType SUB _   I64  = I64
+getOpReturnType MUL U64 _    = U64
+getOpReturnType MUL F64 _    = F64
+getOpReturnType MUL I64 _    = I64
+getOpReturnType MUL _   U64  = U64
+getOpReturnType MUL _   F64  = F64
+getOpReturnType MUL _   I64  = I64
+getOpReturnType DIV U64 _    = U64
+getOpReturnType DIV F64 _    = F64
+getOpReturnType DIV I64 _    = I64
+getOpReturnType DIV _   U64  = U64
+getOpReturnType DIV _   F64  = F64
+getOpReturnType DIV _   I64  = I64
+getOpReturnType MOD U64 _    = U64
+getOpReturnType MOD I64 _    = I64
+getOpReturnType EQ  _   _    = U64
+getOpReturnType NE  _   _    = U64
+getOpReturnType LT  _   _    = U64
+getOpReturnType GT  _   _    = U64
+getOpReturnType LTE _   _    = U64
+getOpReturnType GTE _   _    = U64
+getOpReturnType AND U64 _    = U64
+getOpReturnType OR  U64 _    = U64
+getOpReturnType XOR U64 _    = U64
+getOpReturnType LSH U64 _    = U64
+getOpReturnType RSH U64 _    = U64
+getOpReturnType opr t1  t2   = error ("Invalid operator: " ++ (show opr) ++ " Invalid operand types: " ++ (showTerm t1) ++ ", " ++ (showTerm t2))
 
-checkValidType :: Term -> [Term] -> Int -> Env Bool
-checkValidType typ validTypes dep = foldr (\t acc -> do
-    isEqual <- equal typ t dep
-    if isEqual then return True else acc
-  ) (return False) validTypes
+
+getOp1ReturnType :: Oper1 -> Term -> Term
+getOp1ReturnType COS F64 = F64
+getOp1ReturnType SIN F64 = F64
+getOp1ReturnType TAN F64 = F64
+getOp1ReturnType opr t   = error ("Invalid operator: " ++ (show opr) ++ " Invalid operand type: " ++ (showTerm t))
 
