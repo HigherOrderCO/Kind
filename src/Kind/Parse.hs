@@ -545,7 +545,7 @@ parseSuffAnn :: Term -> Parser Term
 parseSuffAnn term = do
   P.try $ string_skp "::"
   typ <- parseTerm
-  return $ Ann False term typ
+  return $ Ann True term typ
 
 parseSuffEql :: Term -> Parser Term
 parseSuffEql term = do

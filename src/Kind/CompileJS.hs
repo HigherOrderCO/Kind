@@ -15,7 +15,7 @@ import Kind.Util
 
 import Control.Monad (forM)
 import Data.List (intercalate, isSuffixOf)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
 import qualified Data.IntMap.Strict as IM
@@ -60,7 +60,11 @@ type CTBook = M.Map String CT
 -- - Annotate Mat cases with the field names
 termToCT :: Book -> Fill -> Term -> Maybe Term -> Int -> CT
 termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
-  t2ct term typx dep = go term where
+
+  t2ct term typx dep = 
+    -- trace ("t2ct: " ++ showTerm term ++ "\ntype: " ++ maybe "*" showTerm typx ++ "\ndep: " ++ show dep) $
+    go term where
+
     go (Lam nam bod) =
       let bod' = \x -> t2ct (bod (Var nam dep)) Nothing (dep+1)
       in CLam nam bod'
@@ -84,20 +88,23 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
           in CCon nam fields
         Nothing -> error $ "constructor-not-found:" ++ nam
     go (Mat cse) =
-      case reduce book fill 2 (fromJust typx) of
-        (All _ adt _) ->
-          let adt' = reduce book fill 2 adt
-              cts  = getADTCts adt'
-              cses = map (\ (cnam, cbod) ->
-                if cnam == "_" then
-                  (cnam, ["_"], t2ct cbod Nothing dep)
-                else case lookup cnam cts of
-                  Just (Ctr _ tele) ->
-                    let fNames = getTeleNames tele dep []
-                    in (cnam, fNames, t2ct cbod Nothing dep)
-                  Nothing -> error $ "constructor-not-found:" ++ cnam) cse
-          in CLam ("__" ++ show dep) $ \x -> CMat x cses
-        otherwise -> error "match-without-type"
+      if isJust typx then
+        case reduce book fill 2 (fromJust typx) of
+          (All _ adt _) ->
+            let adt' = reduce book fill 2 adt
+                cts  = getADTCts adt'
+                cses = map (\ (cnam, cbod) ->
+                  if cnam == "_" then
+                    (cnam, ["_"], t2ct cbod Nothing dep)
+                  else case lookup cnam cts of
+                    Just (Ctr _ tele) ->
+                      let fNames = getTeleNames tele dep []
+                      in (cnam, fNames, t2ct cbod Nothing dep)
+                    Nothing -> error $ "constructor-not-found:" ++ cnam) cse
+            in CLam ("__" ++ show dep) $ \x -> CMat x cses
+          otherwise -> error "match-without-type"
+      else
+        error "err"
     go (Swi zer suc) =
       let zer' = t2ct zer Nothing dep
           suc' = t2ct suc Nothing dep
