@@ -667,6 +667,7 @@ parsePattern = do
   P.notFollowedBy $ string_skp "with"
   P.choice [
     parsePatternNat,
+    parsePatternLst,
     parsePatternCtr,
     parsePatternVar
     ]
@@ -679,6 +680,13 @@ parsePatternNat = do
   skip
   let n = read num
   return $ (foldr (\_ acc -> PCtr "Succ" [acc]) (PCtr "Zero" []) [1..n])
+
+parsePatternLst :: Parser Pattern
+parsePatternLst = do
+  P.try $ char_skp '['
+  elems <- P.many parsePattern
+  char_skp ']'
+  return $ foldr (\x acc -> PCtr "Cons" [x, acc]) (PCtr "Nil" []) elems
 
 parsePatternCtr :: Parser Pattern
 parsePatternCtr = do
@@ -703,13 +711,14 @@ parseUses = P.many $ P.try $ do
   long <- name_skp
   string_skp "as "
   short <- name_skp
-  return (short ++ "/", long ++ "/")
+  return (short, long)
 
 expandUses :: Uses -> String -> String
-expandUses uses name =
-  case filter (\(short, _) -> short `isPrefixOf` name) uses of
-    (short, long):_ -> long ++ drop (length short) name
-    []              -> name
+expandUses ((short, long):uses) name
+  | short == name                    = long
+  | (short ++ "/") `isPrefixOf` name = long ++ drop (length short) name
+  | otherwise                        = expandUses uses name
+expandUses [] name                   = name
 
 -- Syntax Sugars
 -- -------------
@@ -961,8 +970,11 @@ flattenDef rules depth =
 flattenWith :: Int -> With -> Term
 flattenWith dep (WBod bod)     = bod
 flattenWith dep (WWit wth rul) =
-  let bod = flattenDef rul (dep + 1)
-  in foldl App bod wth
+  -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
+  let wthA = foldr1 (\x acc -> Con "Pair" [(Nothing, x), (Nothing, acc)]) wth
+      rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr "Pair" [x, acc]) pat], wth)) rul
+      bod  = flattenDef rulA (dep + 1)
+  in App bod wthA
 
 flattenRules :: [[Pattern]] -> [Term] -> Int -> Term
 flattenRules ([]:mat)   (bod:bods) depth = bod
