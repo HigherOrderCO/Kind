@@ -417,7 +417,7 @@ checkUnreachable src cNam term dep = go src cNam term dep where
 
 checkLater :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
 checkLater False src term typx dep = check False src term typx dep
-checkLater True  src term typx dep = envSusp (Check src term typx dep) >> return (Met 0 [])
+checkLater True  src term typx dep = envSusp (Check src term typx dep) >> return term
 
 doCheckMode :: Bool -> Term -> Env Term
 doCheckMode sus (Ann _ val typ) = do

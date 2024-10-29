@@ -96,9 +96,9 @@ apiCheck bookPath (book, defs, _) defName defPath = do
         case M.lookup fileDefName book of
           Just term -> do
             case envRun (doCheck term) book of
-              Done state _ -> do
+              Done state chkTerm -> do
                 apiPrintLogs state
-                apiPrintWarn term state
+                apiPrintWarn chkTerm state
                 putStrLn $ "\x1b[32m✓ " ++ fileDefName ++ "\x1b[0m"
                 return $ Right ()
               Fail state -> do
