@@ -612,7 +612,7 @@ parseDefADT = do
   where fillCtrRet  ret (Ctr nm tele)    = Ctr nm (fillTeleRet ret tele)
         fillTeleRet ret (TRet (Met _ _)) = TRet ret
         fillTeleRet _   (TRet ret)       = TRet ret
-        fillTeleRet ret (TExt nm tm bod) = TExt nm tm (\x -> fillTeleRet ret (bod x))
+        fillTeleRet ret (TExt nm tm bod) = TExt nm tm (\x -> fillTeleRet ret (bod x)) -- FIXME: 'bod x'?
 
 parseDefFun :: Parser (String, Term)
 parseDefFun = do

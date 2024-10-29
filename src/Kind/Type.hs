@@ -89,6 +89,9 @@ data Term
   -- Nat Literal (sugar)
   | Nat Integer
 
+  -- Substitution
+  | Sub Term
+
 -- Location: Name, Line, Column
 data Loc = Loc String Int Int
 data Cod = Cod Loc Loc

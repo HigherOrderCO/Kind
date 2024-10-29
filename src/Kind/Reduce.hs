@@ -254,7 +254,7 @@ bind (ADT scp cts typ) ctx =
   where
     bindCtr (Ctr nm tele)       ctx = Ctr nm (bindTele tele ctx)
     bindTele (TRet term)        ctx = TRet (bind term ctx)
-    bindTele (TExt nam typ bod) ctx = TExt nam (bind typ ctx) $ \x -> bindTele (bod x) ((nam, x) : ctx)
+    bindTele (TExt nam typ bod) ctx = TExt nam (bind typ ctx) $ \x -> bindTele (bod x) ((nam, x) : ctx) -- FIXME: 'bod x'?
 bind (Con nam arg) ctx =
   let arg' = map (\(f, x) -> (f, bind x ctx)) arg in
   Con nam arg'
