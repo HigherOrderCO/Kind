@@ -71,6 +71,15 @@ name_end = do
 name_skp :: Parser String
 name_skp = name_end <* skip
 
+kw_end :: String -> Parser String
+kw_end s = do
+  x <- string_end s
+  P.notFollowedBy name_char
+  return x
+
+kw_skp :: String -> Parser String
+kw_skp s = kw_end s <* skip
+
 digit :: Parser Char
 digit = P.digit
 
@@ -512,7 +521,7 @@ parseHol = withSrc $ do
   return $ Hol nam ctx
 
 parseLog parseBody = withSrc $ do
-  P.try $ string_skp "log"
+  P.try $ kw_skp "log"
   msg <- parseTerm
   val <- parseBody
   return $ Log msg val
@@ -585,7 +594,7 @@ parseDef = P.choice
 
 parseDefADT :: Parser (String, Term)
 parseDefADT = do
-  P.try $ string_skp "data "
+  P.try $ kw_skp "data"
   name <- name_skp
   params <- P.many $ do
     P.try $ char_skp '('
@@ -666,7 +675,7 @@ parseRule dep = P.try $ do
   pats <- P.many parsePattern
   with <- P.choice 
     [ P.try $ do
-      string_skp "with"
+      kw_skp "with"
       wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
       rul <- P.many1 $ parseRule (dep + 1)
       return $ WWit wth rul
@@ -679,7 +688,7 @@ parseRule dep = P.try $ do
 
 parsePattern :: Parser Pattern
 parsePattern = do
-  P.notFollowedBy $ string_skp "with"
+  P.notFollowedBy $ kw_skp "with"
   P.choice [
     parsePatternNat,
     parsePatternLst,
@@ -722,9 +731,9 @@ parsePatternVar = do
 
 parseUses :: Parser Uses
 parseUses = P.many $ P.try $ do
-  string_skp "use "
+  kw_skp "use"
   long <- name_skp
-  string_skp "as "
+  kw_skp "as"
   short <- name_skp
   return (short, long)
 
@@ -740,7 +749,7 @@ expandUses [] name                   = name
 
 parseDo :: Parser Term
 parseDo = withSrc $ do
-  P.try $ string_skp "do "
+  P.try $ kw_skp "do"
   monad <- name_skp
   char_skp '{'
   skip
@@ -768,7 +777,9 @@ parseDoAsk monad = P.choice
 
 parseDoAskMch :: String -> Parser Term
 parseDoAskMch monad = do
-  P.try $ string_skp "ask #"
+  P.try $ do
+    kw_skp "ask"
+    string_skp "#"
   cnam <- name_skp
   char_skp '{'
   args <- P.many name_skp
@@ -791,7 +802,7 @@ parseDoAskVal monad = P.choice
 parseDoAskValNamed :: String -> Parser Term
 parseDoAskValNamed monad = do
   nam <- P.try $ do
-    string_skp "ask "
+    kw_skp "ask"
     nam <- name_skp
     char_skp '='
     return nam
@@ -804,7 +815,7 @@ parseDoAskValNamed monad = do
 
 parseDoAskValAnon :: String -> Parser Term
 parseDoAskValAnon monad = do
-  P.try $ string_skp "ask "
+  P.try $ kw_skp "ask"
   exp <- parseTerm
   next <- parseStmt monad
   (_, _, uses) <- P.getState
@@ -814,7 +825,7 @@ parseDoAskValAnon monad = do
 
 parseDoRet :: String -> Parser Term
 parseDoRet monad = do
-  P.try $ string_skp "ret "
+  P.try $ kw_skp "ret"
   exp <- parseTerm
   (_, _, uses) <- P.getState
   return $ App (App (Ref (monad ++ "/pure")) (Met 0 [])) exp
@@ -824,13 +835,13 @@ parseDoFor monad = do
   (stt, nam, lst, loop, body) <- P.choice
     [ do
         stt <- P.try $ do
-          string_skp "ask "
+          kw_skp "ask"
           stt <- name_skp
           string_skp "="
-          string_skp "for"
+          kw_skp "for"
           return stt
         nam <- name_skp
-        string_skp "in"
+        kw_skp "in"
         lst <- parseTerm
         char_skp '{'
         loop <- parseStmt monad
@@ -838,9 +849,9 @@ parseDoFor monad = do
         body <- parseStmt monad
         return (Just stt, nam, lst, loop, body)
     , do
-        P.try $ string_skp "for "
+        P.try $ kw_skp "for"
         nam <- name_skp
-        string_skp "in"
+        kw_skp "in"
         lst <- parseTerm
         char_skp '{'
         loop <- parseStmt monad
@@ -870,16 +881,16 @@ parseDoFor monad = do
 -- match cond { #True: t #False: f }
 
 parseIf = withSrc $ do
-  P.try $ string_skp "if "
+  P.try $ kw_skp "if"
   cond <- parseTerm
   t <- parseBranch True
-  string_skp "else"
+  kw_skp "else"
   f <- P.choice [parseBranch False, parseIf]
   return $ App (Mat [("True", t), ("False", f)]) cond
   where
     parseBranch isIf = P.choice
       [ do
-          string_skp "do "
+          kw_skp "do"
           monad <- name_skp
           char_skp '{'
           t <- parseStmt monad
@@ -900,7 +911,7 @@ parseIf = withSrc $ do
 -- if (fn x c0) { v0 } else if (fn x c1) { v1 } else { df }
 
 parseWhen = withSrc $ do
-  P.try $ string_skp "when "
+  P.try $ kw_skp "when"
   fun <- parseTerm
   val <- parseTerm
   char_skp '{'
@@ -928,7 +939,7 @@ parseWhen = withSrc $ do
 
 parseMatInl :: Parser Term
 parseMatInl = withSrc $ do
-  P.try $ string_skp "match "
+  P.try $ kw_skp "match"
   x <- parseTerm
   char_skp '{'
   cse <- parseMatCases
@@ -937,7 +948,7 @@ parseMatInl = withSrc $ do
 
 parseSwiInl :: Parser Term
 parseSwiInl = withSrc $ do
-  P.try $ string_skp "switch "
+  P.try $ kw_skp "switch"
   x <- parseTerm
   char_skp '{'
   P.choice
