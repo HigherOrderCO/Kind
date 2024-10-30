@@ -562,7 +562,7 @@ parseHol = withSrc $ do
   return $ Hol nam ctx
 
 parseLog parseBody = withSrc $ do
-  P.try $ string_skp "log"
+  P.try $ string_skp "log "
   msg <- parseTerm
   val <- parseBody
   return $ Log msg val
@@ -724,7 +724,7 @@ parseRule dep = P.try $ do
   pats <- P.many parsePattern
   with <- P.choice 
     [ P.try $ do
-      string_skp "with"
+      string_skp "with "
       wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
       rul <- P.many1 $ parseRule (dep + 1)
       return $ WWit wth rul
@@ -737,7 +737,7 @@ parseRule dep = P.try $ do
 
 parsePattern :: Parser Pattern
 parsePattern = do
-  P.notFollowedBy $ string_skp "with"
+  P.notFollowedBy $ string_skp "with "
   P.choice [
     parsePatternNat,
     parsePatternLst,
