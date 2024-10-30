@@ -15,7 +15,6 @@ import Kind.Show
 import Kind.Type
 import Prelude hiding (EQ, LT, GT)
 import System.Console.ANSI
-import System.Exit (die)
 import Text.Parsec ((<?>), (<|>), getPosition, sourceLine, sourceColumn, getState, setState)
 import Text.Parsec.Error (errorPos, errorMessages, showErrorMessages, ParseError, errorMessages, Message(..))
 import qualified Control.Applicative as A
@@ -85,7 +84,7 @@ doParseTerm filename input =
   case P.runParser (parseTerm <* P.eof) (filename, 0, []) filename input of
     Left err -> do
       showParseError filename input err
-      die ""
+      return $ Ref "bad-parse"
     Right term -> return $ bind (genMetas term) []
 
 doParseUses :: String -> String -> IO Uses
@@ -93,7 +92,7 @@ doParseUses filename input =
   case P.runParser (parseUses <* P.eof) (filename, 0, []) filename input of
     Left err -> do
       showParseError filename input err
-      die ""
+      return $ []
     Right uses -> return uses
 
 doParseBook :: String -> String -> IO Book
@@ -106,7 +105,7 @@ doParseBook filename input = do
   case P.runParser parser (filename, 0, []) filename input of
     Left err -> do
       showParseError filename input err
-      die ""
+      return M.empty
     Right book -> return book
 
 -- Error handling

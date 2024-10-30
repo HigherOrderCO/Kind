@@ -161,6 +161,7 @@ runWithAll :: FilePath -> Command -> IO (Either String ())
 runWithAll bookPath action = do
   files <- findKindFiles bookPath
   results <- forM files $ \file -> do
+    putStrLn $ "\x1b[1m\x1b[4m[" ++ file ++ "]\x1b[0m"
     runWithOne bookPath file action
   return $ sequence_ results
 

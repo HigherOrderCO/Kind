@@ -552,6 +552,7 @@ prelude = unlines [
   "  }",
   "  return list;",
   "}",
+  "",
   "let MEMORY = new Map();",
   "function SWAP(key, val) {",
   "  var old = MEMORY.get(key) || 0n;",
