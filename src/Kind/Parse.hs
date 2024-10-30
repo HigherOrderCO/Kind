@@ -7,6 +7,7 @@ import Data.Functor.Identity (Identity)
 import Data.List (intercalate, isPrefixOf, uncons, find, transpose)
 import Data.Maybe (catMaybes, fromJust, isJust)
 import Data.Set (toList, fromList)
+import Data.Word
 import Debug.Trace
 import Highlight (highlightError, highlight)
 import Kind.Equal
@@ -42,11 +43,11 @@ skip = P.skipMany (parseSpace <|> parseComment)
       P.char '\n'
       return ()) <?> "Comment"
 
-char_end :: Char -> Parser Char
-char_end c = P.char c
+char :: Char -> Parser Char
+char c = P.char c
 
-string_end :: String -> Parser String
-string_end s = P.string s
+string :: String -> Parser String
+string s = P.string s
 
 char_skp :: Char -> Parser Char
 char_skp c = P.char c <* skip
@@ -60,17 +61,26 @@ name_init = P.satisfy (`elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw
 name_char :: Parser Char
 name_char = P.satisfy (`elem` "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/_.-$")
 
-name_end :: Parser String
-name_end = do
+name :: Parser String
+name = do
   head <- name_init
   tail <- P.many name_char
   return (head : tail)
 
 name_skp :: Parser String
-name_skp = name_end <* skip
+name_skp = name <* skip
 
 digit :: Parser Char
 digit = P.digit
+
+numeric :: Parser String
+numeric = do
+  head <- P.satisfy (`elem` "0123456789")
+  tail <- P.many (P.satisfy (`elem` "0123456789xb_"))
+  return (head : tail)
+
+numeric_skp :: Parser String
+numeric_skp = numeric <* skip
 
 oneOf :: String -> Parser Char
 oneOf s = P.oneOf s
@@ -210,11 +220,11 @@ parseApp = withSrc $ do
   char_skp '('
   fun <- parseTerm
   args <- P.many $ do
-    P.notFollowedBy (char_end ')')
+    P.notFollowedBy (char ')')
     era <- P.optionMaybe (char_skp '-')
     arg <- parseTerm
     return (era, arg)
-  char_end ')'
+  char ')'
   return $ foldl (\f (era, a) -> App f a) fun args
 
 parseAnn = withSrc $ do
@@ -223,7 +233,7 @@ parseAnn = withSrc $ do
   char_skp ':'
   chk <- P.option False (char_skp ':' >> return True)
   typ <- parseTerm
-  char_end '}'
+  char '}'
   return $ Ann chk val typ
 
 parseSlf = withSrc $ do
@@ -246,7 +256,7 @@ parseADT = withSrc $ do
   char_skp ']'
   char_skp '{'
   cts <- P.many $ P.try parseADTCtr
-  char_end '}'
+  char '}'
   typ <- do
     skip
     char_skp ':'
@@ -282,7 +292,7 @@ parseTele = do
 
 parseCon = withSrc $ do
   char_skp '#'
-  nam <- name_end
+  nam <- name
   args <- P.option [] $ P.try $ do
     skip
     char_skp '{'
@@ -294,14 +304,14 @@ parseCon = withSrc $ do
         return name
       term <- parseTerm
       return (name, term)
-    char_end '}'
+    char '}'
     return args
   return $ Con nam args
 
-parseCases :: String -> Parser [(String, Term)]
-parseCases prefix = do
+parseMatCases :: Parser [(String, Term)]
+parseMatCases = do
   cse <- P.many $ P.try $ do
-    string_skp prefix
+    string_skp "#"
     cnam <- name_skp
     args <- P.option [] $ P.try $ do
       char_skp '{'
@@ -322,30 +332,33 @@ parseCases prefix = do
     Just (dnam, dbod) -> cse ++ [("_", (Lam dnam (\_ -> dbod)))]
     Nothing           -> cse
 
-parseSwiElim :: Parser (Term, Term)
-parseSwiElim = do
-  zero <- do
-    P.try $ do
-      char_skp '0'
-      char_skp ':'
-    parseTerm
-  succ <- do
-    string_skp "_"
-    pred <- P.optionMaybe $ do
-      char_skp '{'
-      name <- name_skp
-      char_skp '}'
-      return name
+parseSwiCases :: Parser Term
+parseSwiCases = do
+  cse <- P.many $ P.try $ do
+    cnam <- numeric_skp
     char_skp ':'
-    succ <- parseTerm
-    return $ maybe succ (\name -> Lam name (\_ -> succ)) pred
-  return (zero, succ)
+    cbod <- parseTerm
+    return (cnam, cbod)
+  dflt <- P.optionMaybe $ do
+    dnam <- P.try $ do
+      dnam <- name_skp
+      string_skp ":"
+      return dnam
+    dbod <- parseTerm
+    return (dnam, dbod)
+  case dflt of
+    Just (dnam, dbod) -> return $ build (cse ++ [("_", (Lam dnam (\_ -> dbod)))]) 0
+    Nothing           -> return $ build cse 0
+  where build :: [(String, Term)] -> Int -> Term
+        build []           i               = error "Switch must have at least one case."
+        build (("_",t):cs) i               = t
+        build ((n,t):cs)   i | read n == i = Swi t (build cs (i+1))
+        build ((n,t):cs)   i | otherwise   = error "Switch cases must be in ascending order starting from 0."
 
-parseMatCases :: Parser [(String, Term)]
-parseMatCases = parseCases "#"
-
-parseSwiCases :: Parser [(String, Term)]
-parseSwiCases = parseCases ""
+parseSwiElim :: Parser Term
+parseSwiElim = do
+  cases <- parseSwiCases
+  return cases
 
 parseSwi = withSrc $ do
   P.try $ do
@@ -353,20 +366,20 @@ parseSwi = withSrc $ do
     char_skp '{'
     P.lookAhead $ P.try $ do
       char_skp '0'
-  (zero, succ) <- parseSwiElim
-  char_end '}'
-  return $ Swi zero succ
+  elim <- parseSwiElim
+  char '}'
+  return $ elim
 
 parseMat = withSrc $ do
   P.try $ do
     string_skp "λ"
     string_skp "{"
   cse <- parseMatCases
-  char_end '}'
+  char '}'
   return $ Mat cse
 
 parseRef = withSrc $ do
-  name <- name_end
+  name <- name
   (_, _, uses) <- P.getState
   let name' = expandUses uses name
   return $ case name' of
@@ -410,7 +423,7 @@ parseLet = parseLocal "let" Let
 parseUse :: Parser Term -> Parser Term
 parseUse = parseLocal "use" Use
 
-parseSet = withSrc $ char_end '*' >> return Set
+parseSet = withSrc $ char '*' >> return Set
 
 parseFloat = withSrc $ P.try $ do
   -- Parse optional negative sign
@@ -421,7 +434,7 @@ parseFloat = withSrc $ P.try $ do
 
   -- Parse decimal part (this must succeed, or we fail the whole parser)
   decPart <- do
-    char_end '.'
+    char '.'
     P.many1 digit
 
   -- Parse optional exponent
@@ -438,11 +451,9 @@ parseFloat = withSrc $ P.try $ do
   -- Apply the sign to the final value
   return $ Flt (sign value)
 
-parseNum = withSrc $ P.choice
-  [ P.try (string_skp "0x") >> (Num . read . filter (/= '_') . ("0x" ++) <$> P.many1 (P.hexDigit <|> char_skp '_'))
-  , P.try (string_skp "0b") >> (Num . read . filter (/= '_') . ("0b" ++) <$> P.many1 (oneOf "01" <|> char_skp '_'))
-  , Num . read . filter (/= '_') <$> P.many1 (digit <|> char_skp '_')
-  ]
+parseNum = withSrc $ do
+  val <- numeric
+  return $ Num (read (filter (/= '_') val))
 
 parseOp2 = withSrc $ do
   opr <- P.try $ do
@@ -450,13 +461,13 @@ parseOp2 = withSrc $ do
     parseOper
   fst <- parseTerm
   snd <- parseTerm
-  char_end ')'
+  char ')'
   return $ Op2 opr fst snd
 
 parseLst = withSrc $ do
   char_skp '['
   elems <- P.many parseTerm
-  char_end ']'
+  char ']'
   return $ Lst elems
 
 parseTxtChr :: Parser Char
@@ -483,15 +494,15 @@ parseTxtChr = P.choice
   ]
 
 parseTxt = withSrc $ do
-  char_end '"'
+  char '"'
   txt <- P.many parseTxtChr
-  char_end '"'
+  char '"'
   return $ Txt txt
 
 parseChr = withSrc $ do
-  char_end '\''
+  char '\''
   chr <- parseTxtChr
-  char_end '\''
+  char '\''
   return $ Num (fromIntegral $ ord chr)
 
 parseHol = withSrc $ do
@@ -500,7 +511,7 @@ parseHol = withSrc $ do
   ctx <- P.option [] $ do
     char_skp '['
     terms <- P.sepBy parseTerm (char_skp ',')
-    char_end ']'
+    char ']'
     return terms
   return $ Hol nam ctx
 
@@ -585,7 +596,7 @@ parseDefADT = do
     [ do
         P.try $ char_skp '~'
         P.many $ do
-          P.notFollowedBy (char_end '{')
+          P.notFollowedBy (char '{')
           char_skp '('
           iname <- name_skp
           char_skp ':'
@@ -724,7 +735,7 @@ parseDo = withSrc $ do
   skip
   (_, _, uses) <- P.getState
   body <- parseStmt (expandUses uses monad)
-  char_end '}'
+  char '}'
   return body
 
 parseStmt :: String -> Parser Term
@@ -861,12 +872,12 @@ parseIf = withSrc $ do
           monad <- name_skp
           char_skp '{'
           t <- parseStmt monad
-          if isIf then char_skp '}' else char_end '}'
+          if isIf then char_skp '}' else char '}'
           return t
       , do
           char_skp '{'
           t <- parseTerm
-          if isIf then char_skp '}' else char_end '}'
+          if isIf then char_skp '}' else char '}'
           return t
       ]
 
@@ -893,7 +904,7 @@ parseWhen = withSrc $ do
     char_skp ':'
     body <- parseTerm
     return $ body
-  char_end '}'
+  char '}'
   return $ foldr
     (\ (cond, body) acc -> App
       (Mat [("True", body), ("False", acc)])
@@ -910,7 +921,7 @@ parseMatInl = withSrc $ do
   x <- parseTerm
   char_skp '{'
   cse <- parseMatCases
-  char_end '}'
+  char '}'
   return $ App (Mat cse) x
 
 parseSwiInl :: Parser Term
@@ -918,26 +929,9 @@ parseSwiInl = withSrc $ do
   P.try $ string_skp "switch "
   x <- parseTerm
   char_skp '{'
-  P.choice
-    [ do
-        (zero, succ) <- parseSwiElim
-        char_end '}'
-        return $ App (Swi zero succ) x
-    , do
-        cases <- parseSwiCases
-        char_end '}'
-        let defaultCase = find (\(name, _) -> name == "_") cases
-        case defaultCase of
-          Nothing -> do
-            error "Numeric switch requires a default case"
-          Just (_, defaultBody) -> do
-            let nonDefaultCases = filter (\(name, _) -> name /= "_") cases
-                buildIfChain [] = defaultBody
-                buildIfChain ((num,body):rest) = App
-                  (Mat [("True", body), ("False", buildIfChain rest)])
-                  (App (App (Ref "Base/U64/eq") x) (Num (read num)))
-            return $ buildIfChain nonDefaultCases
-    ]
+  cse <- parseSwiCases
+  char '}'
+  return $ App cse x
 
 -- Nat
 -- ---
