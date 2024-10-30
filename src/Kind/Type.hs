@@ -5,7 +5,6 @@ import qualified Data.Map.Strict as M
 
 import Debug.Trace
 import Data.Word (Word64)
-import Data.Int (Int64)
 
 -- Kind's AST
 data Term
@@ -54,23 +53,14 @@ data Term
   -- F64 Type
   | F64
 
-  -- I64 Type
-  | I64
-
   -- U64 Value
   | Num Word64
 
   -- F64 Value
   | Flt Double
 
-  -- I64 Value
-  | Int Int64
-
   -- Binary Operation
   | Op2 Oper Term Term
-
-  -- Unary Operation
-  | Op1 Oper1 Term
 
   -- U64 Elimination (updated to use splitting lambda)
   | Swi Term Term
@@ -105,10 +95,6 @@ data Term
 -- Location: Name, Line, Column
 data Loc = Loc String Int Int
 data Cod = Cod Loc Loc
-
-data Oper1
-  = COS | SIN | TAN
-  deriving Show
 
 -- Numeric Operators
 data Oper 
