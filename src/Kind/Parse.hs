@@ -341,6 +341,8 @@ parseSwiCases = do
     return (cnam, cbod)
   dflt <- P.optionMaybe $ do
     dnam <- P.try $ do
+      cnam <- numeric_skp
+      char_skp '+'
       dnam <- name_skp
       string_skp ":"
       return dnam
