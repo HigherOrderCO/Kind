@@ -315,7 +315,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
 
   -- Inliner
   red :: CT -> CT
-  red tm = trace ("red " ++ showCT tm 0) $ go tm where
+  red tm = {-trace ("red " ++ showCT tm 0) $-} go tm where
     go (CApp fun arg) = app (red fun) arg
     go (CRef nam)     = ref nam    
     go val            = val
@@ -330,7 +330,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
   -- create an aux function called "inl :: String -> Bool" after it
   ref :: String -> CT
   ref nam
-    | inl nam   = trace ("inlined:"++nam) $ red (fromJust (M.lookup nam book))
+    | inl nam   = {-trace ("inlined:"++nam) $-} red (fromJust (M.lookup nam book))
     | otherwise = CRef nam
 
   inl :: String -> Bool
