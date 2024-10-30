@@ -76,8 +76,8 @@ digit = P.digit
 numeric :: Parser String
 numeric = do
   head <- P.satisfy (`elem` "0123456789")
-  tail <- P.many (P.satisfy (`elem` "0123456789xb_"))
-  return (head : tail)
+  tail <- P.many (P.satisfy (`elem` "bx0123456789abcdefABCDEF_"))
+  return $ show (read (head : tail) :: Word64)
 
 numeric_skp :: Parser String
 numeric_skp = numeric <* skip
