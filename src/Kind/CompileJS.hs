@@ -14,7 +14,7 @@ import Kind.Type
 import Kind.Util
 
 import Control.Monad (forM)
-import Data.List (intercalate, isSuffixOf)
+import Data.List (intercalate, isSuffixOf, elem)
 import Data.Maybe (fromJust, isJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
@@ -37,6 +37,7 @@ data CT
   | CCon String [(String, CT)]
   | CMat CT [(String, [String], CT)]
   | CRef String
+  | CHol String
   | CLet String CT (CT -> CT)
   | CNum Word64
   | CFlt Double
@@ -139,8 +140,8 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
       CLst (map (\x -> t2ct x Nothing dep) lst)
     go (Nat val) =
       CNat val
-    go (Hol _ _) =
-      CNul
+    go (Hol nam _) =
+      CHol nam
     go (Met _ _) =
       CNul
     go (Log msg nxt) =
@@ -173,6 +174,7 @@ removeUnreachables ct = go ct where
     let fields' = map (\(f,t) -> (f, go t)) fields
     in CCon nam fields'
   go (CRef nam) = CRef nam
+  go (CHol nam) = CHol nam
   go (CLet nam val bod) =
     let val' = go val
         bod' = \x -> go (bod x)
@@ -274,10 +276,9 @@ arityOf book name = case M.lookup name book of
   Just ct -> length $ fst $ getArguments ct
   Nothing -> 0
 
-isRecCall :: String -> Int -> CT -> Bool
-isRecCall fnName arity app =
-  let (appFun, appArgs) = getAppChain app
-  in case appFun of
+isRecCall :: String -> Int -> CT -> [CT] -> Bool
+isRecCall fnName arity appFun appArgs =
+  case appFun of
     CRef appFunName ->
       let isSameFunc  = appFunName == fnName
           isSameArity = length appArgs == arity
@@ -287,6 +288,10 @@ isRecCall fnName arity app =
 isSatCall :: CTBook -> CT -> [CT] -> Bool
 isSatCall book (CRef funName) appArgs = arityOf book funName == length appArgs
 isSatCall book _              _       = False
+
+isEffCall :: CTBook -> CT -> [CT] -> Bool
+isEffCall book (CHol name) appArgs = True
+isEffCall book name        appArgs = False
 
 -- Converts a function to JavaScript
 fnToJS :: CTBook -> String -> CT -> ST.State Int String
@@ -310,15 +315,34 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
 
   -- Inliner
   red :: CT -> CT
-  red (CApp fun arg)     = app (red fun) arg
-  red val                = val
+  red tm = trace ("red " ++ showCT tm 0) $ go tm where
+    go (CApp fun arg) = app (red fun) arg
+    go (CRef nam)     = ref nam    
+    go val            = val
 
   -- Inliner APP
   app :: CT -> CT -> CT
   app (CLam nam bod) arg = red (bod (red arg))
   app fun            arg = CApp fun arg
 
-  -- TODO: inline REFs with heuristic
+  -- Inliner REF
+  -- NOTE: this should only inline refs ending with "bind", "bind/go" or "pure".
+  -- create an aux function called "inl :: String -> Bool" after it
+  ref :: String -> CT
+  ref nam
+    | inl nam   = trace ("inlined:"++nam) $ red (fromJust (M.lookup nam book))
+    | otherwise = CRef nam
+
+  inl :: String -> Bool
+  -- inl nam = False
+  inl nam = any (`isSuffixOf` nam)
+    [ "/bind"
+    , "/bind/go"
+    , "/pure"
+    , "IO/print"
+    , "IO/prompt"
+    , "IO/swap"
+    ]
 
   -- Genreates a fresh name
   fresh :: ST.State Int String
@@ -374,7 +398,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
     go app@(CApp fun arg) = do
       let (appFun, appArgs) = getAppChain app
       -- Tail Recursive Call
-      if tail && isRecCall fnName (length fnArgs) app then do
+      if tail && isRecCall fnName (length fnArgs) appFun appArgs then do
         -- TODO: here, we will mutably set the function's arguments with the new argList values, and 'continue'
         -- TODO: AI generated, review
         argDefs <- forM (zip fnArgs appArgs) $ \(paramName, appArgs) -> do
@@ -388,6 +412,39 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
         let (CRef funName) = appFun
         argExprs <- mapM (\arg -> ctToJS False Nothing arg dep) appArgs
         ret var $ concat [nameToJS funName, "$(", intercalate ", " argExprs, ")"]
+      -- IO Actions
+      else if isEffCall book appFun appArgs then do
+        let (CHol name) = appFun
+        case name of
+          "IO_BIND" -> do
+            let [_, _, call, cont] = appArgs
+            callName <- fresh
+            callStmt <- ctToJS False (Just callName) call dep
+            contStmt <- ctToJS False var (CApp cont (CVar callName dep)) dep
+            return $ concat [callStmt, contStmt]
+          "IO_PURE" -> do
+            let [_, value] = appArgs
+            valueStmt <- ctToJS False var value dep
+            return $ valueStmt
+          "IO_SWAP" -> do
+            let [key, val] = appArgs
+            keyName  <- fresh
+            keyStmt  <- ctToJS False (Just keyName) key dep
+            valName  <- fresh
+            valStmt  <- ctToJS False (Just valName) val dep
+            resName  <- fresh
+            resStmt  <- return $ concat ["var ", resName, " = SWAP(", keyName, ", ", valName, ");"]
+            doneStmt <- ctToJS False var (CVar resName 0) dep
+            return $ concat [keyStmt, valStmt, resStmt, doneStmt]
+          "IO_PRINT" -> do
+            let [text] = appArgs
+            textName <- fresh
+            textStmt <- ctToJS False (Just textName) text dep
+            doneStmt <- ctToJS False var (CCon "Unit" []) dep 
+            return $ concat [textStmt, "console.log(LIST_TO_JSTR(", textName, "));", doneStmt]
+          "IO_PROMPT" -> do
+            error $ "TODO"
+          _ -> error $ "Unknown IO operation: " ++ name
       -- Normal Application
       else do
         funExpr <- ctToJS False Nothing fun dep
@@ -431,6 +488,8 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
         Nothing  -> ret var $ concat ["(() => { var ", retName, ";", ifelse, " return ", retName, " })()"]
     go (CRef nam) =
       ret var $ nameToJS nam
+    go (CHol nam) =
+      ret var $ "null"
     go (CLet nam val bod) =
       case var of
         Just var -> do
@@ -492,6 +551,12 @@ prelude = unlines [
   "    list = {$: 'Cons', head: BigInt(str.charCodeAt(i)), tail: list};",
   "  }",
   "  return list;",
+  "}",
+  "let MEMORY = new Map();",
+  "function SWAP(key, val) {",
+  "  var old = MEMORY.get(key) || 0n;",
+  "  MEMORY.set(key, val);",
+  "  return old;",
   "}"
   ]
 
@@ -543,6 +608,8 @@ bindCT (CRef nam) ctx =
   case lookup nam ctx of
     Just x  -> x
     Nothing -> CRef nam
+bindCT (CHol nam) ctx =
+  CHol nam
 bindCT (CLet nam val bod) ctx =
   let val' = bindCT val ctx in
   let bod' = \x -> bindCT (bod (CVar nam 0)) ((nam, x) : ctx) in
@@ -594,6 +661,8 @@ rnCT (CRef nam) ctx =
   case lookup nam ctx of
     Just x  -> x
     Nothing -> CRef nam
+rnCT (CRef nam) ctx =
+  CHol nam
 rnCT (CLet nam val bod) ctx =
   let val' = rnCT val ctx in
   let bod' = \x -> rnCT (bod (CVar nam 0)) ((nam, x) : ctx) in
@@ -669,6 +738,7 @@ showCT (CApp fun arg)     dep = "(" ++ showCT fun dep ++ " " ++ showCT arg dep +
 showCT (CCon nam fields)  dep = "#" ++ nam ++ "{" ++ concatMap (\(f,t) -> f ++ ":" ++ showCT t dep ++ " ") fields ++ "}"
 showCT (CMat val cses)    dep = "match " ++ showCT val dep ++ " {" ++ concatMap (\(cn,fs,cb) -> "#" ++ cn ++ ":" ++ showCT cb dep ++ " ") cses ++ "}"
 showCT (CRef nam)         dep = nam
+showCT (CHol nam)         dep = nam
 showCT (CLet nam val bod) dep = "let " ++ nam ++ " = " ++ showCT val dep ++ "; " ++ showCT (bod (CVar nam dep)) (dep+1)
 showCT (CNum val)         dep = show val
 showCT (CFlt val)         dep = show val
