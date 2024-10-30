@@ -412,7 +412,6 @@ parseUse = parseLocal "use" Use
 
 parseSet = withSrc $ char_end '*' >> return Set
 
-
 parseFloat = withSrc $ P.try $ do
   -- Parse optional negative sign
   sign <- P.option id $ P.char '-' >> return negate
@@ -439,7 +438,11 @@ parseFloat = withSrc $ P.try $ do
   -- Apply the sign to the final value
   return $ Flt (sign value)
 
-parseNum = withSrc $ Num . read <$> P.many1 digit
+parseNum = withSrc $ P.choice
+  [ P.try (string_skp "0x") >> (Num . read . ("0x" ++) <$> P.many1 P.hexDigit)
+  , P.try (string_skp "0b") >> (Num . read . ("0b" ++) <$> P.many1 (oneOf "01"))
+  , Num . read <$> P.many1 digit
+  ]
 
 parseOp2 = withSrc $ do
   opr <- P.try $ do
