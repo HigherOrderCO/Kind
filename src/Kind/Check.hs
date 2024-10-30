@@ -80,6 +80,9 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go U64 = do
     return $ Ann False U64 Set
 
+  go I64 = do
+    return $ Ann False I64 Set
+
   go F64 = do
     return $ Ann False F64 Set
 
@@ -89,29 +92,17 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go (Flt num) = do
     return $ Ann False (Flt num) F64
 
+  go (Int num) = do
+    return $ Ann False (Int num) I64
 
   go (Op2 opr fst snd) = do
-    fstT <- infer sus src fst dep
-    sndT <- infer sus src snd dep
- 
-    let validTypes = [F64, U64]
-    isValidType <- checkValidType (getType fstT) validTypes dep
-
-    if not isValidType then do
-      envLog (Error src (Ref "Valid numeric type") (getType fstT) (Op2 opr fst snd) dep)
-      envFail
-    else do
-      typesEqual <- equal (getType fstT) (getType sndT) dep
-      if not typesEqual then do
-        envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
-        envFail
-      else do
-        book <- envGetBook
-        fill <- envGetFill
-        let reducedFst = reduce book fill 1 (getType fstT)
-        let returnType = getOpReturnType opr reducedFst
-        return $ Ann False (Op2 opr fstT sndT) returnType
+    envLog (Error src (Ref "annotation") (Ref "Op2") (Op2 opr fst snd) dep)
+    envFail
   
+  go (Op1 opr fst) = do
+    envLog (Error src (Ref "annotation") (Ref "Op1") (Op1 opr fst) dep)
+    envFail
+
   go (Swi zer suc) = do
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
     envFail
@@ -288,6 +279,42 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
           otherwise -> infer sus src (Mat cse) dep
       otherwise -> infer sus src (Mat cse) dep
 
+  go (Op2 opr fst snd) = do
+    fstT <- infer sus src fst dep
+    sndT <- infer sus src snd dep
+
+    t1 <- equal (getType fstT) typx dep
+    t2 <- equal (getType fstT) (getType sndT) dep
+
+    if not t1 then do
+      envLog (Error src typx (getType fstT) (Op2 opr fst snd) dep)
+      envFail
+    else if not t2 then do
+      envLog (Error src (getType fstT) (getType sndT) (Op2 opr fst snd) dep)
+      envFail
+    else do
+      book <- envGetBook
+      fill <- envGetFill
+      let reducedFst = reduce book fill 1 (getType fstT)
+      let reducedSnd = reduce book fill 1 (getType sndT)
+      let returnType = getOpReturnType opr reducedFst reducedSnd
+
+      return $ Ann False (Op2 opr fst snd) returnType
+
+  go (Op1 opr fst) = do
+    fstT <- infer sus src fst dep
+
+    t1 <- equal (getType fstT) typx dep
+    if not t1 then do
+      envLog (Error src typx (getType fstT) (Op1 opr fst) dep)
+      envFail
+    else do
+      book <- envGetBook
+      fill <- envGetFill
+      let reducedFst = reduce book fill 1 (getType fstT)
+      let returnType = getOp1ReturnType opr reducedFst
+      return $ Ann False (Op1 opr fst) returnType
+
   go (Swi zer suc) = do
     book <- envGetBook
     fill <- envGetFill
@@ -390,7 +417,7 @@ checkUnreachable src cNam term dep = go src cNam term dep where
 
 checkLater :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
 checkLater False src term typx dep = check False src term typx dep
-checkLater True  src term typx dep = envSusp (Check src term typx dep) >> return (Met 0 [])
+checkLater True  src term typx dep = envSusp (Check src term typx dep) >> return term
 
 doCheckMode :: Bool -> Term -> Env Term
 doCheckMode sus (Ann _ val typ) = do

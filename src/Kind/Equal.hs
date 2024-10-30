@@ -114,14 +114,21 @@ identical a b dep = do
     return True
   go F64 F64 dep =
     return True
+  go I64 I64 dep =
+    return True
   go (Num aVal) (Num bVal) dep =
     return (aVal == bVal)
   go (Flt aVal) (Flt bVal) dep =
+    return (aVal == bVal)
+  go (Int aVal) (Int bVal) dep =
     return (aVal == bVal)
   go (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep = do
     iFst <- identical aFst bFst dep
     iSnd <- identical aSnd bSnd dep
     return (iFst && iSnd)
+  go (Op1 aOpr aFst) (Op1 bOpr bFst) dep = do
+    iFst <- identical aFst bFst dep
+    return iFst
   go (Swi aZer aSuc) (Swi bZer bSuc) dep = do
     iZer <- identical aZer bZer dep
     iSuc <- identical aSuc bSuc dep
@@ -198,6 +205,9 @@ similar a b dep = go a b dep where
     eFst <- equal aFst bFst dep
     eSnd <- equal aSnd bSnd dep
     return (eFst && eSnd)
+  go (Op1 aOpr aFst) (Op1 bOpr bFst) dep = do
+    eFst <- equal aFst bFst dep
+    return eFst
   go (Swi aZer aSuc) (Swi bZer bSuc) dep = do
     eZer <- equal aZer bZer dep
     eSuc <- equal aSuc bSuc dep
@@ -318,6 +328,9 @@ occur book fill uid term dep = go term dep where
     let o_fst = go fst dep
         o_snd = go snd dep
     in o_fst || o_snd
+  go (Op1 opr fst) dep =
+    let o_fst = go fst dep
+    in o_fst
   go (Swi zer suc) dep =
     let o_zer = go zer dep
         o_suc = go suc dep
@@ -407,12 +420,18 @@ same U64 U64 dep =
   True
 same F64 F64 dep =
   True
+same I64 I64 dep =
+  True
 same (Num aVal) (Num bVal) dep =
   aVal == bVal
 same (Flt aVal) (Flt bVal) dep =
   aVal == bVal
+same (Int aVal) (Int bVal) dep =
+  aVal == bVal
 same (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep =
   same aFst bFst dep && same aSnd bSnd dep
+same (Op1 aOpr aFst) (Op1 bOpr bFst) dep =
+  same aFst bFst dep
 same (Swi aZer aSuc) (Swi bZer bSuc) dep =
   same aZer bZer dep && same aSuc bSuc dep
 same (Txt aTxt) (Txt bTxt) dep =
@@ -474,9 +493,12 @@ subst lvl neo term = go term where
   go Set               = Set
   go U64               = U64
   go F64               = F64
+  go I64               = I64
   go (Num n)           = Num n
   go (Flt n)           = Flt n
+  go (Int n)           = Int n
   go (Op2 opr fst snd) = Op2 opr (go fst) (go snd)
+  go (Op1 opr fst)     = Op1 opr (go fst)
   go (Txt txt)         = Txt txt
   go (Lst lst)         = Lst (map go lst)
   go (Nat val)         = Nat val
@@ -509,10 +531,13 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Hol nam ctx)      = Hol nam (map (\x -> replace old neo x (dep+1)) ctx)
   go Set                = Set
   go U64                = U64
+  go I64                = I64
   go F64                = F64
   go (Num n)            = Num n
+  go (Int n)            = Int n
   go (Flt n)            = Flt n
   go (Op2 opr fst snd)  = Op2 opr (replace old neo fst dep) (replace old neo snd dep)
+  go (Op1 opr fst)      = Op1 opr (replace old neo fst dep)
   go (Txt txt)          = Txt txt
   go (Lst lst)          = Lst (map (\x -> replace old neo x dep) lst)
   go (Nat val)          = Nat val
