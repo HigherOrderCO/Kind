@@ -28,7 +28,7 @@ type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
 -- Types used for flattening pattern-matching equations
 type Rule     = ([Pattern], With)
-data Pattern  = PVar String | PCtr String [Pattern] deriving Show
+data Pattern  = PVar String | PCtr (Maybe String) String [Pattern] deriving Show
 data With     = WBod Term | WWit [Term] [Rule]
 
 -- Helper functions that consume trailing whitespace
@@ -752,18 +752,22 @@ parsePatternNat = do
     P.many1 digit
   skip
   let n = read num
-  return $ (foldr (\_ acc -> PCtr "Succ" [acc]) (PCtr "Zero" []) [1..n])
+  return $ (foldr (\_ acc -> PCtr Nothing "Succ" [acc]) (PCtr Nothing "Zero" []) [1..n])
 
 parsePatternLst :: Parser Pattern
 parsePatternLst = do
   P.try $ char_skp '['
   elems <- P.many parsePattern
   char_skp ']'
-  return $ foldr (\x acc -> PCtr "Cons" [x, acc]) (PCtr "Nil" []) elems
+  return $ foldr (\x acc -> PCtr Nothing "Cons" [x, acc]) (PCtr Nothing "Nil" []) elems
 
 parsePatternCtr :: Parser Pattern
 parsePatternCtr = do
-  name <- P.try $ do
+  name <- P.optionMaybe $ P.try $ do
+    name <- name_skp
+    char_skp '@'
+    return name
+  cnam <- P.try $ do
     char_skp '#'
     name_skp
   args <- P.option [] $ P.try $ do
@@ -771,7 +775,7 @@ parsePatternCtr = do
     args <- P.many parsePattern
     char_skp '}'
     return args
-  return $ (PCtr name args)
+  return $ (PCtr name cnam args)
 
 parsePatternVar :: Parser Pattern
 parsePatternVar = do
@@ -1028,7 +1032,7 @@ flattenWith dep (WBod bod)     = bod
 flattenWith dep (WWit wth rul) =
   -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
   let wthA = foldr1 (\x acc -> Con "Pair" [(Nothing, x), (Nothing, acc)]) wth
-      rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr "Pair" [x, acc]) pat], wth)) rul
+      rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr Nothing "Pair" [x, acc]) pat], wth)) rul
       bod  = flattenDef rulA (dep + 1)
   in App bod wthA
 
@@ -1054,7 +1058,10 @@ flattenAdtCol col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "flattenAdtCol: col = " ++ show col ++ ", depth = " ++ show depth) $
   let ctr = map (makeCtrCase col mat bods depth) (getColCtrs col)
       dfl = makeDflCase col mat bods depth
-  in Mat (ctr++dfl)
+      nam = getMatNam col
+  in case nam of
+    (Just nam) -> (Lam nam (\x -> App (Mat (ctr++dfl)) (Ref nam)))
+    Nothing    -> Mat (ctr++dfl)
 
 -- Creates a constructor case: '#Name: body'
 makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> String -> (String, Term)
@@ -1064,8 +1071,8 @@ makeCtrCase col mat bods depth ctr =
       (mat', bods') = foldr (go var) ([], []) (zip3 col mat bods)
       bod           = flattenRules mat' bods' (depth + 1)
   in (ctr, bod)
-  where go var ((PCtr nam ps), pats, bod) (mat, bods)
-          | nam == ctr = ((ps ++ pats):mat, bod:bods)
+  where go var ((PCtr nam cnam ps), pats, bod) (mat, bods)
+          | cnam == ctr = ((ps ++ pats):mat, bod:bods)
           | otherwise  = (mat, bods)
         go var ((PVar "_"), pats, bod) (mat, bods) =
           let pat = map (maybe (PVar "_") PVar) var
@@ -1095,7 +1102,7 @@ getCol :: [[Pattern]] -> ([Pattern], [[Pattern]])
 getCol (pats:mat) = unzip (catMaybes (map uncons (pats:mat)))
 
 getColCtrs :: [Pattern] -> [String]
-getColCtrs col = toList . fromList $ foldr (\pat acc -> case pat of (PCtr nam _) -> nam:acc ; _ -> acc) [] col
+getColCtrs col = toList . fromList $ foldr (\pat acc -> case pat of (PCtr _ cnam _) -> cnam:acc ; _ -> acc) [] col
 
 getVarColName :: [Pattern] -> Maybe String
 getVarColName col = foldr (A.<|>) Nothing $ map go col
@@ -1109,7 +1116,12 @@ getCtrColNames :: [Pattern] -> String -> [Maybe String]
 getCtrColNames col ctr = 
   let mat = foldr go [] col
   in map getVarColName (transpose mat)
-  where go (PCtr nam ps) acc
-          | nam == ctr  = ps:acc
+  where go (PCtr nam cnam ps) acc
+          | cnam == ctr = ps:acc
           | otherwise   = acc
         go _ acc        = acc
+
+getMatNam :: [Pattern] -> Maybe String
+getMatNam (PCtr (Just nam) _ _:_) = Just nam
+getMatNam (_:col)                 = getMatNam col
+getMatNam []                      = Nothing
