@@ -439,9 +439,9 @@ parseFloat = withSrc $ P.try $ do
   return $ Flt (sign value)
 
 parseNum = withSrc $ P.choice
-  [ P.try (string_skp "0x") >> (Num . read . ("0x" ++) <$> P.many1 P.hexDigit)
-  , P.try (string_skp "0b") >> (Num . read . ("0b" ++) <$> P.many1 (oneOf "01"))
-  , Num . read <$> P.many1 digit
+  [ P.try (string_skp "0x") >> (Num . read . filter (/= '_') . ("0x" ++) <$> P.many1 (P.hexDigit <|> char_skp '_'))
+  , P.try (string_skp "0b") >> (Num . read . filter (/= '_') . ("0b" ++) <$> P.many1 (oneOf "01" <|> char_skp '_'))
+  , Num . read . filter (/= '_') <$> P.many1 (digit <|> char_skp '_')
   ]
 
 parseOp2 = withSrc $ do
