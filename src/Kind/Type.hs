@@ -1,5 +1,6 @@
 module Kind.Type where
 
+import System.IO.Unsafe (unsafePerformIO)
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 
@@ -135,3 +136,28 @@ data Env a = Env (State -> Res a) -- monadic checker
 -- UNCOMMENT THIS TO DEBUG THE TYPE CHECKER
 -- debug a b = trace a b
 debug a b = b
+
+-- -- Global Memory
+-- memory :: IORef (IM.IntMap Word64)
+-- memory = unsafePerformIO $ newIORef IM.IntMap.empty
+-- [># NOINLINE memory #<]
+
+-- -- Function to mutate the global IntMap
+-- swap :: Word64 -> Word64 -> Word64
+-- swap key val = unsafePerformIO $ do
+    -- mem <- readIORef memory
+    -- let newMem = IntMap.insert (fromIntegral key) val mem
+    -- writeIORef memory mem
+
+
+
+
+
+
+
+
+
+
+
+
+

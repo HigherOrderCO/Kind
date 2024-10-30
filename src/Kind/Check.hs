@@ -414,4 +414,4 @@ doAnnotate term = do
   doCheckMode True term
   term <- doCheckMode False term
   fill <- envGetFill
-  return (term, fill)
+  return (bind term [], fill)

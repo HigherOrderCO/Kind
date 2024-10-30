@@ -48,7 +48,6 @@ data CT
   | CTxt String
   | CLst [CT]
   | CNat Integer
-  | CSub CT
 
 type CTBook = M.Map String CT
 
@@ -211,36 +210,41 @@ removeUnreachables ct = go ct where
 -- - from: λx       match v { #Foo{a b}: λy λz A #Bar: λy λz B ... }
 -- -   to: λx λy λz match v { #Foo{a b}:       A #Bar:       B ... }
 -- TODO: document why this is (and has to be) terrible
-liftLambdas :: [String] -> CT -> Int -> CT
-liftLambdas nms ct depth = gen (liftLen ct depth 0 0) [] ct depth where
+liftLambdas :: CT -> Int -> CT
+liftLambdas ct depth = 
+  gen (liftLen ct depth 0 0) [] ct depth where
 
   gen :: Int -> [CT] -> CT -> Int -> CT
   gen 0 ctx ct dep = liftVal ctx ct dep 0 0
   gen n ctx ct dep = CLam (nam dep) (\x -> gen (n-1) (ctx++[x]) ct (dep+1))
 
   nam :: Int -> String
-  nam d | d < length nms = nms !! d ++ "$" ++ show d
-  nam d | otherwise      = "_"      ++ "$" ++ show d
+  nam d = "_" ++ "$" ++ show d
 
   var :: [CT] -> Int -> CT
   var ctx d | d < length ctx = ctx !! d
   var ctx d | otherwise      = CNul
 
+  eta :: [String] -> CT -> CT
+  eta []         ct             = ct
+  eta (fld:flds) (CLam nam bod) = CLam nam $ \x -> eta flds (bod x)
+  eta (fld:flds) ct             = CLam fld $ \x -> CApp (eta flds ct) x
+
   liftVal :: [CT] -> CT -> Int -> Int -> Int -> CT
   liftVal ctx ct dep lifts skip = go ct dep lifts skip where
-    go (CLam nam bod)     dep lifts 0    = liftVal ctx (bod (var ctx lifts)) (dep+1) (lifts+1) 0
-    go (CLam nam bod)     dep lifts skip = CLam nam     $ \x -> liftVal ctx (bod x) (dep+1) lifts (skip-1)
-    go (CLet nam val bod) dep lifts skip = CLet nam val $ \x -> liftVal ctx (bod x) (dep+1) lifts skip
-    go ct@(CMat val cse)  dep lifts skip | length cse > 0 =
-      let recsV = flip map cse $ \ (_,f,b) -> liftVal ctx (liftLambdas f b dep) dep lifts (skip + length f)
-          recsL = flip map cse $ \ (_,f,b) -> liftLen     (liftLambdas f b dep) dep lifts (skip + length f)
+    go (CLam nam bod)        dep lifts 0    = liftVal ctx (bod (var ctx lifts)) (dep+1) (lifts+1) 0
+    go (CLam nam bod)        dep lifts skip = CLam nam     $ \x -> liftVal ctx (bod x) (dep+1) lifts (skip-1)
+    go (CLet nam val bod)    dep lifts skip = CLet nam val $ \x -> liftVal ctx (bod x) (dep+1) lifts skip
+    go ct@(CMat val cse)     dep lifts skip | length cse > 0 =
+      let recsV = flip map cse $ \ (_,f,b) -> liftVal ctx (eta f b) dep lifts (skip + length f)
+          recsL = flip map cse $ \ (_,f,b) -> liftLen     (eta f b) dep lifts (skip + length f)
           valid = flip all recsL $ \ a -> a == head recsL
       in if valid then CMat val (zipWith (\ (n,f,_) b -> (n,f,b)) cse recsV) else ct
     go ct@(CSwi val zer suc) dep lifts skip =
-      let recZL = liftLen     (liftLambdas []    zer dep) dep lifts skip
-          recZV = liftVal ctx (liftLambdas []    zer dep) dep lifts skip
-          recSL = liftLen     (liftLambdas ["p"] suc dep) dep lifts (skip + 1)
-          recSV = liftVal ctx (liftLambdas ["p"] suc dep) dep lifts (skip + 1)
+      let recZL = liftLen     (eta []    zer) dep lifts skip
+          recZV = liftVal ctx (eta []    zer) dep lifts skip
+          recSL = liftLen     (eta ["p"] suc) dep lifts (skip + 1)
+          recSV = liftVal ctx (eta ["p"] suc) dep lifts (skip + 1)
           valid = recZL == recSL
       in if valid then CSwi val recZV recSV else ct
     go ct dep lifts s = ct
@@ -251,15 +255,77 @@ liftLambdas nms ct depth = gen (liftLen ct depth 0 0) [] ct depth where
     go (CLam nam bod)     dep lifts skip = liftLen (bod CNul) (dep+1) lifts (skip-1)
     go (CLet nam val bod) dep lifts skip = liftLen (bod CNul) (dep+1) lifts skip
     go (CMat val cse)     dep lifts skip | length cse > 0 =
-      let recsL = flip map cse $ \ (_,f,b) -> liftLen (liftLambdas f b dep) dep lifts (skip + length f)
+      let recsL = flip map cse $ \ (_,f,b) -> liftLen (eta f b) dep lifts (skip + length f)
           valid = flip all recsL $ \ a -> a == head recsL
       in if valid then head recsL else lifts
     go (CSwi val zer suc) dep lifts skip =
-      let recZL = liftLen (liftLambdas []    zer dep) dep lifts skip
-          recSL = liftLen (liftLambdas ["p"] suc dep) dep lifts (skip + 1)
+      let recZL = liftLen (eta []    zer) dep lifts skip
+          recSL = liftLen (eta ["p"] suc) dep lifts (skip + 1)
           valid = recZL == recSL
       in if valid then recZL else lifts
     go ct dep lifts s = lifts
+
+inline :: CTBook -> CT -> CT
+inline book ct = nf ct where
+  nf :: CT -> CT
+  nf ct = go (red book ct) where
+    go :: CT -> CT
+    go (CLam nam bod)     = CLam nam (\x -> nf (bod x))
+    go (CApp fun arg)     = CApp (nf fun) (nf arg)
+    go (CCon nam fields)  = CCon nam (map (\(f,t) -> (f, nf t)) fields)
+    go (CMat val cses)    = CMat (nf val) (map (\(n,f,b) -> (n,f, nf b)) cses)
+    go (CRef nam)         = CRef nam
+    go (CHol nam)         = CHol nam
+    go (CLet nam val bod) = CLet nam (nf val) (\x -> nf (bod x))
+    go (CNum val)         = CNum val
+    go (CFlt val)         = CFlt val
+    go (COp2 opr fst snd) = COp2 opr (nf fst) (nf snd)
+    go (CSwi val zer suc) = CSwi (nf val) (nf zer) (nf suc)
+    go (CLog msg nxt)     = CLog (nf msg) (nf nxt)
+    go (CVar nam idx)     = CVar nam idx
+    go (CTxt txt)         = CTxt txt
+    go (CLst lst)         = CLst (map nf lst)
+    go (CNat val)         = CNat val
+    go CNul               = CNul
+
+-- CT Evaluation
+-- -------------
+
+-- Reduce to WNF
+red :: CTBook -> CT -> CT
+red book tm = go tm where
+  go (CApp fun arg) = app book (red book fun) arg
+  go (CRef nam)     = ref book nam    
+  go val            = val
+
+-- Application
+app :: CTBook -> CT -> CT -> CT
+app book (CLam nam bod) arg = red book (bod (red book arg))
+app book (CMat val cse) arg = CMat val (map (\ (n,f,b) -> (n, f, skp f b (\b -> CApp b arg))) cse)
+app book fun            arg = CApp fun arg
+
+-- Maps inside N lambdas
+skp :: [String] -> CT -> (CT -> CT) -> CT
+skp []         ct fn = fn ct
+skp (fld:flds) ct fn = CLam fld $ \x -> skp flds (CApp ct x) fn
+
+-- Reference
+-- NOTE: this should only inline refs ending with "bind", "bind/go" or "pure".
+-- create an aux function called "inl :: String -> Bool" after it
+ref :: CTBook -> String -> CT
+ref book nam
+  | inl nam   = red book (fromJust (M.lookup nam book))
+  | otherwise = CRef nam
+  where
+    inl :: String -> Bool
+    inl nam = any (`isSuffixOf` nam)
+      [ "/bind"
+      , "/bind/go"
+      , "/pure"
+      , "IO/print"
+      , "IO/prompt"
+      , "IO/swap"
+      ]
 
 -- JavaScript Codegen
 -- ------------------
@@ -313,37 +379,6 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
 
   where
 
-  -- Inliner
-  red :: CT -> CT
-  red tm = {-trace ("red " ++ showCT tm 0) $-} go tm where
-    go (CApp fun arg) = app (red fun) arg
-    go (CRef nam)     = ref nam    
-    go val            = val
-
-  -- Inliner APP
-  app :: CT -> CT -> CT
-  app (CLam nam bod) arg = red (bod (red arg))
-  app fun            arg = CApp fun arg
-
-  -- Inliner REF
-  -- NOTE: this should only inline refs ending with "bind", "bind/go" or "pure".
-  -- create an aux function called "inl :: String -> Bool" after it
-  ref :: String -> CT
-  ref nam
-    | inl nam   = {-trace ("inlined:"++nam) $-} red (fromJust (M.lookup nam book))
-    | otherwise = CRef nam
-
-  inl :: String -> Bool
-  -- inl nam = False
-  inl nam = any (`isSuffixOf` nam)
-    [ "/bind"
-    , "/bind/go"
-    , "/pure"
-    , "IO/print"
-    , "IO/prompt"
-    , "IO/swap"
-    ]
-
   -- Genreates a fresh name
   fresh :: ST.State Int String
   fresh = do
@@ -381,7 +416,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
 
   -- Compiles a CT to JS
   ctToJS :: Bool -> Maybe String -> CT -> Int -> ST.State Int String
-  ctToJS tail var term dep = go (red term) where
+  ctToJS tail var term dep = go (red book term) where
     go CNul =
       ret var "null"
     go tm@(CLam nam bod) = do
@@ -457,6 +492,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
       let fields' = concatMap (\ (fname, expr) -> ", " ++ fname ++ ": " ++ expr) fieldExprs
       ret var $ concat ["({$: \"", nam, "\"", fields', "})"]
     go (CMat val cses) = do
+      let isRecord = length cses == 1 && not (any (\ (nm,_,_) -> nm == "_") cses)
       valName <- fresh
       valStmt <- ctToJS False (Just valName) val dep
       retName <- case var of
@@ -469,8 +505,12 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
         else do
           let bod = foldl CApp cbod (map (\f -> (CVar (valName++"."++f) 0)) fields)
           retStmt <- ctToJS tail (Just retName) bod dep
-          return $ concat ["case \"", cnam, "\": { ", retStmt, " break; }"]
-      let switch = concat [valStmt, "switch (", valName, ".$) { ", unwords cases, " }"]
+          return $ if isRecord
+            then retStmt
+            else concat ["case \"", cnam, "\": { ", retStmt, " break; }"]
+      let switch = if isRecord
+            then concat [valStmt, unwords cases]
+            else concat [valStmt, "switch (", valName, ".$) { ", unwords cases, " }"]
       case var of
         Just var -> return $ switch
         Nothing  -> ret var $ concat ["(() => { var ", retName, ";", switch, " return ", retName, " })()"]
@@ -561,29 +601,22 @@ prelude = unlines [
   "}"
   ]
 
-compileTerm :: Book -> (String, Term) -> (String, CT)
-compileTerm book (name, term) =
-  case envRun (doAnnotate term) book of
-    Done _ (term, fill) ->
-      let tm  = bind term []
-          arg = getArgNames tm
-          ct0 = termToCT book fill tm Nothing 0
-          ct1 = removeUnreachables ct0
-          ct2 = liftLambdas arg ct1 0
-          -- dbg = trace ("~" ++ showCT ct0 0 ++ "\n~" ++ showCT (rnCT ct0 []) 0 ++ "\n~" ++ showCT ct2 0 ++ "\n")
-          dbg = id
-      in dbg (name, ct2)
-    Fail _ ->
-      error $ "COMPILATION_ERROR: " ++ name ++ " isn't well-typed."
-
 generateJS :: CTBook -> (String, CT) -> String
 generateJS book (name, ct) = ST.evalState (fnToJS book name ct) 0 ++ "\n\n"
 
+defToCT :: Book -> (String, Term) -> (String, CT)
+defToCT book (name, term) =
+  case envRun (doAnnotate term) book of
+    Done _ (term, fill) -> (name, termToCT book fill term Nothing 0)
+    Fail _              -> error $ "COMPILATION_ERROR: " ++ name ++ " is ill-typed"
+
 compileJS :: Book -> String
 compileJS book =
-  let ctDefs  = map (compileTerm book) (topoSortBook book)
-      ctBook  = M.fromList ctDefs
-      jsFns   = concatMap (generateJS ctBook) ctDefs
+  let ctDefs0 = flip map (topoSortBook book) (defToCT book)
+      ctDefs1 = flip map ctDefs0 $ \ (nm,ct) -> (nm, removeUnreachables ct)
+      ctDefs2 = flip map ctDefs1 $ \ (nm,ct) -> (nm, inline (M.fromList ctDefs1) ct)
+      ctDefs3 = flip map ctDefs2 $ \ (nm,ct) -> (nm, liftLambdas ct 0)
+      jsFns   = concatMap (generateJS (M.fromList ctDefs3)) ctDefs3
   in prelude ++ "\n\n" ++ jsFns
 
 -- Utils
@@ -693,31 +726,6 @@ rnCT (CLst lst) ctx =
   CLst lst'
 rnCT (CNat val) ctx = CNat val
 
--- substCT :: Bool -> Int -> CT -> CT -> CT
--- substCT dry lvl neo term =
-  -- let result = go term
-  -- in  (if dry then id else trace ("SUBST-OLD: " ++ show lvl ++ " " ++ showCT term lvl ++ "\nSUBST-NEW: " ++ show lvl ++ " " ++ showCT result lvl)) $
-      -- result
-
-  -- where
-  -- go (CLam nam bod)     = CLam nam (\x -> go (bod (CSub x)))
-  -- go (CApp fun arg)     = CApp (go fun) (go arg)
-  -- go (CCon nam fields)  = CCon nam (map (\(f,t) -> (f,go t)) fields)
-  -- go (CMat val cses)    = CMat (go val) (map (\(n,f,b) -> (n,f,go b)) cses)
-  -- go (CRef nam)         = CRef nam
-  -- go (CLet nam val bod) = CLet nam (go val) (\x -> go (bod (CSub x)))
-  -- go (CNum n)           = CNum n
-  -- go (CFlt n)           = CFlt n
-  -- go (COp2 opr fst snd) = COp2 opr (go fst) (go snd)
-  -- go (CSwi val zer suc) = CSwi (go val) (go zer) (go suc)
-  -- go (CLog msg nxt)     = CLog (go msg) (go nxt)
-  -- go (CVar nam idx)     = if lvl == idx then neo else CVar nam idx
-  -- go (CTxt txt)         = CTxt txt
-  -- go (CLst lst)         = CLst (map go lst)
-  -- go (CNat val)         = CNat val
-  -- go CNul               = CNul
-  -- go (CSub val)         = val
-
 getAppChain :: CT -> (CT, [CT])
 getAppChain (CApp fun arg) =
   let (f, args) = getAppChain fun
@@ -750,7 +758,6 @@ showCT (CVar nam dep)     _   = nam ++ "^" ++ show dep
 showCT (CTxt txt)         dep = show txt
 showCT (CLst lst)         dep = "[" ++ unwords (map (\x -> showCT x dep) lst) ++ "]"
 showCT (CNat val)         dep = show val
-showCT (CSub val)         dep = "<" ++ showCT val dep ++ ">"
 
 -- Tests
 -- -----
@@ -811,4 +818,4 @@ test1 = CLam "x" $ \x -> CMat x [
 ctest :: IO ()
 ctest = do
   putStrLn $ showCT test1 0
-  putStrLn $ showCT (liftLambdas [] test1 0) 0
+  putStrLn $ showCT (liftLambdas test1 0) 0
