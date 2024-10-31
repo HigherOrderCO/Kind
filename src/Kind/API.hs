@@ -48,7 +48,8 @@ main = do
         ["run", arg]   -> runWithOne bookPath arg apiNormal
         ["check"]      -> runWithAll bookPath apiCheck
         ["check", arg] -> runWithOne bookPath arg apiCheck
-        ["to-js", arg] -> runWithOne bookPath arg apiToJS
+        ["to-js", arg, "--with-exports"] -> runWithOne bookPath arg (apiToJS True)
+        ["to-js", arg] -> runWithOne bookPath arg (apiToJS False)
         ["show", arg]  -> runWithOne bookPath arg apiShow
         ["deps", arg]  -> runWithOne bookPath arg apiDeps
         ["rdeps", arg] -> runWithOne bookPath arg apiRDeps
@@ -113,9 +114,9 @@ apiCheck bookPath (book, defs, _) defName defPath = do
       return $ Left $ "No definitions found in file: " ++ defPath
 
 -- Compiles the whole book to JS
-apiToJS :: Command
-apiToJS bookPath (book, _, _) _ _ = do
-  putStrLn $ compileJS book
+apiToJS :: Bool -> Command
+apiToJS withExports bookPath (book, _, _) _ _ = do
+  putStrLn $ compileJS book withExports
   return $ Right ()
 
 -- Shows a definition

@@ -19,7 +19,7 @@ import Kind.Type
 import Kind.Util
 
 import Control.Monad (forM)
-import Data.List (intercalate, isSuffixOf, elem)
+import Data.List (intercalate, isSuffixOf, isPrefixOf, elem)
 import Data.Maybe (fromJust, isJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
@@ -59,6 +59,19 @@ data CT
 
 type CTBook = M.Map String CT
 
+sanitizeName :: String -> String
+sanitizeName = map (\c -> if c == '-' then '$' else c)
+
+getFunctionNames :: String -> [String]
+getFunctionNames js = 
+  [ name | line <- lines js,
+           "const " `isPrefixOf` line,
+           let parts = words line,
+           length parts >= 2,
+           let name = head $ words $ parts !! 1,
+           not $ "$" `isSuffixOf` name  -- Skip internal functions ending with $
+  ]
+
 -- Term to CT
 -- ----------
 
@@ -70,12 +83,12 @@ termToCT :: Book -> Fill -> Term -> Maybe Term -> Int -> CT
 termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 
   t2ct term typx dep = 
-    -- trace ("t2ct: " ++ showTerm term ++ "\ntype: " ++ maybe "*" showTerm typx ++ "\ndep: " ++ show dep) $
     go term where
 
     go (Lam nam bod) =
-      let bod' = \x -> t2ct (bod (Var nam dep)) Nothing (dep+1)
-      in CLam nam bod'
+      let sanitizedName = sanitizeName nam
+          bod' = \x -> t2ct (bod (Var sanitizedName dep)) Nothing (dep+1)
+      in CLam sanitizedName bod'
     go (App fun arg) =
       let fun' = t2ct fun Nothing dep
           arg' = t2ct arg Nothing dep
@@ -89,26 +102,28 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go (ADT _ _ _) =
       CNul
     go (Con nam arg) =
-      case lookup nam (getADTCts (reduce book fill 2 (fromJust typx))) of
+      let sanitizedName = sanitizeName nam
+      in case lookup sanitizedName (getADTCts (reduce book fill 2 (fromJust typx))) of
         Just (Ctr _ tele) ->
           let fNames = getTeleNames tele dep []
-              fields = map (\ (f,t) -> (f, t2ct t Nothing dep)) $ zip fNames (map snd arg)
-          in CCon nam fields
-        Nothing -> error $ "constructor-not-found:" ++ nam
+              fields = map (\(f, t) -> (sanitizeName f, t2ct t Nothing dep)) $ zip fNames (map snd arg)
+          in CCon sanitizedName fields
+        Nothing -> error $ "constructor-not-found:" ++ sanitizedName
     go (Mat cse) =
       if isJust typx then
         case reduce book fill 2 (fromJust typx) of
           (All _ adt _) ->
             let adt' = reduce book fill 2 adt
                 cts  = getADTCts adt'
-                cses = map (\ (cnam, cbod) ->
-                  if cnam == "_" then
-                    (cnam, ["_"], t2ct cbod Nothing dep)
-                  else case lookup cnam cts of
+                cses = map (\(cnam, cbod) ->
+                  let sanitizedCName = sanitizeName cnam
+                  in if sanitizedCName == "_" then
+                    (sanitizedCName, ["_"], t2ct cbod Nothing dep)
+                  else case lookup sanitizedCName cts of
                     Just (Ctr _ tele) ->
                       let fNames = getTeleNames tele dep []
-                      in (cnam, fNames, t2ct cbod Nothing dep)
-                    Nothing -> error $ "constructor-not-found:" ++ cnam) cse
+                      in (sanitizedCName, map sanitizeName fNames, t2ct cbod Nothing dep)
+                    Nothing -> error $ "constructor-not-found:" ++ sanitizedCName) cse
             in CLam ("__" ++ show dep) $ \x -> CMat x cses
           otherwise -> error "match-without-type"
       else
@@ -124,26 +139,32 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
           def' = t2ct def Nothing dep
       in CKVs kvs' def'
     go (Get got nam map key bod) =
-      let map' = t2ct map Nothing dep
+      let sanitizedGot = sanitizeName got
+          sanitizedNam = sanitizeName nam
+          map' = t2ct map Nothing dep
           key' = t2ct key Nothing dep
-          bod' = \x y -> t2ct (bod (Var got dep) (Var nam dep)) Nothing (dep+2)
-      in CGet got nam map' key' bod'
+          bod' = \x y -> t2ct (bod (Var sanitizedGot dep) (Var sanitizedNam dep)) Nothing (dep+2)
+      in CGet sanitizedGot sanitizedNam map' key' bod'
     go (Put got nam map key val bod) =
-      let map' = t2ct map Nothing dep
+      let sanitizedGot = sanitizeName got
+          sanitizedNam = sanitizeName nam
+          map' = t2ct map Nothing dep
           key' = t2ct key Nothing dep
           val' = t2ct val Nothing dep
-          bod' = \x y -> t2ct (bod (Var got dep) (Var nam dep)) Nothing (dep+2)
-      in CPut got nam map' key' val' bod'
+          bod' = \x y -> t2ct (bod (Var sanitizedGot dep) (Var sanitizedNam dep)) Nothing (dep+2)
+      in CPut sanitizedGot sanitizedNam map' key' val' bod'
     go (All _ _ _) =
       CNul
     go (Ref nam) =
-      CRef nam
+      CRef (sanitizeName nam)
     go (Let nam val bod) =
-      let val' = t2ct val Nothing dep
-          bod' = \x -> t2ct (bod (Var nam dep)) Nothing (dep+1)
-      in CLet nam val' bod'
+      let sanitizedName = sanitizeName nam
+          val' = t2ct val Nothing dep
+          bod' = \x -> t2ct (bod (Var sanitizedName dep)) Nothing (dep+1)
+      in CLet sanitizedName val' bod'
     go (Use nam val bod) =
-      t2ct (bod val) typx dep
+      let sanitizedName = sanitizeName nam
+      in t2ct (bod (Var sanitizedName dep)) typx dep
     go Set =
       CNul
     go U64 =
@@ -165,7 +186,7 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go (Nat val) =
       CNat val
     go (Hol nam _) =
-      CHol nam
+      CHol (sanitizeName nam)
     go (Met _ _) =
       CNul
     go (Log msg nxt) =
@@ -173,7 +194,7 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
           nxt' = t2ct nxt Nothing dep
       in CLog msg' nxt'
     go (Var nam idx) =
-      CVar nam idx
+      CVar (sanitizeName nam) idx
     go (Src _ val) =
       t2ct val typx dep
 
@@ -465,7 +486,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
   -- Compiles a CT to JS
   ctToJS :: Bool -> Maybe String -> CT -> Int -> ST.State Int String
   ctToJS tail var term dep = 
-    trace ("COMPILE: " ++ showCT term 0) $
+    --trace ("COMPILE: " ++ showCT term 0) $
     go (red book term) where
     go CNul =
       ret var "null"
@@ -700,15 +721,16 @@ defToCT book (name, term) =
     Done _ (term, fill) -> (name, termToCT book fill term Nothing 0)
     Fail _              -> error $ "COMPILATION_ERROR: " ++ name ++ " is ill-typed"
 
-compileJS :: Book -> String
-compileJS book =
+compileJS :: Book -> Bool -> String
+compileJS book withExports =
   let ctDefs0 = flip map (topoSortBook book) (defToCT book)
       ctDefs1 = flip map ctDefs0 $ \ (nm,ct) -> (nm, removeUnreachables ct)
       ctDefs2 = flip map ctDefs1 $ \ (nm,ct) -> (nm, inline (M.fromList ctDefs1) ct)
       ctDefs3 = flip map ctDefs2 $ \ (nm,ct) -> (nm, liftLambdas ct 0)
       jsFns   = concatMap (generateJS (M.fromList ctDefs3)) ctDefs3
+      exports = if withExports then "export { " ++ intercalate ", " (getFunctionNames jsFns) ++ " }" else ""
       debug   = trace ("\nCompiled CTs:\n" ++ unlines (map (\(n,c) -> "- " ++ n ++ ":\n" ++ showCT c 0) ctDefs3))
-  in prelude ++ "\n\n" ++ jsFns
+  in prelude ++ "\n\n" ++ jsFns ++ "\n" ++ exports
 
 -- Utils
 -- -----
@@ -943,3 +965,4 @@ ctest :: IO ()
 ctest = do
   putStrLn $ showCT test1 0
   putStrLn $ showCT (liftLambdas test1 0) 0
+
