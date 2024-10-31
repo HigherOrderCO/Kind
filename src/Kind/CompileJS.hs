@@ -298,11 +298,16 @@ red book tm = go tm where
   go (CRef nam)     = ref book nam    
   go val            = val
 
+-- (let x = y A B)
+-- ---------------
+-- let x = y (A B)
+
 -- Application
 app :: CTBook -> CT -> CT -> CT
-app book (CLam nam bod) arg = red book (bod (red book arg))
-app book (CMat val cse) arg = CMat val (map (\ (n,f,b) -> (n, f, skp f b (\b -> CApp b arg))) cse)
-app book fun            arg = CApp fun arg
+app book (CLam nam bod)     arg = red book (bod (red book arg))
+app book (CMat val cse)     arg = CMat val (map (\ (n,f,b) -> (n, f, skp f b (\b -> CApp b arg))) cse)
+app book (CLet nam val bod) arg = CLet nam val (\x -> app book (bod x) arg)
+app book fun                arg = CApp fun arg
 
 -- Maps inside N lambdas
 skp :: [String] -> CT -> (CT -> CT) -> CT
@@ -367,7 +372,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
   bodyName <- fresh
   bodyStmt <- ctToJS True (Just bodyName) fnBody 0 
   let wrapArgs cur args fnBody
-        | null args = concat ["(() => ", fnBody, ")()"]
+        | null args = concat ["((A) => ", fnBody, ")()"]
         | otherwise = if cur
             then concat [intercalate " => " args, " => ", fnBody]
             else concat ["(", intercalate "," args, ") => ", fnBody]
@@ -513,7 +518,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
             else concat [valStmt, "switch (", valName, ".$) { ", unwords cases, " }"]
       case var of
         Just var -> return $ switch
-        Nothing  -> ret var $ concat ["(() => { var ", retName, ";", switch, " return ", retName, " })()"]
+        Nothing  -> ret var $ concat ["((B) => { var ", retName, ";", switch, " return ", retName, " })()"]
     go (CSwi val zer suc) = do
       valName <- fresh
       valStmt <- ctToJS False (Just valName) val dep
@@ -525,7 +530,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
       let ifelse = concat [valStmt, "if (", valName, " === 0n) { ", zerStmt, " } else { ", sucStmt, " }"]
       case var of
         Just var -> return $ ifelse
-        Nothing  -> ret var $ concat ["(() => { var ", retName, ";", ifelse, " return ", retName, " })()"]
+        Nothing  -> ret var $ concat ["((C) => { var ", retName, ";", ifelse, " return ", retName, " })()"]
     go (CRef nam) =
       ret var $ nameToJS nam
     go (CHol nam) =
@@ -541,7 +546,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
           let uid = nameToJS nam ++ "$" ++ show dep
           valExpr <- ctToJS False (Just uid) val dep
           bodExpr <- ctToJS tail Nothing (bod (CVar uid dep)) (dep + 1)
-          return $ concat ["(() => {", valExpr, "return ", bodExpr, ";})()"]
+          return $ concat ["((D) => {", valExpr, "return ", bodExpr, ";})()"]
     go (CNum val) =
       ret var $ show val ++ "n"
     go (CFlt val) =
@@ -617,6 +622,7 @@ compileJS book =
       ctDefs2 = flip map ctDefs1 $ \ (nm,ct) -> (nm, inline (M.fromList ctDefs1) ct)
       ctDefs3 = flip map ctDefs2 $ \ (nm,ct) -> (nm, liftLambdas ct 0)
       jsFns   = concatMap (generateJS (M.fromList ctDefs3)) ctDefs3
+      debug   = trace ("\nCompiled CTs:\n" ++ unlines (map (\(n,c) -> "- " ++ n ++ ":\n" ++ showCT c 0) ctDefs3))
   in prelude ++ "\n\n" ++ jsFns
 
 -- Utils
