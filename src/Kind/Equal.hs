@@ -66,10 +66,6 @@ identical a b dep = do
     identical a bVal dep
   go (ADT aScp aCts aTyp) (ADT bScp bCts bTyp) dep = do
     identical aTyp bTyp dep
-    -- iSlf <- zipWithM (\ax bx -> identical ax bx dep) aScp bScp
-    -- if and iSlf && length aCts == length bCts
-      -- then and <$> zipWithM goCtr aCts bCts
-      -- else return False
   go (Con aNam aArg) (Con bNam bArg) dep = do
     if aNam == bNam && length aArg == length bArg
       then and <$> zipWithM (\(_, aVal) (_, bVal) -> identical aVal bVal dep) aArg bArg
@@ -126,6 +122,26 @@ identical a b dep = do
     iZer <- identical aZer bZer dep
     iSuc <- identical aSuc bSuc dep
     return (iZer && iSuc)
+  go (Map aTyp) (Map bTyp) dep =
+    identical aTyp bTyp dep
+  go (KVs aMap aDef) (KVs bMap bDef) dep = do
+    iDef <- identical aDef bDef dep
+    iMap <- flip mapM (IM.toList aMap) $ \ (aKey,aVal) ->
+      case IM.lookup aKey bMap of
+        Just bVal -> identical aVal bVal dep
+        Nothing   -> return False
+    return (iDef && and iMap && IM.size aMap == IM.size bMap)
+  go (Get aGot aNam aMap aKey aBod) (Get bGot bNam bMap bKey bBod) dep = do
+    iMap <- identical aMap bMap dep
+    iKey <- identical aKey bKey dep
+    iBod <- identical (aBod (Var aGot dep) (Var aNam dep)) (bBod (Var bGot dep) (Var bNam dep)) (dep + 2)
+    return (iMap && iKey && iBod)
+  go (Put aGot aNam aMap aKey aVal aBod) (Put bGot bNam bMap bKey bVal bBod) dep = do
+    iMap <- identical aMap bMap dep
+    iKey <- identical aKey bKey dep
+    iVal <- identical aVal bVal dep
+    iBod <- identical (aBod (Var aGot dep) (Var aNam dep)) (bBod (Var bGot dep) (Var bNam dep)) (dep + 2)
+    return (iMap && iKey && iVal && iBod)
   go (Txt aTxt) (Txt bTxt) dep =
     return (aTxt == bTxt)
   go (Lst aLst) (Lst bLst) dep =
@@ -202,6 +218,26 @@ similar a b dep = go a b dep where
     eZer <- equal aZer bZer dep
     eSuc <- equal aSuc bSuc dep
     return (eZer && eSuc)
+  go (Map aTyp) (Map bTyp) dep = do
+    equal aTyp bTyp dep
+  go (KVs aMap aDef) (KVs bMap bDef) dep = do
+    eDef <- equal aDef bDef dep
+    eMap <- flip mapM (IM.toList aMap) $ \ (aKey,aVal) ->
+      case IM.lookup aKey bMap of
+        Just bVal -> equal aVal bVal dep
+        Nothing   -> return False
+    return (eDef && and eMap && IM.size aMap == IM.size bMap)
+  go (Get aGot aNam aMap aKey aBod) (Get bGot bNam bMap bKey bBod) dep = do
+    eMap <- equal aMap bMap dep
+    eKey <- equal aKey bKey dep
+    eBod <- equal (aBod (Var aGot dep) (Var aNam dep)) (bBod (Var bGot dep) (Var bNam dep)) (dep + 2)
+    return (eMap && eKey && eBod)
+  go (Put aGot aNam aMap aKey aVal aBod) (Put bGot bNam bMap bKey bVal bBod) dep = do
+    eMap <- equal aMap bMap dep
+    eKey <- equal aKey bKey dep
+    eVal <- equal aVal bVal dep
+    eBod <- equal (aBod (Var aGot dep) (Var aNam dep)) (bBod (Var bGot dep) (Var bNam dep)) (dep + 2)
+    return (eMap && eKey && eVal && eBod)
   go a b dep = identical a b dep
 
   goCtr (Ctr aCNm aTele) (Ctr bCNm bTele) = do
@@ -322,6 +358,24 @@ occur book fill uid term dep = go term dep where
     let o_zer = go zer dep
         o_suc = go suc dep
     in o_zer || o_suc
+  go (Map typ) dep =
+    let o_typ = go typ dep
+    in o_typ
+  go (KVs map def) dep =
+    let o_map = any (\(_, x) -> go x dep) (IM.toList map)
+        o_def = go def dep
+    in o_map || o_def
+  go (Get got nam map key bod) dep =
+    let o_map = go map dep
+        o_key = go key dep
+        o_bod = go (bod (Var got dep) (Var nam dep)) (dep + 2)
+    in o_map || o_key || o_bod
+  go (Put got nam map key val bod) dep =
+    let o_map = go map dep
+        o_key = go key dep
+        o_val = go val dep
+        o_bod = go (bod (Var got dep) (Var nam dep)) (dep + 2)
+    in o_map || o_key || o_val || o_bod
   go (Src src val) dep =
     let o_val = go val dep
     in o_val
@@ -415,6 +469,23 @@ same (Op2 aOpr aFst aSnd) (Op2 bOpr bFst bSnd) dep =
   same aFst bFst dep && same aSnd bSnd dep
 same (Swi aZer aSuc) (Swi bZer bSuc) dep =
   same aZer bZer dep && same aSuc bSuc dep
+same (Map aTyp) (Map bTyp) dep =
+  same aTyp bTyp dep
+same (KVs aMap aDef) (KVs bMap bDef) dep =
+  let sDef = same aDef bDef dep
+      sMap = IM.size aMap == IM.size bMap && and (map (\ (aKey,aVal) -> maybe False (\bVal -> same aVal bVal dep) (IM.lookup aKey bMap)) (IM.toList aMap))
+  in sDef && sMap
+same (Get aGot aNam aMap aKey aBod) (Get bGot bNam bMap bKey bBod) dep =
+  let sMap = same aMap bMap dep
+      sKey = same aKey bKey dep
+      sBod = same (aBod (Var aGot dep) (Var aNam dep)) (bBod (Var bGot dep) (Var bNam dep)) (dep + 2)
+  in sMap && sKey && sBod
+same (Put aGot aNam aMap aKey aVal aBod) (Put bGot bNam bMap bKey bVal bBod) dep =
+  let sMap = same aMap bMap dep
+      sKey = same aKey bKey dep
+      sVal = same aVal bVal dep
+      sBod = same (aBod (Var aGot dep) (Var aNam dep)) (bBod (Var bGot dep) (Var bNam dep)) (dep + 2)
+  in sMap && sKey && sVal && sBod
 same (Txt aTxt) (Txt bTxt) dep =
   aTxt == bTxt
 same (Lst aLst) (Lst bLst) dep =
@@ -465,8 +536,10 @@ subst lvl neo term = go term where
   go (Con nam arg)     = Con nam (map (\(f, t) -> (f, go t)) arg)
   go (Mat cse)         = Mat (map goCse cse)
   go (Swi zer suc)     = Swi (go zer) (go suc)
-  go (Ref nam)         = Ref nam
-  go (Let nam val bod) = Let nam (go val) (\x -> go (bod (Sub x)))
+  go (Map typ)         = Map (go typ)
+  go (KVs map def)     = KVs (IM.map go map) (go def)
+  go (Get g n m k b)   = Get g n (go m) (go k) (\x y -> go (b x y))
+  go (Put g n m k v b) = Put g n (go m) (go k) (go v) (\x y -> go (b x y))
   go (Use nam val bod) = Use nam (go val) (\x -> go (bod (Sub x)))
   go (Met uid spn)     = Met uid (map go spn)
   go (Log msg nxt)     = Log (go msg) (go nxt)
@@ -501,6 +574,10 @@ replace old neo term dep = if same old term dep then neo else go term where
   go (Con nam arg)      = Con nam (map (\(f, t) -> (f, replace old neo t dep)) arg)
   go (Mat cse)          = Mat (map goCse cse)
   go (Swi zer suc)      = Swi (replace old neo zer dep) (replace old neo suc dep)
+  go (Map typ)          = Map (replace old neo typ dep)
+  go (KVs map def)      = KVs (IM.map (\x -> replace old neo x dep) map) (replace old neo def dep)
+  go (Get g n m k b)    = Get g n (replace old neo m dep) (replace old neo k dep) (\x y -> replace old neo (b x y) (dep+2))
+  go (Put g n m k v b)  = Put g n (replace old neo m dep) (replace old neo k dep) (replace old neo v dep) (\x y -> replace old neo (b x y) (dep+2))
   go (Ref nam)          = Ref nam
   go (Let nam val bod)  = Let nam (replace old neo val dep) (\x -> replace old neo (bod (Sub x)) (dep+1))
   go (Use nam val bod)  = Use nam (replace old neo val dep) (\x -> replace old neo (bod (Sub x)) (dep+1))

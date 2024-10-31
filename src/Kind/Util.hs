@@ -8,6 +8,7 @@ import Kind.Equal
 
 import Prelude hiding (LT, GT, EQ)
 
+import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 
@@ -16,33 +17,37 @@ import Debug.Trace
 -- Gets dependencies of a term
 getDeps :: Term -> [String]
 getDeps term = case term of
-  Ref nam       -> [nam]
-  All _ inp out -> getDeps inp ++ getDeps (out Set)
-  Lam _ bod     -> getDeps (bod Set)
-  App fun arg   -> getDeps fun ++ getDeps arg
-  Ann _ val typ -> getDeps val ++ getDeps typ
-  Slf _ typ bod -> getDeps typ ++ getDeps (bod Set)
-  Ins val       -> getDeps val
-  ADT scp cts t -> concatMap getDeps scp ++ concatMap getDepsCtr cts ++ getDeps t
-  Con _ arg     -> concatMap (getDeps . snd) arg
-  Mat cse       -> concatMap (getDeps . snd) cse
-  Let _ val bod -> getDeps val ++ getDeps (bod Set)
-  Use _ val bod -> getDeps val ++ getDeps (bod Set)
-  Op2 _ fst snd -> getDeps fst ++ getDeps snd
-  Swi zer suc   -> getDeps zer ++ getDeps suc
-  Src _ val     -> getDeps val
-  Hol _ args    -> concatMap getDeps args
-  Met _ args    -> concatMap getDeps args
-  Log msg nxt   -> getDeps msg ++ getDeps nxt
-  Var _ _       -> []
-  Set           -> []
-  U64           -> []
-  F64           -> []
-  Num _         -> []
-  Flt _         -> []
-  Txt _         -> []
-  Lst elems     -> concatMap getDeps elems
-  Nat _         -> []
+  Ref nam         -> [nam]
+  All _ inp out   -> getDeps inp ++ getDeps (out Set)
+  Lam _ bod       -> getDeps (bod Set)
+  App fun arg     -> getDeps fun ++ getDeps arg
+  Ann _ val typ   -> getDeps val ++ getDeps typ
+  Slf _ typ bod   -> getDeps typ ++ getDeps (bod Set)
+  Ins val         -> getDeps val
+  ADT scp cts t   -> concatMap getDeps scp ++ concatMap getDepsCtr cts ++ getDeps t
+  Con _ arg       -> concatMap (getDeps . snd) arg
+  Mat cse         -> concatMap (getDeps . snd) cse
+  Let _ val bod   -> getDeps val ++ getDeps (bod Set)
+  Use _ val bod   -> getDeps val ++ getDeps (bod Set)
+  Op2 _ fst snd   -> getDeps fst ++ getDeps snd
+  Swi zer suc     -> getDeps zer ++ getDeps suc
+  Map val         -> getDeps val
+  KVs kvs def     -> concatMap getDeps (IM.elems kvs) ++ getDeps def
+  Get _ _ m k b   -> getDeps m ++ getDeps k ++ getDeps (b Set Set)
+  Put _ _ m k v b -> getDeps m ++ getDeps k ++ getDeps v ++ getDeps (b Set Set)
+  Src _ val       -> getDeps val
+  Hol _ args      -> concatMap getDeps args
+  Met _ args      -> concatMap getDeps args
+  Log msg nxt     -> getDeps msg ++ getDeps nxt
+  Var _ _         -> []
+  Set             -> []
+  U64             -> []
+  F64             -> []
+  Num _           -> []
+  Flt _           -> []
+  Txt _           -> []
+  Lst elems       -> concatMap getDeps elems
+  Nat _           -> []
 
 -- Gets dependencies of a constructor
 getDepsCtr :: Ctr -> [String]

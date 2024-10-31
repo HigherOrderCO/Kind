@@ -99,6 +99,28 @@ showTermGo small term dep =
         let zero' = showTermGo small zero dep
             succ' = showTermGo small succ dep
         in concat ["λ{ 0: ", zero', " _: ", succ', " }"]
+      Map typ ->
+        let typ' = showTermGo small typ dep
+        in concat ["(Map ", typ', ")"]
+      KVs kvs def ->
+        let kvs' = unwords (map (\(k, v) -> show k ++ ":" ++ showTermGo small v dep) (IM.toList kvs))
+            def' = showTermGo small def dep
+        in concat ["{", kvs', " | ", def', "}"]
+      Get got nam map key bod ->
+        let got' = got
+            nam' = nam
+            map' = showTermGo small map dep
+            key' = showTermGo small key dep
+            bod' = showTermGo small (bod (Var got dep) (Var nam dep)) (dep + 2)
+        in concat ["get ", got', " = ", nam', "@", map', "[", key', "] ", bod']
+      Put got nam map key val bod ->
+        let got' = got
+            nam' = nam
+            map' = showTermGo small map dep
+            key' = showTermGo small key dep
+            val' = showTermGo small val dep
+            bod' = showTermGo small (bod (Var got dep) (Var nam dep)) (dep + 2)
+        in concat ["put ", got', " = ", nam', "@", map', "[", key', "] := ", val', " ", bod']
       Txt txt -> concat ["\"" , txt , "\""]
       Lst lst -> concat ["[", unwords (map (\x -> showTermGo small x dep) lst), "]"]
       Nat val -> concat ["#", (show val)]

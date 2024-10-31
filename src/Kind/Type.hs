@@ -9,62 +9,85 @@ import Data.Word (Word64)
 
 -- Kind's AST
 data Term
-  -- Product: ∀(x: A) B
+  -- Product: `∀(x: A) B`
   = All String Term (Term -> Term)
 
-  -- Lambda: λx f
+  -- Lambda: `λx f`
   | Lam String (Term -> Term)
 
-  -- Application: (fun arg)
+  -- Application: `(fun arg)`
   | App Term Term
 
-  -- Annotation: {x: T}
+  -- Annotation: `{x: T}`
   | Ann Bool Term Term
 
-  -- Self-Type: $(x: A) B
+  -- Self-Type: `$(x: A) B`
   | Slf String Term (Term -> Term)
 
-  -- Self-Inst: ~x
+  -- Self-Inst: `~x`
   | Ins Term
 
-  -- Datatype: "#[i0 i1...]{ #C0 Tele0 #C1 Tele1 ... }
+  -- Datatype: `#[i0 i1...]{ #C0 Tele0 #C1 Tele1 ... }`
   | ADT [Term] [Ctr] Term
 
-  -- Constructor: #CN { x0 x1 ... }
+  -- Constructor: `#CN { x0 x1 ... }`
   | Con String [(Maybe String, Term)]
 
-  -- Match: λ{ #C0:B0 #C1:B1 ... }
+  -- Lambda-Match: `λ{ #C0:B0 #C1:B1 ... }`
   | Mat [(String, Term)]
 
-  -- Top-Level Reference
+  -- Top-Level Reference: `Foo`
   | Ref String
 
-  -- Local let-definition
+  -- Local let-definition: `let x = val body`
   | Let String Term (Term -> Term)
 
-  -- Local use-definition
+  -- Local use-definition: `use x = val body`
   | Use String Term (Term -> Term)
 
-  -- Type : Type
+  -- Universe: `Set`
   | Set
 
-  -- U64 Type
+  -- U64 Type: `U64`
   | U64
 
-  -- F64 Type
+  -- F64 Type: `F64`
   | F64
 
-  -- U64 Value
+  -- U64 Value: `123`
   | Num Word64
 
-  -- F64 Value
+  -- F64 Value: `1.5`
   | Flt Double
 
-  -- Binary Operation
+  -- Binary Operation: `(+ x y)`
   | Op2 Oper Term Term
 
-  -- U64 Elimination (updated to use splitting lambda)
+  -- U64 Elimination: `λ{ 0:A 1+p:B }`
   | Swi Term Term
+
+  -- Linear Map Type: `(Map T)`
+  | Map Term 
+
+  -- Linear Map Value: `{ k0:v0 k1:v1 ... | default }`
+  | KVs (IM.IntMap Term) Term
+
+  -- Linear Map Getter: `get val = nam@map[key] bod`
+  -- - got is the name of the obtained value
+  -- - nam is the name of the map
+  -- - map is the value of the map
+  -- - key is the key to query
+  -- - bod is the continuation; receives the value and the same map
+  | Get String String Term Term (Term -> Term -> Term)
+
+  -- Map Swapper: `put got = nam@map[key] := val body`
+  -- - got is the name of the old value
+  -- - nam is the name of the map
+  -- - map is the value of the map
+  -- - key is the key to swap
+  -- - val is the val to insert
+  -- - bod is the continuation; receives the old value and the changed map
+  | Put String String Term Term Term (Term -> Term -> Term)
 
   -- Inspection Hole
   | Hol String [Term]

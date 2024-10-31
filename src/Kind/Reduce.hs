@@ -38,6 +38,8 @@ reduce book fill lv term = red term where
   red (Src src val)     = red val
   red (Met uid spn)     = met uid spn
   red (Log msg nxt)     = log msg nxt
+  red (Get g n m k b)   = get g n m k b
+  red (Put g n m k v b) = put g n m k v b
   red val               = val
 
   app (Ref nam)     arg | lv > 0 = app (ref nam) arg
@@ -117,6 +119,20 @@ reduce book fill lv term = red term where
 
   log msg nxt = logMsg book fill lv msg msg nxt ""
 
+  get g n m k b = case (red k, red m) of
+    (Num k, KVs kvs d) -> case IM.lookup (fromIntegral k) kvs of
+      Just v  -> red (b v (KVs kvs d))
+      Nothing -> red (b d (KVs kvs d))
+    _ -> Get g n m k b
+
+  put g n m k v b = case (red k, red m) of
+    (Num k, KVs kvs d) -> case IM.lookup (fromIntegral k) kvs of
+      Just o  -> red (b o (KVs (IM.insert (fromIntegral k) v kvs) d))
+      Nothing -> red (b d (KVs (IM.insert (fromIntegral k) v kvs) d))
+    _ -> Put g n m k v b
+
+
+
 -- Logging
 -- -------
 
@@ -125,6 +141,7 @@ logMsg book fill lv msg' msg nxt txt =
   case (reduce book fill lv msg) of
     Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
       Num chr -> logMsg book fill lv msg' tail nxt (txt ++ [toEnum (fromIntegral chr)])
+      _       -> trace (">> " ++ (showTerm (normal book fill 1 msg' 0))) $ (reduce book fill lv nxt)
     Con "Nil" [] ->
       trace txt (reduce book fill lv nxt)
     _ ->
@@ -194,6 +211,24 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
     let nf_fst = normal book fill lv fst dep in
     let nf_snd = normal book fill lv snd dep in
     Op2 opr nf_fst nf_snd
+  go (Map typ) dep =
+    let nf_typ = normal book fill lv typ dep in
+    Map nf_typ
+  go (KVs kvs def) dep =
+    let nf_kvs = IM.map (\x -> normal book fill lv x dep) kvs in
+    let nf_def = normal book fill lv def dep in
+    KVs nf_kvs nf_def
+  go (Get g n m k b) dep =
+    let nf_m = normal book fill lv m dep in
+    let nf_k = normal book fill lv k dep in
+    let nf_b = \v s -> normal book fill lv (b (Var g dep) (Var n dep)) (dep + 2) in
+    Get g n nf_m nf_k nf_b
+  go (Put g n m k v b) dep =
+    let nf_m = normal book fill lv m dep in
+    let nf_k = normal book fill lv k dep in
+    let nf_v = normal book fill lv v dep in
+    let nf_b = \o s -> normal book fill lv (b (Var g dep) (Var n dep)) (dep + 2) in
+    Put g n nf_m nf_k nf_v nf_b
   go (Txt val) dep = Txt val
   go (Lst val) dep =
     let nf_val = map (\x -> normal book fill lv x dep) val in
@@ -265,6 +300,24 @@ bind (Swi zer suc) ctx =
   let zer' = bind zer ctx in
   let suc' = bind suc ctx in
   Swi zer' suc'
+bind (Map typ) ctx =
+  let typ' = bind typ ctx in
+  Map typ'
+bind (KVs kvs def) ctx =
+  let kvs' = IM.map (\x -> bind x ctx) kvs in
+  let def' = bind def ctx in
+  KVs kvs' def'
+bind (Get g n m k b) ctx =
+  let m' = bind m ctx in
+  let k' = bind k ctx in
+  let b' = \v s -> bind (b v s) ((n, s) : (g, v) : ctx) in
+  Get g n m' k' b'
+bind (Put g n m k v b) ctx =
+  let m' = bind m ctx in
+  let k' = bind k ctx in
+  let v' = bind v ctx in
+  let b' = \o s -> bind (b o s) ((n, s) : (g, o) : ctx) in
+  Put g n m' k' v' b'
 bind (Ref nam) ctx =
   case lookup nam ctx of
     Just x  -> x
@@ -346,6 +399,24 @@ genMetasGo (Swi zer suc) c =
   let (zer', c1) = genMetasGo zer c
       (suc', c2) = genMetasGo suc c1
   in (Swi zer' suc', c2)
+genMetasGo (Map typ) c = 
+  let (typ', c1) = genMetasGo typ c
+  in (Map typ', c1)
+genMetasGo (KVs kvs def) c = 
+  let (def', c1) = genMetasGo def c
+      (kvs', c2) = foldr (\ (k, t) (acc, c') -> let (t', c'') = genMetasGo t c' in (IM.insert k t' acc, c'')) (IM.empty, c1) (IM.toList kvs)
+  in (KVs kvs' def', c2)
+genMetasGo (Get g n m k b) c = 
+  let (m', c1) = genMetasGo m c
+      (k', c2) = genMetasGo k c1
+      (b', c3) = genMetasGo (b (Var g 0) (Var n 0)) c2
+  in (Get g n m' k' (\_ _ -> b'), c3)
+genMetasGo (Put g n m k v b) c = 
+  let (m', c1) = genMetasGo m c
+      (k', c2) = genMetasGo k c1
+      (v', c3) = genMetasGo v c2
+      (b', c4) = genMetasGo (b (Var g 0) (Var n 0)) c3
+  in (Put g n m' k' v' (\_ _ -> b'), c4)
 genMetasGo (Let nam val bod) c = 
   let (val', c1) = genMetasGo val c
       (bod', c2) = genMetasGo (bod (Var nam 0)) c1

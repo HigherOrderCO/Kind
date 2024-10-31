@@ -116,6 +116,48 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
     envLog (Error src (Ref "annotation") (Ref "switch") (Swi zer suc) dep)
     envFail
 
+  go (Map typ) = do
+    typA <- checkLater sus src typ Set dep
+    return $ Ann False (Map typA) Set
+
+  go (KVs kvs dft) = do
+    dftA <- infer sus src dft dep
+    kvsA <- forM (IM.toList kvs) $ \(key, val ) -> do
+      valA <- check sus src val (getType dftA) dep
+      return (key, valA)
+    return $ Ann False (KVs (IM.fromList kvsA) dftA) (Map (getType dftA))
+
+  go (Get got nam map key bod) = do
+    mapA <- infer sus src map dep
+    book <- envGetBook
+    fill <- envGetFill
+    case reduce book fill 2 (getType mapA) of
+      (Map typ) -> do
+        let got_ann = Ann False (Var got dep) typ
+        let nam_ann = Ann False (Var nam dep) (Map typ)
+        keyA <- check sus src key U64 dep
+        bodA <- infer sus src (bod got_ann nam_ann) dep
+        return $ Ann False (Get got nam mapA keyA (\g m -> bodA)) (getType bodA)
+      otherwise -> do
+        envLog (Error src (Ref "Map") (getType mapA) (Get got nam map key bod) dep)
+        envFail
+
+  go (Put got nam map key val bod) = do
+    mapA <- infer sus src map dep
+    book <- envGetBook
+    fill <- envGetFill
+    case reduce book fill 2 (getType mapA) of
+      (Map typ) -> do
+        valA <- check sus src val typ dep
+        let got_ann = Ann False (Var got dep) typ
+        let nam_ann = Ann False (Var nam dep) (Map typ)
+        keyA <- check sus src key U64 dep
+        bodA <- infer sus src (bod got_ann nam_ann) dep
+        return $ Ann False (Put got nam mapA keyA valA (\g m -> bodA)) (getType bodA)
+      otherwise -> do
+        envLog (Error src (Ref "Map") (getType mapA) (Put got nam map key val bod) dep)
+        envFail
+
   go (Let nam val bod) = do
     valA <- infer sus src val dep
     bodA <- infer sus src (bod (Ann False (Var nam dep) (getType valA))) dep
@@ -305,6 +347,49 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
             return $ Ann False (Swi zerA sucA) typx
           otherwise -> infer sus src (Swi zer suc) dep
       otherwise -> infer sus src (Swi zer suc) dep
+
+  go (KVs kvs dft) = do
+    book <- envGetBook
+    fill <- envGetFill
+    case reduce book fill 2 typx of
+      (Map typ) -> do
+        dftA <- check sus src dft typ dep
+        kvsA <- forM (IM.toList kvs) $ \(key, val) -> do
+          valA <- check sus src val typ dep
+          return (key, valA)
+        return $ Ann False (KVs (IM.fromList kvsA) dftA) typx
+      otherwise -> infer sus src (KVs kvs dft) dep
+
+  go (Get got nam map key bod) = do
+    mapA <- infer sus src map dep
+    book <- envGetBook
+    fill <- envGetFill
+    case reduce book fill 2 (getType mapA) of
+      (Map typ) -> do
+        let got_ann = Ann False (Var got dep) typ
+        let nam_ann = Ann False (Var nam dep) (Map typ)
+        keyA <- check sus src key U64 dep
+        bodA <- check sus src (bod got_ann nam_ann) typx dep
+        return $ Ann False (Get got nam mapA keyA (\g m -> bodA)) typx
+      otherwise -> do
+        envLog (Error src (Ref "Map") (getType mapA) (Get got nam map key bod) dep)
+        envFail
+
+  go (Put got nam map key val bod) = do
+    mapA <- infer sus src map dep
+    book <- envGetBook
+    fill <- envGetFill
+    case reduce book fill 2 (getType mapA) of
+      (Map typ) -> do
+        valA <- check sus src val typ dep
+        let got_ann = Ann False (Var got dep) typ
+        let nam_ann = Ann False (Var nam dep) (Map typ)
+        keyA <- check sus src key U64 dep
+        bodA <- check sus src (bod got_ann nam_ann) typx dep
+        return $ Ann False (Put got nam mapA keyA valA (\g m -> bodA)) typx
+      otherwise -> do
+        envLog (Error src (Ref "Map") (getType mapA) (Put got nam map key val bod) dep)
+        envFail
 
   go (Let nam val bod) = do
     valA <- infer sus src val dep

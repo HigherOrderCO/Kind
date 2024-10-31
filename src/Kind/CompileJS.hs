@@ -1,5 +1,10 @@
--- Checker:
+-- Type.hs:
 -- //./Type.hs//
+
+-- FIXME: currently, the Map type will compile to a mutable map in JS, which
+-- means we assume it is used linearly (no cloning). To improve this, we can add
+-- a shallow-cloning operation for cloned maps, or use an immutable map. Adding
+-- linearity checks to Kind would let us pick the best representation.
 
 {-# LANGUAGE ViewPatterns #-}
 
@@ -43,6 +48,9 @@ data CT
   | CFlt Double
   | COp2 Oper CT CT
   | CSwi CT CT CT
+  | CKVs (IM.IntMap CT) CT
+  | CGet String String CT CT (CT -> CT -> CT)
+  | CPut String String CT CT CT (CT -> CT -> CT)
   | CLog CT CT
   | CVar String Int
   | CTxt String
@@ -109,6 +117,23 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
       let zer' = t2ct zer Nothing dep
           suc' = t2ct suc Nothing dep
       in CLam ("__" ++ show dep) $ \x -> CSwi x zer' suc'
+    go (Map typ) =
+      CNul
+    go (KVs kvs def) =
+      let kvs' = IM.map (\v -> t2ct v Nothing dep) kvs
+          def' = t2ct def Nothing dep
+      in CKVs kvs' def'
+    go (Get got nam map key bod) =
+      let map' = t2ct map Nothing dep
+          key' = t2ct key Nothing dep
+          bod' = \x y -> t2ct (bod (Var got dep) (Var nam dep)) Nothing (dep+2)
+      in CGet got nam map' key' bod'
+    go (Put got nam map key val bod) =
+      let map' = t2ct map Nothing dep
+          key' = t2ct key Nothing dep
+          val' = t2ct val Nothing dep
+          bod' = \x y -> t2ct (bod (Var got dep) (Var nam dep)) Nothing (dep+2)
+      in CPut got nam map' key' val' bod'
     go (All _ _ _) =
       CNul
     go (Ref nam) =
@@ -191,6 +216,21 @@ removeUnreachables ct = go ct where
         zer' = go zer
         suc' = go suc
     in CSwi val' zer' suc'
+  go (CKVs kvs def) =
+    let kvs' = IM.map go kvs
+        def' = go def
+    in CKVs kvs' def'
+  go (CGet got nam map key bod) =
+    let map' = go map
+        key' = go key
+        bod' = \x y -> go (bod x y)
+    in CGet got nam map' key' bod'
+  go (CPut got nam map key val bod) =
+    let map' = go map
+        key' = go key
+        val' = go val
+        bod' = \x y -> go (bod x y)
+    in CPut got nam map' key' val' bod'
   go (CLog msg nxt) =
     let msg' = go msg
         nxt' = go nxt
@@ -281,6 +321,9 @@ inline book ct = nf ct where
     go (CFlt val)         = CFlt val
     go (COp2 opr fst snd) = COp2 opr (nf fst) (nf snd)
     go (CSwi val zer suc) = CSwi (nf val) (nf zer) (nf suc)
+    go (CKVs kvs def)     = CKVs (IM.map nf kvs) (nf def)
+    go (CGet g n m k b)   = CGet g n (nf m) (nf k) (\x y -> nf (b x y))
+    go (CPut g n m k v b) = CPut g n (nf m) (nf k) (nf v) (\x y -> nf (b x y))
     go (CLog msg nxt)     = CLog (nf msg) (nf nxt)
     go (CVar nam idx)     = CVar nam idx
     go (CTxt txt)         = CTxt txt
@@ -421,7 +464,9 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
 
   -- Compiles a CT to JS
   ctToJS :: Bool -> Maybe String -> CT -> Int -> ST.State Int String
-  ctToJS tail var term dep = go (red book term) where
+  ctToJS tail var term dep = 
+    trace ("COMPILE: " ++ showCT term 0) $
+    go (red book term) where
     go CNul =
       ret var "null"
     go tm@(CLam nam bod) = do
@@ -518,7 +563,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
             else concat [valStmt, "switch (", valName, ".$) { ", unwords cases, " }"]
       case var of
         Just var -> return $ switch
-        Nothing  -> ret var $ concat ["((B) => { var ", retName, ";", switch, " return ", retName, " })()"]
+        Nothing  -> return $ concat ["((B) => { var ", retName, ";", switch, " return ", retName, " })()"]
     go (CSwi val zer suc) = do
       valName <- fresh
       valStmt <- ctToJS False (Just valName) val dep
@@ -527,10 +572,52 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
         Nothing  -> fresh
       zerStmt <- ctToJS tail (Just retName) zer dep
       sucStmt <- ctToJS tail (Just retName) (CApp suc (COp2 SUB (CVar valName 0) (CNum 1))) dep
-      let ifelse = concat [valStmt, "if (", valName, " === 0n) { ", zerStmt, " } else { ", sucStmt, " }"]
+      let swiStmt = concat [valStmt, "if (", valName, " === 0n) { ", zerStmt, " } else { ", sucStmt, " }"]
       case var of
-        Just var -> return $ ifelse
-        Nothing  -> ret var $ concat ["((C) => { var ", retName, ";", ifelse, " return ", retName, " })()"]
+        Just var -> return $ swiStmt
+        Nothing  -> return $ concat ["((C) => { var ", retName, ";", swiStmt, " return ", retName, " })()"]
+    go (CKVs kvs def) = do
+      retName <- case var of
+        Just var -> return var
+        Nothing  -> fresh
+      dftStmt <- do
+        dftName <- fresh
+        dftStmt <- ctToJS False (Just dftName) def dep
+        return $ concat [dftStmt, retName, ".set(-1n, ", dftName, ");"]
+      kvStmts <- forM (IM.toList kvs) $ \(k, v) -> do
+        valName <- fresh
+        valStmt <- ctToJS False (Just valName) v dep
+        return $ concat [valStmt, retName, ".set(", show k, "n, ", valName, ");"]
+      let mapStmt = concat ["var ", retName, " = new Map();", unwords kvStmts, dftStmt]
+      case var of
+        Just var -> return $ mapStmt
+        Nothing  -> return $ concat ["((E) => {", mapStmt, "return ", retName, "})()"]
+    go (CGet got nam map key bod) = do
+      mapName <- fresh
+      mapStmt <- ctToJS False (Just mapName) map dep
+      keyName <- fresh
+      keyStmt <- ctToJS False (Just keyName) key dep
+      neoName <- fresh
+      gotName <- fresh
+      retStmt <- ctToJS tail var (bod (CVar gotName dep) (CVar neoName dep)) dep
+      let neoUid  = nameToJS nam ++ "$" ++ show dep
+      let gotUid  = nameToJS got ++ "$" ++ show dep
+      let gotStmt = concat ["var ", gotName, " = ", mapName, ".has(", keyName, ") ? ", mapName, ".get(", keyName, ") : ", mapName, ".get(-1n);"]
+      let neoStmt = concat ["var ", neoName, " = ", mapName, ";"]
+      return $ concat [mapStmt, keyStmt, gotStmt, retStmt]
+    go (CPut got nam map key val bod) = do
+      mapName <- fresh
+      mapStmt <- ctToJS False (Just mapName) map dep
+      keyName <- fresh
+      keyStmt <- ctToJS False (Just keyName) key dep
+      valName <- fresh
+      valStmt <- ctToJS False (Just valName) val dep
+      neoName <- fresh
+      gotName <- fresh
+      let gotStmt = concat ["var ", gotName, " = ", mapName, ".has(", keyName, ") ? ", mapName, ".get(", keyName, ") : ", mapName, ".get(-1n);"]
+      let neoStmt = concat ["var ", neoName, " = ", mapName, "; ", mapName, ".set(", keyName, ", ", valName, ");"]
+      retStmt <- ctToJS tail var (bod (CVar gotName dep) (CVar neoName dep)) dep
+      return $ concat [mapStmt, keyStmt, valStmt, gotStmt, neoStmt, retStmt]
     go (CRef nam) =
       ret var $ nameToJS nam
     go (CHol nam) =
@@ -665,6 +752,21 @@ bindCT (CSwi val zer suc) ctx =
   let zer' = bindCT zer ctx in
   let suc' = bindCT suc ctx in
   CSwi val' zer' suc'
+bindCT (CKVs kvs def) ctx =
+  let kvs' = IM.map (\v -> bindCT v ctx) kvs in
+  let def' = bindCT def ctx in
+  CKVs kvs' def'
+bindCT (CGet got nam map key bod) ctx =
+  let map' = bindCT map ctx in
+  let key' = bindCT key ctx in
+  let bod' = \x y -> bindCT (bod (CVar got 0) (CVar nam 0)) ((nam, y) : (got, x) : ctx) in
+  CGet got nam map' key' bod'
+bindCT (CPut got nam map key val bod) ctx =
+  let map' = bindCT map ctx in
+  let key' = bindCT key ctx in
+  let val' = bindCT val ctx in
+  let bod' = \x y -> bindCT (bod (CVar got 0) (CVar nam 0)) ((nam, y) : (got, x) : ctx) in
+  CPut got nam map' key' val' bod'
 bindCT (CLog msg nxt) ctx =
   let msg' = bindCT msg ctx in
   let nxt' = bindCT nxt ctx in
@@ -718,6 +820,21 @@ rnCT (CSwi val zer suc) ctx =
   let zer' = rnCT zer ctx in
   let suc' = rnCT suc ctx in
   CSwi val' zer' suc'
+rnCT (CKVs kvs def) ctx =
+  let kvs' = IM.map (\v -> rnCT v ctx) kvs in
+  let def' = rnCT def ctx in
+  CKVs kvs' def'
+rnCT (CGet got nam map key bod) ctx =
+  let map' = rnCT map ctx in
+  let key' = rnCT key ctx in
+  let bod' = \x y -> rnCT (bod (CVar got 0) (CVar nam 0)) ((got, x) : (nam, y) : ctx) in
+  CGet got nam map' key' bod'
+rnCT (CPut got nam map key val bod) ctx =
+  let map' = rnCT map ctx in
+  let key' = rnCT key ctx in
+  let val' = rnCT val ctx in
+  let bod' = \x y -> rnCT (bod (CVar got 0) (CVar nam 0)) ((got, x) : (nam, y) : ctx) in
+  CPut got nam map' key' val' bod'
 rnCT (CLog msg nxt) ctx =
   let msg' = rnCT msg ctx in
   let nxt' = rnCT nxt ctx in
@@ -759,6 +876,9 @@ showCT (CNum val)         dep = show val
 showCT (CFlt val)         dep = show val
 showCT (COp2 opr fst snd) dep = "(<op> " ++ showCT fst dep ++ " " ++ showCT snd dep ++ ")"
 showCT (CSwi val zer suc) dep = "switch " ++ showCT val dep ++ " {0:" ++ showCT zer dep ++ " _: " ++ showCT suc dep ++ "}"
+showCT (CKVs kvs def)     dep = "{" ++ unwords (map (\(k,v) -> show k ++ ":" ++ showCT v dep) (IM.toList kvs)) ++ " | " ++ showCT def dep ++ "}"
+showCT (CGet g n m k b)   dep = "get " ++ g ++ " = " ++ n ++ "@" ++ showCT m dep ++ "[" ++ showCT k dep ++ "] " ++ showCT (b (CVar g dep) (CVar n dep)) (dep+2)
+showCT (CPut g n m k v b) dep = "put " ++ g ++ " = " ++ n ++ "@" ++ showCT m dep ++ "[" ++ showCT k dep ++ "] := " ++ showCT v dep ++ " " ++ showCT (b (CVar g dep) (CVar n dep)) (dep+2)
 showCT (CLog msg nxt)     dep = "log(" ++ showCT msg dep ++ "," ++ showCT nxt dep ++ ")"
 showCT (CVar nam dep)     _   = nam ++ "^" ++ show dep
 showCT (CTxt txt)         dep = show txt

@@ -19,6 +19,7 @@ import System.Console.ANSI
 import Text.Parsec ((<?>), (<|>), getPosition, sourceLine, sourceColumn, getState, setState)
 import Text.Parsec.Error (errorPos, errorMessages, showErrorMessages, ParseError, errorMessages, Message(..))
 import qualified Control.Applicative as A
+import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 import qualified Text.Parsec as P
 
@@ -77,7 +78,7 @@ numeric :: Parser String
 numeric = do
   head <- P.satisfy (`elem` "0123456789")
   tail <- P.many (P.satisfy (`elem` "bx0123456789abcdefABCDEF_"))
-  return $ show (read (head : tail) :: Word64)
+  return $ show (read (filter (/= '_') (head : tail)) :: Word64)
 
 numeric_skp :: Parser String
 numeric_skp = numeric <* skip
@@ -164,8 +165,8 @@ parseTerm = (do
     , parseLam
     , parseEra
     , parseOp2
+    , parseMap
     , parseApp
-    , parseAnn
     , parseSlf
     , parseIns
     , parseADT
@@ -173,10 +174,13 @@ parseTerm = (do
     , parseCon
     , (parseUse parseTerm)
     , (parseLet parseTerm)
+    , (parseGet parseTerm)
+    , (parsePut parseTerm)
     , parseIf
     , parseWhen
     , parseMatInl
     , parseSwiInl
+    , parseKVs
     , parseDo
     , parseSet
     , parseFloat
@@ -226,15 +230,6 @@ parseApp = withSrc $ do
     return (era, arg)
   char ')'
   return $ foldl (\f (era, a) -> App f a) fun args
-
-parseAnn = withSrc $ do
-  char_skp '{'
-  val <- parseTerm
-  char_skp ':'
-  chk <- P.option False (char_skp ':' >> return True)
-  typ <- parseTerm
-  char '}'
-  return $ Ann chk val typ
 
 parseSlf = withSrc $ do
   string_skp "$("
@@ -379,6 +374,55 @@ parseMat = withSrc $ do
   cse <- parseMatCases
   char '}'
   return $ Mat cse
+
+-- TODO: implement the Map parsers
+parseMap = withSrc $ do
+  P.try $ string_skp "(Map "
+  typ <- parseTerm
+  char ')'
+  return $ Map typ
+
+parseKVs = withSrc $ do
+  char_skp '{'
+  kvs <- P.many parseKV
+  char_skp '|'
+  dft <- parseTerm
+  char '}'
+  return $ KVs (IM.fromList kvs) dft
+  where
+    parseKV = do
+      key <- read <$> numeric_skp
+      char_skp ':'
+      val <- parseTerm
+      return (key, val)
+
+parseGet parseBody = withSrc $ do
+  P.try $ string_skp "get "
+  got <- name_skp
+  string_skp "="
+  nam <- name_skp
+  map <- P.option (Ref nam) $ P.try $ char_skp '@' >> parseTerm
+  char_skp '['
+  key <- parseTerm
+  char_skp ']'
+  bod <- parseBody
+  return $ Get got nam map key (\x y -> bod)
+
+parsePut parseBody = withSrc $ do
+  P.try $ string_skp "put "
+  got <- P.option "_" $ P.try $ do
+    got <- name_skp
+    string_skp "="
+    return got
+  nam <- name_skp
+  map <- P.option (Ref nam) $ P.try $ char_skp '@' >> parseTerm
+  char_skp '['
+  key <- parseTerm
+  char_skp ']'
+  string_skp ":="
+  val <- parseTerm
+  bod <- parseBody
+  return $ Put got nam map key val (\x y -> bod)
 
 parseRef = withSrc $ do
   name <- name
