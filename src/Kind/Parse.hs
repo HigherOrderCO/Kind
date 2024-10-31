@@ -28,7 +28,7 @@ type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
 -- Types used for flattening pattern-matching equations
 type Rule     = ([Pattern], With)
-data Pattern  = PVar String | PCtr (Maybe String) String [Pattern] deriving Show
+data Pattern  = PVar String | PCtr (Maybe String) String [Pattern] | PNum Word64 | PSuc Word64 String
 data With     = WBod Term | WWit [Term] [Rule]
 
 -- Helper functions that consume trailing whitespace
@@ -742,6 +742,8 @@ parsePattern = do
     parsePatternNat,
     parsePatternLst,
     parsePatternCtr,
+    parsePatternSuc,
+    parsePatternNum,
     parsePatternVar
     ]
 
@@ -776,6 +778,22 @@ parsePatternCtr = do
     char_skp '}'
     return args
   return $ (PCtr name cnam args)
+
+parsePatternNum :: Parser Pattern
+parsePatternNum = do
+  num <- P.try $ do
+    num <- numeric_skp
+    return (read num)
+  return $ (PNum num)
+
+parsePatternSuc :: Parser Pattern
+parsePatternSuc = do
+  num <- P.try $ do
+    num <- numeric_skp
+    char_skp '+'
+    return (read num)
+  nam <- name_skp
+  return $ (PSuc num nam)
 
 parsePatternVar :: Parser Pattern
 parsePatternVar = do
@@ -1039,8 +1057,10 @@ flattenWith dep (WWit wth rul) =
 flattenRules :: [[Pattern]] -> [Term] -> Int -> Term
 flattenRules ([]:mat)   (bod:bods) depth = bod
 flattenRules (pats:mat) (bod:bods) depth
-  | all isVar col  = flattenVarCol col mat' (bod:bods) (depth + 1)
-  | otherwise      = flattenAdtCol col mat' (bod:bods) (depth + 1)
+  | all isVar col                 = flattenVarCol col mat' (bod:bods) (depth + 1)
+  | not (null (getColCtrs col))   = flattenAdtCol col mat' (bod:bods) (depth + 1)
+  | isJust (fst (getColSucc col)) = flattenNumCol col mat' (bod:bods) (depth + 1)
+  | otherwise                     = error "invalid pattern matching function"
   where (col,mat') = getCol (pats:mat)
 flattenRules _ _ _ = error "internal error"
 
@@ -1082,6 +1102,8 @@ makeCtrCase col mat bods depth ctr =
               pat = map PVar vr2
               bo2 = Use nam (Con ctr (map (\x -> (Nothing, Ref x)) vr2)) (\x -> bod)
           in ((pat ++ pats):mat, bo2:bods)
+        go var (_, pats, bod) (mat, bods) =
+          (mat, bods)
 
 -- Creates a default case: '#_: body'
 makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> [(String, Term)]
@@ -1090,7 +1112,45 @@ makeDflCase col mat bods depth =
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods) in
   if null bods' then [] else [("_", flattenRules mat' bods' (depth + 1))]
   where go ((PVar nam), pats, bod) (mat, bods) = (((PVar nam):pats):mat, bod:bods)
-        go (ctr,        pats, bod) (mat, bods) = (mat, bods)
+        go (_,          pats, bod) (mat, bods) = (mat, bods)
+
+flattenNumCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
+flattenNumCol col mat bods depth =
+  -- Find the succ case with the value
+  let (suc, var) = getColSucc col
+      sucA       = fromJust suc
+      varA       = maybe ("%n-" ++ show sucA) id var
+      numCs      = map (makeNumCase col mat bods depth) [0..sucA-1]
+      sucCs      = (makeSucCase col mat bods depth sucA varA)
+  in foldr (\x acc -> Swi x acc) sucCs numCs
+
+makeNumCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Word64 -> Term
+makeNumCase col mat bods depth num =
+  let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
+  in if null bods' then error $ "missing case for " ++ show num
+     else (flattenRules mat' bods' (depth + 1))
+  where go ((PNum val), pats, bod) (mat, bods)
+          | val == num = (pats:mat, bod:bods)
+          | otherwise  = (mat, bods)
+        go ((PVar "_"), pats, bod) (mat, bods) =
+          (pats:mat, bod:bods)
+        go ((PVar nam), pats, bod) (mat, bods) =
+          let bod' = Use nam (Num num) (\x -> bod)
+          in (pats:mat, bod':bods)
+        go (_, pats, bod) (mat, bods) =
+          (mat, bods)
+
+makeSucCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Word64 -> String -> Term
+makeSucCase col mat bods depth suc var =
+  let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
+      bod           = (flattenRules mat' bods' (depth + 1))
+  in Lam var (\x -> bod)
+  where go ((PSuc _ _), pats, bod) (mat, bods) = (pats:mat, bod:bods)
+        go ((PVar "_"), pats, bod) (mat, bods) = (pats:mat, bod:bods)
+        go ((PVar nam), pats, bod) (mat, bods) = 
+          let bodA = Use nam (Op2 ADD (Num suc) (Ref var)) (\x -> bod)
+          in (pats:mat, bodA:bods)
+        go (_, pats, bod)          (mat, bods) = (mat, bods)
 
 -- Helper Functions
 
@@ -1125,3 +1185,23 @@ getMatNam :: [Pattern] -> Maybe String
 getMatNam (PCtr (Just nam) _ _:_) = Just nam
 getMatNam (_:col)                 = getMatNam col
 getMatNam []                      = Nothing
+
+-- If theres a PSuc, it returns (Just val, Just nam)
+-- If there a PNum a PVar but no PSuc, it returns (Just (max val + 1), Nothing)
+-- Otherwise, it returns (Nothing, Nothing)
+getColSucc :: [Pattern] -> (Maybe Word64, Maybe String)
+getColSucc pats =
+  case findSuc pats of
+    Just (val, name) -> (Just val, Just name)
+    Nothing          -> case (maxNum pats Nothing) of
+      Just maxVal -> (Just (maxVal + 1), Nothing) 
+      Nothing     -> (Nothing, Nothing)
+  where
+    findSuc []                = Nothing
+    findSuc (PSuc val name:_) = Just (val, name)
+    findSuc (_:rest)          = findSuc rest
+
+    maxNum []            acc        = acc
+    maxNum (PNum val:ps) Nothing    = maxNum ps (Just val)
+    maxNum (PNum val:ps) (Just max) = maxNum ps (Just (if val > max then val else max))
+    maxNum (_:ps)        acc        = maxNum ps acc
