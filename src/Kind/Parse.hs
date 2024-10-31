@@ -28,7 +28,7 @@ type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
 -- Types used for flattening pattern-matching equations
 type Rule     = ([Pattern], With)
-data Pattern  = PVar String | PCtr String [Pattern] deriving Show
+data Pattern  = PVar String | PCtr (Maybe String) String [Pattern] | PNum Word64 | PSuc Word64 String
 data With     = WBod Term | WWit [Term] [Rule]
 
 -- Helper functions that consume trailing whitespace
@@ -562,7 +562,7 @@ parseHol = withSrc $ do
   return $ Hol nam ctx
 
 parseLog parseBody = withSrc $ do
-  P.try $ string_skp "log"
+  P.try $ string_skp "log "
   msg <- parseTerm
   val <- parseBody
   return $ Log msg val
@@ -724,7 +724,7 @@ parseRule dep = P.try $ do
   pats <- P.many parsePattern
   with <- P.choice 
     [ P.try $ do
-      string_skp "with"
+      string_skp "with "
       wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
       rul <- P.many1 $ parseRule (dep + 1)
       return $ WWit wth rul
@@ -737,10 +737,13 @@ parseRule dep = P.try $ do
 
 parsePattern :: Parser Pattern
 parsePattern = do
-  P.notFollowedBy $ string_skp "with"
+  P.notFollowedBy $ string_skp "with "
   P.choice [
     parsePatternNat,
+    parsePatternLst,
     parsePatternCtr,
+    parsePatternSuc,
+    parsePatternNum,
     parsePatternVar
     ]
 
@@ -751,11 +754,22 @@ parsePatternNat = do
     P.many1 digit
   skip
   let n = read num
-  return $ (foldr (\_ acc -> PCtr "Succ" [acc]) (PCtr "Zero" []) [1..n])
+  return $ (foldr (\_ acc -> PCtr Nothing "Succ" [acc]) (PCtr Nothing "Zero" []) [1..n])
+
+parsePatternLst :: Parser Pattern
+parsePatternLst = do
+  P.try $ char_skp '['
+  elems <- P.many parsePattern
+  char_skp ']'
+  return $ foldr (\x acc -> PCtr Nothing "Cons" [x, acc]) (PCtr Nothing "Nil" []) elems
 
 parsePatternCtr :: Parser Pattern
 parsePatternCtr = do
-  name <- P.try $ do
+  name <- P.optionMaybe $ P.try $ do
+    name <- name_skp
+    char_skp '@'
+    return name
+  cnam <- P.try $ do
     char_skp '#'
     name_skp
   args <- P.option [] $ P.try $ do
@@ -763,7 +777,23 @@ parsePatternCtr = do
     args <- P.many parsePattern
     char_skp '}'
     return args
-  return $ (PCtr name args)
+  return $ (PCtr name cnam args)
+
+parsePatternNum :: Parser Pattern
+parsePatternNum = do
+  num <- P.try $ do
+    num <- numeric_skp
+    return (read num)
+  return $ (PNum num)
+
+parsePatternSuc :: Parser Pattern
+parsePatternSuc = do
+  num <- P.try $ do
+    num <- numeric_skp
+    char_skp '+'
+    return (read num)
+  nam <- name_skp
+  return $ (PSuc num nam)
 
 parsePatternVar :: Parser Pattern
 parsePatternVar = do
@@ -776,13 +806,14 @@ parseUses = P.many $ P.try $ do
   long <- name_skp
   string_skp "as "
   short <- name_skp
-  return (short ++ "/", long ++ "/")
+  return (short, long)
 
 expandUses :: Uses -> String -> String
-expandUses uses name =
-  case filter (\(short, _) -> short `isPrefixOf` name) uses of
-    (short, long):_ -> long ++ drop (length short) name
-    []              -> name
+expandUses ((short, long):uses) name
+  | short == name                    = long
+  | (short ++ "/") `isPrefixOf` name = long ++ drop (length short) name
+  | otherwise                        = expandUses uses name
+expandUses [] name                   = name
 
 -- Syntax Sugars
 -- -------------
@@ -1017,14 +1048,19 @@ flattenDef rules depth =
 flattenWith :: Int -> With -> Term
 flattenWith dep (WBod bod)     = bod
 flattenWith dep (WWit wth rul) =
-  let bod = flattenDef rul (dep + 1)
-  in foldl App bod wth
+  -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
+  let wthA = foldr1 (\x acc -> Con "Pair" [(Nothing, x), (Nothing, acc)]) wth
+      rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr Nothing "Pair" [x, acc]) pat], wth)) rul
+      bod  = flattenDef rulA (dep + 1)
+  in App bod wthA
 
 flattenRules :: [[Pattern]] -> [Term] -> Int -> Term
 flattenRules ([]:mat)   (bod:bods) depth = bod
 flattenRules (pats:mat) (bod:bods) depth
-  | all isVar col  = flattenVarCol col mat' (bod:bods) (depth + 1)
-  | otherwise      = flattenAdtCol col mat' (bod:bods) (depth + 1)
+  | all isVar col                 = flattenVarCol col mat' (bod:bods) (depth + 1)
+  | not (null (getColCtrs col))   = flattenAdtCol col mat' (bod:bods) (depth + 1)
+  | isJust (fst (getColSucc col)) = flattenNumCol col mat' (bod:bods) (depth + 1)
+  | otherwise                     = error "invalid pattern matching function"
   where (col,mat') = getCol (pats:mat)
 flattenRules _ _ _ = error "internal error"
 
@@ -1042,7 +1078,10 @@ flattenAdtCol col mat bods depth =
   -- trace (replicate (depth * 2) ' ' ++ "flattenAdtCol: col = " ++ show col ++ ", depth = " ++ show depth) $
   let ctr = map (makeCtrCase col mat bods depth) (getColCtrs col)
       dfl = makeDflCase col mat bods depth
-  in Mat (ctr++dfl)
+      nam = getMatNam col
+  in case nam of
+    (Just nam) -> (Lam nam (\x -> App (Mat (ctr++dfl)) (Ref nam)))
+    Nothing    -> Mat (ctr++dfl)
 
 -- Creates a constructor case: '#Name: body'
 makeCtrCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> String -> (String, Term)
@@ -1052,8 +1091,8 @@ makeCtrCase col mat bods depth ctr =
       (mat', bods') = foldr (go var) ([], []) (zip3 col mat bods)
       bod           = flattenRules mat' bods' (depth + 1)
   in (ctr, bod)
-  where go var ((PCtr nam ps), pats, bod) (mat, bods)
-          | nam == ctr = ((ps ++ pats):mat, bod:bods)
+  where go var ((PCtr nam cnam ps), pats, bod) (mat, bods)
+          | cnam == ctr = ((ps ++ pats):mat, bod:bods)
           | otherwise  = (mat, bods)
         go var ((PVar "_"), pats, bod) (mat, bods) =
           let pat = map (maybe (PVar "_") PVar) var
@@ -1063,6 +1102,8 @@ makeCtrCase col mat bods depth ctr =
               pat = map PVar vr2
               bo2 = Use nam (Con ctr (map (\x -> (Nothing, Ref x)) vr2)) (\x -> bod)
           in ((pat ++ pats):mat, bo2:bods)
+        go var (_, pats, bod) (mat, bods) =
+          (mat, bods)
 
 -- Creates a default case: '#_: body'
 makeDflCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> [(String, Term)]
@@ -1071,7 +1112,45 @@ makeDflCase col mat bods depth =
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods) in
   if null bods' then [] else [("_", flattenRules mat' bods' (depth + 1))]
   where go ((PVar nam), pats, bod) (mat, bods) = (((PVar nam):pats):mat, bod:bods)
-        go (ctr,        pats, bod) (mat, bods) = (mat, bods)
+        go (_,          pats, bod) (mat, bods) = (mat, bods)
+
+flattenNumCol :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Term
+flattenNumCol col mat bods depth =
+  -- Find the succ case with the value
+  let (suc, var) = getColSucc col
+      sucA       = fromJust suc
+      varA       = maybe ("%n-" ++ show sucA) id var
+      numCs      = map (makeNumCase col mat bods depth) [0..sucA-1]
+      sucCs      = (makeSucCase col mat bods depth sucA varA)
+  in foldr (\x acc -> Swi x acc) sucCs numCs
+
+makeNumCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Word64 -> Term
+makeNumCase col mat bods depth num =
+  let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
+  in if null bods' then error $ "missing case for " ++ show num
+     else (flattenRules mat' bods' (depth + 1))
+  where go ((PNum val), pats, bod) (mat, bods)
+          | val == num = (pats:mat, bod:bods)
+          | otherwise  = (mat, bods)
+        go ((PVar "_"), pats, bod) (mat, bods) =
+          (pats:mat, bod:bods)
+        go ((PVar nam), pats, bod) (mat, bods) =
+          let bod' = Use nam (Num num) (\x -> bod)
+          in (pats:mat, bod':bods)
+        go (_, pats, bod) (mat, bods) =
+          (mat, bods)
+
+makeSucCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Word64 -> String -> Term
+makeSucCase col mat bods depth suc var =
+  let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
+      bod           = (flattenRules mat' bods' (depth + 1))
+  in Lam var (\x -> bod)
+  where go ((PSuc _ _), pats, bod) (mat, bods) = (pats:mat, bod:bods)
+        go ((PVar "_"), pats, bod) (mat, bods) = (pats:mat, bod:bods)
+        go ((PVar nam), pats, bod) (mat, bods) = 
+          let bodA = Use nam (Op2 ADD (Num suc) (Ref var)) (\x -> bod)
+          in (pats:mat, bodA:bods)
+        go (_, pats, bod)          (mat, bods) = (mat, bods)
 
 -- Helper Functions
 
@@ -1083,7 +1162,7 @@ getCol :: [[Pattern]] -> ([Pattern], [[Pattern]])
 getCol (pats:mat) = unzip (catMaybes (map uncons (pats:mat)))
 
 getColCtrs :: [Pattern] -> [String]
-getColCtrs col = toList . fromList $ foldr (\pat acc -> case pat of (PCtr nam _) -> nam:acc ; _ -> acc) [] col
+getColCtrs col = toList . fromList $ foldr (\pat acc -> case pat of (PCtr _ cnam _) -> cnam:acc ; _ -> acc) [] col
 
 getVarColName :: [Pattern] -> Maybe String
 getVarColName col = foldr (A.<|>) Nothing $ map go col
@@ -1097,7 +1176,32 @@ getCtrColNames :: [Pattern] -> String -> [Maybe String]
 getCtrColNames col ctr = 
   let mat = foldr go [] col
   in map getVarColName (transpose mat)
-  where go (PCtr nam ps) acc
-          | nam == ctr  = ps:acc
+  where go (PCtr nam cnam ps) acc
+          | cnam == ctr = ps:acc
           | otherwise   = acc
         go _ acc        = acc
+
+getMatNam :: [Pattern] -> Maybe String
+getMatNam (PCtr (Just nam) _ _:_) = Just nam
+getMatNam (_:col)                 = getMatNam col
+getMatNam []                      = Nothing
+
+-- If theres a PSuc, it returns (Just val, Just nam)
+-- If there a PNum a PVar but no PSuc, it returns (Just (max val + 1), Nothing)
+-- Otherwise, it returns (Nothing, Nothing)
+getColSucc :: [Pattern] -> (Maybe Word64, Maybe String)
+getColSucc pats =
+  case findSuc pats of
+    Just (val, name) -> (Just val, Just name)
+    Nothing          -> case (maxNum pats Nothing) of
+      Just maxVal -> (Just (maxVal + 1), Nothing) 
+      Nothing     -> (Nothing, Nothing)
+  where
+    findSuc []                = Nothing
+    findSuc (PSuc val name:_) = Just (val, name)
+    findSuc (_:rest)          = findSuc rest
+
+    maxNum []            acc        = acc
+    maxNum (PNum val:ps) Nothing    = maxNum ps (Just val)
+    maxNum (PNum val:ps) (Just max) = maxNum ps (Just (if val > max then val else max))
+    maxNum (_:ps)        acc        = maxNum ps acc
