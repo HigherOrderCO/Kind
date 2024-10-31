@@ -600,11 +600,9 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
       neoName <- fresh
       gotName <- fresh
       retStmt <- ctToJS tail var (bod (CVar gotName dep) (CVar neoName dep)) dep
-      let neoUid  = nameToJS nam ++ "$" ++ show dep
-      let gotUid  = nameToJS got ++ "$" ++ show dep
       let gotStmt = concat ["var ", gotName, " = ", mapName, ".has(", keyName, ") ? ", mapName, ".get(", keyName, ") : ", mapName, ".get(-1n);"]
       let neoStmt = concat ["var ", neoName, " = ", mapName, ";"]
-      return $ concat [mapStmt, keyStmt, gotStmt, retStmt]
+      return $ concat [mapStmt, keyStmt, gotStmt, neoStmt, retStmt]
     go (CPut got nam map key val bod) = do
       mapName <- fresh
       mapStmt <- ctToJS False (Just mapName) map dep
@@ -614,9 +612,9 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
       valStmt <- ctToJS False (Just valName) val dep
       neoName <- fresh
       gotName <- fresh
+      retStmt <- ctToJS tail var (bod (CVar gotName dep) (CVar neoName dep)) dep
       let gotStmt = concat ["var ", gotName, " = ", mapName, ".has(", keyName, ") ? ", mapName, ".get(", keyName, ") : ", mapName, ".get(-1n);"]
       let neoStmt = concat ["var ", neoName, " = ", mapName, "; ", mapName, ".set(", keyName, ", ", valName, ");"]
-      retStmt <- ctToJS tail var (bod (CVar gotName dep) (CVar neoName dep)) dep
       return $ concat [mapStmt, keyStmt, valStmt, gotStmt, neoStmt, retStmt]
     go (CRef nam) =
       ret var $ nameToJS nam

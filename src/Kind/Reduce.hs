@@ -38,8 +38,8 @@ reduce book fill lv term = red term where
   red (Src src val)     = red val
   red (Met uid spn)     = met uid spn
   red (Log msg nxt)     = log msg nxt
-  red (Get g n m k b)   = get g n m k b
-  red (Put g n m k v b) = put g n m k v b
+  red (Get g n m k b)   = get g n (red m) (red k) b
+  red (Put g n m k v b) = put g n (red m) (red k) v b
   red val               = val
 
   app (Ref nam)     arg | lv > 0 = app (ref nam) arg
@@ -119,32 +119,28 @@ reduce book fill lv term = red term where
 
   log msg nxt = logMsg book fill lv msg msg nxt ""
 
-  get g n m k b = case (red k, red m) of
-    (Num k, KVs kvs d) -> case IM.lookup (fromIntegral k) kvs of
-      Just v  -> red (b v (KVs kvs d))
-      Nothing -> red (b d (KVs kvs d))
-    _ -> Get g n m k b
+  get g n (KVs kvs d) (Num k) b = case IM.lookup (fromIntegral k) kvs of
+    Just v  -> red (b v (KVs kvs d))
+    Nothing -> red (b d (KVs kvs d))
+  get g n m k b = Get g n m k b
 
-  put g n m k v b = case (red k, red m) of
-    (Num k, KVs kvs d) -> case IM.lookup (fromIntegral k) kvs of
-      Just o  -> red (b o (KVs (IM.insert (fromIntegral k) v kvs) d))
-      Nothing -> red (b d (KVs (IM.insert (fromIntegral k) v kvs) d))
-    _ -> Put g n m k v b
-
-
+  put g n (KVs kvs d) (Num k) v b = case IM.lookup (fromIntegral k) kvs of
+    Just o  -> red (b o (KVs (IM.insert (fromIntegral k) v kvs) d))
+    Nothing -> red (b d (KVs (IM.insert (fromIntegral k) v kvs) d))
+  put g n m k v b = Put g n m k v b
 
 -- Logging
 -- -------
 
 logMsg :: Book -> Fill -> Int -> Term -> Term -> Term -> String -> Term
 logMsg book fill lv msg' msg nxt txt =
-  case (reduce book fill lv msg) of
+  case (reduce book fill 2 msg) of
     Con "Cons" [(_, head), (_, tail)] -> case (reduce book fill lv head) of
       Num chr -> logMsg book fill lv msg' tail nxt (txt ++ [toEnum (fromIntegral chr)])
       _       -> trace (">> " ++ (showTerm (normal book fill 1 msg' 0))) $ (reduce book fill lv nxt)
     Con "Nil" [] ->
       trace txt (reduce book fill lv nxt)
-    _ ->
+    bad ->
       trace (">> " ++ (showTerm (normal book fill 1 msg' 0))) $ (reduce book fill lv nxt)
 
 -- Normalization
