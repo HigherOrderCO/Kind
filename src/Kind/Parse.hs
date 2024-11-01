@@ -192,7 +192,7 @@ parseTerm = (do
 
 -- Individual term parsers
 parseAll = withSrc $ do
-  string_skp "∀"
+  P.choice [string_skp "∀", string_skp "@"]
   era <- P.optionMaybe (char_skp '-')
   char_skp '('
   nam <- name_skp
@@ -203,14 +203,14 @@ parseAll = withSrc $ do
   return $ All nam inp (\x -> bod)
 
 parseLam = withSrc $ do
-  string_skp "λ"
+  P.choice [string_skp "λ", string_skp "@"]
   era <- P.optionMaybe (char_skp '-')
   nam <- name_skp
   bod <- parseTerm
   return $ Lam nam (\x -> bod)
 
 parseEra = withSrc $ do
-  string_skp "λ"
+  P.choice [string_skp "λ", string_skp "@"]
   era <- P.optionMaybe (char_skp '-')
   nam <- char_skp '_'
   bod <- parseTerm
@@ -364,7 +364,7 @@ parseSwiElim = do
 
 parseSwi = withSrc $ do
   P.try $ do
-    char_skp 'λ'
+    P.choice [string_skp "λ", string_skp "@"]
     char_skp '{'
     P.lookAhead $ P.try $ do
       char_skp '0'
@@ -372,9 +372,10 @@ parseSwi = withSrc $ do
   char '}'
   return $ elim
 
+--   | MAT: "λ{" ("#" <Name> ":" <Term>)* "}"
 parseMat = withSrc $ do
   P.try $ do
-    string_skp "λ"
+    P.choice [string_skp "λ", string_skp "@"]
     string_skp "{"
   cse <- parseMatCases
   char '}'
@@ -664,7 +665,7 @@ parseRule dep = P.try $ do
   P.count dep $ char_skp '.'
   char_skp '|'
   pats <- P.many parsePattern
-  with <- P.choice 
+  with <- P.choice
     [ P.try $ do
       string_skp "with"
       wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
@@ -1036,7 +1037,7 @@ getVarColName col = foldr (A.<|>) Nothing $ map go col
 -- For a column of patterns that will become a Mat,
 -- return the name of the inner fields or Nothing if they are also Mats.
 getCtrColNames :: [Pattern] -> String -> [Maybe String]
-getCtrColNames col ctr = 
+getCtrColNames col ctr =
   let mat = foldr go [] col
   in map getVarColName (transpose mat)
   where go (PCtr nam ps) acc
