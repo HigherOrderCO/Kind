@@ -975,7 +975,7 @@ parseIf = withSrc $ do
 -- When
 -- ----
 
--- when fn x { c0: v0 c1: v1 _: df }
+-- when fn x { c0: v0 c1: v1 } else { df }
 -- -------------------------------------------------------- desugars to
 -- if (fn x c0) { v0 } else if (fn x c1) { v1 } else { df }
 
@@ -985,22 +985,20 @@ parseWhen = withSrc $ do
   val <- parseTerm
   char_skp '{'
   cases <- P.many $ do
-    P.notFollowedBy (char_skp '_')
     cond <- parseTerm
     char_skp ':'
     body <- parseTerm
     return (cond, body)
-  defaultCase <- do
-    char_skp '_'
-    char_skp ':'
-    body <- parseTerm
-    return $ body
+  char_skp '}'
+  string_skp "else"
+  char_skp '{'
+  elseCase <- parseTerm
   char '}'
   return $ foldr
     (\ (cond, body) acc -> App
       (Mat [("True", body), ("False", acc)])
       (App (App fun val) cond))
-    defaultCase
+    elseCase
     cases
 
 -- Match
