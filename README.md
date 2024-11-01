@@ -1,6 +1,4 @@
-# Introduction to Kind
-
-Kind is a minimalist proof checker, recently rewritten from JavaScript to Haskell. This project is in active development and offers a powerful tool for verifying mathematical and logical proofs.
+# Kind
 
 ## Overview
 
