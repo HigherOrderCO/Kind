@@ -193,11 +193,3 @@ rewrite
   #refl: λP λx x
 };
 ```
-
-The main function of the file is defined as:
-
-```kind
-MAIN = rewrite;
-```
-
-Note: There are comments at the end of the file suggesting usage examples and a possible alternative implementation of the `rewrite` function, but they are commented out in the current code.
