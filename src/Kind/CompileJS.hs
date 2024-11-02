@@ -19,7 +19,7 @@ import Kind.Type
 import Kind.Util
 
 import Control.Monad (forM)
-import Data.List (intercalate, isSuffixOf, elem)
+import Data.List (intercalate, isSuffixOf, elem, isInfixOf)
 import Data.Maybe (fromJust, isJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
@@ -452,25 +452,37 @@ isEffCall :: CTBook -> CT -> [CT] -> Bool
 isEffCall book (CHol name) appArgs = True
 isEffCall book name        appArgs = False
 
+
+
+
 -- Converts a function to JavaScript
 fnToJS :: CTBook -> String -> CT -> ST.State Int String
 fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
-
-  -- Compiles the top-level function to JS
   bodyName <- fresh
   bodyStmt <- ctToJS True bodyName fnBody 0 
-  let wrapArgs cur args fnBody
-        | null args = concat ["((A) => ", fnBody, ")()"]
-        | otherwise = if cur
-            then concat [intercalate " => " args, " => ", fnBody]
-            else concat ["(", intercalate "," args, ") => ", fnBody]
-  let uncBody = concat ["{ while (1) { ", bodyStmt, "return ", bodyName, "; } }"]
-  let curBody = nameToJS fnName ++ "$" ++ (if null fnArgs then "" else "(" ++ intercalate "," fnArgs ++ ")")
-  let uncFunc = concat ["const ", nameToJS fnName, "$ = ", wrapArgs False fnArgs uncBody]
-  let curFunc = concat ["const ", nameToJS fnName, " = ", wrapArgs True fnArgs curBody]
-  return $ uncFunc ++ "\n" ++ curFunc
+  let tco = isInfixOf "/*TCO*/" bodyStmt
+  let bod = "{" ++ bodyStmt ++ "return " ++ bodyName ++ "; }"
+  let fun = jsDefFun fnName fnArgs tco bod
+  let cur = jsDefCur fnName fnArgs
+  return $ fun ++ "\n" ++ cur
 
   where
+
+  -- Generates top-level function
+  jsDefFun name []   tco body = 
+    let wrap = \x -> "(() => " ++ x ++ ")()"
+        head = "const " ++ nameToJS name ++ "$ = "
+    in head ++ wrap body
+  jsDefFun name args tco body =
+    let loop = \ x -> concat ["{while(1)", x, "}"]
+        head = "function " ++ nameToJS name ++ "$(" ++ intercalate "," args ++ ") "
+    in head ++ (if tco then loop body else body)
+
+  -- Generates top-level function (curried version)
+  jsDefCur name args =
+    let head = "const " ++ nameToJS name ++ " = " ++ concat (map (\x -> x ++ " => ") args)
+        body = nameToJS name ++ "$" ++ (if null args then "" else "(" ++ intercalate "," args ++ ")")
+    in head ++ body
 
   -- Genreates a fresh name
   fresh :: ST.State Int String
@@ -538,7 +550,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
           argStmt <- ctToJS False argName appArgs dep
           return (argStmt, paramName ++ " = " ++ argName ++ ";")
         let (argStmts, paramDefs) = unzip argDefs
-        return $ concat argStmts ++ concat paramDefs ++ " continue;"
+        return $ concat argStmts ++ concat paramDefs ++ "/*TCO*/continue;"
       -- Saturated Call Optimization
       else if isSatCall book appFun appArgs then do
         let (CRef funName) = appFun
