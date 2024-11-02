@@ -168,9 +168,10 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
 
   -- TODO: annotate inside ADT for completion (not needed)
   go (ADT scp cts typ) = do
-    forM_ cts $ \ (Ctr _ tele) -> do
-      checkTele sus src tele Set dep
-    return $ Ann False (ADT scp cts typ) Set
+    ctsA <- forM cts $ \ (Ctr cnam tele) -> do
+      teleA <- checkTele sus src tele Set dep
+      return $ Ctr cnam teleA
+    return $ Ann False (ADT scp ctsA typ) Set
 
   go (Con nam arg) = do
     envLog (Error src (Ref "annotation") (Ref "constructor") (Con nam arg) dep)

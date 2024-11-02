@@ -34,9 +34,13 @@ import Prelude hiding (EQ, LT, GT)
 -- Type
 -- ----
 
+-- Compilation Targets
+data Target = C | JS deriving (Eq, Show)
+
 -- Compilable Term
 data CT
   = CNul
+  | CSet
   | CU64
   | CADT [(String,[(String,CT)])]
   | CMap CT
@@ -73,7 +77,7 @@ termToCT :: Book -> Fill -> Term -> Maybe Term -> Int -> CT
 termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 
   t2ct term typx dep = 
-    -- trace ("t2ct: " ++ showTerm term ++ "\ntype: " ++ maybe "*" showTerm typx ++ "\ndep: " ++ show dep) $
+    trace ("t2ct: " ++ showTerm term ++ "\ntype: " ++ maybe "*" showTerm typx ++ "\ndep: " ++ show dep) $
     go term where
 
     go (Lam nam bod) =
@@ -96,16 +100,17 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go (Ins val) =
       t2ct val typx dep
     go (ADT scp cts typ) =
-      -- TODO: compile the ADT type correctly, from ADT to CADT
       let cts' = map (\ (Ctr nam tele) -> (nam, map (\ (fn,ft) -> (fn, go ft)) (getTeleFields tele dep []))) cts
       in CADT cts'
     go (Con nam arg) =
-      case lookup nam (getADTCts (reduce book fill 2 (fromJust typx))) of
-        Just (Ctr _ tele) ->
-          let fNames = getTeleNames tele dep []
-              fields = map (\ (f,t) -> (f, t2ct t Nothing dep)) $ zip fNames (map snd arg)
-          in CCon nam fields
-        Nothing -> error $ "constructor-not-found:" ++ nam
+      case typx of
+        Just typx -> case lookup nam (getADTCts (reduce book fill 2 typx)) of
+          Just (Ctr _ tele) ->
+            let fNames = getTeleNames tele dep []
+                fields = map (\ (f,t) -> (f, t2ct t Nothing dep)) $ zip fNames (map snd arg)
+            in CCon nam fields
+          Nothing -> error $ "constructor-not-found:" ++ nam
+        Nothing -> error $ "untyped-constructor"
     go (Mat cse) =
       case typx of
         Just typx -> case reduce book fill 2 typx of
@@ -159,9 +164,9 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go (Use nam val bod) =
       t2ct (bod val) typx dep
     go Set =
-      CNul
+      CSet
     go U64 =
-      CNul
+      CU64
     go F64 =
       CNul
     go (Num val) =
@@ -199,6 +204,8 @@ removeUnreachables :: CT -> CT
 removeUnreachables ct = go ct where
   go CNul =
     CNul
+  go CSet =
+    CSet
   go CU64 =
     CU64
   go (CADT cts) =
@@ -336,6 +343,7 @@ inline book ct = nf ct where
   nf ct = go (red book ct) where
     go :: CT -> CT
     go CNul                     = CNul
+    go CSet                     = CSet
     go CU64                     = CU64
     go (CADT cts)               = CADT (map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, nf ft)) fs)) cts)
     go (CMap typ)               = CMap (nf typ)
@@ -423,11 +431,11 @@ ref book nam
 -- JavaScript Codegen
 -- ------------------
 
-getArguments :: CT -> ([String], CT)
+getArguments :: CT -> ([(String,CT)], CT)
 getArguments term = go term 0 where
   go (CLam (nam,inp) bod) dep =
     let (args, body) = go (bod (CVar nam dep)) (dep+1)
-    in (nam:args, body)
+    in ((nam,inp):args, body)
   go body dep = ([], body)
 
 arityOf :: CTBook -> String -> Int
@@ -452,36 +460,36 @@ isEffCall :: CTBook -> CT -> [CT] -> Bool
 isEffCall book (CHol name) appArgs = True
 isEffCall book name        appArgs = False
 
-
-
-
--- Converts a function to JavaScript
+-- Converts a function to JavaScript or C
 fnToJS :: CTBook -> String -> CT -> ST.State Int String
-fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
+fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
   bodyName <- fresh
   bodyStmt <- ctToJS True bodyName fnBody 0 
+  argTypes <- return $ map (\ (nm,ty) -> tyToTS ty) fnArgs
+
+  let arg = zip (map fst fnArgs) argTypes
   let tco = isInfixOf "/*TCO*/" bodyStmt
   let bod = "{" ++ bodyStmt ++ "return " ++ bodyName ++ "; }"
-  let fun = jsDefFun fnName fnArgs tco bod
-  let cur = jsDefCur fnName fnArgs
+  let fun = jsDefFun fnName arg tco bod
+  let cur = jsDefCur fnName arg
   return $ fun ++ "\n" ++ cur
 
   where
 
   -- Generates top-level function
-  jsDefFun name []   tco body = 
+  jsDefFun name [] tco body = 
     let wrap = \x -> "(() => " ++ x ++ ")()"
         head = "const " ++ nameToJS name ++ "$ = "
     in head ++ wrap body
-  jsDefFun name args tco body =
+  jsDefFun name arg tco body =
     let loop = \ x -> concat ["{while(1)", x, "}"]
-        head = "function " ++ nameToJS name ++ "$(" ++ intercalate "," args ++ ") "
+        head = "function " ++ nameToJS name ++ "$(" ++ intercalate "," (map (\ (nm,ty) -> nm++"/*:"++ty++"*/") arg) ++ ") "
     in head ++ (if tco then loop body else body)
 
   -- Generates top-level function (curried version)
-  jsDefCur name args =
-    let head = "const " ++ nameToJS name ++ " = " ++ concat (map (\x -> x ++ " => ") args)
-        body = nameToJS name ++ "$" ++ (if null args then "" else "(" ++ intercalate "," args ++ ")")
+  jsDefCur name arg =
+    let head = "const " ++ nameToJS name ++ " = " ++ concat (map (\x -> x ++ " => ") (map fst arg))
+        body = nameToJS name ++ "$" ++ (if null arg then "" else "(" ++ intercalate "," (map fst arg) ++ ")")
     in head ++ body
 
   -- Genreates a fresh name
@@ -518,19 +526,29 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
   operToJS LSH = "<<"
   operToJS RSH = ">>"
 
-  -- Compiles a CT to JS
+  -- Compiles a CType to TS
+  tyToTS :: CT -> String
+  tyToTS CU64       = "BigInt"
+  tyToTS (CADT cts) = intercalate " | " $ map (\ (nm,fs) -> "{$:'" ++ nm ++ concat (map (\ (fn,ft) -> "', " ++ fn ++ ": " ++ tyToTS ft) fs) ++ "}") cts
+  tyToTS (CMap typ) = "(Map " ++ tyToTS typ ++ ")"
+  tyToTS (CRef nam) = nam
+  tyToTS other      = showCT other 0
+
+  -- Compiles a CTerm to JS
   ctToJS :: Bool -> String -> CT -> Int -> ST.State Int String
   ctToJS tail var term dep = 
     -- trace ("COMPILE: " ++ showCT term 0) $
     go (red book term) where
     go CNul =
       set var "null"
-    go CU64 =
-      set var $ "BigInt"
-    go (CADT cts) = do
-      set var $ "Object"
-    go (CMap typ) =
-      set var $ "Map"
+    go CSet =
+      set var "/*Type*/null"
+    go ty@CU64 =
+      set var $ "/*" ++ tyToTS ty ++ "*/null"
+    go ty@(CADT cts) = do
+      set var $ "/*" ++ tyToTS ty ++ "*/null"
+    go ty@(CMap typ) =
+      set var $ "/*" ++ tyToTS ty ++ "*/null"
     go tm@(CLam (nam,inp) bod) = do
       let (names, bodyTerm, _) = lams tm dep []
       bodyName <- fresh
@@ -545,7 +563,7 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
       let (appFun, appArgs) = getAppChain app
       -- Tail Recursive Call
       if tail && isRecCall fnName (length fnArgs) appFun appArgs then do
-        argDefs <- forM (zip fnArgs appArgs) $ \(paramName, appArgs) -> do
+        argDefs <- forM (zip (map fst fnArgs) appArgs) $ \ (paramName, appArgs) -> do
           argName <- fresh
           argStmt <- ctToJS False argName appArgs dep
           return (argStmt, paramName ++ " = " ++ argName ++ ";")
@@ -710,8 +728,6 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
           zero = CCon "Zero" []
       in  ctToJS False var (foldr (\_ acc -> succ acc) zero [1..val]) dep
 
-
-
 prelude :: String
 prelude = unlines [
   "function LIST_TO_JSTR(list) {",
@@ -769,6 +785,7 @@ compileJS book =
 
 bindCT :: CT -> [(String,CT)] -> CT
 bindCT CNul ctx = CNul
+bindCT CSet ctx = CSet
 bindCT CU64 ctx = CU64
 bindCT (CADT cts) ctx =
   let cts' = map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, bindCT ft ctx)) fs)) cts in
@@ -843,6 +860,7 @@ bindCT (CNat val) ctx = CNat val
 
 rnCT :: CT -> [(String,CT)] -> CT
 rnCT CNul ctx = CNul
+rnCT CSet ctx = CSet
 rnCT CU64 ctx = CU64
 rnCT (CADT cts) ctx =
   let cts' = map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, rnCT ft ctx)) fs)) cts in
@@ -933,6 +951,7 @@ isNul _    = False
 -- TODO: implement a showCT :: CT -> String function
 showCT :: CT -> Int -> String
 showCT CNul                     dep = "*"
+showCT CSet                     dep = "Set"
 showCT CU64                     dep = "U64"
 showCT (CADT cts)               dep = "data{" ++ concatMap (\ (n,fs) -> "#" ++ n ++ " " ++ concatMap (\ (fn,ft) -> fn ++ ":" ++ showCT ft dep ++ " ") fs) cts ++ "}"
 showCT (CMap typ)               dep = "(Map " ++ showCT typ dep ++ ")"
