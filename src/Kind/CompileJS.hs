@@ -590,14 +590,13 @@ fnToJS book fnName (getArguments -> (fnArgs, fnBody)) = do
         retStmt <- set var $ concat ["(", funName, ")(", argName, ")"]
         return $ concat [funStmt, argStmt, retStmt]
     go (CCon nam fields) = do
-      fieldNamesStmts <- forM fields $ \ (nm, tm) -> do
-        fieldName <- fresh
-        fieldStmt <- ctToJS False fieldName tm dep
-        return ((nm, fieldName), fieldStmt)
-      let fields' = concatMap (\ (nm, fieldName) -> ", " ++ nm ++ ": " ++ fieldName) (map fst fieldNamesStmts)
-      retStmt <- set var $ concat ["({$: \"", nam, "\"", fields', "})"]
-      return $ concat (map snd fieldNamesStmts ++ [retStmt])
-
+      objStmt <- set var $ concat ["({$: \"", nam, "\"})"]
+      setStmts <- forM fields $ \ (nm, tm) -> do
+        fldName <- fresh
+        fldStmt <- ctToJS False fldName tm dep
+        setStmt <- return $ concat [var ++ "." ++ nm ++ " = " ++ fldName ++ ";"]
+        return $ concat [fldStmt, setStmt]
+      return $ concat $ [objStmt] ++ setStmts
     go (CMat val cses) = do
       let isRecord = length cses == 1 && not (any (\ (nm,_,_) -> nm == "_") cses)
       valName <- fresh
