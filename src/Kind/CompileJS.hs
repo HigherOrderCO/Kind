@@ -44,6 +44,7 @@ data CT
   | CU64
   | CADT [(String,[(String,CT)])]
   | CMap CT
+  | CAll (String,CT) (CT -> CT)
   | CLam (String,CT) (CT -> CT)
   | CApp CT CT
   | CCon String [(String, CT)]
@@ -77,9 +78,13 @@ termToCT :: Book -> Fill -> Term -> Maybe Term -> Int -> CT
 termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
 
   t2ct term typx dep = 
-    trace ("t2ct: " ++ showTerm term ++ "\ntype: " ++ maybe "*" showTerm typx ++ "\ndep: " ++ show dep) $
+    -- trace ("t2ct: " ++ showTerm term ++ "\ntype: " ++ maybe "*" showTerm typx ++ "\ndep: " ++ show dep) $
     go term where
 
+    go (All nam inp bod) =
+      let inp' = t2ct inp Nothing dep
+          bod' = \x -> t2ct (bod (Var nam dep)) Nothing (dep+1)
+      in CAll (nam,inp') bod'
     go (Lam nam bod) =
       case typx of
         Just typx -> case (reduce book fill 2 typx) of
@@ -219,6 +224,10 @@ removeUnreachables ct = go ct where
         cse' = map (\ (n,f,t) -> (n, map (\ (fn,ft) -> (fn, go ft)) f, go t)) cse
         cseF = filter (\ (_,_,t) -> not (isNul t)) cse'
     in CMat val' cseF
+  go (CAll (nam,inp) bod) =
+    let inp' = go inp
+        bod' = \x -> go (bod x)
+    in CAll (nam,inp') bod'
   go (CLam (nam,inp) bod) =
     let inp' = go inp
         bod' = \x -> go (bod x)
@@ -282,6 +291,7 @@ removeUnreachables ct = go ct where
 -- - from: λx       match v { #Foo{a b}: λy λz A #Bar: λy λz B ... }
 -- -   to: λx λy λz match v { #Foo{a b}:       A #Bar:       B ... }
 -- TODO: document why this is (and has to be) terrible
+-- NOTE: this loses dependencies, turning foralls into simple arrows
 liftLambdas :: CT -> Int -> CT
 liftLambdas ct depth = 
   gen (liftInp ct depth [] 0) [] ct depth where
@@ -347,6 +357,7 @@ inline book ct = nf ct where
     go CU64                     = CU64
     go (CADT cts)               = CADT (map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, nf ft)) fs)) cts)
     go (CMap typ)               = CMap (nf typ)
+    go (CAll (nam,inp) bod)     = CAll (nam, nf inp) (\x -> nf (bod x))
     go (CLam (nam,inp) bod)     = CLam (nam, nf inp) (\x -> nf (bod x))
     go (CApp fun arg)           = CApp (nf fun) (nf arg)
     go (CCon nam fields)        = CCon nam (map (\ (f,t) -> (f, nf t)) fields)
@@ -384,6 +395,7 @@ red book tm = go tm where
 
 -- Application
 app :: CTBook -> CT -> CT -> CT
+app book (CAll (nam,inp) bod)     arg = red book (bod (red book arg))
 app book (CLam (nam,inp) bod)     arg = red book (bod (red book arg))
 app book (CMat val cse)           arg = CMat val (map (\ (n,f,b) -> (n, f, skp f b (\b -> CApp b arg))) cse)
 app book (CLet (nam,typ) val bod) arg = CLet (nam,typ) val (\x -> app book (bod x) arg)
@@ -465,7 +477,7 @@ fnToJS :: CTBook -> String -> CT -> ST.State Int String
 fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
   bodyName <- fresh
   bodyStmt <- ctToJS True bodyName fnBody 0 
-  argTypes <- return $ map (\ (nm,ty) -> tyToTS ty) fnArgs
+  argTypes <- return $ zipWith (\ dep (nm,ty) -> tyToTS ty dep) [0..] fnArgs
 
   let arg = zip (map fst fnArgs) argTypes
   let tco = isInfixOf "/*TCO*/" bodyStmt
@@ -527,12 +539,28 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
   operToJS RSH = ">>"
 
   -- Compiles a CType to TS
-  tyToTS :: CT -> String
-  tyToTS CU64       = "BigInt"
-  tyToTS (CADT cts) = intercalate " | " $ map (\ (nm,fs) -> "{$:'" ++ nm ++ concat (map (\ (fn,ft) -> "', " ++ fn ++ ": " ++ tyToTS ft) fs) ++ "}") cts
-  tyToTS (CMap typ) = "(Map " ++ tyToTS typ ++ ")"
-  tyToTS (CRef nam) = nam
-  tyToTS other      = showCT other 0
+  tyToTS :: CT -> Int -> String
+  tyToTS CSet dep =
+    "Type"
+  tyToTS CU64 dep =
+    "BigInt"
+  tyToTS (CADT cts) dep =
+    intercalate " | " $ flip map cts $ \ (nm,fs) -> "{$:'" ++ nm ++ "'" ++ concat (map (\ (fn,ft) -> ", " ++ fn ++ ": " ++ tyToTS ft dep) fs) ++ "}"
+  tyToTS (CMap typ) dep =
+    "Map<BigInt, " ++ tyToTS typ dep ++ ">"
+  tyToTS (CAll (nam,inp) bod) dep =
+    let uid = nameToJS nam ++ "$" ++ show dep
+    in "(" ++ uid ++ ":" ++ tyToTS inp dep ++ ") => " ++ tyToTS (bod (CVar uid dep)) (dep + 1)
+  tyToTS (CRef nam) dep =
+    nam
+  tyToTS (CVar nam _) dep = 
+    nam
+  tyToTS (CApp fun arg) dep =
+    tyToTS fun dep ++ "<" ++ tyToTS arg dep ++ ">"
+  tyToTS CNul dep =
+    "null"
+  tyToTS term dep =
+    "null"
 
   -- Compiles a CTerm to JS
   ctToJS :: Bool -> String -> CT -> Int -> ST.State Int String
@@ -544,11 +572,13 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
     go CSet =
       set var "/*Type*/null"
     go ty@CU64 =
-      set var $ "/*" ++ tyToTS ty ++ "*/null"
+      set var $ "/*" ++ tyToTS ty dep ++ "*/null"
     go ty@(CADT cts) = do
-      set var $ "/*" ++ tyToTS ty ++ "*/null"
+      set var $ "/*" ++ tyToTS ty dep ++ "*/null"
     go ty@(CMap typ) =
-      set var $ "/*" ++ tyToTS ty ++ "*/null"
+      set var $ "/*" ++ tyToTS ty dep ++ "*/null"
+    go ty@(CAll (nam,inp) bod) =
+      set var $ "/*" ++ tyToTS ty dep ++ "*/null"
     go tm@(CLam (nam,inp) bod) = do
       let (names, bodyTerm, _) = lams tm dep []
       bodyName <- fresh
@@ -792,6 +822,10 @@ bindCT (CADT cts) ctx =
   CADT cts'
 bindCT (CMap typ) ctx =
   CMap (bindCT typ ctx)
+bindCT (CAll (nam,inp) bod) ctx =
+  let inp' = bindCT inp ctx in
+  let bod' = \x -> bindCT (bod (CVar nam 0)) ((nam, x) : ctx) in
+  CAll (nam,inp') bod'
 bindCT (CLam (nam,inp) bod) ctx =
   let inp' = bindCT inp ctx in
   let bod' = \x -> bindCT (bod (CVar nam 0)) ((nam, x) : ctx) in
@@ -868,6 +902,11 @@ rnCT (CADT cts) ctx =
 rnCT (CMap typ) ctx =
   let typ' = rnCT typ ctx
   in (CMap typ')
+rnCT (CAll (nam,inp) bod) ctx =
+  let nam' = "x" ++ show (length ctx) in
+  let inp' = rnCT inp ctx in
+  let bod' = \x -> rnCT (bod (CVar nam' 0)) ((nam', x) : ctx) in
+  CAll (nam',inp') bod'
 rnCT (CLam (nam,inp) bod) ctx =
   let nam' = "x" ++ show (length ctx) in
   let inp' = rnCT inp ctx in
@@ -956,6 +995,7 @@ showCT CU64                     dep = "U64"
 showCT (CADT cts)               dep = "data{" ++ concatMap (\ (n,fs) -> "#" ++ n ++ " " ++ concatMap (\ (fn,ft) -> fn ++ ":" ++ showCT ft dep ++ " ") fs) cts ++ "}"
 showCT (CMap typ)               dep = "(Map " ++ showCT typ dep ++ ")"
 showCT (CLam (nam,inp) bod)     dep = "λ(" ++ nam ++ ": " ++ showCT inp dep ++ "). " ++ showCT (bod (CVar nam dep)) (dep+1)
+showCT (CAll (nam,inp) bod)     dep = "∀(" ++ nam ++ ": " ++ showCT inp dep ++ "). " ++ showCT (bod (CVar nam dep)) (dep+1)
 showCT (CApp fun arg)           dep = "(" ++ showCT fun dep ++ " " ++ showCT arg dep ++ ")"
 showCT (CCon nam fields)        dep = "#" ++ nam ++ "{" ++ concatMap (\ (f,v) -> f ++ ":" ++ showCT v dep ++ " ") fields ++ "}"
 showCT (CMat val cses)          dep = "match " ++ showCT val dep ++ " {" ++ concatMap (\(cn,fs,cb) -> "#" ++ cn ++ ":" ++ showCT cb dep ++ " ") cses ++ "}"
