@@ -116,6 +116,10 @@ getTeleNames :: Tele -> Int -> [String] -> [String]
 getTeleNames (TRet _)           dep acc = reverse acc
 getTeleNames (TExt name _ next) dep acc = getTeleNames (next (Var name dep)) (dep+1) (name:acc)
 
+getTeleFields :: Tele -> Int -> [(String,Term)] -> [(String,Term)]
+getTeleFields (TRet _)              dep acc = reverse acc
+getTeleFields (TExt name ttyp next) dep acc = getTeleFields (next (Var name dep)) (dep+1) ((name,ttyp):acc)
+
 getDatIndices :: Term -> [Term]
 getDatIndices term = case term of
   ADT idxs _ _ -> idxs
