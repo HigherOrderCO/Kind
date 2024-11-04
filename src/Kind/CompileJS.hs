@@ -19,7 +19,7 @@ import Kind.Type
 import Kind.Util
 
 import Control.Monad (forM)
-import Data.List (intercalate, isSuffixOf, elem, isInfixOf)
+import Data.List (intercalate, isSuffixOf, elem, isInfixOf, isPrefixOf)
 import Data.Maybe (fromJust, isJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
@@ -42,6 +42,7 @@ data CT
   = CNul
   | CSet
   | CU64
+  | CF64
   | CADT [(String,[(String,CT)])]
   | CMap CT
   | CAll (String,CT) (CT -> CT)
@@ -54,7 +55,7 @@ data CT
   | CLet (String,CT) CT (CT -> CT)
   | CNum Word64
   | CFlt Double
-  | COp2 Oper CT CT
+  | COp2 CT Oper CT CT
   | CSwi CT CT CT
   | CKVs (IM.IntMap CT) CT
   | CGet String String CT CT (CT -> CT -> CT)
@@ -173,15 +174,18 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
     go U64 =
       CU64
     go F64 =
-      CNul
+      CF64
     go (Num val) =
       CNum val
     go (Flt val) =
       CFlt val
-    go (Op2 opr fst snd) =
-      let fst' = t2ct fst Nothing dep
-          snd' = t2ct snd Nothing dep
-      in COp2 opr fst' snd'
+    go (Op2 opr fst snd) = case typx of
+      Nothing -> error "Type information required for binary operation"
+      Just typ -> 
+          let fst' = t2ct fst Nothing dep
+              snd' = t2ct snd Nothing dep
+              typ' = t2ct typ Nothing dep
+          in COp2 typ' opr fst' snd'
     go (Txt txt) =
       CTxt txt
     go (Lst lst) =
@@ -213,6 +217,8 @@ removeUnreachables ct = go ct where
     CSet
   go CU64 =
     CU64
+  go CF64 =
+    CF64
   go (CADT cts) =
     let cts' = map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, go ft)) fs)) cts
     in CADT cts'
@@ -250,10 +256,11 @@ removeUnreachables ct = go ct where
     CNum val
   go (CFlt val) =
     CFlt val
-  go (COp2 opr fst snd) =
+  go (COp2 typ opr fst snd) =
     let fst' = go fst
         snd' = go snd
-    in COp2 opr fst' snd'
+        typ' = go typ
+    in COp2 typ' opr fst' snd'
   go (CSwi val zer suc) =
     let val' = go val
         zer' = go zer
@@ -355,6 +362,7 @@ inline book ct = nf ct where
     go CNul                     = CNul
     go CSet                     = CSet
     go CU64                     = CU64
+    go CF64                     = CF64
     go (CADT cts)               = CADT (map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, nf ft)) fs)) cts)
     go (CMap typ)               = CMap (nf typ)
     go (CAll (nam,inp) bod)     = CAll (nam, nf inp) (\x -> nf (bod x))
@@ -368,7 +376,7 @@ inline book ct = nf ct where
     go (CLet (nam,typ) val bod) = CLet (nam, nf typ) (nf val) (\x -> nf (bod x))
     go (CNum val)               = CNum val
     go (CFlt val)               = CFlt val
-    go (COp2 opr fst snd)       = COp2 opr (nf fst) (nf snd)
+    go (COp2 typ opr fst snd)   = COp2 (nf typ) opr (nf fst) (nf snd)
     go (CSwi val zer suc)       = CSwi (nf val) (nf zer) (nf suc)
     go (CKVs kvs def)           = CKVs (IM.map nf kvs) (nf def)
     go (CGet g n m k b)         = CGet g n (nf m) (nf k) (\x y -> nf (b x y))
@@ -544,6 +552,8 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
     "Type"
   tyToTS CU64 dep =
     "BigInt"
+  tyToTS CF64 dep =
+    "Number"
   tyToTS (CADT cts) dep =
     intercalate " | " $ flip map cts $ \ (nm,fs) -> "{$:'" ++ nm ++ "'" ++ concat (map (\ (fn,ft) -> ", " ++ fn ++ ": " ++ tyToTS ft dep) fs) ++ "}"
   tyToTS (CMap typ) dep =
@@ -572,6 +582,8 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
     go CSet =
       set var "/*Type*/null"
     go ty@CU64 =
+      set var $ "/*" ++ tyToTS ty dep ++ "*/null"
+    go ty@CF64 =
       set var $ "/*" ++ tyToTS ty dep ++ "*/null"
     go ty@(CADT cts) = do
       set var $ "/*" ++ tyToTS ty dep ++ "*/null"
@@ -679,7 +691,7 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
       valName <- fresh
       valStmt <- ctToJS False valName val dep
       zerStmt <- ctToJS tail var zer dep
-      sucStmt <- ctToJS tail var (CApp suc (COp2 SUB (CVar valName 0) (CNum 1))) dep
+      sucStmt <- ctToJS tail var (CApp suc (COp2 CU64 SUB (CVar valName 0) (CNum 1))) dep
       let swiStmt = concat [valStmt, "if (", valName, " === 0n) { ", zerStmt, " } else { ", sucStmt, " }"]
       return $ swiStmt
     go (CKVs kvs def) = do
@@ -730,13 +742,21 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
       set var $ show val ++ "n"
     go (CFlt val) =
       set var $ show val
-    go (COp2 opr fst snd) = do
+
+    go (COp2 typ opr fst snd) = do
       let opr' = operToJS opr
       fstName <- fresh
-      fstStmt <- ctToJS False fstName fst dep
       sndName <- fresh
+      fstStmt <- ctToJS False fstName fst dep
       sndStmt <- ctToJS False sndName snd dep
-      retStmt <- set var $ concat ["BigInt.asUintN(64, ", fstName, " ", opr', " ", sndName, ")"]
+
+
+      let retExpr = case typ of
+            CF64 -> concat [fstName, " ", opr', " ", sndName]
+            CU64 -> concat ["BigInt.asUintN(64, ", fstName, " ", opr', " ", sndName, ")"]
+            _ -> error ("Invalid type for binary operation: " ++ showCT typ dep)
+              
+      retStmt <- set var retExpr
       return $ concat [fstStmt, sndStmt, retStmt]
     go (CLog msg nxt) = do
       msgName <- fresh
@@ -807,8 +827,9 @@ compileJS book =
       ctDefs2 = flip map ctDefs1 $ \ (nm,ct) -> (nm, inline (M.fromList ctDefs1) ct)
       ctDefs3 = flip map ctDefs2 $ \ (nm,ct) -> (nm, liftLambdas ct 0)
       jsFns   = concatMap (generateJS (M.fromList ctDefs3)) ctDefs3
+      exports = "export { " ++ intercalate ", " (getFunctionNames jsFns) ++ " }" 
       debug   = trace ("\nCompiled CTs:\n" ++ unlines (map (\(n,c) -> "- " ++ n ++ ":\n" ++ showCT c 0) ctDefs3))
-  in prelude ++ "\n\n" ++ jsFns
+  in prelude ++ "\n\n" ++ jsFns ++ "\n" ++ exports
 
 -- Utils
 -- -----
@@ -817,6 +838,7 @@ bindCT :: CT -> [(String,CT)] -> CT
 bindCT CNul ctx = CNul
 bindCT CSet ctx = CSet
 bindCT CU64 ctx = CU64
+bindCT CF64 ctx = CF64
 bindCT (CADT cts) ctx =
   let cts' = map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, bindCT ft ctx)) fs)) cts in
   CADT cts'
@@ -854,10 +876,11 @@ bindCT (CLet (nam,typ) val bod) ctx =
   CLet (nam,typ') val' bod'
 bindCT (CNum val) ctx = CNum val
 bindCT (CFlt val) ctx = CFlt val
-bindCT (COp2 opr fst snd) ctx =
+bindCT (COp2 typ opr fst snd) ctx =
   let fst' = bindCT fst ctx in
   let snd' = bindCT snd ctx in
-  COp2 opr fst' snd'
+  let typ' = bindCT typ ctx in
+  COp2 typ' opr fst' snd'
 bindCT (CSwi val zer suc) ctx =
   let val' = bindCT val ctx in
   let zer' = bindCT zer ctx in
@@ -896,6 +919,7 @@ rnCT :: CT -> [(String,CT)] -> CT
 rnCT CNul ctx = CNul
 rnCT CSet ctx = CSet
 rnCT CU64 ctx = CU64
+rnCT CF64 ctx = CF64
 rnCT (CADT cts) ctx =
   let cts' = map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, rnCT ft ctx)) fs)) cts in
   CADT cts'
@@ -936,10 +960,11 @@ rnCT (CLet (nam,typ) val bod) ctx =
   CLet (nam,typ') val' bod'
 rnCT (CNum val) ctx = CNum val
 rnCT (CFlt val) ctx = CFlt val
-rnCT (COp2 opr fst snd) ctx =
+rnCT (COp2 typ opr fst snd) ctx =
   let fst' = rnCT fst ctx in
   let snd' = rnCT snd ctx in
-  COp2 opr fst' snd'
+  let typ' = rnCT typ ctx in
+  COp2 typ' opr fst' snd'
 rnCT (CSwi val zer suc) ctx =
   let val' = rnCT val ctx in
   let zer' = rnCT zer ctx in
@@ -984,6 +1009,16 @@ isNul :: CT -> Bool
 isNul CNul = True
 isNul _    = False
 
+getFunctionNames :: String -> [String]
+getFunctionNames js = 
+  [ name | line <- lines js,
+           "const " `isPrefixOf` line,
+           let parts = words line,
+           length parts >= 2,
+           let name = head $ words $ parts !! 1,
+           not $ "$" `isSuffixOf` name  -- Skip internal functions ending with $
+  ]
+
 -- Stringification
 -- ---------------
 
@@ -992,6 +1027,7 @@ showCT :: CT -> Int -> String
 showCT CNul                     dep = "*"
 showCT CSet                     dep = "Set"
 showCT CU64                     dep = "U64"
+showCT CF64                     dep = "F64"
 showCT (CADT cts)               dep = "data{" ++ concatMap (\ (n,fs) -> "#" ++ n ++ " " ++ concatMap (\ (fn,ft) -> fn ++ ":" ++ showCT ft dep ++ " ") fs) cts ++ "}"
 showCT (CMap typ)               dep = "(Map " ++ showCT typ dep ++ ")"
 showCT (CLam (nam,inp) bod)     dep = "λ(" ++ nam ++ ": " ++ showCT inp dep ++ "). " ++ showCT (bod (CVar nam dep)) (dep+1)
@@ -1004,7 +1040,7 @@ showCT (CHol nam)               dep = nam
 showCT (CLet (nam,typ) val bod) dep = "let " ++ nam ++ " : " ++ showCT typ dep ++ " = " ++ showCT val dep ++ "; " ++ showCT (bod (CVar nam dep)) (dep+1)
 showCT (CNum val)               dep = show val
 showCT (CFlt val)               dep = show val
-showCT (COp2 opr fst snd)       dep = "(<op> " ++ showCT fst dep ++ " " ++ showCT snd dep ++ ")"
+showCT (COp2 typ opr fst snd)   dep = "(<op> " ++ showCT fst dep ++ " " ++ showCT snd dep ++ ")"
 showCT (CSwi val zer suc)       dep = "switch " ++ showCT val dep ++ " {0:" ++ showCT zer dep ++ " _: " ++ showCT suc dep ++ "}"
 showCT (CKVs kvs def)           dep = "{" ++ unwords (map (\(k,v) -> show k ++ ":" ++ showCT v dep) (IM.toList kvs)) ++ " | " ++ showCT def dep ++ "}"
 showCT (CGet g n m k b)         dep = "get " ++ g ++ " = " ++ n ++ "@" ++ showCT m dep ++ "[" ++ showCT k dep ++ "] " ++ showCT (b (CVar g dep) (CVar n dep)) (dep+2)
