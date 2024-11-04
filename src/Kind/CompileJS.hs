@@ -19,7 +19,7 @@ import Kind.Type
 import Kind.Util
 
 import Control.Monad (forM)
-import Data.List (intercalate, isSuffixOf, elem, isInfixOf)
+import Data.List (intercalate, isSuffixOf, elem, isInfixOf, isPrefixOf)
 import Data.Maybe (fromJust, isJust)
 import Data.Word
 import qualified Control.Monad.State.Lazy as ST
@@ -807,8 +807,9 @@ compileJS book =
       ctDefs2 = flip map ctDefs1 $ \ (nm,ct) -> (nm, inline (M.fromList ctDefs1) ct)
       ctDefs3 = flip map ctDefs2 $ \ (nm,ct) -> (nm, liftLambdas ct 0)
       jsFns   = concatMap (generateJS (M.fromList ctDefs3)) ctDefs3
+      exports = "export { " ++ intercalate ", " (getFunctionNames jsFns) ++ " }" 
       debug   = trace ("\nCompiled CTs:\n" ++ unlines (map (\(n,c) -> "- " ++ n ++ ":\n" ++ showCT c 0) ctDefs3))
-  in prelude ++ "\n\n" ++ jsFns
+  in prelude ++ "\n\n" ++ jsFns ++ "\n" ++ exports
 
 -- Utils
 -- -----
@@ -983,6 +984,16 @@ getAppChain term = (term, [])
 isNul :: CT -> Bool
 isNul CNul = True
 isNul _    = False
+
+getFunctionNames :: String -> [String]
+getFunctionNames js = 
+  [ name | line <- lines js,
+           "const " `isPrefixOf` line,
+           let parts = words line,
+           length parts >= 2,
+           let name = head $ words $ parts !! 1,
+           not $ "$" `isSuffixOf` name  -- Skip internal functions ending with $
+  ]
 
 -- Stringification
 -- ---------------
