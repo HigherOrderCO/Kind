@@ -75,10 +75,10 @@ digit :: Parser Char
 digit = P.digit
 
 numeric :: Parser String
-numeric = do
+numeric = (do
   head <- P.satisfy (`elem` "0123456789")
   tail <- P.many (P.satisfy (`elem` "bx0123456789abcdefABCDEF_"))
-  return $ show (read (filter (/= '_') (head : tail)) :: Word64)
+  return $ show (read (filter (/= '_') (head : tail)) :: Word64)) <?> "Number"
 
 numeric_skp :: Parser String
 numeric_skp = numeric <* skip
