@@ -4,7 +4,7 @@ module Kind.Parse where
 
 import Data.Char (ord)
 import Data.Functor.Identity (Identity)
-import Data.List (intercalate, isPrefixOf, uncons, find, transpose)
+import Data.List (intercalate, isPrefixOf, uncons, unsnoc, find, transpose)
 import Data.Maybe (catMaybes, fromJust, isJust)
 import Data.Set (toList, fromList)
 import Data.Word
@@ -447,6 +447,7 @@ parseRef = withSrc $ do
 parseLocal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocal header ctor parseBody = withSrc $ P.choice
   [ parseLocalMch header ctor parseBody
+  , parseLocalPar header ctor parseBody
   , parseLocalVal header ctor parseBody
   ]
 
@@ -462,6 +463,21 @@ parseLocalMch header ctor parseBody = do
   bod <- parseBody
   return $ ctor "got" val (\got ->
     App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) bod args)]) got)
+
+parseLocalPar :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
+parseLocalPar header ctor parseBody = do
+  P.try $ string_skp (header ++ " (")
+  head <- name_skp
+  tail <- P.many $ do
+    char_skp ','
+    name_skp
+  char_skp ')'
+  let (init, last) = maybe ([], head) id $ unsnoc (head : tail)
+  char_skp '='
+  val <- parseTerm
+  bod <- parseBody
+  return $ ctor "got" val (\got ->
+    App (foldr (\x acc -> Mat [("Pair", Lam x (\_ -> acc))]) (Lam last (\_ -> bod)) init) got)
 
 parseLocalVal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocalVal header ctor parseBody = do
@@ -850,6 +866,7 @@ parseStmt monad = guardChoice
 parseDoAsk :: String -> Parser Term
 parseDoAsk monad = guardChoice
   [ (parseDoAskMch monad, discard $ string_skp "ask #")
+  , (parseDoAskPar monad, discard $ string_skp "ask (" >> name_skp >> string_skp ",")
   , (parseDoAskVal monad, discard $ string_skp "ask ")
   ] $ fail "'ask' statement"
 
@@ -868,6 +885,23 @@ parseDoAskMch monad = do
     (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
     (Lam "got" (\got ->
       App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) next args)]) got))
+
+parseDoAskPar :: String -> Parser Term
+parseDoAskPar monad = do
+  string_skp "ask ("
+  head <- name_skp
+  tail <- P.many $ do
+    char_skp ','
+    name_skp
+  char_skp ')'
+  let (init, last) = maybe ([], head) id $ unsnoc (head : tail)
+  char_skp '='
+  val <- parseTerm
+  next <- parseStmt monad
+  (_, _, uses) <- P.getState
+  return $ App
+    (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
+    (foldr (\x acc -> Mat [("Pair", Lam x (\_ -> acc))]) (Lam last (\_ -> next)) init)
 
 parseDoAskVal :: String -> Parser Term
 parseDoAskVal monad = P.choice
