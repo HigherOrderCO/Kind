@@ -773,6 +773,8 @@ parsePattern = do
     [ (parsePatternNat, discard $ string_skp "#" >> numeric_skp)
     , (parsePatternLst, discard $ string_skp "[")
     , (parsePatternCon, discard $ string_skp "#" <|> (name_skp >> string_skp "@"))
+    , (parsePatternTxt, discard $ string_skp "\"")
+    , (parsePatternPar, discard $ string_skp "(")
     , (parsePatternSuc, discard $ numeric_skp >> char_skp '+')
     , (parsePatternNum, discard $ numeric_skp)
     , (parsePatternVar, discard $ name_skp)
@@ -791,6 +793,24 @@ parsePatternLst = do
   elems <- P.many parsePattern
   char_skp ']'
   return $ foldr (\x acc -> PCtr Nothing "Cons" [x, acc]) (PCtr Nothing "Nil" []) elems
+
+parsePatternTxt :: Parser Pattern
+parsePatternTxt = do
+  char '"'
+  txt <- P.many parseTxtChr
+  char '"'
+  return $ foldr (\x acc -> PCtr Nothing "Cons" [PNum (toEnum (ord x)), acc]) (PCtr Nothing "Nil" []) txt
+
+parsePatternPar :: Parser Pattern
+parsePatternPar = do
+  char_skp '('
+  head <- parsePattern
+  tail <- P.many $ do
+    char_skp ','
+    parsePattern
+  char_skp ')'
+  let (init, last) = maybe ([], head) id (unsnoc (head : tail))
+  return $ foldr (\x acc -> PCtr Nothing "Pair" [x, acc]) last init
 
 parsePatternCon :: Parser Pattern
 parsePatternCon = do
@@ -1086,7 +1106,7 @@ flattenWith :: Int -> With -> Term
 flattenWith dep (WBod bod)     = bod
 flattenWith dep (WWit wth rul) =
   -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
-  let wthA = foldr1 (\x acc -> Con "Pair" [(Nothing, x), (Nothing, acc)]) wth
+  let wthA = foldr1 (\x acc -> Ann True (Con "Pair" [(Nothing, x), (Nothing, acc)]) (App (App (Ref "Pair") (Met 0 [])) (Met 0 []))) wth
       rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr Nothing "Pair" [x, acc]) pat], wth)) rul
       bod  = flattenDef rulA (dep + 1)
   in App bod wthA
