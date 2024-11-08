@@ -15,7 +15,7 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Kind
-                    , Kind.API
+                    , Kind.CLI
                     , Kind.Check
                     , Kind.CompileJS
                     , Kind.Env
