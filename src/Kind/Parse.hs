@@ -776,40 +776,67 @@ parseRule dep = do
 parsePattern :: Parser Pattern
 parsePattern = do
   P.notFollowedBy $ string_skp "with "
-  guardChoice
-    [ (parsePatternNat, discard $ string_skp "#" >> numeric_skp)
-    , (parsePatternLst, discard $ string_skp "[")
-    , (parsePatternCon, discard $ string_skp "#" <|> (name_skp >> string_skp "@"))
-    , (parsePatternTxt, discard $ string_skp "\"")
-    , (parsePatternPar, discard $ string_skp "(")
-    , (parsePatternSuc, discard $ numeric_skp >> char_skp '+')
-    , (parsePatternNum, discard $ numeric_skp)
-    , (parsePatternVar, discard $ name_skp)
+  pat <- guardChoice
+    [ (parsePatPrn, discard $ string_skp "(")
+    , (parsePatNat, discard $ string_skp "#" >> numeric_skp)
+    , (parsePatLst, discard $ string_skp "[")
+    , (parsePatCon, discard $ string_skp "#" <|> (name_skp >> string_skp "@"))
+    , (parsePatTxt, discard $ string_skp "\"")
+    , (parsePatSuc, discard $ numeric_skp >> char_skp '+')
+    , (parsePatNum, discard $ numeric_skp)
+    , (parsePatVar, discard $ name_skp)
     ] $ fail "Pattern-matching"
+  parsePatSuffix pat
 
-parsePatternNat :: Parser Pattern
-parsePatternNat = do
+parsePatSuffix :: Pattern -> Parser Pattern
+parsePatSuffix pat = P.choice
+  [ parsePatSuffPar pat
+  , parsePatSuffCns pat
+  , return pat
+  ]
+
+parsePatSuffPar :: Pattern -> Parser Pattern
+parsePatSuffPar fst = do
+  P.try $ string_skp ","
+  snd <- parsePattern
+  return $ PCtr Nothing "Pair" [fst, snd]
+
+parsePatSuffCns :: Pattern -> Parser Pattern
+parsePatSuffCns head = do
+  P.try $ string_skp ":"
+  tail <- parsePattern
+  return $ PCtr Nothing "Cons" [head, tail]
+
+parsePatPrn :: Parser Pattern
+parsePatPrn = do
+  string_skp "("
+  pat <- parsePattern
+  string_skp ")"
+  return pat
+
+parsePatNat :: Parser Pattern
+parsePatNat = do
   char_skp '#'
   num <- numeric_skp
   let n = read num
   return $ (foldr (\_ acc -> PCtr Nothing "Succ" [acc]) (PCtr Nothing "Zero" []) [1..n])
 
-parsePatternLst :: Parser Pattern
-parsePatternLst = do
+parsePatLst :: Parser Pattern
+parsePatLst = do
   char_skp '['
   elems <- P.many parsePattern
   char_skp ']'
   return $ foldr (\x acc -> PCtr Nothing "Cons" [x, acc]) (PCtr Nothing "Nil" []) elems
 
-parsePatternTxt :: Parser Pattern
-parsePatternTxt = do
+parsePatTxt :: Parser Pattern
+parsePatTxt = do
   char '"'
   txt <- P.many parseTxtChr
   char '"'
   return $ foldr (\x acc -> PCtr Nothing "Cons" [PNum (toEnum (ord x)), acc]) (PCtr Nothing "Nil" []) txt
 
-parsePatternPar :: Parser Pattern
-parsePatternPar = do
+parsePatPar :: Parser Pattern
+parsePatPar = do
   char_skp '('
   head <- parsePattern
   tail <- P.many $ do
@@ -819,8 +846,8 @@ parsePatternPar = do
   let (init, last) = maybe ([], head) id (unsnoc (head : tail))
   return $ foldr (\x acc -> PCtr Nothing "Pair" [x, acc]) last init
 
-parsePatternCon :: Parser Pattern
-parsePatternCon = do
+parsePatCon :: Parser Pattern
+parsePatCon = do
   name <- P.optionMaybe $ P.try $ do
     name <- name_skp
     char_skp '@'
@@ -834,20 +861,20 @@ parsePatternCon = do
     return args
   return $ (PCtr name cnam args)
 
-parsePatternNum :: Parser Pattern
-parsePatternNum = do
+parsePatNum :: Parser Pattern
+parsePatNum = do
   num <- numeric_skp
   return $ (PNum (read num))
 
-parsePatternSuc :: Parser Pattern
-parsePatternSuc = do
+parsePatSuc :: Parser Pattern
+parsePatSuc = do
   num <- numeric_skp
   char_skp '+'
   nam <- name_skp
   return $ (PSuc (read num) nam)
 
-parsePatternVar :: Parser Pattern
-parsePatternVar = do
+parsePatVar :: Parser Pattern
+parsePatVar = do
   name <- name_skp
   return $ (PVar name)
 
