@@ -1,5 +1,5 @@
 module Kind (
-  module Kind.API,
+  module Kind.CLI,
   module Kind.Check,
   module Kind.Env,
   module Kind.Equal,
@@ -10,7 +10,7 @@ module Kind (
   module Kind.Util,
 ) where
 
-import Kind.API
+import Kind.CLI
 import Kind.Check
 import Kind.CompileJS
 import Kind.Env

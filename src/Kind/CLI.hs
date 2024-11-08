@@ -1,7 +1,7 @@
 -- Type.hs:
 -- //./Type.hs//
 
-module Kind.API where
+module Kind.CLI where
 
 import Control.Exception (try)
 import Control.Monad (forM, forM_, foldM)
@@ -44,14 +44,14 @@ main = do
       exitWith (ExitFailure 1)
     Just bookPath -> do
       result <- case args of
-        -- ["check"]      -> runWithAll bookPath apiCheckAll
-        ["run", arg]   -> runWithOne bookPath arg apiNormal
-        ["check"]      -> runWithAll bookPath apiCheck
-        ["check", arg] -> runWithOne bookPath arg apiCheck
-        ["to-js", arg] -> runWithOne bookPath arg apiToJS
-        ["show", arg]  -> runWithOne bookPath arg apiShow
-        ["deps", arg]  -> runWithOne bookPath arg apiDeps
-        ["rdeps", arg] -> runWithOne bookPath arg apiRDeps
+        -- ["check"]      -> runWithAll bookPath cliCheckAll
+        ["run", arg]   -> runWithOne bookPath arg cliNormal
+        ["check"]      -> runWithAll bookPath cliCheck
+        ["check", arg] -> runWithOne bookPath arg cliCheck
+        ["to-js", arg] -> runWithOne bookPath arg cliToJS
+        ["show", arg]  -> runWithOne bookPath arg cliShow
+        ["deps", arg]  -> runWithOne bookPath arg cliDeps
+        ["rdeps", arg] -> runWithOne bookPath arg cliRDeps
         _              -> printHelp
       case result of
         Left err -> do
@@ -73,12 +73,12 @@ printHelp = do
   putStrLn "  kind help              # Shows this help message"
   return $ Right ()
 
--- API Commands
+-- CLI Commands
 -- ------------
 
 -- Normalizes the target definition
-apiNormal :: Command
-apiNormal bookPath (book, _, _) defName defPath =
+cliNormal :: Command
+cliNormal bookPath (book, _, _) defName defPath =
   case M.lookup "main" book of
     Just term -> do
       result <- showInfo book IM.empty (Print term 0)
@@ -88,8 +88,8 @@ apiNormal bookPath (book, _, _) defName defPath =
       return $ Left $ "Error: Definition '" ++ defName ++ "' not found."
 
 -- Checks all definitions in the target file
-apiCheck :: Command
-apiCheck bookPath (book, defs, _) defName defPath = do
+cliCheck :: Command
+cliCheck bookPath (book, defs, _) defName defPath = do
   case M.lookup defPath defs of
     Just fileDefNames -> do
       results <- forM fileDefNames $ \fileDefName -> do
@@ -97,13 +97,13 @@ apiCheck bookPath (book, defs, _) defName defPath = do
           Just term -> do
             case envRun (doCheck term) book of
               Done state _ -> do
-                apiPrintLogs state
-                apiPrintWarn term state
+                cliPrintLogs state
+                cliPrintWarn term state
                 putStrLn $ "\x1b[32m✓ " ++ fileDefName ++ "\x1b[0m"
                 return $ Right ()
               Fail state -> do
-                apiPrintLogs state
-                apiPrintWarn term state
+                cliPrintLogs state
+                cliPrintWarn term state
                 putStrLn $ "\x1b[31m✗ " ++ fileDefName ++ "\x1b[0m"
                 return $ Left $ "Error."
           Nothing -> return $ Left $ "Definition not found: " ++ fileDefName
@@ -113,14 +113,14 @@ apiCheck bookPath (book, defs, _) defName defPath = do
       return $ Left $ "No definitions found in file: " ++ defPath
 
 -- Compiles the whole book to JS
-apiToJS :: Command
-apiToJS bookPath (book, _, _) _ _ = do
+cliToJS :: Command
+cliToJS bookPath (book, _, _) _ _ = do
   putStrLn $ compileJS book
   return $ Right ()
 
 -- Shows a definition
-apiShow :: Command
-apiShow bookPath (book, _, _) defName _ = 
+cliShow :: Command
+cliShow bookPath (book, _, _) defName _ = 
   case M.lookup defName book of
     Just term -> do
       putStrLn $ showTerm term
@@ -129,8 +129,8 @@ apiShow bookPath (book, _, _) defName _ =
       return $ Left $ "Error: Definition '" ++ defName ++ "' not found."
 
 -- Shows immediate dependencies of a definition
-apiDeps :: Command
-apiDeps bookPath (book, _, _) defName _ = 
+cliDeps :: Command
+cliDeps bookPath (book, _, _) defName _ = 
   case M.lookup defName book of
     Just term -> do
       forM_ (filter (/= defName) $ nub $ getDeps term) $ \dep -> putStrLn dep
@@ -139,13 +139,13 @@ apiDeps bookPath (book, _, _) defName _ =
       return $ Left $ "Error: Definition '" ++ defName ++ "' not found."
 
 -- Shows all dependencies of a definition recursively
-apiRDeps :: Command
-apiRDeps bookPath (book, _, _) defName _ = do
+cliRDeps :: Command
+cliRDeps bookPath (book, _, _) defName _ = do
   let deps = S.toList $ S.delete defName $ getAllDeps book defName
   forM_ deps $ \dep -> putStrLn dep
   return $ Right ()
 
--- API Runners
+-- CLI Runners
 -- -----------
 
 -- Runs a command on a single file
@@ -153,8 +153,8 @@ runWithOne :: FilePath -> String -> Command -> IO (Either String ())
 runWithOne bookPath arg action = do
   let defName = getDefName bookPath arg
   let defPath = getDefPath bookPath defName
-  apiCtx <- loadName bookPath M.empty defName
-  action bookPath apiCtx defName defPath
+  cliCtx <- loadName bookPath M.empty defName
+  action bookPath cliCtx defName defPath
 
 -- Runs a command on all files
 runWithAll :: FilePath -> Command -> IO (Either String ())
@@ -287,15 +287,15 @@ showContextAnn book fill (Src _ val)       dep = showContextAnn book fill val de
 showContextAnn book fill term              dep = showTermGo True (normal book fill 0 term dep) dep
 
 -- Prints logs from the type-checker
-apiPrintLogs :: State -> IO ()
-apiPrintLogs (State book fill susp logs) = do
+cliPrintLogs :: State -> IO ()
+cliPrintLogs (State book fill susp logs) = do
   forM_ logs $ \log -> do
     result <- showInfo book fill log
     putStr result
 
 -- Prints a warning if there are unsolved metas
-apiPrintWarn :: Term -> State -> IO ()
-apiPrintWarn term (State _ fill _ _) = do
+cliPrintWarn :: Term -> State -> IO ()
+cliPrintWarn term (State _ fill _ _) = do
   let metaCount = countMetas term
   let fillCount = IM.size fill
   if (metaCount > fillCount) then do
