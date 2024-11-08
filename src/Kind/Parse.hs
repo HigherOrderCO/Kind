@@ -183,7 +183,7 @@ parseTerm = do
     , (parseADT,             discard $ string_skp "#[" <|> string_skp "data[")
     , (parseNat,             discard $ string_skp "#" >> digit)
     , (parseCon,             discard $ string_skp "#" >> name)
-    , (parseUpd,             discard $ string_skp "record")
+    , (parseUpd,             discard $ string_skp "record ")
     , ((parseUse parseTerm), discard $ string_skp "use ")
     , ((parseLet parseTerm), discard $ string_skp "let ")
     , ((parseGet parseTerm), discard $ string_skp "get ")
