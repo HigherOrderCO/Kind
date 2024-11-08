@@ -676,14 +676,16 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
     go (CUpd trm fields) = do
       updName <- fresh
       updStmt <- ctToJS False updName trm dep
-      setStmts <- forM fields $ \ (nm, tm) -> do
+      setVarsAndStmts <- forM fields $ \ (nm, tm) -> do
         fldName <- fresh
         fldStmt <- ctToJS False fldName tm dep
-        return $ fldStmt
+        return $ ((nm, fldName), fldStmt)
+      let (setVars, setStmts) = unzip setVarsAndStmts
+      let setVarsCode = concatMap (\(field, val) -> field ++ ": " ++ val ++ ", ") setVars
       return $ concat $
         [updStmt] ++
         setStmts ++
-        [updName, "= {...", var, ", ", concatMap (\ (f,v) -> f ++ ": " ++ showCT v dep ++ ", ") fields ++ "};"]
+        [var, " = {...", updName, ", ", setVarsCode ++ "};"]
     go (CMat val cses) = do
       let isRecord = length cses == 1 && not (any (\ (nm,_,_) -> nm == "_") cses)
       valName <- fresh
