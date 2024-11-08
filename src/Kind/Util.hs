@@ -26,6 +26,7 @@ getDeps term = case term of
   Ins val         -> getDeps val
   ADT scp cts t   -> concatMap getDeps scp ++ concatMap getDepsCtr cts ++ getDeps t
   Con _ arg       -> concatMap (getDeps . snd) arg
+  Upd trm arg     -> getDeps trm ++ concatMap (getDeps . snd) arg
   Mat cse         -> concatMap (getDeps . snd) cse
   Let _ val bod   -> getDeps val ++ getDeps (bod Set)
   Use _ val bod   -> getDeps val ++ getDeps (bod Set)
