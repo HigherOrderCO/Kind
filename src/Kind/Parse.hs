@@ -617,6 +617,7 @@ parseSuffix term = guardChoice
   , (parseSuffEql term, discard $ string_skp "==")
   , (parseSuffPAR term, discard $ string_skp "&")
   , (parseSuffPar term, discard $ string_skp ",")
+  , (parseSuffCns term, discard $ string_skp ":")
   ] $ parseSuffVal term
 
 parseSuffArr :: Term -> Parser Term
@@ -648,6 +649,12 @@ parseSuffPar fst = do
   P.try $ string_skp ","
   snd <- parseTerm
   return $ Con "Pair" [(Nothing, fst), (Nothing, snd)]
+
+parseSuffCns :: Term -> Parser Term
+parseSuffCns head = do
+  P.try $ string_skp ":"
+  tail <- parseTerm
+  return $ Con "Cons" [(Nothing, head), (Nothing, tail)]
 
 parseSuffVal :: Term -> Parser Term
 parseSuffVal term = return term
