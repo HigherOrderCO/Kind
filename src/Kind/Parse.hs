@@ -4,7 +4,7 @@ module Kind.Parse where
 
 import Data.Char (ord)
 import Data.Functor.Identity (Identity)
-import Data.List (intercalate, isPrefixOf, uncons, find, transpose)
+import Data.List (intercalate, isPrefixOf, uncons, unsnoc, find, transpose)
 import Data.Maybe (catMaybes, fromJust, isJust)
 import Data.Set (toList, fromList)
 import Data.Word
@@ -75,10 +75,10 @@ digit :: Parser Char
 digit = P.digit
 
 numeric :: Parser String
-numeric = do
+numeric = (do
   head <- P.satisfy (`elem` "0123456789")
   tail <- P.many (P.satisfy (`elem` "bx0123456789abcdefABCDEF_"))
-  return $ show (read (filter (/= '_') (head : tail)) :: Word64)
+  return $ show (read (filter (/= '_') (head : tail)) :: Word64)) <?> "Number"
 
 numeric_skp :: Parser String
 numeric_skp = numeric <* skip
@@ -447,6 +447,7 @@ parseRef = withSrc $ do
 parseLocal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocal header ctor parseBody = withSrc $ P.choice
   [ parseLocalMch header ctor parseBody
+  , parseLocalPar header ctor parseBody
   , parseLocalVal header ctor parseBody
   ]
 
@@ -462,6 +463,21 @@ parseLocalMch header ctor parseBody = do
   bod <- parseBody
   return $ ctor "got" val (\got ->
     App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) bod args)]) got)
+
+parseLocalPar :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
+parseLocalPar header ctor parseBody = do
+  P.try $ string_skp (header ++ " (")
+  head <- name_skp
+  tail <- P.many $ do
+    char_skp ','
+    name_skp
+  char_skp ')'
+  let (init, last) = maybe ([], head) id $ unsnoc (head : tail)
+  char_skp '='
+  val <- parseTerm
+  bod <- parseBody
+  return $ ctor "got" val (\got ->
+    App (foldr (\x acc -> Mat [("Pair", Lam x (\_ -> acc))]) (Lam last (\_ -> bod)) init) got)
 
 parseLocalVal :: String -> (String -> Term -> (Term -> Term) -> Term) -> Parser Term -> Parser Term
 parseLocalVal header ctor parseBody = do
@@ -757,6 +773,8 @@ parsePattern = do
     [ (parsePatternNat, discard $ string_skp "#" >> numeric_skp)
     , (parsePatternLst, discard $ string_skp "[")
     , (parsePatternCon, discard $ string_skp "#" <|> (name_skp >> string_skp "@"))
+    , (parsePatternTxt, discard $ string_skp "\"")
+    , (parsePatternPar, discard $ string_skp "(")
     , (parsePatternSuc, discard $ numeric_skp >> char_skp '+')
     , (parsePatternNum, discard $ numeric_skp)
     , (parsePatternVar, discard $ name_skp)
@@ -775,6 +793,24 @@ parsePatternLst = do
   elems <- P.many parsePattern
   char_skp ']'
   return $ foldr (\x acc -> PCtr Nothing "Cons" [x, acc]) (PCtr Nothing "Nil" []) elems
+
+parsePatternTxt :: Parser Pattern
+parsePatternTxt = do
+  char '"'
+  txt <- P.many parseTxtChr
+  char '"'
+  return $ foldr (\x acc -> PCtr Nothing "Cons" [PNum (toEnum (ord x)), acc]) (PCtr Nothing "Nil" []) txt
+
+parsePatternPar :: Parser Pattern
+parsePatternPar = do
+  char_skp '('
+  head <- parsePattern
+  tail <- P.many $ do
+    char_skp ','
+    parsePattern
+  char_skp ')'
+  let (init, last) = maybe ([], head) id (unsnoc (head : tail))
+  return $ foldr (\x acc -> PCtr Nothing "Pair" [x, acc]) last init
 
 parsePatternCon :: Parser Pattern
 parsePatternCon = do
@@ -850,6 +886,7 @@ parseStmt monad = guardChoice
 parseDoAsk :: String -> Parser Term
 parseDoAsk monad = guardChoice
   [ (parseDoAskMch monad, discard $ string_skp "ask #")
+  , (parseDoAskPar monad, discard $ string_skp "ask (" >> name_skp >> string_skp ",")
   , (parseDoAskVal monad, discard $ string_skp "ask ")
   ] $ fail "'ask' statement"
 
@@ -868,6 +905,23 @@ parseDoAskMch monad = do
     (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
     (Lam "got" (\got ->
       App (Mat [(cnam, foldr (\arg acc -> Lam arg (\_ -> acc)) next args)]) got))
+
+parseDoAskPar :: String -> Parser Term
+parseDoAskPar monad = do
+  string_skp "ask ("
+  head <- name_skp
+  tail <- P.many $ do
+    char_skp ','
+    name_skp
+  char_skp ')'
+  let (init, last) = maybe ([], head) id $ unsnoc (head : tail)
+  char_skp '='
+  val <- parseTerm
+  next <- parseStmt monad
+  (_, _, uses) <- P.getState
+  return $ App
+    (App (App (App (Ref (monad ++ "/bind")) (Met 0 [])) (Met 0 [])) val)
+    (foldr (\x acc -> Mat [("Pair", Lam x (\_ -> acc))]) (Lam last (\_ -> next)) init)
 
 parseDoAskVal :: String -> Parser Term
 parseDoAskVal monad = P.choice
@@ -1052,7 +1106,7 @@ flattenWith :: Int -> With -> Term
 flattenWith dep (WBod bod)     = bod
 flattenWith dep (WWit wth rul) =
   -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
-  let wthA = foldr1 (\x acc -> Con "Pair" [(Nothing, x), (Nothing, acc)]) wth
+  let wthA = foldr1 (\x acc -> Ann True (Con "Pair" [(Nothing, x), (Nothing, acc)]) (App (App (Ref "Pair") (Met 0 [])) (Met 0 []))) wth
       rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr Nothing "Pair" [x, acc]) pat], wth)) rul
       bod  = flattenDef rulA (dep + 1)
   in App bod wthA
