@@ -49,6 +49,7 @@ data CT
   | CLam (String,CT) (CT -> CT)
   | CApp CT CT
   | CCon String [(String, CT)]
+  | CUpd CT [(String, CT)]
   | CMat CT [(String, [(String,CT)], CT)]
   | CRef String
   | CHol String
@@ -117,6 +118,7 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
             in CCon nam fields
           Nothing -> error $ "constructor-not-found:" ++ nam
         Nothing -> error $ "untyped-constructor"
+    go (Upd trm arg) = CUpd (t2ct trm Nothing dep) (map (\(f, t) -> (f, t2ct t Nothing dep)) arg)
     go (Mat cse) =
       case typx of
         Just typx -> case reduce book fill 2 typx of
@@ -158,8 +160,6 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
           val' = t2ct val Nothing dep
           bod' = \x y -> t2ct (bod (Var got dep) (Var nam dep)) Nothing (dep+2)
       in CPut got nam map' key' val' bod'
-    go (All _ _ _) =
-      CNul
     go (Ref nam) =
       CRef nam
     go (Let nam val bod) =
@@ -245,6 +245,10 @@ removeUnreachables ct = go ct where
   go (CCon nam fields) =
     let fields' = map (\ (f,t) -> (f, go t)) fields
     in CCon nam fields'
+  go (CUpd trm fields) =
+    let trm' = go trm in
+    let fields' = map (\ (f,t) -> (f, go t)) fields
+    in CUpd trm' fields'
   go (CRef nam) = CRef nam
   go (CHol nam) = CHol nam
   go (CLet (nam,typ) val bod) =
@@ -369,7 +373,7 @@ inline book ct = nf ct where
     go (CLam (nam,inp) bod)     = CLam (nam, nf inp) (\x -> nf (bod x))
     go (CApp fun arg)           = CApp (nf fun) (nf arg)
     go (CCon nam fields)        = CCon nam (map (\ (f,t) -> (f, nf t)) fields)
-    go (CADT cts)               = CADT (map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, nf ft)) fs)) cts)
+    go (CUpd trm fields)        = CUpd (nf trm) (map (\ (f,t) -> (f, nf t)) fields)
     go (CMat val cses)          = CMat (nf val) (map (\ (n,f,b) -> (n, map (\ (fn,ft) -> (fn, nf ft)) f, nf b)) cses)
     go (CRef nam)               = CRef nam
     go (CHol nam)               = CHol nam
@@ -669,6 +673,17 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
         setStmt <- return $ concat [var ++ "." ++ nm ++ " = " ++ fldName ++ ";"]
         return $ concat [fldStmt, setStmt]
       return $ concat $ [objStmt] ++ setStmts
+    go (CUpd trm fields) = do
+      updName <- fresh
+      updStmt <- ctToJS False updName trm dep
+      setStmts <- forM fields $ \ (nm, tm) -> do
+        fldName <- fresh
+        fldStmt <- ctToJS False fldName tm dep
+        return $ fldStmt
+      return $ concat $
+        [updStmt] ++
+        setStmts ++
+        [updName, "= {...", var, ", ", concatMap (\ (f,v) -> f ++ ": " ++ showCT v dep ++ ", ") fields ++ "};"]
     go (CMat val cses) = do
       let isRecord = length cses == 1 && not (any (\ (nm,_,_) -> nm == "_") cses)
       valName <- fresh
@@ -859,6 +874,10 @@ bindCT (CApp fun arg) ctx =
 bindCT (CCon nam arg) ctx =
   let arg' = map (\(f, x) -> (f, bindCT x ctx)) arg in
   CCon nam arg'
+bindCT (CUpd trm arg) ctx =
+  let trm' = bindCT trm ctx in
+  let arg' = map (\(f, x) -> (f, bindCT x ctx)) arg in
+  CUpd trm' arg'
 bindCT (CMat val cse) ctx =
   let val' = bindCT val ctx in
   let cse' = map (\(cn,fs,cb) -> (cn, fs, bindCT cb ctx)) cse in
@@ -943,6 +962,10 @@ rnCT (CApp fun arg) ctx =
 rnCT (CCon nam arg) ctx =
   let arg' = map (\(f, x) -> (f, rnCT x ctx)) arg in
   CCon nam arg'
+rnCT (CUpd trm arg) ctx =
+  let trm' = rnCT trm ctx in
+  let arg' = map (\(f, x) -> (f, rnCT x ctx)) arg in
+  CUpd trm' arg'
 rnCT (CMat val cse) ctx =
   let val' = rnCT val ctx in
   let cse' = map (\(cn,fs,cb) -> (cn, fs, rnCT cb ctx)) cse in
@@ -1034,6 +1057,7 @@ showCT (CLam (nam,inp) bod)     dep = "λ(" ++ nam ++ ": " ++ showCT inp dep ++ 
 showCT (CAll (nam,inp) bod)     dep = "∀(" ++ nam ++ ": " ++ showCT inp dep ++ "). " ++ showCT (bod (CVar nam dep)) (dep+1)
 showCT (CApp fun arg)           dep = "(" ++ showCT fun dep ++ " " ++ showCT arg dep ++ ")"
 showCT (CCon nam fields)        dep = "#" ++ nam ++ "{" ++ concatMap (\ (f,v) -> f ++ ":" ++ showCT v dep ++ " ") fields ++ "}"
+showCT (CUpd trm fields)        dep = "record " ++ showCT trm dep ++ "{" ++ concatMap (\ (f,v) -> f ++ ":" ++ showCT v dep ++ " ") fields ++ "}"
 showCT (CMat val cses)          dep = "match " ++ showCT val dep ++ " {" ++ concatMap (\(cn,fs,cb) -> "#" ++ cn ++ ":" ++ showCT cb dep ++ " ") cses ++ "}"
 showCT (CRef nam)               dep = nam
 showCT (CHol nam)               dep = nam
