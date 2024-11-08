@@ -27,9 +27,8 @@ type Uses     = [(String, String)]
 type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
 -- Types used for flattening pattern-matching equations
-type Rule     = ([Pattern], With)
+type Rule     = ([Pattern], Term)
 data Pattern  = PVar String | PCtr (Maybe String) String [Pattern] | PNum Word64 | PSuc Word64 String
-data With     = WBod Term | WWit [Term] [Rule]
 
 -- Helper functions that consume trailing whitespace
 skip :: Parser ()
@@ -760,18 +759,18 @@ parseRule dep = do
     P.count dep $ char_skp '.'
     char_skp '|'
   pats <- P.many parsePattern
-  with <- P.choice 
-    [ P.try $ do
+  body <- P.choice 
+    [ withSrc $ P.try $ do
       string_skp "with "
       wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
       rul <- P.many1 $ parseRule (dep + 1)
-      return $ WWit wth rul
+      return $ flattenWith dep wth rul
     , P.try $ do
       char_skp '='
       body <- parseTerm
-      return $ WBod body
+      return body
     ]
-  return $ (pats, with)
+  return $ (pats, body)
 
 parsePattern :: Parser Pattern
 parsePattern = do
@@ -1132,13 +1131,11 @@ parseNat = withSrc $ do
 -- Flattener for pattern matching equations
 flattenDef :: [Rule] -> Int -> Term
 flattenDef rules depth =
-  let (pats, with) = unzip rules
-      bods         = map (flattenWith 0) with
+  let (pats, bods) = unzip rules
   in flattenRules pats bods depth
 
-flattenWith :: Int -> With -> Term
-flattenWith dep (WBod bod)     = bod
-flattenWith dep (WWit wth rul) =
+flattenWith :: Int -> [Term] -> [Rule] -> Term
+flattenWith dep wth rul =
   -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
   let wthA = foldr1 (\x acc -> Ann True (Con "Pair" [(Nothing, x), (Nothing, acc)]) (App (App (Ref "Pair") (Met 0 [])) (Met 0 []))) wth
       rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr Nothing "Pair" [x, acc]) pat], wth)) rul
