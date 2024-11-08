@@ -300,35 +300,30 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
     book <- envGetBook
     fill <- envGetFill
     case reduce book fill 2 typx of
-      (ADT adtScp adtCts adtTyp) ->
-        case adtCts of
-          -- Exactly 1 constructor
-          [adtCts] -> do
-            let (Ctr _ cTel) = adtCts
-            let expectedFields = getFields cTel
-            let wrongField = find (not . (`elem` expectedFields)) (map fst arg)
-            case wrongField of
-              Just fld -> do
-                envLog (Error src (Hol ("expected_one_of:" ++ show expectedFields) []) (Hol ("detected:" ++ fld) []) (Hol "unknown_field" []) dep)
-                envFail
-              Nothing -> pure ()
-
-            argA <- checkConstructor src arg cTel dep
-            return $ Ann False (Upd trm argA) typx
-          _ -> do
-            -- 0 or more than 1 constructors
-            envLog $ Error src
-              (Hol ("expected: 1 constructor") [])
-              (Hol ("detected: " ++ show (length adtCts) ++ " constructors") []) 
-              (Hol ("record_update_multiple_constructors") []) dep
+      (ADT adtScp [adtCts] adtTyp) -> do
+        -- Exactly 1 constructor
+        let (Ctr _ cTel) = adtCts
+        let expectedFields = getTeleNames cTel 0 []
+        let wrongField = find (not . (`elem` expectedFields)) (map fst arg)
+        case wrongField of
+          Just fld -> do
+            envLog (Error src (Hol ("expected_one_of:" ++ show expectedFields) []) (Hol ("detected:" ++ fld) []) (Hol "unknown_field" []) dep)
             envFail
+          Nothing -> pure ()
+
+        argA <- checkConstructor src arg cTel dep
+        return $ Ann False (Upd trm argA) typx
+        
+      (ADT adtScp adtCts adtTyp) -> do
+        -- 0 or more than 1 constructors
+        envLog $ Error src
+          (Hol ("expected: 1 constructor") [])
+          (Hol ("detected: " ++ show (length adtCts) ++ " constructors") []) 
+          (Hol ("record_update_multiple_constructors") []) dep
+        envFail
 
       otherwise -> infer sus src (Upd trm arg) dep
     where
-      getFields :: Tele -> [String]
-      getFields (TRet trm) = []
-      getFields (TExt fld trm f) = fld : getFields (f trm)
-
       checkConstructor :: Maybe Cod -> [(String, Term)] -> Tele -> Int -> Env [(String, Term)]
       checkConstructor src [] (TRet ret) dep = do
         cmp src val ret typx dep

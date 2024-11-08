@@ -130,14 +130,52 @@ reduce book fill lv term = red term where
     Nothing -> red (b d (KVs (IM.insert (fromIntegral k) v kvs) d))
   put g n m k v b = Put g n m k v b
 
-  -- Requires the original constructor to have been declared with its field names.
-  -- Updated fields must appear in the same order as the constructor's definition.
-  upd (Con cnam cargs) changes = Con cnam (updateArgs cargs changes) where
-    updateArgs ((Just argName, argVal) : otherArgs) changes@((changeName, changeVal) : otherChanges) = 
-      if argName == changeName
-        then (Just argName, changeVal) : updateArgs otherArgs otherChanges
-        else (Just argName, argVal)    : updateArgs otherArgs changes
-    updateArgs args changes = args
+  -- Performance could be better if there was an earlier stage of compilation to force every constructor
+  -- to have its field names
+  upd (Con cnam cargs) changes = 
+    case findADT <$> (M.lookup cnam book) of
+      Just (ADT adtScp [adtCts] adtTyp) -> do
+        let (Ctr _ cTel) = adtCts
+        let fields = getFields cTel
+        let named = nameAllFields cargs fields
+        let updated = foldl' replace named changes
+        Con cnam (map (\(nam, trm) -> (Just nam, trm)) updated)
+      _ ->
+        error ("critical error: couldn't find ADT for: " ++ cnam)
+    where
+      updateArgs ((Just argName, argVal) : otherArgs) changes@((changeName, changeVal) : otherChanges) = 
+        if argName == changeName
+          then (Just argName, changeVal) : updateArgs otherArgs otherChanges
+          else (Just argName, argVal)    : updateArgs otherArgs changes
+      updateArgs args changes = args
+      
+      findADT :: Term -> Term
+      findADT adt@(ADT _ _ _) = adt
+      findADT (Ann _ t _) = findADT t
+      findADT (Lam _ f) = findADT (f Set)
+      findADT (Src _ t) = findADT t
+      findADT trm = trm
+
+      getFields :: Tele -> [String]
+      getFields (TRet _) = []
+      getFields (TExt nam t f) = nam : getFields (f t)
+
+      nameAllFields :: [(Maybe String, Term)] -> [String] -> [(String, Term)]
+      nameAllFields ((Just thisName, term) : rest) (thatName : names) =
+        if thisName == thatName
+          then (thisName, term) : nameAllFields rest (thatName : names)
+          else (thisName, term) : nameAllFields rest names
+      nameAllFields ((Nothing, term) : rest) (thatName : names) =
+        (thatName, term) : nameAllFields rest names
+      nameAllFields [] _ = []
+
+      replace :: Eq a => [(a, b)] -> (a, b) -> [(a, b)]
+      replace [] _ = []
+      replace (cur@(curKey, curVal) : xs) (key, val) =
+        if curKey == key
+          then (key, val) : xs
+          else cur        : replace xs (key, val)
+
   upd trm changes = trace (showTerm trm) $ Upd trm changes
 
 -- Logging
