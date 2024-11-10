@@ -126,6 +126,7 @@ data Oper
   | MOD | EQ  | NE  | LT
   | GT  | LTE | GTE | AND
   | OR  | XOR | LSH | RSH
+  | COS | SIN | TAN | ATAN
   deriving Show
 
 -- Telescope
