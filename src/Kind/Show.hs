@@ -174,6 +174,10 @@ showOper OR  = "|"
 showOper XOR = "^"
 showOper LSH = "<<"
 showOper RSH = ">>"
+showOper COS = "cos"
+showOper SIN = "sin"
+showOper TAN = "tan"
+showOper ATAN = "atan"
 
 -- Pretty Printing (Sugars)
 -- ------------------------
