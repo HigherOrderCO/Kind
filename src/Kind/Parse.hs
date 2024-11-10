@@ -14,6 +14,7 @@ import Kind.Equal
 import Kind.Reduce
 import Kind.Show
 import Kind.Type
+import Kind.Util
 import Prelude hiding (EQ, LT, GT)
 import System.Console.ANSI
 import Text.Parsec ((<?>), (<|>), getPosition, sourceLine, sourceColumn, getState, setState)
@@ -530,7 +531,9 @@ parseOp2 = withSrc $ do
   char_skp '('
   opr <- parseOper
   fst <- parseTerm
-  snd <- parseTerm
+  snd <- if isUnary opr
+         then return (Flt 0.0)  -- Fill snd with `Flt 0.0` for unary operators
+         else parseTerm         -- Parse the second term for binary operators
   char ')'
   return $ Op2 opr fst snd
 
@@ -608,6 +611,10 @@ parseOper = P.choice
   , P.try (string_skp "&") >> return AND
   , P.try (string_skp "|") >> return OR
   , P.try (string_skp "^") >> return XOR
+  , P.try (string_skp "cos") >> return COS
+  , P.try (string_skp "sin") >> return SIN
+  , P.try (string_skp "tan") >> return TAN
+  , P.try (string_skp "atan") >> return ATAN
   ] <?> "Binary operator"
 
 parseSuffix :: Term -> Parser Term
