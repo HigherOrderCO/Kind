@@ -162,6 +162,10 @@ getOpReturnType MUL U64 = U64
 getOpReturnType MUL F64 = F64
 getOpReturnType DIV U64 = U64
 getOpReturnType DIV F64 = F64
+getOpReturnType COS F64 = F64
+getOpReturnType SIN F64 = F64
+getOpReturnType TAN F64 = F64
+getOpReturnType ATAN F64 = F64
 getOpReturnType MOD U64 = U64
 getOpReturnType EQ  _   = U64
 getOpReturnType NE  _   = U64
@@ -181,4 +185,11 @@ checkValidType typ validTypes dep = foldr (\t acc -> do
     isEqual <- equal typ t dep
     if isEqual then return True else acc
   ) (return False) validTypes
+
+isUnary :: Oper -> Bool
+isUnary COS  = True
+isUnary SIN  = True
+isUnary TAN  = True
+isUnary ATAN = True
+isUnary _    = False
 
