@@ -614,6 +614,7 @@ parseOper = P.choice
   , P.try (string_skp "cos") >> return COS
   , P.try (string_skp "sin") >> return SIN
   , P.try (string_skp "tan") >> return TAN
+  , P.try (string_skp "atan2") >> return ATAN2
   , P.try (string_skp "atan") >> return ATAN
   ] <?> "Binary operator"
 

@@ -88,6 +88,7 @@ reduce book fill lv term = red term where
   op2 COS (Num _)   _         = error "COS operation not supported for integer values"
   op2 SIN (Num _)   _         = error "SIN operation not supported for integer values"
   op2 ATAN (Num _)  _         = error "ATAN2 operation not supported for integer values"
+  op2 ATAN2 (Num _) (Num _)   = error "ATAN2 operation not supported for integer values"
   op2 op  (Ref nam) (Flt snd)  | lv > 0 = op2 op (ref nam) (Flt snd)
   op2 op  (Flt fst) (Ref nam)  | lv > 0 = op2 op (Flt fst) (ref nam)
   op2 ADD (Flt fst) (Flt snd) = Flt (fst + snd)
@@ -108,6 +109,7 @@ reduce book fill lv term = red term where
   op2 SIN (Flt fst)  _        = Flt (sin fst)
   op2 TAN (Flt fst)  _        = Flt (tan fst)
   op2 ATAN (Flt fst) _        = Flt (atan fst)
+  op2 ATAN2 (Flt fst) (Flt snd) = Flt (atan2 fst snd)
   op2 opr fst       snd       = Op2 opr fst snd
 
   ref nam | lv > 0 = case M.lookup nam book of

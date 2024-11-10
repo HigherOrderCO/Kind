@@ -178,6 +178,7 @@ showOper COS = "cos"
 showOper SIN = "sin"
 showOper TAN = "tan"
 showOper ATAN = "atan"
+showOper ATAN2 = "atan2"
 
 -- Pretty Printing (Sugars)
 -- ------------------------
