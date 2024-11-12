@@ -743,7 +743,7 @@ parseDefFunSingle = do
   return val
 
 parseDefFunRules :: Parser Term
-parseDefFunRules = do
+parseDefFunRules = withSrc $ do
   rules <- P.many1 (parseRule 0)
   let flat = flattenDef rules 0
   return
