@@ -454,3 +454,44 @@ genMetasGoTele (TExt nam typ bod) c =
 
 countMetas :: Term -> Int
 countMetas term = snd (genMetasGo term 0)
+
+-- Substitutes metas with their filled values
+substMetas :: Fill -> Term -> Term 
+substMetas fill term = go term where
+  go (Met uid spn)     = case IM.lookup uid fill of
+    Just val -> go val  -- Recursively substitute filled metas
+    Nothing  -> Met uid (map go spn)
+  go (All nam inp bod) = All nam (go inp) (\x -> go (bod x))
+  go (Lam nam bod)     = Lam nam (\x -> go (bod x))
+  go (App fun arg)     = App (go fun) (go arg)
+  go (Ann chk val typ) = Ann chk (go val) (go typ)
+  go (Slf nam typ bod) = Slf nam (go typ) (\x -> go (bod x))
+  go (Ins val)         = Ins (go val)
+  go (ADT scp cts typ) = ADT (map go scp) (map goCtr cts) (go typ)
+    where goCtr (Ctr name tele) = Ctr name (goTele tele)
+          goTele (TRet term)        = TRet (go term)
+          goTele (TExt nam typ bod) = TExt nam (go typ) (\x -> goTele (bod x))
+  go (Con nam args)    = Con nam [(f, go t) | (f,t) <- args]
+  go (Mat cases)       = Mat [(name, go term) | (name, term) <- cases]
+  go (Let nam val bod) = Let nam (go val) (\x -> go (bod x))
+  go (Use nam val bod) = Use nam (go val) (\x -> go (bod x))
+  go (Op2 op fst snd)  = Op2 op (go fst) (go snd)
+  go (Swi zer suc)     = Swi (go zer) (go suc)
+  go (Map typ)         = Map (go typ)
+  go (KVs kvs def)     = KVs (IM.map go kvs) (go def)
+  go (Get got nam map key bod)     = Get got nam (go map) (go key) (\x y -> go (bod x y))
+  go (Put got nam map key val bod) = Put got nam (go map) (go key) (go val) (\x y -> go (bod x y))
+  go (Hol nam ctx)     = Hol nam (map go ctx)
+  go (Log msg nxt)     = Log (go msg) (go nxt)
+  go (Src src val)     = Src src (go val)
+  go (Txt txt)         = Txt txt
+  go (Lst lst)         = Lst (map go lst)
+  go (Nat n)           = Nat n
+  go (Num n)           = Num n
+  go (Flt n)           = Flt n
+  go Set               = Set
+  go U64               = U64
+  go F64               = F64
+  go (Ref name)        = Ref name
+  go (Var name idx)    = Var name idx
+  go (Sub val)         = Sub (go val)

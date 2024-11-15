@@ -96,7 +96,7 @@ cliCheck bookPath (book, defs, _) defName defPath = do
         case M.lookup fileDefName book of
           Just term -> do
             case envRun (doCheck term) book of
-              Done state _ -> do
+              Done state term -> do
                 cliPrintLogs state
                 cliPrintWarn term state
                 putStrLn $ "\x1b[32m✓ " ++ fileDefName ++ "\x1b[0m"
@@ -288,17 +288,16 @@ showContextAnn book fill term              dep = showTermGo True (normal book fi
 
 -- Prints logs from the type-checker
 cliPrintLogs :: State -> IO ()
-cliPrintLogs (State book fill susp logs) = do
+cliPrintLogs (State book fill susp logs _) = do
   forM_ logs $ \log -> do
     result <- showInfo book fill log
     putStr result
 
 -- Prints a warning if there are unsolved metas
 cliPrintWarn :: Term -> State -> IO ()
-cliPrintWarn term (State _ fill _ _) = do
+cliPrintWarn term (State _ fill _ _ _) = do
   let metaCount = countMetas term
-  let fillCount = IM.size fill
-  if (metaCount > fillCount) then do
-    putStrLn $ "WARNING: " ++ show (metaCount - fillCount) ++ " unsolved metas."
+  if (metaCount /= 0) then do
+    putStrLn $ "WARNING: " ++ (show metaCount) ++ " unsolved metas."
   else
     return ()

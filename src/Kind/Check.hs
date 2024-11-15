@@ -448,8 +448,9 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
     equal <- equal expected detected dep
     if equal then do
       susp <- envTakeSusp
-      forM_ susp $ \ (Check src val typ dep) -> do
-        check sus src val typ dep
+      forM_ susp $ \ (Check src val typ uid dep) -> do
+        termA <- check sus src val typ dep
+        envFill uid termA
       return ()
     else do
       envLog (Error src expected detected term dep)
@@ -476,28 +477,39 @@ checkUnreachable src cNam term dep = go src cNam term dep where
 
 checkLater :: Bool -> Maybe Cod -> Term -> Term -> Int -> Env Term
 checkLater False src term typx dep = check False src term typx dep
-checkLater True  src term typx dep = envSusp (Check src term typx dep) >> return (Met 0 [])
+checkLater True  src term typx dep = do
+  uid <- envFresh
+  envSusp (Check src term typx uid dep)
+  return (Met uid [])
 
 doCheckMode :: Bool -> Term -> Env Term
-doCheckMode sus (Ann _ val typ) = do
-  check sus Nothing typ Set 0
-  check sus Nothing val typ 0
-doCheckMode sus (Src _ val) = do
-  doCheckMode sus val
-doCheckMode sus (Ref nam) = do
-  book <- envGetBook
-  case M.lookup nam book of
-    Just val -> doCheckMode sus val
-    Nothing  -> envLog (Error Nothing (Ref "expression") (Ref "undefined") (Ref nam) 0) >> envFail
 doCheckMode sus term = do
-  infer True Nothing term 0
+  envPutFresh ((countMetas term) + 1)
+  term <- go sus term
+  fill <- envGetFill
+  susp <- envTakeSusp
+  let fillA = foldr (\ (Check _ v _ k _) fill -> IM.insert k v fill) fill susp
+  return $ substMetas fillA term
+
+  where
+  go sus (Ann _ val typ) = do
+    check sus Nothing typ Set 0
+    check sus Nothing val typ 0
+  go sus (Src _ val) = do
+    go sus val
+  go sus (Ref nam) = do
+    book <- envGetBook
+    case M.lookup nam book of
+      Just val -> go sus val
+      Nothing  -> envLog (Error Nothing (Ref "expression") (Ref "undefined") (Ref nam) 0) >> envFail
+  go sus term = do
+    infer True Nothing term 0
 
 doCheck :: Term -> Env Term
 doCheck = doCheckMode True
 
 doAnnotate :: Term -> Env (Term, Fill)
 doAnnotate term = do
-  doCheckMode True term
-  term <- doCheckMode False term
+  term <- doCheckMode True term
   fill <- envGetFill
   return (bind term [], fill)

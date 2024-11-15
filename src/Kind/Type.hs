@@ -151,8 +151,8 @@ data Info
 type Fill = IM.IntMap Term
 
 -- Checker State
-data Check = Check (Maybe Cod) Term Term Int -- postponed check
-data State = State Book Fill [Check] [Info] -- state type
+data Check = Check (Maybe Cod) Term Term Int Int -- postponed check
+data State = State Book Fill [Check] [Info] Int  -- state type
 data Res a = Done State a | Fail State -- result type
 data Env a = Env (State -> Res a) -- monadic checker
 
