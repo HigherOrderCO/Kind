@@ -27,9 +27,8 @@ type Uses     = [(String, String)]
 type PState   = (String, Int, Uses)
 type Parser a = P.ParsecT String PState Identity a
 -- Types used for flattening pattern-matching equations
-type Rule     = ([Pattern], With)
+type Rule     = ([Pattern], Term)
 data Pattern  = PVar String | PCtr (Maybe String) String [Pattern] | PNum Word64 | PSuc Word64 String
-data With     = WBod Term | WWit [Term] [Rule]
 
 -- Helper functions that consume trailing whitespace
 skip :: Parser ()
@@ -617,6 +616,7 @@ parseSuffix term = guardChoice
   , (parseSuffEql term, discard $ string_skp "==")
   , (parseSuffPAR term, discard $ string_skp "&")
   , (parseSuffPar term, discard $ string_skp ",")
+  , (parseSuffCns term, discard $ string_skp ";;")
   ] $ parseSuffVal term
 
 parseSuffArr :: Term -> Parser Term
@@ -648,6 +648,12 @@ parseSuffPar fst = do
   P.try $ string_skp ","
   snd <- parseTerm
   return $ Con "Pair" [(Nothing, fst), (Nothing, snd)]
+
+parseSuffCns :: Term -> Parser Term
+parseSuffCns head = do
+  P.try $ string_skp ";;"
+  tail <- parseTerm
+  return $ Con "Cons" [(Nothing, head), (Nothing, tail)]
 
 parseSuffVal :: Term -> Parser Term
 parseSuffVal term = return term
@@ -737,7 +743,7 @@ parseDefFunSingle = do
   return val
 
 parseDefFunRules :: Parser Term
-parseDefFunRules = do
+parseDefFunRules = withSrc $ do
   rules <- P.many1 (parseRule 0)
   let flat = flattenDef rules 0
   return
@@ -753,56 +759,83 @@ parseRule dep = do
     P.count dep $ char_skp '.'
     char_skp '|'
   pats <- P.many parsePattern
-  with <- P.choice 
-    [ P.try $ do
+  body <- P.choice 
+    [ withSrc $ P.try $ do
       string_skp "with "
       wth <- P.many1 $ P.notFollowedBy (char_skp '.') >> parseTerm
       rul <- P.many1 $ parseRule (dep + 1)
-      return $ WWit wth rul
+      return $ flattenWith dep wth rul
     , P.try $ do
       char_skp '='
       body <- parseTerm
-      return $ WBod body
+      return body
     ]
-  return $ (pats, with)
+  return $ (pats, body)
 
 parsePattern :: Parser Pattern
 parsePattern = do
   P.notFollowedBy $ string_skp "with "
-  guardChoice
-    [ (parsePatternNat, discard $ string_skp "#" >> numeric_skp)
-    , (parsePatternLst, discard $ string_skp "[")
-    , (parsePatternCon, discard $ string_skp "#" <|> (name_skp >> string_skp "@"))
-    , (parsePatternTxt, discard $ string_skp "\"")
-    , (parsePatternPar, discard $ string_skp "(")
-    , (parsePatternSuc, discard $ numeric_skp >> char_skp '+')
-    , (parsePatternNum, discard $ numeric_skp)
-    , (parsePatternVar, discard $ name_skp)
+  pat <- guardChoice
+    [ (parsePatPrn, discard $ string_skp "(")
+    , (parsePatNat, discard $ string_skp "#" >> numeric_skp)
+    , (parsePatLst, discard $ string_skp "[")
+    , (parsePatCon, discard $ string_skp "#" <|> (name_skp >> string_skp "@"))
+    , (parsePatTxt, discard $ string_skp "\"")
+    , (parsePatSuc, discard $ numeric_skp >> char_skp '+')
+    , (parsePatNum, discard $ numeric_skp)
+    , (parsePatVar, discard $ name_skp)
     ] $ fail "Pattern-matching"
+  parsePatSuffix pat
 
-parsePatternNat :: Parser Pattern
-parsePatternNat = do
+parsePatSuffix :: Pattern -> Parser Pattern
+parsePatSuffix pat = P.choice
+  [ parsePatSuffPar pat
+  , parsePatSuffCns pat
+  , return pat
+  ]
+
+parsePatSuffPar :: Pattern -> Parser Pattern
+parsePatSuffPar fst = do
+  P.try $ string_skp ","
+  snd <- parsePattern
+  return $ PCtr Nothing "Pair" [fst, snd]
+
+parsePatSuffCns :: Pattern -> Parser Pattern
+parsePatSuffCns head = do
+  P.try $ string_skp ";;"
+  tail <- parsePattern
+  return $ PCtr Nothing "Cons" [head, tail]
+
+parsePatPrn :: Parser Pattern
+parsePatPrn = do
+  string_skp "("
+  pat <- parsePattern
+  string_skp ")"
+  return pat
+
+parsePatNat :: Parser Pattern
+parsePatNat = do
   char_skp '#'
   num <- numeric_skp
   let n = read num
   return $ (foldr (\_ acc -> PCtr Nothing "Succ" [acc]) (PCtr Nothing "Zero" []) [1..n])
 
-parsePatternLst :: Parser Pattern
-parsePatternLst = do
+parsePatLst :: Parser Pattern
+parsePatLst = do
   char_skp '['
   elems <- P.many parsePattern
   char_skp ']'
   return $ foldr (\x acc -> PCtr Nothing "Cons" [x, acc]) (PCtr Nothing "Nil" []) elems
 
-parsePatternTxt :: Parser Pattern
-parsePatternTxt = do
+parsePatTxt :: Parser Pattern
+parsePatTxt = do
   char '"'
   txt <- P.many parseTxtChr
   char '"'
   return $ foldr (\x acc -> PCtr Nothing "Cons" [PNum (toEnum (ord x)), acc]) (PCtr Nothing "Nil" []) txt
 
-parsePatternPar :: Parser Pattern
-parsePatternPar = do
+parsePatPar :: Parser Pattern
+parsePatPar = do
   char_skp '('
   head <- parsePattern
   tail <- P.many $ do
@@ -812,8 +845,8 @@ parsePatternPar = do
   let (init, last) = maybe ([], head) id (unsnoc (head : tail))
   return $ foldr (\x acc -> PCtr Nothing "Pair" [x, acc]) last init
 
-parsePatternCon :: Parser Pattern
-parsePatternCon = do
+parsePatCon :: Parser Pattern
+parsePatCon = do
   name <- P.optionMaybe $ P.try $ do
     name <- name_skp
     char_skp '@'
@@ -827,20 +860,20 @@ parsePatternCon = do
     return args
   return $ (PCtr name cnam args)
 
-parsePatternNum :: Parser Pattern
-parsePatternNum = do
+parsePatNum :: Parser Pattern
+parsePatNum = do
   num <- numeric_skp
   return $ (PNum (read num))
 
-parsePatternSuc :: Parser Pattern
-parsePatternSuc = do
+parsePatSuc :: Parser Pattern
+parsePatSuc = do
   num <- numeric_skp
   char_skp '+'
   nam <- name_skp
   return $ (PSuc (read num) nam)
 
-parsePatternVar :: Parser Pattern
-parsePatternVar = do
+parsePatVar :: Parser Pattern
+parsePatVar = do
   name <- name_skp
   return $ (PVar name)
 
@@ -1098,13 +1131,11 @@ parseNat = withSrc $ do
 -- Flattener for pattern matching equations
 flattenDef :: [Rule] -> Int -> Term
 flattenDef rules depth =
-  let (pats, with) = unzip rules
-      bods         = map (flattenWith 0) with
+  let (pats, bods) = unzip rules
   in flattenRules pats bods depth
 
-flattenWith :: Int -> With -> Term
-flattenWith dep (WBod bod)     = bod
-flattenWith dep (WWit wth rul) =
+flattenWith :: Int -> [Term] -> [Rule] -> Term
+flattenWith dep wth rul =
   -- Wrap the 'with' arguments and patterns in Pairs since the type checker only takes one match argument.
   let wthA = foldr1 (\x acc -> Ann True (Con "Pair" [(Nothing, x), (Nothing, acc)]) (App (App (Ref "Pair") (Met 0 [])) (Met 0 []))) wth
       rulA = map (\(pat, wth) -> ([foldr1 (\x acc -> PCtr Nothing "Pair" [x, acc]) pat], wth)) rul

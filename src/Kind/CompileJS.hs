@@ -446,6 +446,9 @@ ref book nam
       , "IO/print"
       , "IO/prompt"
       , "IO/swap"
+      , "IO/read"
+      , "IO/exec"
+      , "IO/args"
       ]
 
 -- JavaScript Codegen
@@ -652,6 +655,25 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
             return $ concat [textStmt, "console.log(LIST_TO_JSTR(", textName, "));", doneStmt]
           "IO_PROMPT" -> do
             error $ "TODO"
+          "IO_READ" -> do
+            let [path] = appArgs
+            pathName <- fresh
+            pathStmt <- ctToJS False pathName path dep
+            let readStmt = concat
+                  [ "try { var ", var, " = { $: 'Done', value: JSTR_TO_LIST(readFileSync(LIST_TO_JSTR(", pathName, "), 'utf8')) }; } "
+                  , "catch (e) { var ", var, " = { $: 'Fail', error: e.message }; }"
+                  ]
+            return $ concat [pathStmt, readStmt]
+          "IO_EXEC" -> do
+            let [cmd] = appArgs
+            cmdName  <- fresh
+            cmdStmt  <- ctToJS False cmdName cmd dep
+            retStmt  <- set var $ concat ["JSTR_TO_LIST(execSync(LIST_TO_JSTR(", cmdName, ")).toString())"]
+            return $ concat [cmdStmt, retStmt]
+          "IO_ARGS" -> do
+            let [_] = appArgs
+            retStmt  <- set var "process.argv.slice(2).map(x => JLIST_TO_LIST(x, JSTR_TO_LIST))"
+            return retStmt
           _ -> error $ "Unknown IO operation: " ++ name
       -- Normal Application
       else do
@@ -780,6 +802,9 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
 
 prelude :: String
 prelude = unlines [
+  "import { readFileSync } from 'fs';",
+  "import { execSync } from 'child_process';",
+  "",
   "function LIST_TO_JSTR(list) {",
   "  try {",
   "    let result = '';",
@@ -801,6 +826,29 @@ prelude = unlines [
   "    list = {$: 'Cons', head: BigInt(str.charCodeAt(i)), tail: list};",
   "  }",
   "  return list;",
+  "}",
+  "",
+  "function LIST_TO_JLIST(list, decode) {",
+  "  try {",
+  "    let result = [];",
+  "    let current = list;",
+  "    while (current.$ === 'Cons') {",
+  "      result += decode(current.head);",
+  "      current = current.tail;",
+  "    }",
+  "    if (current.$ === 'Nil') {",
+  "      return result;",
+  "    }",
+  "  } catch (e) {}",
+  "  return list;",
+  "}",
+  "",
+  "function JLIST_TO_LIST(inp, encode) {",
+  "  let out = {$: 'Nil'};",
+  "  for (let i = inp.length - 1; i >= 0; i--) {",
+  "    out = {$: 'Cons', head: encode(inp[i]), tail: out};",
+  "  }",
+  "  return out;",
   "}",
   "",
   "let MEMORY = new Map();",
@@ -951,8 +999,6 @@ rnCT (CRef nam) ctx =
   case lookup nam ctx of
     Just x  -> x
     Nothing -> CRef nam
-rnCT (CRef nam) ctx =
-  CHol nam
 rnCT (CLet (nam,typ) val bod) ctx =
   let typ' = rnCT typ ctx in
   let val' = rnCT val ctx in
