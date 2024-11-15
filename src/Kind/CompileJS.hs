@@ -158,8 +158,6 @@ termToCT book fill term typx dep = bindCT (t2ct term typx dep) [] where
           val' = t2ct val Nothing dep
           bod' = \x y -> t2ct (bod (Var got dep) (Var nam dep)) Nothing (dep+2)
       in CPut got nam map' key' val' bod'
-    go (All _ _ _) =
-      CNul
     go (Ref nam) =
       CRef nam
     go (Let nam val bod) =
@@ -369,7 +367,6 @@ inline book ct = nf ct where
     go (CLam (nam,inp) bod)     = CLam (nam, nf inp) (\x -> nf (bod x))
     go (CApp fun arg)           = CApp (nf fun) (nf arg)
     go (CCon nam fields)        = CCon nam (map (\ (f,t) -> (f, nf t)) fields)
-    go (CADT cts)               = CADT (map (\ (n,fs) -> (n, map (\ (fn,ft) -> (fn, nf ft)) fs)) cts)
     go (CMat val cses)          = CMat (nf val) (map (\ (n,f,b) -> (n, map (\ (fn,ft) -> (fn, nf ft)) f, nf b)) cses)
     go (CRef nam)               = CRef nam
     go (CHol nam)               = CHol nam
@@ -672,7 +669,7 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
             return $ concat [cmdStmt, retStmt]
           "IO_ARGS" -> do
             let [_] = appArgs
-            retStmt  <- set var "process.argv.slice(2).map(x => JLIST_TO_LIST(x, JSTR_TO_LIST))"
+            retStmt  <- set var "process.argv.slice(2).map(x => JARRAY_TO_LIST(x, JSTR_TO_LIST))"
             return retStmt
           _ -> error $ "Unknown IO operation: " ++ name
       -- Normal Application
@@ -828,7 +825,7 @@ prelude = unlines [
   "  return list;",
   "}",
   "",
-  "function LIST_TO_JLIST(list, decode) {",
+  "function LIST_TO_JARRAY(list, decode) {",
   "  try {",
   "    let result = [];",
   "    let current = list;",
@@ -843,7 +840,7 @@ prelude = unlines [
   "  return list;",
   "}",
   "",
-  "function JLIST_TO_LIST(inp, encode) {",
+  "function JARRAY_TO_LIST(inp, encode) {",
   "  let out = {$: 'Nil'};",
   "  for (let i = inp.length - 1; i >= 0; i--) {",
   "    out = {$: 'Cons', head: encode(inp[i]), tail: out};",
