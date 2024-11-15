@@ -33,6 +33,9 @@ data Term
   -- Constructor: `#CN { x0 x1 ... }`
   | Con String [(Maybe String, Term)]
 
+  -- Record update syntax: `record x {a: 0 b: 1 ...}`
+  | Upd Term [(String, Term)]
+
   -- Lambda-Match: `λ{ #C0:B0 #C1:B1 ... }`
   | Mat [(String, Term)]
 

@@ -66,6 +66,11 @@ showTermGo small term dep =
           showArg (maybeField, term) = case maybeField of
             Just field -> field ++ ": " ++ showTermGo small term dep
             Nothing -> showTermGo small term dep
+      Upd trm arg ->
+        let arg' = unwords (map showArg arg)
+        in concat ["record", " ", showTermGo small trm dep, " ", "{", arg', "}"]
+        where
+          showArg (field, term) = field ++ ": " ++ showTermGo small term dep
       Mat cse ->
         let cse' = unwords (map (\(cnm, cbod) -> "#" ++ cnm ++ ": " ++ showTermGo small cbod dep) cse)
         in concat ["λ{ ", cse', " }"]

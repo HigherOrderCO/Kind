@@ -13,6 +13,7 @@ import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 
 import Control.Monad (forM, forM_, unless, when)
+import Data.Foldable (find)
 import Debug.Trace
 
 -- Type-Checking
@@ -176,6 +177,10 @@ infer sus src term dep = debug ("infer:" ++ (if sus then "* " else " ") ++ showT
   go (Con nam arg) = do
     envLog (Error src (Ref "annotation") (Ref "constructor") (Con nam arg) dep)
     envFail
+  
+  go (Upd trm args) = do
+    envLog (Error src (Ref "annotation") (Ref "record update") (Upd trm args) dep)
+    envFail
 
   go (Mat cse) = do
     envLog (Error src (Ref "annotation") (Ref "match") (Mat cse) dep)
@@ -290,6 +295,49 @@ check sus src term typx dep = debug ("check:" ++ (if sus then "* " else " ") ++ 
       checkConstructor src _ _ dep = do
         envLog (Error src (Hol "arity_mismatch" []) (Hol "unknown_type" []) (Hol "constructor" []) dep)
         envFail
+
+  go val@(Upd trm arg) = do
+    book <- envGetBook
+    fill <- envGetFill
+    case reduce book fill 2 typx of
+      (ADT adtScp [adtCts] adtTyp) -> do
+        -- Exactly 1 constructor
+        let (Ctr _ cTel) = adtCts
+        let expectedFields = getTeleNames cTel 0 []
+        let wrongField = find (not . (`elem` expectedFields)) (map fst arg)
+        case wrongField of
+          Just fld -> do
+            envLog (Error src (Hol ("expected_one_of:" ++ show expectedFields) []) (Hol ("detected:" ++ fld) []) (Hol "unknown_field" []) dep)
+            envFail
+          Nothing -> pure ()
+
+        argA <- checkConstructor src arg cTel dep
+        return $ Ann False (Upd trm argA) typx
+        
+      (ADT adtScp adtCts adtTyp) -> do
+        -- 0 or more than 1 constructors
+        envLog $ Error src
+          (Hol ("expected: 1 constructor") [])
+          (Hol ("detected: " ++ show (length adtCts) ++ " constructors") []) 
+          (Hol ("record_update_multiple_constructors") []) dep
+        envFail
+
+      otherwise -> infer sus src (Upd trm arg) dep
+    where
+      checkConstructor :: Maybe Cod -> [(String, Term)] -> Tele -> Int -> Env [(String, Term)]
+      checkConstructor src [] (TRet ret) dep = do
+        cmp src val ret typx dep
+        return []
+      checkConstructor src ((field, arg):args) (TExt nam inp bod) dep =
+        if field /= nam
+          then do
+            -- Constructors must be in order
+            checkConstructor src ((field, arg) : args) (bod arg) dep
+          else do
+            argA  <- check sus src arg inp dep
+            argsA <- checkConstructor src args (bod arg) (dep + 1)
+            return $ (field, argA) : argsA
+      checkConstructor src _ _ dep = return []
 
   go (Mat cse) = do
     book <- envGetBook

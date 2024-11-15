@@ -182,6 +182,7 @@ parseTerm = do
     , (parseADT,             discard $ string_skp "#[" <|> string_skp "data[")
     , (parseNat,             discard $ string_skp "#" >> digit)
     , (parseCon,             discard $ string_skp "#" >> name)
+    , (parseUpd,             discard $ string_skp "record ")
     , ((parseUse parseTerm), discard $ string_skp "use ")
     , ((parseLet parseTerm), discard $ string_skp "let ")
     , ((parseGet parseTerm), discard $ string_skp "get ")
@@ -313,6 +314,28 @@ parseCon = withSrc $ do
     char '}'
     return args
   return $ Con nam args
+
+parseUpd = withSrc $ do
+  string_skp "record"
+  skip
+
+  term <- parseTerm
+  skip
+
+  args <- P.option [] $ P.try $ do
+    skip
+    char_skp '{'
+    args <- P.many $ do
+      P.notFollowedBy (char_skp '}')
+      name <- do
+        name <- name_skp
+        char_skp ':'
+        return name
+      term <- parseTerm
+      return (name, term)
+    char '}'
+    return args
+  return $ Upd term args
 
 parseMatCases :: Parser [(String, Term)]
 parseMatCases = do
