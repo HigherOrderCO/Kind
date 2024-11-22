@@ -616,6 +616,7 @@ parseOper = P.choice
   , P.try (string_skp "tan") >> return TAN
   , P.try (string_skp "atan2") >> return ATAN2
   , P.try (string_skp "atan") >> return ATAN
+  , P.try (string_skp "round") >> return ROUND
   ] <?> "Binary operator"
 
 parseSuffix :: Term -> Parser Term

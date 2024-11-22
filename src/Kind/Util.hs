@@ -167,6 +167,7 @@ getOpReturnType SIN F64 = F64
 getOpReturnType TAN F64 = F64
 getOpReturnType ATAN  F64 = F64
 getOpReturnType ATAN2 F64 = F64
+getOpReturnType ROUND F64 = F64
 getOpReturnType MOD U64 = U64
 getOpReturnType EQ  _   = U64
 getOpReturnType NE  _   = U64
@@ -188,9 +189,9 @@ checkValidType typ validTypes dep = foldr (\t acc -> do
   ) (return False) validTypes
 
 isUnary :: Oper -> Bool
-isUnary COS  = True
-isUnary SIN  = True
-isUnary TAN  = True
-isUnary ATAN = True
-isUnary _    = False
-
+isUnary COS   = True
+isUnary SIN   = True
+isUnary TAN   = True
+isUnary ATAN  = True
+isUnary ROUND = True
+isUnary _     = False

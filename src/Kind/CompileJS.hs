@@ -757,16 +757,11 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
             (CF64, TAN)   -> concat ["Math.tan(", fstName, ")"]
             (CF64, ATAN)  -> concat ["Math.atan(", fstName, ")"]
             (CF64, ATAN2) -> concat ["Math.atan2(", fstName, ", ", sndName, ")"]
+            (CF64, ROUND) -> concat ["(Math.round(", fstName, " * Math.pow(10, 2)) / Math.pow(10, 2))"]
             (CF64, _)     -> concat [fstName, " ", opr', " ", sndName] 
             (CU64, _)     -> concat ["BigInt.asUintN(64, ", fstName, " ", opr', " ", sndName, ")"]
             _ -> error ("Invalid type for binary operation: " ++ showCT typ dep)
 
-
-      --let retExpr = case typ of
-            --CF64 -> concat [fstName, " ", opr', " ", sndName]
-            --CU64 -> concat ["BigInt.asUintN(64, ", fstName, " ", opr', " ", sndName, ")"]
-            --_ -> error ("Invalid type for binary operation: " ++ showCT typ dep)
-              
       retStmt <- set var retExpr
       return $ concat [fstStmt, sndStmt, retStmt]
     go (CLog msg nxt) = do

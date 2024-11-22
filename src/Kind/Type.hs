@@ -122,12 +122,12 @@ data Cod = Cod Loc Loc
 
 -- Numeric Operators
 data Oper 
-  = ADD   | SUB | MUL | DIV
-  | MOD   | EQ  | NE  | LT
-  | GT    | LTE | GTE | AND
-  | OR    | XOR | LSH | RSH
-  | COS   | SIN | TAN | ATAN
-  | ATAN2
+  = ADD   | SUB   | MUL | DIV
+  | MOD   | EQ    | NE  | LT
+  | GT    | LTE   | GTE | AND
+  | OR    | XOR   | LSH | RSH
+  | COS   | SIN   | TAN | ATAN
+  | ATAN2 | ROUND
   deriving Show
 
 -- Telescope
