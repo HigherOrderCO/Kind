@@ -672,8 +672,10 @@ parseDef = guardChoice
 
 parseDefADT :: Parser (String, Term)
 parseDefADT = do
+  (_, _, uses) <- P.getState
   P.try $ string_skp "data "
   name <- name_skp
+  let nameA = expandUses uses name
   params <- P.many $ do
     P.try $ char_skp '('
     pname <- name_skp
@@ -702,15 +704,15 @@ parseDefADT = do
   let paramNames = map fst params
   let indexNames = map fst indices
   let allParams  = params ++ indices
-  let selfType   = foldl (\ acc arg -> App acc (Ref arg)) (Ref name) (paramNames ++ indexNames)
+  let selfType   = foldl (\ acc arg -> App acc (Ref arg)) (Ref nameA) (paramNames ++ indexNames)
   let typeBody   = foldr (\ (pname, ptype) acc -> All pname ptype (\_ -> acc)) Set allParams
   let newCtrs    = map (fillCtrRet selfType) ctrs -- fill ctr type when omitted
   let dataBody   = ADT (map (\ (iNam,iTyp) -> Ref iNam) indices) newCtrs selfType
   let fullBody   = foldr (\ (pname, _) acc -> Lam pname (\_ -> acc)) dataBody allParams
   let term       = bind (genMetas (Ann False fullBody typeBody)) []
   return $
-    -- trace ("parsed " ++ name ++ " = " ++ (showTermGo False term 0))
-    (name, term)
+    -- trace ("parsed " ++ nameA ++ " = " ++ (showTermGo False term 0))
+    (nameA, term)
   where fillCtrRet  ret (Ctr nm tele)    = Ctr nm (fillTeleRet ret tele)
         fillTeleRet ret (TRet (Met _ _)) = TRet ret
         fillTeleRet _   (TRet ret)       = TRet ret
@@ -1054,7 +1056,8 @@ parseIf = withSrc $ do
           string_skp "do "
           monad <- name_skp
           char_skp '{'
-          t <- parseStmt monad
+          (_, _, uses) <- P.getState
+          t <- parseStmt (expandUses uses monad)
           if isIf then char_skp '}' else char '}'
           return t
       , do
