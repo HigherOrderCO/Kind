@@ -1234,7 +1234,8 @@ makeNumCase col mat bods depth num =
 makeSucCase :: [Pattern] -> [[Pattern]] -> [Term] -> Int -> Word64 -> String -> Term
 makeSucCase col mat bods depth suc var =
   let (mat', bods') = foldr go ([], []) (zip3 col mat bods)
-      bod           = (flattenRules mat' bods' (depth + 1))
+      bod           = if null bods' then error $ "missing case for " ++ show suc ++ "+" ++ var
+                      else (flattenRules mat' bods' (depth + 1))
   in Lam var (\x -> bod)
   where go ((PSuc _ _), pats, bod) (mat, bods) = (pats:mat, bod:bods)
         go ((PVar "_"), pats, bod) (mat, bods) = (pats:mat, bod:bods)
