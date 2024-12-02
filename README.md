@@ -22,7 +22,7 @@ To use Kind, you will need:
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your-username/kind.git
+   git clone https://github.com/HigherOrderCO/Kind.git
    cd kind
    ```
 
