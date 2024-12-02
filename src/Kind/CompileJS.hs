@@ -790,7 +790,7 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
     go (CVar nam _) =
       set var nam
     go (CTxt txt) =
-      set var $ "JSTR_TO_LIST(`" ++ txt ++ "`)"
+      set var $ "JSTR_TO_LIST(`" ++ (concatMap (\c -> if c == '`' then "\\`" else [c]) txt) ++ "`)"
     go (CLst lst) =
       let cons = \x acc -> CCon "Cons" [("head", x), ("tail", acc)]
           nil  = CCon "Nil" []
