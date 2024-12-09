@@ -672,7 +672,7 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
             return $ concat [cmdStmt, retStmt]
           "IO_ARGS" -> do
             let [_] = appArgs
-            retStmt  <- set var "process.argv.slice(2).map(x => JLIST_TO_LIST(x, JSTR_TO_LIST))"
+            retStmt  <- set var "JARRAY_TO_LIST(process.argv.slice(2), JSTR_TO_LIST)"
             return retStmt
           _ -> error $ "Unknown IO operation: " ++ name
       -- Normal Application
@@ -790,7 +790,7 @@ fnToJS book fnName ct@(getArguments -> (fnArgs, fnBody)) = do
     go (CVar nam _) =
       set var nam
     go (CTxt txt) =
-      set var $ "JSTR_TO_LIST(`" ++ txt ++ "`)"
+      set var $ "JSTR_TO_LIST(`" ++ (concatMap (\c -> if c == '`' then "\\`" else [c]) txt) ++ "`)"
     go (CLst lst) =
       let cons = \x acc -> CCon "Cons" [("head", x), ("tail", acc)]
           nil  = CCon "Nil" []
@@ -828,7 +828,7 @@ prelude = unlines [
   "  return list;",
   "}",
   "",
-  "function LIST_TO_JLIST(list, decode) {",
+  "function LIST_TO_JARRAY(list, decode) {",
   "  try {",
   "    let result = [];",
   "    let current = list;",
@@ -843,7 +843,7 @@ prelude = unlines [
   "  return list;",
   "}",
   "",
-  "function JLIST_TO_LIST(inp, encode) {",
+  "function JARRAY_TO_LIST(inp, encode) {",
   "  let out = {$: 'Nil'};",
   "  for (let i = inp.length - 1; i >= 0; i--) {",
   "    out = {$: 'Cons', head: encode(inp[i]), tail: out};",
