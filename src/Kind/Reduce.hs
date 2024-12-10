@@ -40,6 +40,7 @@ reduce book fill lv term = red term where
   red (Log msg nxt)     = log msg nxt
   red (Get g n m k b)   = get g n (red m) (red k) b
   red (Put g n m k v b) = put g n (red m) (red k) v b
+  red (Upd trm args)    = upd (reduce book fill lv trm) args
   red val               = val
 
   app (Ref nam)     arg | lv > 0 = app (ref nam) arg
@@ -129,6 +130,54 @@ reduce book fill lv term = red term where
     Nothing -> red (b d (KVs (IM.insert (fromIntegral k) v kvs) d))
   put g n m k v b = Put g n m k v b
 
+  -- Performance could be better if there was an earlier stage of compilation to force every constructor
+  -- to have its field names
+  upd (Con cnam cargs) changes = 
+    case findADT <$> (M.lookup cnam book) of
+      Just (ADT adtScp [adtCts] adtTyp) -> do
+        let (Ctr _ cTel) = adtCts
+        let fields = getFields cTel
+        let named = nameAllFields cargs fields
+        let updated = foldl' replace named changes
+        Con cnam (map (\(nam, trm) -> (Just nam, trm)) updated)
+      _ ->
+        error ("critical error: couldn't find ADT for: " ++ cnam)
+    where
+      updateArgs ((Just argName, argVal) : otherArgs) changes@((changeName, changeVal) : otherChanges) = 
+        if argName == changeName
+          then (Just argName, changeVal) : updateArgs otherArgs otherChanges
+          else (Just argName, argVal)    : updateArgs otherArgs changes
+      updateArgs args changes = args
+      
+      findADT :: Term -> Term
+      findADT adt@(ADT _ _ _) = adt
+      findADT (Ann _ t _) = findADT t
+      findADT (Lam _ f) = findADT (f Set)
+      findADT (Src _ t) = findADT t
+      findADT trm = trm
+
+      getFields :: Tele -> [String]
+      getFields (TRet _) = []
+      getFields (TExt nam t f) = nam : getFields (f t)
+
+      nameAllFields :: [(Maybe String, Term)] -> [String] -> [(String, Term)]
+      nameAllFields ((Just thisName, term) : rest) (thatName : names) =
+        if thisName == thatName
+          then (thisName, term) : nameAllFields rest (thatName : names)
+          else (thisName, term) : nameAllFields rest names
+      nameAllFields ((Nothing, term) : rest) (thatName : names) =
+        (thatName, term) : nameAllFields rest names
+      nameAllFields [] _ = []
+
+      replace :: Eq a => [(a, b)] -> (a, b) -> [(a, b)]
+      replace [] _ = []
+      replace (cur@(curKey, curVal) : xs) (key, val) =
+        if curKey == key
+          then (key, val) : xs
+          else cur        : replace xs (key, val)
+
+  upd trm changes = trace (showTerm trm) $ Upd trm changes
+
 -- Logging
 -- -------
 
@@ -181,6 +230,10 @@ normal book fill lv term dep = go (reduce book fill lv term) dep where
   go (Con nam arg) dep =
     let nf_arg = map (\(f, t) -> (f, normal book fill lv t dep)) arg in
     Con nam nf_arg
+  go (Upd trm arg) dep =
+    let nf_trm = normal book fill lv trm dep in
+    let nf_arg = map (\(f, t) -> (f, normal book fill lv t dep)) arg in
+    Upd nf_trm nf_arg
   go (Mat cse) dep =
     let nf_cse = map (\(cnam, cbod) -> (cnam, normal book fill lv cbod dep)) cse in
     Mat nf_cse
@@ -289,6 +342,10 @@ bind (ADT scp cts typ) ctx =
 bind (Con nam arg) ctx =
   let arg' = map (\(f, x) -> (f, bind x ctx)) arg in
   Con nam arg'
+bind (Upd trm arg) ctx =
+  let trm' = bind trm ctx in
+  let arg' = map (\(n, x) -> (n, bind x ctx)) arg in
+  Upd trm' arg'
 bind (Mat cse) ctx =
   let cse' = map (\(cn,cb) -> (cn, bind cb ctx)) cse in
   Mat cse'
@@ -388,6 +445,10 @@ genMetasGo (ADT scp cts typ) c =
 genMetasGo (Con nam arg) c = 
   let (arg', c1) = foldr (\(f, t) (acc, c') -> let (t', c'') = genMetasGo t c' in ((f, t'):acc, c'')) ([], c) arg
   in (Con nam arg', c1)
+genMetasGo (Upd trm arg) c =
+  let (trm', c') = genMetasGo trm c in
+  let (arg', c1) = foldr (\(f, t) (acc, c') -> let (t', c'') = genMetasGo t c' in ((f, t'):acc, c'')) ([], c') arg
+  in (Upd trm' arg', c1)
 genMetasGo (Mat cse) c = 
   let (cse', c1) = foldr (\(cn, cb) (acc, c') -> let (cb', c'') = genMetasGo cb c' in ((cn, cb'):acc, c'')) ([], c) cse
   in (Mat cse', c1)
